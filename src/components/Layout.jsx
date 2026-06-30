@@ -1,0 +1,113 @@
+import { NavLink, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { useWheelSocket } from '../hooks/useWheelSocket';
+import './Layout.css';
+
+const NAV_ITEMS = [
+  { to: '/', label: 'Dashboard', icon: IconGrid },
+  { to: '/campaigns', label: 'Campaigns', icon: IconBox },
+  { to: '/launch', label: 'Launch Campaign', icon: IconWheel },
+  { to: '/history', label: 'History', icon: IconClock },
+  { to: '/calibration', label: 'Calibration', icon: IconTarget },
+];
+
+export default function Layout({ children }) {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const { agentConnected } = useWheelSocket();
+
+  return (
+    <div className="shell">
+      <aside className="sidebar">
+        <div className="brand">
+          <div className="brand-mark">PF</div>
+          <div className="brand-name">PrizeFlow</div>
+        </div>
+
+        <nav className="nav">
+          {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={to === '/'}
+              className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+            >
+              <Icon />
+              <span>{label}</span>
+            </NavLink>
+          ))}
+        </nav>
+
+        <div className="sidebar-footer">
+          <div className={`agent-pill ${agentConnected ? 'ok' : 'off'}`}>
+            <span className="dot" />
+            {agentConnected ? 'Wheel connected' : 'Wheel offline'}
+          </div>
+          <div className="user-row">
+            <div className="user-avatar">{(user?.name || user?.email || '?')[0].toUpperCase()}</div>
+            <div className="user-info">
+              <div className="user-name">{user?.name || user?.email}</div>
+              <button
+                className="logout-link"
+                onClick={() => {
+                  logout();
+                  navigate('/login');
+                }}
+              >
+                Sign out
+              </button>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <main className="content">{children}</main>
+    </div>
+  );
+}
+
+function IconGrid() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <rect x="3" y="3" width="8" height="8" rx="2" stroke="currentColor" strokeWidth="1.8" />
+      <rect x="13" y="3" width="8" height="8" rx="2" stroke="currentColor" strokeWidth="1.8" />
+      <rect x="3" y="13" width="8" height="8" rx="2" stroke="currentColor" strokeWidth="1.8" />
+      <rect x="13" y="13" width="8" height="8" rx="2" stroke="currentColor" strokeWidth="1.8" />
+    </svg>
+  );
+}
+function IconBox() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <path d="M3 7l9-4 9 4-9 4-9-4Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+      <path d="M3 7v10l9 4 9-4V7" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+      <path d="M12 11v10" stroke="currentColor" strokeWidth="1.8" />
+    </svg>
+  );
+}
+function IconWheel() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8" />
+      <circle cx="12" cy="12" r="1.6" fill="currentColor" />
+      <path d="M12 3v6M12 15v6M3 12h6M15 12h6" stroke="currentColor" strokeWidth="1.8" />
+    </svg>
+  );
+}
+function IconClock() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M12 7v5l3.5 2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+function IconTarget() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8" />
+      <circle cx="12" cy="12" r="5" stroke="currentColor" strokeWidth="1.8" />
+      <circle cx="12" cy="12" r="1" fill="currentColor" />
+    </svg>
+  );
+}
