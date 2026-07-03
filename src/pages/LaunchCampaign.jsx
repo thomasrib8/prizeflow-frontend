@@ -17,7 +17,16 @@ export default function LaunchCampaign() {
     setLoading(true);
     api
       .listCampaigns()
-      .then((all) => setCampaign(all.find((c) => c.status === 'active') || null))
+      .then((all) => {
+        const active = all.find((c) => c.status === 'active') || null;
+        if (!active) {
+          setCampaign(null);
+          setLoading(false);
+          return;
+        }
+        // Load full campaign detail to get slots
+        return api.getCampaign(active.id).then(setCampaign);
+      })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
   }
@@ -64,7 +73,7 @@ export default function LaunchCampaign() {
     );
   }
 
-  const remaining = campaign.slots.reduce((sum, s) => sum + s.stock_remaining, 0);
+  const remaining = (campaign.slots || []).reduce((sum, s) => sum + s.stock_remaining, 0);
   const progressPct = campaign.total_stock
     ? Math.round((campaign.total_distributed / campaign.total_stock) * 100)
     : 0;
