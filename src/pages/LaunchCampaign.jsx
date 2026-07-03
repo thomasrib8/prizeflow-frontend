@@ -40,7 +40,13 @@ export default function LaunchCampaign() {
       const res = await api.spinCampaign(roomNumber.trim() || undefined);
       setResult(res);
     } catch (e) {
-      setError(e.message);
+      if (e.message === 'SPIN_TOO_WEAK') {
+        setError('⚡ Lancez la roue plus fort — le programme de forçage ne s\'est pas déclenché.');
+      } else if (e.message === 'SPIN_TOO_SHORT') {
+        setError('⏱ La roue n\'a pas atteint la bonne case dans le temps imparti. Relancez.');
+      } else {
+        setError(e.message);
+      }
     } finally {
       setSpinning(false);
     }
