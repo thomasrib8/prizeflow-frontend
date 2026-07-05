@@ -1,121 +1,260 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/client';
-import { Card, Stat, Badge, EmptyState, GiftPill, MiniBar } from '../components/ui';
+import { Card, Badge, EmptyState, GiftPill, MiniBar } from '../components/ui';
+import {
+  ResponsiveContainer, LineChart, Line, XAxis, YAxis,
+  CartesianGrid, Tooltip, Legend,
+} from 'recharts';
 
-const SLOT_COLORS = ['var(--blue)','var(--green)','var(--orange)','var(--purple)','#E11D48','#15803D','#D97706','#4F46E5','#BE185D','#0D9488','#A16207','#7C3AED'];
+const SLOT_COLORS = ['#2563EB','#10B981','#F59E0B','#9333EA','#E11D48','#15803D','#D97706','#4F46E5','#BE185D','#0D9488','#A16207','#7C3AED'];
+const CHART_FILTERS = ['7D', '30D', '90D', 'All'];
+
+function StatCard({ label, value, sub, accent, pct }) {
+  const bar = pct !== undefined;
+  return (
+    <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div className="stat-label">{label}</div>
+      <div className={`stat-value${accent ? ` accent-${accent}` : ''}`}>{value}</div>
+      {sub && <div style={{ fontSize: 11, color: 'var(--text-light)' }}>{sub}</div>}
+      {bar && (
+        <div className="stat-bar">
+          <div className="stat-bar-fill" style={{
+            width: `${Math.min(100, pct)}%`,
+            background: accent === 'blue' ? 'var(--blue)' : accent === 'green' ? 'var(--green)' : accent === 'orange' ? 'var(--orange)' : 'var(--text-light)',
+          }} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CustomTooltip({ active, payload, label }) {
+  if (!active || !payload || !payload.length) return null;
+  return (
+    <div style={{ background: 'white', border: '1px solid #E2E8F0', borderRadius: 8, padding: '10px 14px', fontSize: 12, boxShadow: '0 4px 16px rgba(0,0,0,0.1)' }}>
+      <div style={{ fontWeight: 600, marginBottom: 6, color: '#0F172A' }}>{label}</div>
+      {payload.map(p => (
+        <div key={p.dataKey} style={{ color: p.color, display: 'flex', justifyContent: 'space-between', gap: 16 }}>
+          <span>{p.name}</span><span style={{ fontWeight: 600 }}>{p.value}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function Dashboard() {
   const [data, setData] = useState(null);
+  const [chart, setChart] = useState([]);
+  const [topRewards, setTopRewards] = useState([]);
+  const [chartFilter, setChartFilter] = useState('7D');
   const [error, setError] = useState('');
 
   useEffect(() => {
-    let cancelled = false;
-    api.dashboard().then(d => !cancelled && setData(d)).catch(e => !cancelled && setError(e.message));
-    return () => { cancelled = true; };
+    api.dashboard().then(setData).catch(e => setError(e.message));
+    api.dashboardTopRewards().then(setTopRewards).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    const days = chartFilter === 'All' ? 'all' : chartFilter.replace('D', '');
+    api.dashboardChart(days).then(setChart).catch(() => {});
+  }, [chartFilter]);
 
   if (error) return <div className="error-banner">{error}</div>;
   if (!data) return <p className="page-subtitle">Loading…</p>;
 
   const { kpi, rewards, recentActivity } = data;
+  const campaign = kpi?.campaign;
+
+  const successRate = kpi && kpi.planned > 0
+    ? Math.round((kpi.distributed / kpi.planned) * 100)
+    : 0;
 
   return (
     <div>
+      {/* Header */}
       <div className="page-header">
         <div>
           <h1 className="page-title">Dashboard</h1>
-          <p className="page-subtitle">{kpi ? kpi.campaign.name + ' — in progress' : 'No active campaign'}</p>
+          <p className="page-subtitle">{campaign ? `Welcome back · ${campaign.name}` : 'No active campaign'}</p>
+        </div>
+        {campaign && <Badge tone="green">Active</Badge>}
+      </div>
+
+      {/* 4 KPI cards */}
+      <div className="grid-stats">
+        <StatCard label="Remaining gifts" value={kpi ? kpi.remaining.toLocaleString() : '—'}
+          sub={kpi ? `${Math.round((kpi.remaining/kpi.planned)*100)}% of total` : undefined}
+          accent="orange" pct={kpi ? Math.round((kpi.remaining/kpi.planned)*100) : 0} />
+        <StatCard label="Gifts distributed" value={kpi ? kpi.distributed.toLocaleString() : '—'}
+          sub={kpi ? `${kpi.progressPct}% of total` : undefined}
+          accent="blue" pct={kpi?.progressPct} />
+        <StatCard label="Success rate" value={kpi ? `${successRate}%` : '—'}
+          sub={successRate >= 100 ? 'On target' : successRate > 50 ? 'On track' : 'Behind target'}
+          accent="green" pct={successRate} />
+        <StatCard label="Campaign progress" value={kpi ? `${kpi.progressPct}%` : '—'}
+          sub={kpi ? `${kpi.distributed} / ${kpi.planned} spins` : undefined}
+          pct={kpi?.progressPct} />
+      </div>
+
+      {/* Chart + Campaign Summary */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: 12, marginBottom: 12 }}>
+
+        {/* Distribution overview chart */}
+        <div className="card">
+          <div className="card-head">
+            <h3 className="card-title">Distribution overview</h3>
+            <div style={{ display: 'flex', gap: 4 }}>
+              {CHART_FILTERS.map(f => (
+                <button key={f} onClick={() => setChartFilter(f)} style={{
+                  padding: '4px 10px', borderRadius: 6, border: 'none', fontSize: 11, fontWeight: 600,
+                  cursor: 'pointer', fontFamily: 'inherit',
+                  background: chartFilter === f ? 'var(--navy, #0F1C3F)' : 'var(--border-light, #F1F5F9)',
+                  color: chartFilter === f ? 'white' : 'var(--text-muted)',
+                }}>{f}</button>
+              ))}
+            </div>
+          </div>
+
+          {chart.length === 0 ? (
+            <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
+              No data yet — distributions will appear here after your first spins.
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height={200}>
+              <LineChart data={chart} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
+                <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#94A3B8' }} tickLine={false} axisLine={false}
+                  tickFormatter={v => v.slice(5)} />
+                <YAxis tick={{ fontSize: 10, fill: '#94A3B8' }} tickLine={false} axisLine={false} />
+                <Tooltip content={<CustomTooltip />} />
+                <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
+                <Line type="monotone" dataKey="planned" name="Planned" stroke="#CBD5E1"
+                  strokeWidth={1.5} strokeDasharray="4 3" dot={false} />
+                <Line type="monotone" dataKey="distributed" name="Distributed" stroke="#2563EB"
+                  strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
+                <Line type="monotone" dataKey="remaining" name="Remaining" stroke="#CBD5E1"
+                  strokeWidth={1.5} strokeDasharray="4 3" dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+
+        {/* Campaign Summary */}
+        <div className="card">
+          <div className="card-head">
+            <h3 className="card-title">Campaign summary</h3>
+          </div>
+          {!campaign ? (
+            <EmptyState title="No active campaign" />
+          ) : (
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+              <tbody>
+                {[
+                  ['Campaign', campaign.name],
+                  ['Status', <Badge tone="green">Active</Badge>],
+                  ['Total spins', campaign.total_stock.toLocaleString()],
+                  ['Spins completed', campaign.total_distributed.toLocaleString()],
+                  ['Remaining spins', (campaign.total_stock - campaign.total_distributed).toLocaleString()],
+                  ['Rewards sent', rewards.sent || 0],
+                  ['Redeemed', rewards.used || 0],
+                ].map(([label, value], i) => (
+                  <tr key={i}>
+                    <td style={{ padding: '7px 0', color: 'var(--text-muted)', borderBottom: '1px solid var(--border-light)' }}>{label}</td>
+                    <td style={{ padding: '7px 0', fontWeight: 500, textAlign: 'right', borderBottom: '1px solid var(--border-light)' }}>{value}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+          {campaign && (
+            <div style={{ marginTop: 14, textAlign: 'center' }}>
+              <a href="/history" style={{ fontSize: 12, color: 'var(--blue)', fontWeight: 600, textDecoration: 'none' }}>
+                ↗ View full report
+              </a>
+            </div>
+          )}
         </div>
       </div>
 
-      {kpi ? (
-        <>
-          <div className="grid-stats">
-            <Card><Stat label="Gifts planned" value={kpi.planned.toLocaleString()} pct={100} /></Card>
-            <Card><Stat label="Distributed" value={kpi.distributed.toLocaleString()} accent="blue" pct={kpi.progressPct} /></Card>
-            <Card><Stat label="Remaining" value={kpi.remaining.toLocaleString()} accent="orange" pct={Math.round((kpi.remaining/kpi.planned)*100)} /></Card>
-            <Card><Stat label="Progress" value={`${kpi.progressPct}%`} accent="green" pct={kpi.progressPct} /></Card>
-          </div>
+      {/* Top Rewards + Recent Activity */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: 12 }}>
 
-          <div className="dash-row">
-            <Card title="Gift distribution">
-              {kpi.campaign.slots && kpi.campaign.slots.length > 0 ? (
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      <th>Gift</th>
-                      <th>Stock</th>
-                      <th>Left</th>
-                      <th>Progress</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {kpi.campaign.slots.map(s => {
-                      const pct = s.stock_initial ? Math.round(((s.stock_initial - s.stock_remaining) / s.stock_initial) * 100) : 0;
-                      return (
-                        <tr key={s.slot_index}>
-                          <td><GiftPill slotIndex={s.slot_index} name={s.gift_name} /></td>
-                          <td style={{ color: 'var(--text-muted)' }}>{s.stock_initial}</td>
-                          <td style={{ fontWeight: 600 }}>{s.stock_remaining}</td>
-                          <td><MiniBar pct={pct} color={SLOT_COLORS[s.slot_index % SLOT_COLORS.length]} /></td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              ) : (
-                <div className="campaign-summary">
-                  <div>
-                    <div className="campaign-name">{kpi.campaign.name}</div>
-                    <div className="campaign-meta">Created {formatDate(kpi.campaign.created_at)}</div>
+        {/* Top Rewards */}
+        <div className="card">
+          <div className="card-head">
+            <h3 className="card-title">Top rewards</h3>
+            <a href="/campaigns" style={{ fontSize: 12, color: 'var(--blue)', fontWeight: 600, textDecoration: 'none' }}>View all rewards →</a>
+          </div>
+          {topRewards.length === 0 ? (
+            <EmptyState title="No rewards yet" />
+          ) : (
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Reward</th>
+                  <th style={{ textAlign: 'right' }}>Planned</th>
+                  <th style={{ textAlign: 'right' }}>Distributed</th>
+                  <th style={{ textAlign: 'right' }}>Remaining</th>
+                  <th>Progress</th>
+                </tr>
+              </thead>
+              <tbody>
+                {topRewards.map((r, i) => (
+                  <tr key={i}>
+                    <td><GiftPill slotIndex={r.slotIndex} name={r.giftName} /></td>
+                    <td style={{ textAlign: 'right', color: 'var(--text-muted)' }}>{r.planned}</td>
+                    <td style={{ textAlign: 'right', fontWeight: 600 }}>{r.distributed}</td>
+                    <td style={{ textAlign: 'right', color: 'var(--text-muted)' }}>{r.remaining}</td>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <MiniBar pct={r.pct} color={SLOT_COLORS[r.slotIndex % SLOT_COLORS.length]} />
+                        <span style={{ fontSize: 11, color: 'var(--text-muted)', minWidth: 28 }}>{r.pct}%</span>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+
+        {/* Recent Activity */}
+        <div className="card">
+          <div className="card-head">
+            <h3 className="card-title">Recent activity</h3>
+            <a href="/history" style={{ fontSize: 12, color: 'var(--blue)', fontWeight: 600, textDecoration: 'none' }}>View all</a>
+          </div>
+          {recentActivity.length === 0 ? (
+            <EmptyState title="No activity yet" />
+          ) : (
+            <div className="activity-list">
+              {recentActivity.slice(0, 6).map((row, i) => (
+                <div className="activity-item" key={i}>
+                  <div className="act-icon spin">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2">
+                      <circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="1.5"/>
+                      <line x1="12" y1="3" x2="12" y2="7"/>
+                    </svg>
                   </div>
-                  <Badge tone="green">{kpi.campaign.status}</Badge>
+                  <div className="act-info">
+                    <div className="act-title">
+                      Gift distributed: {row.gift_name || `Case ${row.slot_index}`}
+                    </div>
+                    <div className="act-time">
+                      {formatTime(row.created_at)}{row.room_number ? ` · Room ${row.room_number}` : ''}
+                    </div>
+                  </div>
                 </div>
-              )}
-            </Card>
+              ))}
+            </div>
+          )}
+        </div>
 
-            <Card title="Rewards">
-              <div className="reward-stats">
-                <Stat label="Sent" value={rewards.sent || 0} />
-                <Stat label="Redeemed" value={rewards.used || 0} accent="green" />
-                <Stat label="Recovery" value={`${rewards.recoveryRatePct}%`} accent="blue" />
-              </div>
-            </Card>
-          </div>
-        </>
-      ) : (
-        <Card className="mt-card">
-          <EmptyState title="No active campaign" description="Start a campaign from the Campaigns page to see KPIs here." />
-        </Card>
-      )}
-
-      <Card title="Recent activity" className="mt-card">
-        {recentActivity.length === 0 ? (
-          <EmptyState title="No distributions yet" />
-        ) : (
-          <div className="activity-list">
-            {recentActivity.map((row, i) => (
-              <div className="activity-item" key={i}>
-                <div className="act-icon spin">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="var(--blue)" strokeWidth="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="1.5"/><line x1="12" y1="3" x2="12" y2="7"/></svg>
-                </div>
-                <div className="act-info">
-                  <div className="act-title">Gift distributed — {row.gift_name || `Case ${row.slot_index}`}</div>
-                  <div className="act-time">{formatTime(row.created_at)}{row.room_number ? ` · Room ${row.room_number}` : ''}{row.first_name ? ` · ${row.first_name} ${row.last_name}` : ''}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </Card>
+      </div>
     </div>
   );
 }
 
-function formatDate(s) {
-  if (!s) return '—';
-  return new Date(s.replace(' ', 'T') + 'Z').toLocaleDateString();
-}
 function formatTime(s) {
   if (!s) return '—';
   return new Date(s.replace(' ', 'T') + 'Z').toLocaleString([], { dateStyle: 'short', timeStyle: 'short' });

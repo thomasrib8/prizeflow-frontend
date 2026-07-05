@@ -34,6 +34,8 @@ export const api = {
     request('/auth/register', { method: 'POST', body: { email, password, name }, auth: false }),
 
   dashboard: () => request('/dashboard'),
+  dashboardChart: (days = '7') => request(`/dashboard/chart?days=${days}`),
+  dashboardTopRewards: () => request('/dashboard/top-rewards'),
   distributions: (params = {}) => {
     const qs = new URLSearchParams(params).toString();
     return request(`/distributions${qs ? `?${qs}` : ''}`);
