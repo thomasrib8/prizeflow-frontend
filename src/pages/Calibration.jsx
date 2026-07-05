@@ -1,92 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { useWheelSocket } from '../hooks/useWheelSocket';
+import WheelSVG, { posToAngle } from '../components/WheelSVG';
 
-// Full rotation in position units (empirical — ~400 units = 360°)
-const FULL_ROT = 400;
-const SPINS_PER_PHASE = 10; // 10 spins × 2 phases = 20 total
+const SPINS_PER_PHASE = 10;
 
-// ─── Wheel SVG ───────────────────────────────────────────────────────────────
-function WheelSVG({ positionAngle }) {
-  const cx = 160, cy = 160, r = 130;
-  const sections = 12;
-  const sectionAngle = 360 / sections;
-
-  // Build section paths (sections 1-12 clockwise, 1 at top)
-  const paths = Array.from({ length: sections }, (_, i) => {
-    const startAngle = (i * sectionAngle - 90) * (Math.PI / 180);
-    const endAngle = ((i + 1) * sectionAngle - 90) * (Math.PI / 180);
-    const x1 = cx + r * Math.cos(startAngle);
-    const y1 = cy + r * Math.sin(startAngle);
-    const x2 = cx + r * Math.cos(endAngle);
-    const y2 = cy + r * Math.sin(endAngle);
-    return { x1, y1, x2, y2, startAngle, endAngle };
-  });
-
-  // Dot positions (on rim at each section boundary)
-  const dots = Array.from({ length: sections }, (_, i) => {
-    const a = (i * sectionAngle - 90) * (Math.PI / 180);
-    return { x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) };
-  });
-
-  // Section number label positions (center of each section)
-  const labels = Array.from({ length: sections }, (_, i) => {
-    const a = ((i + 0.5) * sectionAngle - 90) * (Math.PI / 180);
-    const lr = r * 0.68;
-    return { x: cx + lr * Math.cos(a), y: cy + lr * Math.sin(a), num: i + 1 };
-  });
-
-  // Golden cleat: fixed at top, between section 12 and 1 (at -90° = top)
-  const goldAngle = -90 * (Math.PI / 180);
-  const goldOuter = { x: cx + (r + 20) * Math.cos(goldAngle), y: cy + (r + 20) * Math.sin(goldAngle) };
-  const goldInner = { x: cx + (r - 10) * Math.cos(goldAngle), y: cy + (r - 10) * Math.sin(goldAngle) };
-  const goldBall = { x: cx + (r + 8) * Math.cos(goldAngle), y: cy + (r + 8) * Math.sin(goldAngle) };
-
-  // Red cleat: moves with positionAngle (degrees from top, clockwise)
-  const redDeg = positionAngle != null ? positionAngle : 0;
-  const redRad = (redDeg - 90) * (Math.PI / 180);
-  const redOuter = { x: cx + (r + 20) * Math.cos(redRad), y: cy + (r + 20) * Math.sin(redRad) };
-  const redInner = { x: cx + r * Math.cos(redRad), y: cy + r * Math.sin(redRad) };
-
-  return (
-    <svg viewBox="0 0 320 320" style={{ width: 220, height: 220 }}>
-      {/* Wheel rim */}
-      <circle cx={cx} cy={cy} r={r} fill="white" stroke="#111" strokeWidth="2" />
-
-      {/* Section spokes */}
-      {paths.map((p, i) => (
-        <line key={i} x1={cx} y1={cy} x2={p.x1} y2={p.y1} stroke="#111" strokeWidth="1.5" />
-      ))}
-
-      {/* Section numbers */}
-      {labels.map((l, i) => (
-        <text key={i} x={l.x} y={l.y} textAnchor="middle" dominantBaseline="central"
-          fontSize="18" fontWeight="900" fontFamily="Arial Black, sans-serif" fill="#111"
-          transform={`rotate(${(i + 0.5) * sectionAngle}, ${l.x}, ${l.y})`}>
-          {l.num}
-        </text>
-      ))}
-
-      {/* Rim dots at section boundaries */}
-      {dots.map((d, i) => (
-        <circle key={i} cx={d.x} cy={d.y} r="5" fill="#111" />
-      ))}
-
-      {/* Center hub */}
-      <circle cx={cx} cy={cy} r="5" fill="#111" />
-
-      {/* Golden cleat (fixed at top, between 12 and 1) */}
-      <line x1={goldOuter.x} y1={goldOuter.y} x2={goldInner.x} y2={goldInner.y}
-        stroke="#8B4513" strokeWidth="4" strokeLinecap="round" />
-      <circle cx={goldBall.x} cy={goldBall.y} r="6" fill="#C9A84C" />
-
-      {/* Red cleat (live position) */}
-      <line x1={redOuter.x} y1={redOuter.y} x2={redInner.x} y2={redInner.y}
-        stroke="#8B0000" strokeWidth="4" strokeLinecap="round" />
-    </svg>
-  );
-}
 
 // ─── Spin dots progress ───────────────────────────────────────────────────────
 function SpinDots({ total, recorded, label }) {
@@ -156,8 +75,7 @@ export default function Calibration() {
   const [lastCalLaunch, setLastCalLaunch] = useState(0);
   const [spinMsg, setSpinMsg] = useState('');
 
-  // Convert currentPos to display angle (0° = top, clockwise)
-  const posAngle = wheelStatus ? ((wheelStatus.currentPos % FULL_ROT) / FULL_ROT) * 360 : 0;
+  const posAngle = posToAngle(wheelStatus?.currentPos || 0);
 
   // Track calLaunch changes to show "Spin recording" message
   const calLaunch = wheelStatus ? Number(wheelStatus.calLaunch) || 0 : 0;
