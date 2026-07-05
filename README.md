@@ -36,3 +36,4 @@ npm run build            # build de production dans dist/
 
 Build statique standard, déployable sur Vercel ou Netlify (voir la notice de
 déploiement globale du projet pour les étapes détaillées).
+test deploy dev
