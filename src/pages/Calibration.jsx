@@ -3,9 +3,6 @@ import { api } from '../api/client';
 import { Card, Button, Badge } from '../components/ui';
 import { useWheelSocket } from '../hooks/useWheelSocket';
 
-// These commands map 1:1 to the wheel's existing protocol (Socket.cpp / Main.cpp).
-// This screen never reinterprets them: it only sends the exact same strings
-// index.html already sends today.
 const ACTIONS = [
   { command: 'Cal', label: 'Start calibration' },
   { command: 'CalIndex0', label: 'Confirm index 0' },
@@ -21,13 +18,7 @@ export default function Calibration() {
   async function send(command) {
     setError('');
     setPending(command);
-    try {
-      await api.wheelCommand(command);
-    } catch (e) {
-      setError(e.message);
-    } finally {
-      setPending(null);
-    }
+    try { await api.wheelCommand(command); } catch (e) { setError(e.message); } finally { setPending(null); }
   }
 
   return (
@@ -39,30 +30,25 @@ export default function Calibration() {
         </div>
         <Badge tone={agentConnected ? 'green' : 'red'}>{agentConnected ? 'Wheel connected' : 'Wheel offline'}</Badge>
       </div>
-
       {error && <div className="error-banner">{error}</div>}
 
       <Card title="Wheel status">
         <table className="data-table">
           <tbody>
-            <tr><td>State</td><td>{wheelStatus?.state || '—'}</td></tr>
-            <tr><td>Calibration state</td><td>{wheelStatus?.calState || '—'}</td></tr>
-            <tr><td>Current index</td><td>{wheelStatus?.currentIndex ?? '—'}</td></tr>
-            <tr><td>Target index</td><td>{wheelStatus?.targetIndex ?? '—'}</td></tr>
-            <tr><td>Position</td><td>{wheelStatus?.currentPos ?? '—'}</td></tr>
+            <tr><td style={{ color: 'var(--text-muted)', width: 160 }}>State</td><td>{wheelStatus?.state || '—'}</td></tr>
+            <tr><td style={{ color: 'var(--text-muted)' }}>Calibration state</td><td>{wheelStatus?.calState || '—'}</td></tr>
+            <tr><td style={{ color: 'var(--text-muted)' }}>Current index</td><td>{wheelStatus?.currentIndex ?? '—'}</td></tr>
+            <tr><td style={{ color: 'var(--text-muted)' }}>Target index</td><td>{wheelStatus?.targetIndex ?? '—'}</td></tr>
+            <tr><td style={{ color: 'var(--text-muted)' }}>Position</td><td>{wheelStatus?.currentPos ?? '—'}</td></tr>
           </tbody>
         </table>
       </Card>
 
       <Card title="Calibration actions" className="mt-card">
         <div className="cal-actions">
-          {ACTIONS.map((a) => (
-            <Button
-              key={a.command}
-              variant="secondary"
-              disabled={!agentConnected || pending === a.command}
-              onClick={() => send(a.command)}
-            >
+          {ACTIONS.map(a => (
+            <Button key={a.command} variant="secondary" disabled={!agentConnected || pending === a.command}
+              onClick={() => send(a.command)}>
               {pending === a.command ? '…' : a.label}
             </Button>
           ))}
@@ -73,12 +59,8 @@ export default function Calibration() {
         <p className="launch-hint">Force the wheel to a specific case to verify rotation and stop accuracy.</p>
         <div className="cal-actions">
           {Array.from({ length: 12 }, (_, i) => (
-            <Button
-              key={i}
-              variant="secondary"
-              disabled={!agentConnected || pending === `Run;${i}`}
-              onClick={() => send(`Run;${i}`)}
-            >
+            <Button key={i} variant="secondary" disabled={!agentConnected || pending === `Run;${i}`}
+              onClick={() => send(`Run;${i}`)}>
               {pending === `Run;${i}` ? '…' : `Case ${i}`}
             </Button>
           ))}
