@@ -36,6 +36,8 @@ export const api = {
   dashboard: () => request('/dashboard'),
   dashboardChart: (days = '7') => request(`/dashboard/chart?days=${days}`),
   dashboardTopRewards: () => request('/dashboard/top-rewards'),
+  adminSequence: (id) => request(`/admin/campaigns/${id}/sequence`),
+  adminTestCampaigns: () => request('/admin/test-campaigns'),
   distributions: (params = {}) => {
     const qs = new URLSearchParams(params).toString();
     return request(`/distributions${qs ? `?${qs}` : ''}`);
@@ -48,6 +50,7 @@ export const api = {
 
   listCampaigns: () => request('/campaigns'),
   getCampaign: (id) => request(`/campaigns/${id}`),
+  getCampaignSequence: (id) => request(`/campaigns/${id}/sequence`),
   createCampaign: (payload) => request('/campaigns', { method: 'POST', body: payload }),
   duplicateCampaign: (id, name) => request(`/campaigns/${id}/duplicate`, { method: 'POST', body: { name } }),
   startCampaign: (id) => request(`/campaigns/${id}/start`, { method: 'POST' }),

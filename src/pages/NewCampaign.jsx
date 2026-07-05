@@ -2,9 +2,12 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { Card, Button } from '../components/ui';
+import { useAdmin } from '../hooks/useAdmin';
 
 export default function NewCampaign() {
   const navigate = useNavigate();
+  const { isAdmin } = useAdmin();
+  const [isTest, setIsTest] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [slots, setSlots] = useState(
@@ -27,7 +30,10 @@ export default function NewCampaign() {
     if (active.length === 0) return setError('Configure at least one gift with stock > 0');
     setSaving(true);
     try {
-      const created = await api.createCampaign({ name, description, slots: active.map(s => ({ slotIndex: s.slotIndex, giftName: s.giftName, stock: Number(s.stock) })) });
+      const created = await api.createCampaign({
+        name, description, isTest,
+        slots: active.map(s => ({ slotIndex: s.slotIndex, giftName: s.giftName, stock: Number(s.stock) }))
+      });
       navigate(`/campaigns/${created.id}`);
     } catch (err) {
       setError(err.message);
@@ -55,6 +61,15 @@ export default function NewCampaign() {
             <label>Description (optional)</label>
             <textarea value={description} onChange={e => setDescription(e.target.value)} rows={2} placeholder="Short note…" />
           </div>
+          {isAdmin && (
+            <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', marginTop: 4, padding: '10px 14px', background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 8 }}>
+              <input type="checkbox" checked={isTest} onChange={e => setIsTest(e.target.checked)} />
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#92400E' }}>🔧 Test campaign (admin only)</div>
+                <div style={{ fontSize: 12, color: '#B45309', marginTop: 2 }}>Full sequence visible · Excluded from global stats · Remove before production.</div>
+              </div>
+            </label>
+          )}
         </Card>
 
         <Card title="Products (12 wheel slots)" className="mt-card"
