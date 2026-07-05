@@ -27,7 +27,7 @@ export default function Login() {
   return (
     <div className="auth-screen">
       <form className="auth-card" onSubmit={handleSubmit}>
-        <img src="/logo.png" alt="PrizeFlow" className="auth-logo" />
+        <img src="/logo.svg" alt="PrizeFlow" className="auth-logo" />
         <h1 className="auth-title">Welcome back</h1>
         <p className="auth-subtitle">Sign in to operate your campaigns</p>
 

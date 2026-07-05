@@ -21,7 +21,7 @@ export default function Layout({ children }) {
     <div className="shell">
       <aside className="sidebar">
         <div className="brand">
-          <img src="/logo.png" alt="PrizeFlow" className="brand-logo" />
+          <img src="/logo.svg" alt="PrizeFlow" className="brand-logo" />
           <div className="brand-text">
             <div className="brand-name">PrizeFlow</div>
             <div className="brand-sub">Reward Distribution</div>
