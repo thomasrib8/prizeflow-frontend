@@ -26,19 +26,24 @@ export default function Login() {
 
   return (
     <div className="auth-screen">
-      <form className="auth-card" onSubmit={handleSubmit}>
-        <img src="/logo.svg" alt="PrizeFlow" className="auth-logo" />
-        <h1 className="auth-title">Welcome back</h1>
-        <p className="auth-subtitle">Sign in to operate your campaigns</p>
+      <form className="auth-card" onSubmit={handleSubmit} style={{ textAlign: 'center' }}>
 
-        {error && <div className="error-banner">{error}</div>}
+        {/* Logo centered, larger */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
+          <img src="/logo2.svg" alt="PrizeFlow" style={{ width: 100, height: 100, objectFit: 'contain' }} />
+        </div>
 
-        <div className="field">
+        <h1 className="auth-title" style={{ textAlign: 'center' }}>Welcome back</h1>
+        <p className="auth-subtitle" style={{ textAlign: 'center' }}>Sign in to operate your campaigns</p>
+
+        {error && <div className="error-banner" style={{ textAlign: 'left' }}>{error}</div>}
+
+        <div className="field" style={{ textAlign: 'left' }}>
           <label>Email address</label>
           <input type="email" value={email} onChange={e => setEmail(e.target.value)}
             placeholder="operator@yourvenue.com" required autoFocus />
         </div>
-        <div className="field">
+        <div className="field" style={{ textAlign: 'left' }}>
           <label>Password</label>
           <input type="password" value={password} onChange={e => setPassword(e.target.value)}
             placeholder="••••••••" required />
