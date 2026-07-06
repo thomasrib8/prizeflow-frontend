@@ -68,17 +68,22 @@ function Btn({ children, onClick, variant = 'primary', disabled }) {
 export default function Calibration() {
   const navigate = useNavigate();
   const { wheelStatus, agentConnected } = useWheelSocket();
-  const [step, setStep] = useState(0); // 0=confirm, 1=step1, 2=step2, 3=phase1 spins, 4=phase2 spins, 5=done
+  const [step, setStep] = useState(0);
   const [showCancelWarning, setShowCancelWarning] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [lastCalLaunch, setLastCalLaunch] = useState(0);
+  const [baseCalLaunch, setBaseCalLaunch] = useState(0); // calLaunch value when phase started
   const [spinMsg, setSpinMsg] = useState('');
 
   const posAngle = posToAngle(wheelStatus?.currentPos || 0);
 
-  // Track calLaunch changes to show "Spin recording" message
   const calLaunch = wheelStatus ? Number(wheelStatus.calLaunch) || 0 : 0;
+
+  // Progress relative to when the spin phase started (not absolute from factory)
+  const relativeProgress = Math.max(0, calLaunch - baseCalLaunch);
+  const phase1Recorded = Math.min(relativeProgress, SPINS_PER_PHASE);
+  const phase2Recorded = Math.max(0, relativeProgress - SPINS_PER_PHASE);
 
   useEffect(() => {
     if (calLaunch > lastCalLaunch && step >= 3) {
@@ -89,15 +94,15 @@ export default function Calibration() {
     }
   }, [calLaunch, lastCalLaunch, step]);
 
-  // Auto-advance phase 1 -> phase 2
+  // Auto-advance phase 1 -> phase 2 (using relative progress)
   useEffect(() => {
-    if (step === 3 && calLaunch >= SPINS_PER_PHASE) setStep(4);
-  }, [calLaunch, step]);
+    if (step === 3 && relativeProgress >= SPINS_PER_PHASE) setStep(4);
+  }, [relativeProgress, step]);
 
-  // Auto-advance phase 2 -> done
+  // Auto-advance phase 2 -> done (using relative progress)
   useEffect(() => {
-    if (step === 4 && calLaunch >= SPINS_PER_PHASE * 2) setStep(5);
-  }, [calLaunch, step]);
+    if (step === 4 && relativeProgress >= SPINS_PER_PHASE * 2) setStep(5);
+  }, [relativeProgress, step]);
 
   async function send(command) {
     setBusy(true);
@@ -117,7 +122,9 @@ export default function Calibration() {
 
   async function handleStep2Confirm() {
     await send('CalIndex1');
-    setLastCalLaunch(0);
+    // Record current calLaunch as baseline — progress will be measured from here
+    setBaseCalLaunch(calLaunch);
+    setLastCalLaunch(calLaunch);
     setStep(3);
   }
 
@@ -135,10 +142,6 @@ export default function Calibration() {
     setStep(0);
     navigate('/');
   }
-
-  // Phase dots: phase1 = spins 0-9, phase2 = spins 10-19
-  const phase1Recorded = Math.min(calLaunch, SPINS_PER_PHASE);
-  const phase2Recorded = Math.max(0, calLaunch - SPINS_PER_PHASE);
 
   const stepTitles = { 1: 'Step 1 of 4', 2: 'Step 2 of 4', 3: 'Step 3 of 4', 4: 'Step 4 of 4' };
 
