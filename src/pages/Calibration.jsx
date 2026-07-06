@@ -79,17 +79,31 @@ export default function Calibration() {
   const posAngle = posToAngle(wheelStatus?.currentPos || 0);
 
   const calLaunch = wheelStatus ? Number(wheelStatus.calLaunch) || 0 : 0;
+  const [prevPos, setPrevPos] = useState(0);
+  const [isWheelSpinning, setIsWheelSpinning] = useState(false);
 
   // Progress relative to when the spin phase started (not absolute from factory)
   const relativeProgress = Math.max(0, calLaunch - baseCalLaunch);
   const phase1Recorded = Math.min(relativeProgress, SPINS_PER_PHASE);
   const phase2Recorded = Math.max(0, relativeProgress - SPINS_PER_PHASE);
 
+  // Detect wheel physically spinning (position changing > threshold)
+  useEffect(() => {
+    const currentPos = wheelStatus?.currentPos || 0;
+    const posChange = Math.abs(currentPos - prevPos);
+    if (posChange > 0.05 && step >= 3) {
+      setIsWheelSpinning(true);
+    } else if (posChange < 0.02) {
+      setIsWheelSpinning(false);
+    }
+    setPrevPos(currentPos);
+  }, [wheelStatus?.currentPos]);
+
   useEffect(() => {
     if (calLaunch > lastCalLaunch && step >= 3) {
       setLastCalLaunch(calLaunch);
-      setSpinMsg('Spin recording…');
-      const t = setTimeout(() => setSpinMsg(''), 1500);
+      setSpinMsg('✓ Spin recorded!');
+      const t = setTimeout(() => setSpinMsg(''), 2000);
       return () => clearTimeout(t);
     }
   }, [calLaunch, lastCalLaunch, step]);
@@ -253,8 +267,18 @@ export default function Calibration() {
             </div>
 
             {spinMsg && (
-              <div style={{ fontSize: 13, fontWeight: 700, color: '#2563EB', background: '#EFF6FF', padding: '8px 18px', borderRadius: 20, display: 'inline-block', marginBottom: 14, animation: 'fadeIn 0.2s ease' }}>
-                ● Spin recording
+              <div style={{ fontSize: 13, fontWeight: 700, color: '#10B981', background: '#ECFDF5', padding: '8px 18px', borderRadius: 20, display: 'inline-block', marginBottom: 14 }}>
+                {spinMsg}
+              </div>
+            )}
+            {!spinMsg && isWheelSpinning && (
+              <div style={{ fontSize: 13, fontWeight: 600, color: '#2563EB', background: '#EFF6FF', padding: '8px 18px', borderRadius: 20, display: 'inline-block', marginBottom: 14 }}>
+                ⟳ Wheel spinning…
+              </div>
+            )}
+            {!spinMsg && !isWheelSpinning && phase1Recorded === 0 && (
+              <div style={{ fontSize: 12, color: '#94A3B8', marginBottom: 14 }}>
+                Spin the wheel hard enough to trigger the program
               </div>
             )}
 
@@ -291,8 +315,18 @@ export default function Calibration() {
             </div>
 
             {spinMsg && (
-              <div style={{ fontSize: 13, fontWeight: 700, color: '#2563EB', background: '#EFF6FF', padding: '8px 18px', borderRadius: 20, display: 'inline-block', marginBottom: 14 }}>
-                ● Spin recording
+              <div style={{ fontSize: 13, fontWeight: 700, color: '#10B981', background: '#ECFDF5', padding: '8px 18px', borderRadius: 20, display: 'inline-block', marginBottom: 14 }}>
+                {spinMsg}
+              </div>
+            )}
+            {!spinMsg && isWheelSpinning && (
+              <div style={{ fontSize: 13, fontWeight: 600, color: '#2563EB', background: '#EFF6FF', padding: '8px 18px', borderRadius: 20, display: 'inline-block', marginBottom: 14 }}>
+                ⟳ Wheel spinning…
+              </div>
+            )}
+            {!spinMsg && !isWheelSpinning && phase2Recorded === 0 && (
+              <div style={{ fontSize: 12, color: '#94A3B8', marginBottom: 14 }}>
+                Spin the wheel hard enough to trigger the program
               </div>
             )}
 

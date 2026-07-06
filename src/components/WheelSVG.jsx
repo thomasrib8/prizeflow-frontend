@@ -1,7 +1,8 @@
 // Shared wheel SVG component
 // positionAngle: angle in degrees (0 = top, clockwise) for the red cleat
 // highlightSection: 0-11 to highlight a section (for result display)
-const FULL_ROT = 400;
+// FULL_ROT: empirically derived from real wheel data (case 8 ≈ 223, case 3 ≈ 98 = 398%300)
+const FULL_ROT = 300;
 
 export function posToAngle(currentPos) {
   return ((currentPos % FULL_ROT) / FULL_ROT) * 360;
