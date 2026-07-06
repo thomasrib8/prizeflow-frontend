@@ -54,7 +54,7 @@ export default function LaunchCampaign() {
 
   useEffect(loadActiveCampaign, []);
 
-  // Reveal the gift for 5s, then reset for the next guest.
+  // Reveal the gift for 7s, then reset for the next guest.
   useEffect(() => {
     if (phase !== 'result') return undefined;
     const t = setTimeout(() => {
@@ -62,7 +62,7 @@ export default function LaunchCampaign() {
       setResult(null);
       setForm(EMPTY_FORM);
       loadActiveCampaign();
-    }, 5000);
+    }, 7000);
     return () => clearTimeout(t);
   }, [phase]);
 
