@@ -463,9 +463,17 @@ export default function Calibration() {
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 48, marginBottom: 14 }}>✅</div>
             <h2 style={{ fontSize: 20, fontWeight: 700, margin: '0 0 10px', color: '#0F172A' }}>Calibration complete</h2>
-            <p style={{ fontSize: 14, color: '#64748B', lineHeight: 1.6, margin: '0 0 28px' }}>
-              The wheel has been successfully calibrated. You can now return to the dashboard and start a campaign.
+            <p style={{ fontSize: 14, color: '#64748B', lineHeight: 1.6, margin: '0 0 20px' }}>
+              The wheel has calculated and saved the new calibration.
             </p>
+            <div style={{
+              textAlign: 'left', background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10,
+              padding: '14px 16px', marginBottom: 28, fontSize: 13, color: '#92400E', lineHeight: 1.6,
+            }}>
+              ⚠ <strong>Restart required before launching a campaign.</strong> The wheel's control program will
+              silently refuse every spin until it is restarted. Unplug and replug the wheel's power (or power-cycle
+              the Raspberry Pi) now, then wait for it to reconnect before starting a campaign.
+            </div>
             <Btn onClick={() => { send('Free'); setInCalibration(false); navigate('/'); }}>Back to dashboard</Btn>
           </div>
         </Modal>
