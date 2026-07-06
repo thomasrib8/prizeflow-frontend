@@ -60,7 +60,7 @@ export const api = {
 
   spinStatus: () => request('/spin/status'),
   wheelCommand: (command) => request('/spin/command', { method: 'POST', body: { command } }),
-  spinCampaign: (roomNumber) => request('/spin/campaign', { method: 'POST', body: { roomNumber } }),
+  spinCampaign: () => request('/spin/campaign', { method: 'POST' }),
   spinDemo: (slotIndex) => request('/spin/demo', { method: 'POST', body: { slotIndex } }),
   submitReward: (distributionId, payload) =>
     request(`/spin/distributions/${distributionId}/reward`, { method: 'POST', body: payload }),
