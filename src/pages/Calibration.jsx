@@ -136,6 +136,13 @@ export default function Calibration() {
   }
 
   async function handleConfirmEntry() {
+    // If wheel is in WaitFree from a previous spin, clear it first.
+    // Cal is only accepted in Free state (C++ state machine).
+    if (wheelState === 'WaitFree' || wheelState === 'Run') {
+      await send('Free');
+      // Give the wheel 300ms to process Free and transition to Free state
+      await new Promise(r => setTimeout(r, 300));
+    }
     await send('Cal');
     setInCalibration(true);
   }
