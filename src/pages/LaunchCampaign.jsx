@@ -95,11 +95,11 @@ export default function LaunchCampaign() {
         // transaction only runs after a confirmed landing), so the same
         // sequence step is retried. Keep the guest's entered details instead
         // of clearing the form, since they don't need to retype anything.
-        setError('⚠ Arrêt anormal détecté pendant le lancer. Relancez la roue plus franchement.');
+        setError('⚠ An unexpected stop was detected during the spin. Please spin the wheel again.');
       } else if (err.message === 'SPIN_TOO_WEAK') {
-        setError('⚡ Lancez la roue plus fort — le programme de forçage ne s\'est pas déclenché.');
+        setError('⚡ Please don\'t interact with the wheel — spin it again.');
       } else if (err.message === 'SPIN_TOO_SHORT') {
-        setError('⏱ La roue n\'a pas atteint la bonne case dans le temps imparti. Relancez.');
+        setError('⏱ The wheel didn\'t reach the right slot in time. Please spin again.');
       } else {
         setError(err.message);
       }
@@ -151,13 +151,13 @@ export default function LaunchCampaign() {
 
         <div style={{ textAlign: 'center', color: 'white', maxWidth: 480 }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: '#60A5FA', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 12 }}>
-            Merci pour votre participation
+            Thank you for participating
           </div>
           <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.01em', lineHeight: 1.4 }}>
-            Vous recevrez un mail contenant votre cadeau.
+            You will receive an email with your gift.
           </div>
           {/* Test campaigns only: show the actual gift so staff can verify the sequence/stock without waiting on email. */}
-          {campaign?.is_test && (
+          {!!campaign?.is_test && (
             <div style={{ marginTop: 20, fontSize: 32, fontWeight: 900, letterSpacing: '-0.02em', color: '#60A5FA' }}>
               {result.giftName}
             </div>
@@ -165,7 +165,7 @@ export default function LaunchCampaign() {
         </div>
 
         {/* Mini wheel showing stopped section — test campaigns only, same reasoning as the gift name above */}
-        {campaign?.is_test && <WheelSVG positionAngle={posAngle} size={180} highlightSection={slotIndex} />}
+        {!!campaign?.is_test && <WheelSVG positionAngle={posAngle} size={180} highlightSection={slotIndex} />}
       </div>
     );
   }
