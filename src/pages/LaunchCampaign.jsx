@@ -151,7 +151,7 @@ export default function LaunchCampaign() {
 
         <div style={{ textAlign: 'center', color: 'white', maxWidth: 480 }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: '#60A5FA', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 12 }}>
-            Thank you for participating
+            Thank you{form.firstName ? `, ${form.firstName}` : ''}!
           </div>
           <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.01em', lineHeight: 1.4 }}>
             You will receive an email with your gift.
