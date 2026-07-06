@@ -118,7 +118,7 @@ export default function LaunchCampaign() {
       }}>
         {!spinLaunched ? (
           <div style={{ textAlign: 'center', color: 'white', fontSize: 22, fontWeight: 800, maxWidth: 420, lineHeight: 1.4, padding: '0 24px' }}>
-            Lancez la roue pour obtenir votre gain !
+            Spin the wheel to claim your prize!
           </div>
         ) : (
           <>
