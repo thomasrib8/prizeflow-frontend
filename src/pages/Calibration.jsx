@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { useWheelSocket } from '../hooks/useWheelSocket';
@@ -76,6 +76,7 @@ export default function Calibration() {
   const [baseCalLaunch, setBaseCalLaunch] = useState(0);
   const [spinMsg, setSpinMsg] = useState('');
   const [spinPhase, setSpinPhase] = useState(3); // 3 = CW, 4 = CCW
+  const enteredCalRef = useRef(false); // true once the wheel has actually reported a live Cal state
 
   const posAngle = posToAngle(wheelStatus?.currentPos || 0);
   const calLaunch = wheelStatus ? Number(wheelStatus.calLaunch) || 0 : 0;
@@ -110,6 +111,28 @@ export default function Calibration() {
       setSpinPhase(4);
     }
   }, [calState, wheelState, spinPhase]);
+
+  // Track once the wheel has actually confirmed entering calibration
+  useEffect(() => {
+    if (['CalIndex0', 'CalIndex1', 'CalRun', 'CalDone'].includes(wheelState)) {
+      enteredCalRef.current = true;
+    }
+  }, [wheelState]);
+
+  // Recover if the wheel drops back to Free mid-calibration (e.g. a motor
+  // comm watchdog reset on the C++ side per Main.cpp's Error -> WaitIndex ->
+  // WaitFree -> Free path). Without this the UI would spin forever at
+  // step -1 waiting for a transition that will never come, since resuming
+  // requires re-sending Cal from scratch.
+  useEffect(() => {
+    if (inCalibration && enteredCalRef.current && wheelState === 'Free') {
+      enteredCalRef.current = false;
+      setInCalibration(false);
+      setBaseCalLaunch(0);
+      setSpinPhase(3);
+      setError('La calibration a été interrompue par la roue (perte de communication). Veuillez recommencer.');
+    }
+  }, [inCalibration, wheelState]);
 
   // "Spin recorded" flash
   useEffect(() => {
@@ -395,7 +418,7 @@ export default function Calibration() {
             <p style={{ fontSize: 14, color: '#64748B', lineHeight: 1.6, margin: '0 0 28px' }}>
               The wheel has been successfully calibrated. You can now return to the dashboard and start a campaign.
             </p>
-            <Btn onClick={() => { setStep(0); navigate('/'); }}>Back to dashboard</Btn>
+            <Btn onClick={() => { send('Free'); setInCalibration(false); navigate('/'); }}>Back to dashboard</Btn>
           </div>
         </Modal>
       )}
