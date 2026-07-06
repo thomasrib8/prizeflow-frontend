@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { Card, EmptyState } from '../components/ui';
@@ -7,6 +7,7 @@ import WheelSVG, { posToAngle } from '../components/WheelSVG';
 
 // phase: 'form' | 'spinning' | 'result'
 const EMPTY_FORM = { firstName: '', lastName: '', email: '', phone: '', consent: false };
+const LAUNCH_MOVEMENT_THRESHOLD = 0.5; // matches the hub's own hasStartedMoving check
 
 export default function LaunchCampaign() {
   const navigate = useNavigate();
@@ -17,9 +18,27 @@ export default function LaunchCampaign() {
   const [result, setResult] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [busy, setBusy] = useState(false);
+  const [spinLaunched, setSpinLaunched] = useState(false); // true once the guest has actually pushed the wheel
   const { agentConnected, wheelStatus } = useWheelSocket();
+  const spinStartPosRef = useRef(null);
 
   const posAngle = wheelStatus ? posToAngle(wheelStatus.currentPos || 0) : 0;
+
+  // The Run;X command only arms the wheel — Main.cpp waits for the guest to
+  // physically push it past runLaunchMinSpeed before the forced trajectory
+  // actually starts (RunWait -> RunLaunch). The socket protocol reports both
+  // as the same "Run" state, so detect the real launch client-side from
+  // position movement, the same way hub.js's own pendingSpin tracking does.
+  useEffect(() => {
+    if (phase !== 'spinning' || spinLaunched || !wheelStatus) return;
+    if (spinStartPosRef.current === null) {
+      spinStartPosRef.current = wheelStatus.currentPos;
+      return;
+    }
+    if (Math.abs(wheelStatus.currentPos - spinStartPosRef.current) >= LAUNCH_MOVEMENT_THRESHOLD) {
+      setSpinLaunched(true);
+    }
+  }, [phase, spinLaunched, wheelStatus]);
 
   function loadActiveCampaign() {
     setLoading(true);
@@ -52,6 +71,8 @@ export default function LaunchCampaign() {
     if (!form.consent) { setError('Consent is required to claim your reward.'); return; }
     setError('');
     setBusy(true);
+    setSpinLaunched(false);
+    spinStartPosRef.current = null;
     setPhase('spinning');
     try {
       const res = await api.spinCampaign();
@@ -69,7 +90,13 @@ export default function LaunchCampaign() {
       setPhase('result');
     } catch (err) {
       setPhase('form');
-      if (err.message === 'SPIN_TOO_WEAK') {
+      if (err.message === 'SPIN_ABNORMAL_STOP') {
+        // Truncated throw — nothing was consumed server-side (the DB
+        // transaction only runs after a confirmed landing), so the same
+        // sequence step is retried. Keep the guest's entered details instead
+        // of clearing the form, since they don't need to retype anything.
+        setError('⚠ Arrêt anormal détecté pendant le lancer. Relancez la roue plus franchement.');
+      } else if (err.message === 'SPIN_TOO_WEAK') {
         setError('⚡ Lancez la roue plus fort — le programme de forçage ne s\'est pas déclenché.');
       } else if (err.message === 'SPIN_TOO_SHORT') {
         setError('⏱ La roue n\'a pas atteint la bonne case dans le temps imparti. Relancez.');
@@ -89,16 +116,24 @@ export default function LaunchCampaign() {
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
         zIndex: 50, gap: 24,
       }}>
-        <img src="/logo.svg" alt="" style={{ width: 84, height: 84, animation: 'spin 1.2s linear infinite' }} />
-        <div style={{ color: '#60A5FA', fontSize: 15, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-          Please wait…
-        </div>
+        {!spinLaunched ? (
+          <div style={{ textAlign: 'center', color: 'white', fontSize: 22, fontWeight: 800, maxWidth: 420, lineHeight: 1.4, padding: '0 24px' }}>
+            Lancez la roue pour obtenir votre gain !
+          </div>
+        ) : (
+          <>
+            <img src="/logo.svg" alt="" style={{ width: 84, height: 84, animation: 'spin 1.2s linear infinite' }} />
+            <div style={{ color: '#60A5FA', fontSize: 15, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+              Please wait…
+            </div>
+          </>
+        )}
         <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }
 
-  // ── Result: Congratulations ───────────────────────────────────────────────
+  // ── Result ──────────────────────────────────────────────────────────────────
   if (phase === 'result' && result) {
     const slotIndex = result.slotIndex || 0;
     return (
@@ -114,17 +149,23 @@ export default function LaunchCampaign() {
 
         <div style={{ fontSize: 56, animation: 'confetti 0.6s ease-in-out infinite alternate' }}>🎉</div>
 
-        <div style={{ textAlign: 'center', color: 'white' }}>
+        <div style={{ textAlign: 'center', color: 'white', maxWidth: 480 }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: '#60A5FA', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 12 }}>
-            Congratulations
+            Merci pour votre participation
           </div>
-          <div style={{ fontSize: 48, fontWeight: 900, letterSpacing: '-0.02em', lineHeight: 1.1, maxWidth: 480 }}>
-            {result.giftName}
+          <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.01em', lineHeight: 1.4 }}>
+            Vous recevrez un mail contenant votre cadeau.
           </div>
+          {/* Test campaigns only: show the actual gift so staff can verify the sequence/stock without waiting on email. */}
+          {campaign?.is_test && (
+            <div style={{ marginTop: 20, fontSize: 32, fontWeight: 900, letterSpacing: '-0.02em', color: '#60A5FA' }}>
+              {result.giftName}
+            </div>
+          )}
         </div>
 
-        {/* Mini wheel showing stopped section */}
-        <WheelSVG positionAngle={posAngle} size={180} highlightSection={slotIndex} />
+        {/* Mini wheel showing stopped section — test campaigns only, same reasoning as the gift name above */}
+        {campaign?.is_test && <WheelSVG positionAngle={posAngle} size={180} highlightSection={slotIndex} />}
       </div>
     );
   }
