@@ -68,51 +68,65 @@ function Btn({ children, onClick, variant = 'primary', disabled }) {
 export default function Calibration() {
   const navigate = useNavigate();
   const { wheelStatus, agentConnected } = useWheelSocket();
-  const [step, setStep] = useState(0);
+  const [inCalibration, setInCalibration] = useState(false); // true once Cal is sent
   const [showCancelWarning, setShowCancelWarning] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [lastCalLaunch, setLastCalLaunch] = useState(0);
-  const [baseCalLaunch, setBaseCalLaunch] = useState(0); // calLaunch value when phase started
+  const [baseCalLaunch, setBaseCalLaunch] = useState(0);
   const [spinMsg, setSpinMsg] = useState('');
+  const [spinPhase, setSpinPhase] = useState(3); // 3 = CW, 4 = CCW
 
   const posAngle = posToAngle(wheelStatus?.currentPos || 0);
-
   const calLaunch = wheelStatus ? Number(wheelStatus.calLaunch) || 0 : 0;
-  const calState = wheelStatus?.calState || ''; // 'CW', 'CCW', 'Run', or empty
+  const calState = wheelStatus?.calState || '';
   const wheelState = wheelStatus?.state || '';
 
-  // Progress relative to when the spin phase started (not absolute from factory)
+  // ── Step derived ENTIRELY from wheel state (like original app) ──────────────
+  // 0 = confirm entry popup
+  // 1 = step1 (wheel in CalIndex0)
+  // 2 = step2 (wheel in CalIndex1)
+  // 3 = CW spins (wheel in CalRun, calState = CW)
+  // 4 = CCW spins (wheel in CalRun, calState = CCW or Run after CW done)
+  // 5 = done (wheel in CalDone)
+  const step = (() => {
+    if (!inCalibration) return 0;
+    if (wheelState === 'CalDone') return 5;
+    if (wheelState === 'CalRun') return spinPhase;
+    if (wheelState === 'CalIndex1') return 2;
+    if (wheelState === 'CalIndex0') return 1;
+    return 0; // Free or other — still show confirm if not yet started
+  })();
+
   const relativeProgress = Math.max(0, calLaunch - baseCalLaunch);
   const phase1Recorded = Math.min(relativeProgress, SPINS_PER_PHASE);
   const phase2Recorded = Math.max(0, relativeProgress - SPINS_PER_PHASE);
-
-  // Spinning detection: calState = 'Run' means a spin is actively being recorded
   const isRecording = calState === 'Run' && wheelState === 'CalRun';
 
-  // Show "Spin recording" flash when calLaunch increments
+  // Transition CW → CCW
   useEffect(() => {
-    if (calLaunch > lastCalLaunch && step >= 3) {
+    if (wheelState === 'CalRun' && calState === 'CCW' && spinPhase === 3) {
+      setSpinPhase(4);
+    }
+  }, [calState, wheelState, spinPhase]);
+
+  // "Spin recorded" flash
+  useEffect(() => {
+    if (calLaunch > lastCalLaunch && wheelState === 'CalRun') {
       setLastCalLaunch(calLaunch);
       setSpinMsg('✓ Spin recorded!');
       const t = setTimeout(() => setSpinMsg(''), 2000);
       return () => clearTimeout(t);
     }
-  }, [calLaunch, lastCalLaunch, step]);
+  }, [calLaunch, lastCalLaunch, wheelState]);
 
-  // Auto-advance step 3 → 4 when wheel transitions CW → CCW phase
+  // Record baseline when CalRun first starts
   useEffect(() => {
-    if (step === 3 && wheelState === 'CalRun' && calState === 'CCW') {
-      setStep(4);
+    if (wheelState === 'CalRun' && baseCalLaunch === 0) {
+      setBaseCalLaunch(calLaunch);
+      setLastCalLaunch(calLaunch);
     }
-  }, [calState, wheelState, step]);
-
-  // Auto-advance step 4 → done when wheel reaches CalDone state
-  useEffect(() => {
-    if (step >= 3 && wheelState === 'CalDone') {
-      setStep(5);
-    }
-  }, [wheelState, step]);
+  }, [wheelState]);
 
   async function send(command) {
     setBusy(true);
@@ -122,24 +136,21 @@ export default function Calibration() {
 
   async function handleConfirmEntry() {
     await send('Cal');
-    setStep(1);
+    setInCalibration(true);
   }
 
   async function handleStep1Confirm() {
     await send('CalIndex0');
-    setStep(2);
+    // UI advances automatically when wheel responds with CalIndex1 state
   }
 
   async function handleStep2Confirm() {
     await send('CalIndex1');
-    // Record current calLaunch as baseline — progress will be measured from here
-    setBaseCalLaunch(calLaunch);
-    setLastCalLaunch(calLaunch);
-    setStep(3);
+    // UI advances automatically when wheel responds with CalRun state
   }
 
   function handleExitRequest() {
-    if (step > 0 && step < 5) {
+    if (inCalibration && step < 5) {
       setShowCancelWarning(true);
     } else {
       navigate('/');
@@ -149,7 +160,9 @@ export default function Calibration() {
   function handleConfirmExit() {
     send('Free');
     setShowCancelWarning(false);
-    setStep(0);
+    setInCalibration(false);
+    setBaseCalLaunch(0);
+    setSpinPhase(3);
     navigate('/');
   }
 
