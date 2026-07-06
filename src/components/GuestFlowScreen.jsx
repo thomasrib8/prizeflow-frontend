@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import WheelSVG from './WheelSVG';
 
 const RETRY_MESSAGES = {
@@ -12,27 +13,80 @@ const fullScreenBase = {
   zIndex: 50, gap: 24, padding: '0 24px', textAlign: 'center',
 };
 
+const SWIPE_CLOSE_THRESHOLD = 80; // px a 3-finger touch must travel downward to close
+
+function averageTouchY(touches) {
+  let sum = 0;
+  for (let i = 0; i < touches.length; i++) sum += touches[i].clientY;
+  return sum / touches.length;
+}
+
 /// Renders the guest queue experience for a given useGuestFlow() state.
 /// Shared by the public per-guest page (Guest.jsx) and the staff-triggered
 /// kiosk overlay (LaunchCampaign.jsx) — onClose is only passed by the kiosk,
-/// which needs a way to back out of the full-screen overlay.
+/// which needs a way to back out of the full-screen overlay. Guests aren't
+/// meant to see an exit, so it's deliberately not obvious: a hover-only
+/// button tucked in the bottom-right corner on desktop, a 3-finger swipe
+/// down on touch devices.
 export default function GuestFlowScreen({ view, form, setForm, error, busy, status, onSubmit, onRestart, onClose }) {
-  const closeButton = onClose && (
-    <button onClick={onClose} style={{
-      position: 'fixed', top: 20, right: 24, zIndex: 60, background: 'rgba(255,255,255,0.12)',
-      border: '1px solid rgba(255,255,255,0.3)', borderRadius: 8, padding: '7px 14px',
-      fontSize: 13, color: 'white', cursor: 'pointer', fontFamily: 'inherit',
-    }}>Close</button>
+  const [hoveringCorner, setHoveringCorner] = useState(false);
+
+  useEffect(() => {
+    if (!onClose) return undefined;
+    let startY = null;
+
+    function handleTouchStart(e) {
+      startY = e.touches.length === 3 ? averageTouchY(e.touches) : null;
+    }
+    function handleTouchMove(e) {
+      if (startY === null || e.touches.length !== 3) return;
+      if (averageTouchY(e.touches) - startY > SWIPE_CLOSE_THRESHOLD) {
+        startY = null;
+        onClose();
+      }
+    }
+    function handleTouchEnd() { startY = null; }
+
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
+    window.addEventListener('touchend', handleTouchEnd, { passive: true });
+    return () => {
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [onClose]);
+
+  const cornerCloseZone = onClose && (
+    <div
+      onMouseEnter={() => setHoveringCorner(true)}
+      onMouseLeave={() => setHoveringCorner(false)}
+      style={{
+        position: 'fixed', bottom: 0, right: 0, width: 120, height: 120, zIndex: 60,
+        display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end', padding: 18,
+      }}
+    >
+      <button
+        onClick={onClose}
+        style={{
+          background: 'rgba(255,255,255,0.95)', color: '#0F172A', border: '1px solid #E2E8F0',
+          borderRadius: 8, padding: '7px 14px', fontSize: 13, cursor: 'pointer', fontFamily: 'inherit',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
+          opacity: hoveringCorner ? 1 : 0, pointerEvents: hoveringCorner ? 'auto' : 'none',
+          transition: 'opacity 0.2s ease',
+        }}
+      >Close</button>
+    </div>
   );
 
   if (view === 'loading') {
-    return <div style={fullScreenBase}>{closeButton}<div style={{ color: 'white' }}>Loading…</div></div>;
+    return <div style={fullScreenBase}>{cornerCloseZone}<div style={{ color: 'white' }}>Loading…</div></div>;
   }
 
   if (view === 'no_campaign') {
     return (
       <div style={fullScreenBase}>
-        {closeButton}
+        {cornerCloseZone}
         <div style={{ color: 'white', fontSize: 20, fontWeight: 700, maxWidth: 420 }}>
           No campaign is currently running. Please check back later.
         </div>
@@ -43,7 +97,7 @@ export default function GuestFlowScreen({ view, form, setForm, error, busy, stat
   if (view === 'expired') {
     return (
       <div style={fullScreenBase}>
-        {closeButton}
+        {cornerCloseZone}
         <div style={{ color: 'white', fontSize: 20, fontWeight: 700, maxWidth: 420, lineHeight: 1.4 }}>
           Your turn has timed out.
         </div>
@@ -60,7 +114,7 @@ export default function GuestFlowScreen({ view, form, setForm, error, busy, stat
       const result = status.result || {};
       return (
         <div style={fullScreenBase} key="done">
-          {closeButton}
+          {cornerCloseZone}
           <style>{`
             @keyframes fadeIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
             @keyframes confetti { 0%{transform:translateY(0) rotate(0)} 100%{transform:translateY(-20px) rotate(15deg)} }
@@ -87,7 +141,7 @@ export default function GuestFlowScreen({ view, form, setForm, error, busy, stat
     if (status.status === 'waiting') {
       return (
         <div style={fullScreenBase} key="waiting">
-          {closeButton}
+          {cornerCloseZone}
           <div style={{ color: 'white', fontSize: 20, fontWeight: 800, maxWidth: 420 }}>
             You're #{status.position + 1} in line
           </div>
@@ -103,7 +157,7 @@ export default function GuestFlowScreen({ view, form, setForm, error, busy, stat
     if (status.status === 'active') {
       return (
         <div style={fullScreenBase} key="active">
-          {closeButton}
+          {cornerCloseZone}
           {status.retryMessage && RETRY_MESSAGES[status.retryMessage] && (
             <div style={{ fontSize: 13, color: '#FCA5A5', background: 'rgba(239,68,68,0.15)', padding: '8px 16px', borderRadius: 20, maxWidth: 420 }}>
               {RETRY_MESSAGES[status.retryMessage]}
@@ -133,12 +187,7 @@ export default function GuestFlowScreen({ view, form, setForm, error, busy, stat
       position: 'fixed', inset: 0, background: '#F8FAFC',
       display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50,
     }}>
-      {onClose && (
-        <button onClick={onClose} style={{
-          position: 'absolute', top: 20, right: 24, background: 'none', border: '1px solid #E2E8F0',
-          borderRadius: 8, padding: '7px 14px', fontSize: 13, color: '#94A3B8', cursor: 'pointer', fontFamily: 'inherit',
-        }}>Close</button>
-      )}
+      {cornerCloseZone}
       <div style={{
         background: 'white', borderRadius: 20, padding: 'clamp(24px, 6vw, 44px)', width: 460, maxWidth: '94vw',
         maxHeight: '92vh', overflowY: 'auto', boxShadow: '0 30px 80px rgba(0,0,0,0.15)',
