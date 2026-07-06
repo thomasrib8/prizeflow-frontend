@@ -1,26 +1,53 @@
 import { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
 import { api } from '../api/client';
-import { Card, Badge } from '../components/ui';
+import { Card, Badge, Button } from '../components/ui';
 import { useWheelSocket } from '../hooks/useWheelSocket';
+import { useGuestFlow } from '../hooks/useGuestFlow';
+import GuestFlowScreen from '../components/GuestFlowScreen';
 
 const POLL_INTERVAL_MS = 2000;
 
+// A shared tablet cycles through walk-up guests one after another, so unlike
+// the personal-phone guest page: never persist the session, and auto-return
+// to the form 7s after the reveal instead of staying on it.
+function KioskOverlay({ token, onClose }) {
+  const flow = useGuestFlow({ token, persistSession: false, autoReturnMs: 7000 });
+  return (
+    <GuestFlowScreen
+      view={flow.view}
+      form={flow.form}
+      setForm={flow.setForm}
+      error={flow.error}
+      busy={flow.busy}
+      status={flow.status}
+      onSubmit={flow.handleSubmit}
+      onRestart={flow.restart}
+      onClose={onClose}
+    />
+  );
+}
+
 // Staff-facing: guests never see this page. It shows the QR code that leads
-// to the guest flow (/play/:token) and a live view of the queue, so the
-// active campaign's real-time results are visible from the dashboard side
-// while guests play from their own phones.
+// to the guest flow (/play/:token), a live view of the queue, so the active
+// campaign's real-time results are visible from the dashboard side while
+// guests play from their own phones — plus a "Spin the wheel" button that
+// opens the same guest flow full-screen on this device, for walk-up guests
+// without a phone.
 export default function LaunchCampaign() {
   const { agentConnected } = useWheelSocket();
   const [qrDataUrl, setQrDataUrl] = useState(null);
   const [guestUrl, setGuestUrl] = useState('');
+  const [token, setToken] = useState(null);
   const [error, setError] = useState('');
   const [queue, setQueue] = useState(null);
+  const [showKiosk, setShowKiosk] = useState(false);
 
   useEffect(() => {
     api.getQrToken()
-      .then(({ token }) => {
-        const url = `${window.location.origin}/play/${token}`;
+      .then(({ token: t }) => {
+        setToken(t);
+        const url = `${window.location.origin}/play/${t}`;
         setGuestUrl(url);
         return QRCode.toDataURL(url, { width: 320, margin: 1 });
       })
@@ -50,8 +77,13 @@ export default function LaunchCampaign() {
           <h1 className="page-title">Launch Campaign</h1>
           <p className="page-subtitle">Guests scan the QR code below to play from their own phone</p>
         </div>
-        <Badge tone={agentConnected ? 'green' : 'red'}>{agentConnected ? 'Wheel ready' : 'Wheel offline'}</Badge>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <Badge tone={agentConnected ? 'green' : 'red'}>{agentConnected ? 'Wheel ready' : 'Wheel offline'}</Badge>
+          <Button onClick={() => setShowKiosk(true)}>SPIN THE WHEEL</Button>
+        </div>
       </div>
+
+      {showKiosk && token && <KioskOverlay token={token} onClose={() => setShowKiosk(false)} />}
 
       {error && <div className="error-banner">{error}</div>}
 

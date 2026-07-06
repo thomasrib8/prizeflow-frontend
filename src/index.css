@@ -50,6 +50,20 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
   outline-offset: 2px;
 }
 input, select, textarea { font-family: inherit; font-size: 14px; }
+
+/* .field wraps a label + input pair. Also used as a CSS Grid item (e.g. the
+   first/last name row) — min-width: 0 lets it actually shrink instead of
+   being floored by the input's intrinsic default width, which otherwise
+   forces the grid (and the page) to overflow horizontally on narrow phones. */
+.field { margin-bottom: 16px; min-width: 0; }
+.field label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; }
+.field input, .field select, .field textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text);
+}
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
