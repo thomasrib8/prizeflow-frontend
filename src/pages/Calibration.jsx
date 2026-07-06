@@ -83,19 +83,20 @@ export default function Calibration() {
   const wheelState = wheelStatus?.state || '';
 
   // ── Step derived ENTIRELY from wheel state (like original app) ──────────────
-  // 0 = confirm entry popup
-  // 1 = step1 (wheel in CalIndex0)
-  // 2 = step2 (wheel in CalIndex1)
-  // 3 = CW spins (wheel in CalRun, calState = CW)
-  // 4 = CCW spins (wheel in CalRun, calState = CCW or Run after CW done)
-  // 5 = done (wheel in CalDone)
+  // -1 = transitioning (inCalibration=true, waiting for wheel to change state)
+  //  0 = confirm entry popup
+  //  1 = step1 (wheel in CalIndex0)
+  //  2 = step2 (wheel in CalIndex1)
+  //  3 = CW spins (wheel in CalRun, calState = CW)
+  //  4 = CCW spins (wheel in CalRun, calState = CCW)
+  //  5 = done (wheel in CalDone)
   const step = (() => {
     if (!inCalibration) return 0;
     if (wheelState === 'CalDone') return 5;
     if (wheelState === 'CalRun') return spinPhase;
     if (wheelState === 'CalIndex1') return 2;
     if (wheelState === 'CalIndex0') return 1;
-    return 0; // Free or other — still show confirm if not yet started
+    return -1; // inCalibration but transitioning (Free/WaitFree between states)
   })();
 
   const relativeProgress = Math.max(0, calLaunch - baseCalLaunch);
@@ -180,7 +181,7 @@ export default function Calibration() {
           <span className={`badge badge-${agentConnected ? 'green' : 'red'}`}>
             {agentConnected ? 'Wheel connected' : 'Wheel offline'}
           </span>
-          {step > 0 && step < 5 && (
+          {(step > 0 || step === -1) && step < 5 && (
             <button onClick={handleExitRequest} style={{
               background: 'none', border: '1px solid #E2E8F0', borderRadius: 8,
               padding: '7px 14px', fontSize: 13, color: '#64748B', cursor: 'pointer', fontFamily: 'inherit',
@@ -189,6 +190,20 @@ export default function Calibration() {
         </div>
       </div>
       {error && <div className="error-banner">{error}</div>}
+
+      {/* ── STEP -1: Transitioning between states ── */}
+      {step === -1 && (
+        <Modal>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 36, marginBottom: 14 }}>⟳</div>
+            <h2 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 10px', color: '#0F172A' }}>Calibration in progress</h2>
+            <p style={{ fontSize: 14, color: '#64748B', lineHeight: 1.6, margin: '0 0 6px' }}>
+              Waiting for the wheel to transition to the next step…
+            </p>
+            <p style={{ fontSize: 12, color: '#94A3B8' }}>Wheel state: {wheelState || '—'}</p>
+          </div>
+        </Modal>
+      )}
 
       {/* ── STEP 0: Confirm entry popup ── */}
       {step === 0 && (
