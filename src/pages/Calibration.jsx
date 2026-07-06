@@ -76,6 +76,7 @@ export default function Calibration() {
   const [baseCalLaunch, setBaseCalLaunch] = useState(0);
   const [spinMsg, setSpinMsg] = useState('');
   const [spinPhase, setSpinPhase] = useState(3); // 3 = CW, 4 = CCW
+  const [interruptedMessage, setInterruptedMessage] = useState(''); // shown in the step-0 popup instead of the normal entry copy
   const prevWheelStateRef = useRef(''); // previous wheelState, used to detect which Cal state we dropped from
 
   const posAngle = posToAngle(wheelStatus?.currentPos || 0);
@@ -137,18 +138,18 @@ export default function Calibration() {
     setSpinPhase(3);
 
     if (prev === 'CalIndex1') {
-      setError(
+      setInterruptedMessage(
         "Position du taquet non validée par la roue à l'étape 2 : l'écart mesuré entre les positions " +
         "des étapes 1 et 2 est hors de la plage acceptée. Repositionnez le taquet le plus précisément " +
         "possible sur la goupille (toujours le même bord de taquet aux deux étapes) et recommencez la calibration."
       );
     } else if (prev === 'CalRun') {
-      setError(
+      setInterruptedMessage(
         "La communication avec le moteur a été interrompue pendant l'enregistrement des lancers. " +
         "Veuillez recommencer la calibration depuis le début."
       );
     } else {
-      setError('La calibration a été interrompue de façon inattendue par la roue. Veuillez recommencer.');
+      setInterruptedMessage('La calibration a été interrompue de façon inattendue par la roue. Veuillez recommencer.');
     }
   }, [inCalibration, wheelState]);
 
@@ -177,6 +178,7 @@ export default function Calibration() {
   }
 
   async function handleConfirmEntry() {
+    setInterruptedMessage('');
     // If wheel is in WaitFree from a previous spin, clear it first.
     // Cal is only accepted in Free state (C++ state machine).
     if (wheelState === 'WaitFree' || wheelState === 'Run') {
@@ -253,23 +255,43 @@ export default function Calibration() {
         </Modal>
       )}
 
-      {/* ── STEP 0: Confirm entry popup ── */}
+      {/* ── STEP 0: Confirm entry popup, or interrupted-calibration popup ── */}
       {step === 0 && (
         <Modal>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 18px' }}>
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1" fill="#2563EB"/></svg>
-            </div>
-            <h2 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 10px', color: '#0F172A' }}>Wheel Calibration</h2>
-            <p style={{ fontSize: 14, color: '#64748B', lineHeight: 1.6, margin: '0 0 28px' }}>
-              You are about to start the calibration procedure. This operation takes approximately <strong>10 minutes</strong> and will recalibrate the wheel's section detection.
-            </p>
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-              <Btn variant="secondary" onClick={() => navigate('/')}>Cancel</Btn>
-              <Btn onClick={handleConfirmEntry} disabled={busy || !agentConnected}>
-                {busy ? 'Starting…' : 'Start calibration'}
-              </Btn>
-            </div>
+            {interruptedMessage ? (
+              <>
+                <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#FEF2F2', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 18px' }}>
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </div>
+                <h2 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 10px', color: '#0F172A' }}>Calibration interrompue</h2>
+                <p style={{ fontSize: 14, color: '#64748B', lineHeight: 1.6, margin: '0 0 28px' }}>
+                  {interruptedMessage}
+                </p>
+                <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+                  <Btn variant="secondary" onClick={() => { setInterruptedMessage(''); navigate('/'); }}>Cancel</Btn>
+                  <Btn onClick={handleConfirmEntry} disabled={busy || !agentConnected}>
+                    {busy ? 'Restarting…' : 'Restart calibration'}
+                  </Btn>
+                </div>
+              </>
+            ) : (
+              <>
+                <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 18px' }}>
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1" fill="#2563EB"/></svg>
+                </div>
+                <h2 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 10px', color: '#0F172A' }}>Wheel Calibration</h2>
+                <p style={{ fontSize: 14, color: '#64748B', lineHeight: 1.6, margin: '0 0 28px' }}>
+                  You are about to start the calibration procedure. This operation takes approximately <strong>10 minutes</strong> and will recalibrate the wheel's section detection.
+                </p>
+                <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+                  <Btn variant="secondary" onClick={() => navigate('/')}>Cancel</Btn>
+                  <Btn onClick={handleConfirmEntry} disabled={busy || !agentConnected}>
+                    {busy ? 'Starting…' : 'Start calibration'}
+                  </Btn>
+                </div>
+              </>
+            )}
           </div>
         </Modal>
       )}
