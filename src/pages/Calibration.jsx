@@ -76,7 +76,7 @@ export default function Calibration() {
   const [baseCalLaunch, setBaseCalLaunch] = useState(0);
   const [spinMsg, setSpinMsg] = useState('');
   const [spinPhase, setSpinPhase] = useState(3); // 3 = CW, 4 = CCW
-  const enteredCalRef = useRef(false); // true once the wheel has actually reported a live Cal state
+  const prevWheelStateRef = useRef(''); // previous wheelState, used to detect which Cal state we dropped from
 
   const posAngle = posToAngle(wheelStatus?.currentPos || 0);
   const calLaunch = wheelStatus ? Number(wheelStatus.calLaunch) || 0 : 0;
@@ -112,25 +112,43 @@ export default function Calibration() {
     }
   }, [calState, wheelState, spinPhase]);
 
-  // Track once the wheel has actually confirmed entering calibration
+  // Recover if the wheel drops back to WaitFree/Free mid-calibration (per
+  // Main.cpp, this only happens via Error -> WaitIndex -> WaitFree). Without
+  // this the UI would spin forever at step -1 waiting for a transition that
+  // will never come, since resuming requires re-sending Cal from scratch.
+  // The message is tailored to the state we dropped FROM, since that state
+  // tells us which check in Main.cpp rejected us:
+  //  - from CalIndex1: the offsetWheel/pos tolerance check at Main.cpp:302-311
+  //    failed — the cleat position confirmed at step 2 wasn't within the
+  //    expected distance from step 1's position (physical placement issue).
+  //  - from CalRun: remote stopped being CalIndex1 while spinning, which our
+  //    UI never does on its own — points to a motor comm watchdog/hardware
+  //    hiccup rather than a placement issue.
   useEffect(() => {
-    if (['CalIndex0', 'CalIndex1', 'CalRun', 'CalDone'].includes(wheelState)) {
-      enteredCalRef.current = true;
-    }
-  }, [wheelState]);
+    const prev = prevWheelStateRef.current;
+    prevWheelStateRef.current = wheelState;
 
-  // Recover if the wheel drops back to Free mid-calibration (e.g. a motor
-  // comm watchdog reset on the C++ side per Main.cpp's Error -> WaitIndex ->
-  // WaitFree -> Free path). Without this the UI would spin forever at
-  // step -1 waiting for a transition that will never come, since resuming
-  // requires re-sending Cal from scratch.
-  useEffect(() => {
-    if (inCalibration && enteredCalRef.current && wheelState === 'Free') {
-      enteredCalRef.current = false;
-      setInCalibration(false);
-      setBaseCalLaunch(0);
-      setSpinPhase(3);
-      setError('La calibration a été interrompue par la roue (perte de communication). Veuillez recommencer.');
+    if (!inCalibration) return;
+    if (wheelState !== 'WaitFree' && wheelState !== 'Free') return;
+    if (!['CalIndex0', 'CalIndex1', 'CalRun'].includes(prev)) return;
+
+    setInCalibration(false);
+    setBaseCalLaunch(0);
+    setSpinPhase(3);
+
+    if (prev === 'CalIndex1') {
+      setError(
+        "Position du taquet non validée par la roue à l'étape 2 : l'écart mesuré entre les positions " +
+        "des étapes 1 et 2 est hors de la plage acceptée. Repositionnez le taquet le plus précisément " +
+        "possible sur la goupille (toujours le même bord de taquet aux deux étapes) et recommencez la calibration."
+      );
+    } else if (prev === 'CalRun') {
+      setError(
+        "La communication avec le moteur a été interrompue pendant l'enregistrement des lancers. " +
+        "Veuillez recommencer la calibration depuis le début."
+      );
+    } else {
+      setError('La calibration a été interrompue de façon inattendue par la roue. Veuillez recommencer.');
     }
   }, [inCalibration, wheelState]);
 
