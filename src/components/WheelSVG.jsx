@@ -1,11 +1,16 @@
 // Shared wheel SVG component
 // positionAngle: angle in degrees (0 = top, clockwise) for the red cleat
 // highlightSection: 0-11 to highlight a section (for result display)
-// FULL_ROT: empirically derived from real wheel data (case 8 ≈ 223, case 3 ≈ 98 = 398%300)
-const FULL_ROT = 300;
+//
+// Formula derived from original index.html line 227:
+//   transform: rotate(360/12 * pos + "deg")
+// where pos = currentPos (encoder value in sections, not degrees).
+// 360/12 = 30 degrees per section unit.
+const FULL_ROT = 12; // encoder units per full revolution
 
 export function posToAngle(currentPos) {
-  return ((currentPos % FULL_ROT) / FULL_ROT) * 360;
+  // Same formula as original app: 360/12 * pos, wrapped to [0, 360)
+  return (currentPos * (360 / FULL_ROT)) % 360;
 }
 
 export default function WheelSVG({ positionAngle = 0, size = 220, highlightSection = null }) {

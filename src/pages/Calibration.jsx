@@ -79,26 +79,18 @@ export default function Calibration() {
   const posAngle = posToAngle(wheelStatus?.currentPos || 0);
 
   const calLaunch = wheelStatus ? Number(wheelStatus.calLaunch) || 0 : 0;
-  const [prevPos, setPrevPos] = useState(0);
-  const [isWheelSpinning, setIsWheelSpinning] = useState(false);
+  const calState = wheelStatus?.calState || ''; // 'CW', 'CCW', 'Run', or empty
+  const wheelState = wheelStatus?.state || '';
 
   // Progress relative to when the spin phase started (not absolute from factory)
   const relativeProgress = Math.max(0, calLaunch - baseCalLaunch);
   const phase1Recorded = Math.min(relativeProgress, SPINS_PER_PHASE);
   const phase2Recorded = Math.max(0, relativeProgress - SPINS_PER_PHASE);
 
-  // Detect wheel physically spinning (position changing > threshold)
-  useEffect(() => {
-    const currentPos = wheelStatus?.currentPos || 0;
-    const posChange = Math.abs(currentPos - prevPos);
-    if (posChange > 0.05 && step >= 3) {
-      setIsWheelSpinning(true);
-    } else if (posChange < 0.02) {
-      setIsWheelSpinning(false);
-    }
-    setPrevPos(currentPos);
-  }, [wheelStatus?.currentPos]);
+  // Spinning detection: calState = 'Run' means a spin is actively being recorded
+  const isRecording = calState === 'Run' && wheelState === 'CalRun';
 
+  // Show "Spin recording" flash when calLaunch increments
   useEffect(() => {
     if (calLaunch > lastCalLaunch && step >= 3) {
       setLastCalLaunch(calLaunch);
@@ -108,15 +100,19 @@ export default function Calibration() {
     }
   }, [calLaunch, lastCalLaunch, step]);
 
-  // Auto-advance phase 1 -> phase 2 (using relative progress)
+  // Auto-advance step 3 → 4 when wheel transitions CW → CCW phase
   useEffect(() => {
-    if (step === 3 && relativeProgress >= SPINS_PER_PHASE) setStep(4);
-  }, [relativeProgress, step]);
+    if (step === 3 && wheelState === 'CalRun' && calState === 'CCW') {
+      setStep(4);
+    }
+  }, [calState, wheelState, step]);
 
-  // Auto-advance phase 2 -> done (using relative progress)
+  // Auto-advance step 4 → done when wheel reaches CalDone state
   useEffect(() => {
-    if (step === 4 && relativeProgress >= SPINS_PER_PHASE * 2) setStep(5);
-  }, [relativeProgress, step]);
+    if (step >= 3 && wheelState === 'CalDone') {
+      setStep(5);
+    }
+  }, [wheelState, step]);
 
   async function send(command) {
     setBusy(true);
@@ -266,19 +262,24 @@ export default function Calibration() {
               <WheelSVG positionAngle={posAngle} />
             </div>
 
-            {spinMsg && (
+            {isRecording && (
+              <div style={{ fontSize: 13, fontWeight: 700, color: '#F59E0B', background: '#FFFBEB', padding: '8px 18px', borderRadius: 20, display: 'inline-block', marginBottom: 14 }}>
+                ⟳ Recording in progress — do not touch the wheel
+              </div>
+            )}
+            {spinMsg && !isRecording && (
               <div style={{ fontSize: 13, fontWeight: 700, color: '#10B981', background: '#ECFDF5', padding: '8px 18px', borderRadius: 20, display: 'inline-block', marginBottom: 14 }}>
                 {spinMsg}
               </div>
             )}
-            {!spinMsg && isWheelSpinning && (
-              <div style={{ fontSize: 13, fontWeight: 600, color: '#2563EB', background: '#EFF6FF', padding: '8px 18px', borderRadius: 20, display: 'inline-block', marginBottom: 14 }}>
-                ⟳ Wheel spinning…
+            {!isRecording && !spinMsg && wheelState !== 'CalRun' && (
+              <div style={{ fontSize: 12, color: '#EF4444', background: '#FEF2F2', padding: '6px 14px', borderRadius: 20, display: 'inline-block', marginBottom: 14 }}>
+                ⚠ Waiting for calibration mode… (wheel state: {wheelState || '—'})
               </div>
             )}
-            {!spinMsg && !isWheelSpinning && phase1Recorded === 0 && (
+            {!isRecording && !spinMsg && wheelState === 'CalRun' && (
               <div style={{ fontSize: 12, color: '#94A3B8', marginBottom: 14 }}>
-                Spin the wheel hard enough to trigger the program
+                Spin the wheel hard in the clockwise direction
               </div>
             )}
 
@@ -314,32 +315,33 @@ export default function Calibration() {
               <WheelSVG positionAngle={posAngle} />
             </div>
 
-            {spinMsg && (
+            {isRecording && (
+              <div style={{ fontSize: 13, fontWeight: 700, color: '#F59E0B', background: '#FFFBEB', padding: '8px 18px', borderRadius: 20, display: 'inline-block', marginBottom: 14 }}>
+                ⟳ Recording in progress — do not touch the wheel
+              </div>
+            )}
+            {spinMsg && !isRecording && (
               <div style={{ fontSize: 13, fontWeight: 700, color: '#10B981', background: '#ECFDF5', padding: '8px 18px', borderRadius: 20, display: 'inline-block', marginBottom: 14 }}>
                 {spinMsg}
               </div>
             )}
-            {!spinMsg && isWheelSpinning && (
-              <div style={{ fontSize: 13, fontWeight: 600, color: '#2563EB', background: '#EFF6FF', padding: '8px 18px', borderRadius: 20, display: 'inline-block', marginBottom: 14 }}>
-                ⟳ Wheel spinning…
-              </div>
-            )}
-            {!spinMsg && !isWheelSpinning && phase2Recorded === 0 && (
+            {!isRecording && !spinMsg && wheelState === 'CalRun' && (
               <div style={{ fontSize: 12, color: '#94A3B8', marginBottom: 14 }}>
-                Spin the wheel hard enough to trigger the program
+                Spin the wheel hard in the counter-clockwise direction
               </div>
             )}
 
+            {/* Counter-clockwise arrow */}
             <div style={{ marginBottom: 20 }}>
               <svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="#0F1C3F" strokeWidth="2.5">
-                <path d="M 28 8 A 14 14 0 1 0 32 20" strokeLinecap="round"/>
-                <polyline points="28,3 28,9 34,9" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M 12 8 A 14 14 0 1 1 8 20" strokeLinecap="round"/>
+                <polyline points="12,3 12,9 6,9" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <SpinDots total={SPINS_PER_PHASE} recorded={SPINS_PER_PHASE} label="Phase 1" />
-              <SpinDots total={SPINS_PER_PHASE} recorded={phase2Recorded} label="Phase 2" />
+              <SpinDots total={SPINS_PER_PHASE} recorded={SPINS_PER_PHASE} label="Phase 1 — Clockwise ✓" />
+              <SpinDots total={SPINS_PER_PHASE} recorded={phase2Recorded} label="Phase 2 — Counter-clockwise" />
             </div>
 
             <div style={{ marginTop: 24 }}>
