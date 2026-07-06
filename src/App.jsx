@@ -7,6 +7,7 @@ import Campaigns from './pages/Campaigns';
 import NewCampaign from './pages/NewCampaign';
 import CampaignDetail from './pages/CampaignDetail';
 import LaunchCampaign from './pages/LaunchCampaign';
+import Guest from './pages/Guest';
 import Calibration from './pages/Calibration';
 import History from './pages/History';
 
@@ -22,6 +23,8 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
+          {/* Public guest flow — scanned via QR code, no login, outside the authenticated shell */}
+          <Route path="/play/:token" element={<Guest />} />
           <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
           <Route path="/campaigns" element={<PrivateRoute><Campaigns /></PrivateRoute>} />
           <Route path="/campaigns/new" element={<PrivateRoute><NewCampaign /></PrivateRoute>} />

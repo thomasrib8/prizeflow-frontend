@@ -60,10 +60,18 @@ export const api = {
 
   spinStatus: () => request('/spin/status'),
   wheelCommand: (command) => request('/spin/command', { method: 'POST', body: { command } }),
-  spinCampaign: () => request('/spin/campaign', { method: 'POST' }),
   spinDemo: (slotIndex) => request('/spin/demo', { method: 'POST', body: { slotIndex } }),
-  submitReward: (distributionId, payload) =>
-    request(`/spin/distributions/${distributionId}/reward`, { method: 'POST', body: payload }),
+
+  // Staff-facing: the account's guest QR token + a live snapshot of the queue.
+  getQrToken: () => request('/account/qr-token'),
+  getGuestQueueSnapshot: () => request('/account/guest-queue'),
+
+  // Guest-facing (public, unauthenticated — scanned via QR, no login).
+  getGuestCampaign: (token) => request(`/guest/${token}/campaign`, { auth: false }),
+  joinGuestQueue: (token, payload) =>
+    request(`/guest/${token}/join`, { method: 'POST', body: payload, auth: false }),
+  getGuestStatus: (token, sessionToken) =>
+    request(`/guest/${token}/status?session=${encodeURIComponent(sessionToken)}`, { auth: false }),
 };
 
 export function connectWs() {
