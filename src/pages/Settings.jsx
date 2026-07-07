@@ -86,6 +86,9 @@ export default function Settings() {
           <Button type="submit" disabled={saving || !urlDirty}>{saving ? 'Saving…' : 'Save'}</Button>
           {saveMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{saveMsg}</span>}
         </form>
+        <a href="https://youtu.be/JC0GybvQDts" target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: '#2563EB', textDecoration: 'none', marginTop: 8, display: 'inline-block' }}>
+          Not sure where to find it? Watch this quick video →
+        </a>
       </Card>
 
       <Card title="Require a Google review before spinning" className="mt-card">

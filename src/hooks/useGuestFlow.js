@@ -6,8 +6,13 @@ const EMPTY_FORM = { firstName: '', lastName: '', email: '', phone: '', consent:
 
 // Google gives no API/webhook to confirm a specific guest actually posted a
 // review — this is an honor-system friction gate, not real verification: we
-// just require the guest to have been away from our tab (presumably on the
-// Google review page) for at least this long before "Continue" unlocks.
+// just require the guest to click through to the review page, then wait this
+// long before "Continue" unlocks. Earlier this also tried to detect the tab
+// actually going hidden/visible (Page Visibility API) to prove they left and
+// came back, but that's unreliable across mobile browsers (Safari in
+// particular doesn't always fire visibilitychange the same way depending on
+// how the new tab opens) — a plain timer from the click is simpler and
+// actually works everywhere, at the cost of being slightly easier to game.
 const REVIEW_MIN_AWAY_MS = 25000;
 
 /// Shared logic behind the guest queue experience — used both by the public
@@ -25,7 +30,6 @@ export function useGuestFlow({ token, persistSession = false, autoReturnMs = nul
   const [status, setStatus] = useState(null);
   const [reviewState, setReviewState] = useState('idle'); // idle | waiting | ready
   const sessionTokenRef = useRef(persistSession ? localStorage.getItem(storageKey) : null);
-  const reviewHiddenAtRef = useRef(null);
 
   function checkCampaign() {
     return api.getGuestCampaign(token)
@@ -80,23 +84,13 @@ export function useGuestFlow({ token, persistSession = false, autoReturnMs = nul
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, autoReturnMs]);
 
-  // Review-gate: track how long the guest was away from this tab (presumably
-  // on the Google review page opened via openReviewLink) while waiting.
+  // Review-gate: once the guest has clicked through to the review page, wait
+  // out the minimum delay before "Continue" unlocks (see REVIEW_MIN_AWAY_MS
+  // above for why this is a plain timer and not tab-visibility detection).
   useEffect(() => {
     if (view !== 'review' || reviewState !== 'waiting') return undefined;
-
-    function handleVisibility() {
-      if (document.visibilityState === 'hidden') {
-        reviewHiddenAtRef.current = Date.now();
-      } else if (document.visibilityState === 'visible' && reviewHiddenAtRef.current) {
-        const awayMs = Date.now() - reviewHiddenAtRef.current;
-        reviewHiddenAtRef.current = null;
-        if (awayMs >= REVIEW_MIN_AWAY_MS) setReviewState('ready');
-      }
-    }
-
-    document.addEventListener('visibilitychange', handleVisibility);
-    return () => document.removeEventListener('visibilitychange', handleVisibility);
+    const t = setTimeout(() => setReviewState('ready'), REVIEW_MIN_AWAY_MS);
+    return () => clearTimeout(t);
   }, [view, reviewState]);
 
   function openReviewLink() {
