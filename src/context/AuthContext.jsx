@@ -16,12 +16,9 @@ export function AuthProvider({ children }) {
     setUser(user);
   }, []);
 
-  const register = useCallback(async (email, password, name) => {
-    const { user, token } = await api.register(email, password, name);
-    localStorage.setItem('prizeflow_token', token);
-    localStorage.setItem('prizeflow_user', JSON.stringify(user));
-    setUser(user);
-  }, []);
+  // New accounts are pending until an admin approves them — this never logs
+  // the caller in, it just returns the backend's confirmation message.
+  const register = useCallback((email, password, name) => api.register(email, password, name), []);
 
   const logout = useCallback(() => {
     localStorage.removeItem('prizeflow_token');
@@ -29,8 +26,18 @@ export function AuthProvider({ children }) {
     setUser(null);
   }, []);
 
+  // Used after a profile edit (name change) so the sidebar/avatar reflect it
+  // without requiring a re-login.
+  const updateStoredUser = useCallback((partialUser) => {
+    setUser((prev) => {
+      const next = { ...prev, ...partialUser };
+      localStorage.setItem('prizeflow_user', JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, login, register, logout }}>
+    <AuthContext.Provider value={{ user, login, register, logout, updateStoredUser }}>
       {children}
     </AuthContext.Provider>
   );

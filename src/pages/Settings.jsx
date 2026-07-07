@@ -1,8 +1,19 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/client';
 import { Card, Button, Badge } from '../components/ui';
+import { useAuth } from '../context/AuthContext';
 
 export default function Settings() {
+  const { user, updateStoredUser } = useAuth();
+  const [name, setName] = useState(user?.name || '');
+  const [nameSaving, setNameSaving] = useState(false);
+  const [nameMsg, setNameMsg] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [pwSaving, setPwSaving] = useState(false);
+  const [pwMsg, setPwMsg] = useState('');
+  const [pwError, setPwError] = useState('');
+
   const [googleReviewUrl, setGoogleReviewUrl] = useState('');
   const [savedUrl, setSavedUrl] = useState('');
   const [saving, setSaving] = useState(false);
@@ -55,16 +66,81 @@ export default function Settings() {
 
   const urlDirty = googleReviewUrl !== savedUrl;
 
+  async function handleSaveName(e) {
+    e.preventDefault();
+    setNameSaving(true);
+    setNameMsg('');
+    try {
+      const { user: updated } = await api.updateProfile({ name });
+      updateStoredUser({ name: updated.name });
+      setNameMsg('Saved');
+      setTimeout(() => setNameMsg(''), 2000);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setNameSaving(false);
+    }
+  }
+
+  async function handleChangePassword(e) {
+    e.preventDefault();
+    setPwSaving(true);
+    setPwError('');
+    setPwMsg('');
+    try {
+      await api.updateProfile({ currentPassword, newPassword });
+      setCurrentPassword('');
+      setNewPassword('');
+      setPwMsg('Password updated');
+      setTimeout(() => setPwMsg(''), 2000);
+    } catch (err) {
+      setPwError(err.message);
+    } finally {
+      setPwSaving(false);
+    }
+  }
+
   return (
     <div>
       <div className="page-header">
         <div>
           <h1 className="page-title">Settings</h1>
-          <p className="page-subtitle">Configure the Google review gate for guest spins</p>
+          <p className="page-subtitle">Manage your profile and the Google review gate for guest spins</p>
         </div>
       </div>
 
       {error && <div className="error-banner">{error}</div>}
+
+      <Card title="Your profile" className="mt-card">
+        <form onSubmit={handleSaveName} style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 20 }}>
+          <div className="field" style={{ flex: 1, margin: 0 }}>
+            <label>Name</label>
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" />
+          </div>
+          <Button type="submit" disabled={nameSaving || name === (user?.name || '')} style={{ marginTop: 20 }}>
+            {nameSaving ? 'Saving…' : 'Save'}
+          </Button>
+          {nameMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600, marginTop: 20 }}>{nameMsg}</span>}
+        </form>
+
+        <form onSubmit={handleChangePassword}>
+          {pwError && <div className="error-banner">{pwError}</div>}
+          <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end' }}>
+            <div className="field" style={{ flex: 1, margin: 0 }}>
+              <label>Current password</label>
+              <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
+            </div>
+            <div className="field" style={{ flex: 1, margin: 0 }}>
+              <label>New password</label>
+              <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} minLength={8} placeholder="At least 8 characters" />
+            </div>
+            <Button type="submit" disabled={pwSaving || !currentPassword || !newPassword}>
+              {pwSaving ? 'Saving…' : 'Change password'}
+            </Button>
+          </div>
+          {pwMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{pwMsg}</span>}
+        </form>
+      </Card>
 
       <Card title="Google review link" className="mt-card">
         <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 10px', lineHeight: 1.6 }}>

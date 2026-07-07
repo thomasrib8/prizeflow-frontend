@@ -32,6 +32,17 @@ export const api = {
   login: (email, password) => request('/auth/login', { method: 'POST', body: { email, password }, auth: false }),
   register: (email, password, name) =>
     request('/auth/register', { method: 'POST', body: { email, password, name }, auth: false }),
+  forgotPassword: (email) => request('/auth/forgot-password', { method: 'POST', body: { email }, auth: false }),
+  resetPassword: (token, password) =>
+    request('/auth/reset-password', { method: 'POST', body: { token, password }, auth: false }),
+
+  // Self-service profile — name and/or password (requires currentPassword).
+  updateProfile: (payload) => request('/account/profile', { method: 'PATCH', body: payload }),
+
+  // Admin-only account management.
+  listUsers: () => request('/users'),
+  setUserStatus: (id, status) => request(`/users/${id}/status`, { method: 'PATCH', body: { status } }),
+  setUserRole: (id, role) => request(`/users/${id}/role`, { method: 'PATCH', body: { role } }),
 
   dashboard: () => request('/dashboard'),
   dashboardChart: (days = '7') => request(`/dashboard/chart?days=${days}`),
