@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useAdmin } from '../hooks/useAdmin';
 import { useWheelSocket } from '../hooks/useWheelSocket';
 import { api } from '../api/client';
+import ConnectionDiagnosticsModal from './ConnectionDiagnosticsModal';
 import './Layout.css';
 
 const NAV_ITEMS = [
@@ -26,8 +27,9 @@ export default function Layout({ children }) {
   const { user, logout } = useAuth();
   const { isAdmin } = useAdmin();
   const navigate = useNavigate();
-  const { agentConnected } = useWheelSocket();
+  const { agentConnected, connectedSince, latencyMs } = useWheelSocket();
   const [pendingCount, setPendingCount] = useState(0);
+  const [showDiagnostics, setShowDiagnostics] = useState(false);
   const initials = (user?.name || user?.email || '?').slice(0, 2).toUpperCase();
   const navItems = isAdmin ? [...NAV_ITEMS, ...ADMIN_NAV_ITEMS] : NAV_ITEMS;
 
@@ -71,10 +73,14 @@ export default function Layout({ children }) {
         </nav>
 
         <div className="sidebar-footer">
-          <div className={`agent-pill ${agentConnected ? 'ok' : 'off'}`}>
+          <button
+            className={`agent-pill ${agentConnected ? 'ok' : 'off'}`}
+            onClick={() => setShowDiagnostics(true)}
+            style={{ border: 'none', cursor: 'pointer', font: 'inherit' }}
+          >
             <span className="dot" />
             {agentConnected ? 'Wheel connected' : 'Wheel offline'}
-          </div>
+          </button>
           <div className="user-row">
             <div className="user-avatar">{initials}</div>
             <div className="user-info">
@@ -87,6 +93,14 @@ export default function Layout({ children }) {
         </div>
       </aside>
       <main className="content">{children}</main>
+      {showDiagnostics && (
+        <ConnectionDiagnosticsModal
+          onClose={() => setShowDiagnostics(false)}
+          agentConnected={agentConnected}
+          connectedSince={connectedSince}
+          latencyMs={latencyMs}
+        />
+      )}
     </div>
   );
 }
