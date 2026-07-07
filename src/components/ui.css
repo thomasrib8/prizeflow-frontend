@@ -263,9 +263,10 @@ table.data-table tr:hover td { background: #FAFBFC; }
 /* Slots grid */
 .slots-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px 16px; }
 @media (max-width: 700px) { .slots-grid { grid-template-columns: 1fr; } }
-.slot-row { display: grid; grid-template-columns: 52px 1fr 80px; gap: 8px; align-items: center; }
+.slot-row { display: grid; grid-template-columns: 52px 1fr 80px 52px; gap: 8px; align-items: center; }
 .slot-index { font-size: 11px; font-weight: 700; color: var(--text-muted); font-family: var(--font-mono); }
 .slot-row input { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 10px; font-size: 13px; font-family: inherit; }
+.slot-pct { font-size: 11px; font-weight: 700; color: var(--blue); font-family: var(--font-mono); text-align: right; }
 
 /* Recent activity */
 .activity-list { display: flex; flex-direction: column; gap: 10px; }

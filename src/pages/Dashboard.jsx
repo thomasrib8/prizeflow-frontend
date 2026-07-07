@@ -238,7 +238,7 @@ export default function Dashboard() {
                   </div>
                   <div className="act-info">
                     <div className="act-title">
-                      Gift distributed: {row.gift_name || `Case ${row.slot_index}`}
+                      Gift distributed: {row.gift_name || `Case ${row.slot_index + 1}`}
                     </div>
                     <div className="act-time">
                       {formatTime(row.created_at)}{row.room_number ? ` · Room ${row.room_number}` : ''}

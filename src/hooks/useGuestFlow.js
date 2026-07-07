@@ -120,7 +120,11 @@ export function useGuestFlow({ token, persistSession = false, autoReturnMs = nul
       setStatus(null);
       setView('queue');
     } catch (err) {
-      setError(err.message);
+      if (err.message === 'ALREADY_PLAYED') {
+        setError("This email has already played in this campaign. Each guest can only spin once.");
+      } else {
+        setError(err.message);
+      }
     } finally {
       setBusy(false);
     }

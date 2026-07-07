@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { Card, Button } from '../components/ui';
 import { useAdmin } from '../hooks/useAdmin';
+import WheelSVG from '../components/WheelSVG';
 
 export default function NewCampaign() {
   const navigate = useNavigate();
@@ -15,6 +16,9 @@ export default function NewCampaign() {
   );
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+  const [previewAngle, setPreviewAngle] = useState(0);
+
+  const previewCase = Math.floor((((previewAngle % 360) + 360) % 360) / 30) + 1;
 
   const totalStock = slots.reduce((sum, s) => sum + (Number(s.stock) || 0), 0);
 
@@ -72,16 +76,33 @@ export default function NewCampaign() {
           )}
         </Card>
 
+        <Card title="Wheel orientation helper" className="mt-card">
+          <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 16px' }}>
+            Lost track of which physical case is which? Drag the red cleat below to match what you see on the
+            real wheel.
+          </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
+            <WheelSVG positionAngle={previewAngle} size={200} interactive onRotate={setPreviewAngle} />
+            <div style={{ fontSize: 14, color: '#334155' }}>
+              Red cleat is pointing at <strong>Case {previewCase}</strong>
+            </div>
+          </div>
+        </Card>
+
         <Card title="Products (12 wheel slots)" className="mt-card"
           action={<span className="badge badge-blue">Total stock: {totalStock}</span>}>
           <div className="slots-grid">
-            {slots.map((s, i) => (
-              <div className="slot-row" key={i}>
-                <div className="slot-index">Case {i}</div>
-                <input placeholder="Gift name" value={s.giftName} onChange={e => updateSlot(i, 'giftName', e.target.value)} />
-                <input type="number" min="0" placeholder="Stock" value={s.stock || ''} onChange={e => updateSlot(i, 'stock', e.target.value)} />
-              </div>
-            ))}
+            {slots.map((s, i) => {
+              const pct = totalStock ? ((Number(s.stock) || 0) / totalStock) * 100 : 0;
+              return (
+                <div className="slot-row" key={i}>
+                  <div className="slot-index">Case {i + 1}</div>
+                  <input placeholder="Gift name" value={s.giftName} onChange={e => updateSlot(i, 'giftName', e.target.value)} />
+                  <input type="number" min="0" placeholder="Stock" value={s.stock || ''} onChange={e => updateSlot(i, 'stock', e.target.value)} />
+                  <div className="slot-pct">{pct ? `${pct.toFixed(1)}%` : '—'}</div>
+                </div>
+              );
+            })}
           </div>
         </Card>
 

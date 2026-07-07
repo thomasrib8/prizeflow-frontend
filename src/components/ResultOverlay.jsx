@@ -35,7 +35,7 @@ export default function ResultOverlay({ result, onClose }) {
         <div className="overlay-content">
           <div className="result-emoji">🎡</div>
           <div className="result-title">Demo spin</div>
-          <div className="result-gift">Case {result.slotIndex}</div>
+          <div className="result-gift">Case {result.slotIndex + 1}</div>
           <p className="result-note">No stock was used, no client recorded.</p>
           <Button onClick={onClose}>Done</Button>
         </div>

@@ -101,7 +101,7 @@ export default function CampaignDetail() {
               const pct = s.stock_initial ? Math.round(((s.stock_initial - s.stock_remaining) / s.stock_initial) * 100) : 0;
               return (
                 <tr key={s.slot_index}>
-                  <td style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)' }}>{s.slot_index}</td>
+                  <td style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)' }}>{s.slot_index + 1}</td>
                   <td><GiftPill slotIndex={s.slot_index} name={s.gift_name} /></td>
                   <td style={{ color: 'var(--text-muted)' }}>{s.stock_initial}</td>
                   <td style={{ color: 'var(--text-muted)' }}>{((s.stock_initial / total) * 100).toFixed(1)}%</td>
@@ -157,7 +157,7 @@ export default function CampaignDetail() {
                       {s.isNext ? '👉 ' : ''}{s.position}
                     </td>
                     <td style={{ color: s.consumed ? '#CBD5E1' : undefined }}>
-                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11 }}>Case {s.slotIndex}</span>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11 }}>Case {s.slotIndex + 1}</span>
                     </td>
                     <td>
                       {s.consumed

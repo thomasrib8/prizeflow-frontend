@@ -127,6 +127,11 @@ export default function GuestFlowScreen({
     return (
       <div style={fullScreenBase}>
         {cornerCloseZone}
+        {error && (
+          <div style={{ fontSize: 13, color: '#FCA5A5', background: 'rgba(239,68,68,0.15)', padding: '8px 16px', borderRadius: 20, maxWidth: 420 }}>
+            {error}
+          </div>
+        )}
         <div style={{ color: 'white', maxWidth: 420 }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: '#60A5FA', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 10 }}>
             One more step

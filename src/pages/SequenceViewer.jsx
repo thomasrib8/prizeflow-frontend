@@ -115,7 +115,7 @@ export default function SequenceViewer() {
                       {step.isCurrent ? '▶ ' : ''}{step.position}
                     </td>
                     <td style={{ fontFamily: 'var(--font-mono)', fontSize: 11 }}>
-                      {step.slotIndex}
+                      {step.slotIndex + 1}
                     </td>
                     <td>
                       <GiftPill slotIndex={step.slotIndex} name={step.giftName} />

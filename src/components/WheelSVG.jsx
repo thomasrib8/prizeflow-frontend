@@ -1,6 +1,11 @@
+import { useRef } from 'react';
+
 // Shared wheel SVG component
 // positionAngle: angle in degrees (0 = top, clockwise) for the red cleat
 // highlightSection: 0-11 to highlight a section (for result display)
+// interactive + onRotate(angle): lets the user drag the red cleat by hand
+// (mouse or touch) — used in campaign config so an operator confused about
+// physical orientation can spin the on-screen wheel to match the real one.
 //
 // Formula derived from original index.html line 227:
 //   transform: rotate(360/12 * pos + "deg")
@@ -13,7 +18,8 @@ export function posToAngle(currentPos) {
   return (currentPos * (360 / FULL_ROT)) % 360;
 }
 
-export default function WheelSVG({ positionAngle = 0, size = 220, highlightSection = null }) {
+export default function WheelSVG({ positionAngle = 0, size = 220, highlightSection = null, interactive = false, onRotate }) {
+  const svgRef = useRef(null);
   const cx = 160, cy = 160, r = 130;
   const sections = 12;
   const sectionAngle = 360 / sections;
@@ -40,8 +46,42 @@ export default function WheelSVG({ positionAngle = 0, size = 220, highlightSecti
   const redOuter = { x: cx + (r + 18) * Math.cos(redRad), y: cy + (r + 18) * Math.sin(redRad) };
   const redInner = { x: cx + r * Math.cos(redRad), y: cy + r * Math.sin(redRad) };
 
+  function angleFromPointer(clientX, clientY) {
+    const rect = svgRef.current.getBoundingClientRect();
+    const dx = clientX - (rect.left + rect.width / 2);
+    const dy = clientY - (rect.top + rect.height / 2);
+    const deg = Math.atan2(dy, dx) * (180 / Math.PI) + 90;
+    return ((deg % 360) + 360) % 360;
+  }
+
+  function handlePointerDown(e) {
+    if (!interactive) return;
+    e.preventDefault();
+    const move = (ev) => {
+      const point = ev.touches ? ev.touches[0] : ev;
+      onRotate?.(angleFromPointer(point.clientX, point.clientY));
+    };
+    const up = () => {
+      window.removeEventListener('mousemove', move);
+      window.removeEventListener('mouseup', up);
+      window.removeEventListener('touchmove', move);
+      window.removeEventListener('touchend', up);
+    };
+    window.addEventListener('mousemove', move);
+    window.addEventListener('mouseup', up);
+    window.addEventListener('touchmove', move, { passive: true });
+    window.addEventListener('touchend', up);
+    move(e);
+  }
+
   return (
-    <svg viewBox="0 0 320 320" style={{ width: size, height: size }}>
+    <svg
+      ref={svgRef}
+      viewBox="0 0 320 320"
+      style={{ width: size, height: size, cursor: interactive ? 'grab' : undefined, touchAction: interactive ? 'none' : undefined }}
+      onMouseDown={handlePointerDown}
+      onTouchStart={handlePointerDown}
+    >
       {/* Sections */}
       {Array.from({ length: sections }, (_, i) => {
         const startA = (i * sectionAngle - 90) * (Math.PI / 180);
