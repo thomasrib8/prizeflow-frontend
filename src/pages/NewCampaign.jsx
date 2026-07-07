@@ -5,7 +5,7 @@ import { Card, Button } from '../components/ui';
 import { useAdmin } from '../hooks/useAdmin';
 import WheelSVG from '../components/WheelSVG';
 
-const EMPTY_SLOTS = Array.from({ length: 12 }, (_, i) => ({ slotIndex: i, giftName: '', stock: 0 }));
+const EMPTY_SLOTS = Array.from({ length: 12 }, (_, i) => ({ slotIndex: i, giftName: '', stock: 0, alertThreshold: '' }));
 
 export default function NewCampaign() {
   const navigate = useNavigate();
@@ -90,7 +90,12 @@ export default function NewCampaign() {
     try {
       const created = await api.createCampaign({
         name, description, isTest,
-        slots: active.map(s => ({ slotIndex: s.slotIndex, giftName: s.giftName, stock: Number(s.stock) }))
+        slots: active.map(s => ({
+          slotIndex: s.slotIndex,
+          giftName: s.giftName,
+          stock: Number(s.stock),
+          ...(s.alertThreshold !== '' && s.alertThreshold !== undefined ? { alertThreshold: Number(s.alertThreshold) } : {}),
+        }))
       });
       navigate(`/campaigns/${created.id}`);
     } catch (err) {
@@ -162,6 +167,9 @@ export default function NewCampaign() {
               <span className="badge badge-blue">Total stock: {totalStock}</span>
             </div>
           }>
+          <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 12px' }}>
+            "Alert" is an optional low-stock threshold — you'll get an email (and a banner on the campaign page) once that gift's remaining stock drops to or below it.
+          </p>
           <div className="slots-grid">
             {slots.map((s, i) => {
               const pct = totalStock ? ((Number(s.stock) || 0) / totalStock) * 100 : 0;
@@ -170,6 +178,7 @@ export default function NewCampaign() {
                   <div className="slot-index">Case {i + 1}</div>
                   <input placeholder="Gift name" value={s.giftName} onChange={e => updateSlot(i, 'giftName', e.target.value)} />
                   <input type="number" min="0" placeholder="Stock" value={s.stock || ''} onChange={e => updateSlot(i, 'stock', e.target.value)} />
+                  <input type="number" min="0" placeholder="Alert" title="Low-stock alert threshold (optional)" value={s.alertThreshold} onChange={e => updateSlot(i, 'alertThreshold', e.target.value)} />
                   <div className="slot-pct">{pct ? `${pct.toFixed(1)}%` : '—'}</div>
                 </div>
               );

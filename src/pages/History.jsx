@@ -18,11 +18,30 @@ export default function History() {
   const [error, setError] = useState('');
   const [lookupId, setLookupId] = useState('');
   const [lookupBusy, setLookupBusy] = useState(false);
+  const [exportFrom, setExportFrom] = useState('');
+  const [exportTo, setExportTo] = useState('');
+  const [exportBusy, setExportBusy] = useState(false);
 
   useEffect(() => {
     api.distributions().then(setDistributions).catch(e => setError(e.message));
     api.rewards().then(setRewards).catch(e => setError(e.message));
   }, []);
+
+  async function handleExport() {
+    setExportBusy(true);
+    setError('');
+    const params = {};
+    if (exportFrom) params.from = exportFrom;
+    if (exportTo) params.to = exportTo;
+    try {
+      if (tab === 'distributions') await api.exportDistributionsCsv(params);
+      else await api.exportRewardsCsv(params);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setExportBusy(false);
+    }
+  }
 
   // Manual fallback for when scanning the reward's QR code fails — looks up
   // the same signed redemption code by Reward ID and opens the normal
@@ -54,6 +73,23 @@ export default function History() {
         <button className={`tab${tab === 'distributions' ? ' active' : ''}`} onClick={() => setTab('distributions')}>Distributions</button>
         <button className={`tab${tab === 'rewards' ? ' active' : ''}`} onClick={() => setTab('rewards')}>Rewards (CRM)</button>
       </div>
+
+      <Card className="mt-card">
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 13, color: '#64748B' }}>Export CSV</span>
+          <label style={{ fontSize: 12, color: '#94A3B8' }}>From
+            <input type="date" value={exportFrom} onChange={(e) => setExportFrom(e.target.value)}
+              style={{ marginLeft: 6, padding: '7px 10px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13 }} />
+          </label>
+          <label style={{ fontSize: 12, color: '#94A3B8' }}>To
+            <input type="date" value={exportTo} onChange={(e) => setExportTo(e.target.value)}
+              style={{ marginLeft: 6, padding: '7px 10px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13 }} />
+          </label>
+          <Button size="sm" disabled={exportBusy} onClick={handleExport}>
+            {exportBusy ? 'Exporting…' : `Download ${tab === 'distributions' ? 'distributions' : 'rewards'} CSV`}
+          </Button>
+        </div>
+      </Card>
 
       {tab === 'rewards' && (
         <Card className="mt-card">

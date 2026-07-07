@@ -28,6 +28,39 @@ async function request(path, { method = 'GET', body, auth = true } = {}) {
   return data;
 }
 
+// Authenticated file download — browsers won't attach the Bearer token to a
+// plain navigation/<a href>, so this fetches the file as a blob (with the
+// header attached) and triggers the save via a throwaway object URL instead.
+async function downloadFile(path) {
+  const token = getToken();
+  const res = await fetch(`${API_BASE}${path}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (!res.ok) {
+    let message = `Request failed (${res.status})`;
+    try {
+      const data = await res.json();
+      if (data?.error) message = data.error;
+    } catch (e) {
+      // no JSON body
+    }
+    throw new Error(message);
+  }
+  const blob = await res.blob();
+  const disposition = res.headers.get('Content-Disposition') || '';
+  const match = disposition.match(/filename="?([^"]+)"?/);
+  const filename = match ? match[1] : 'download';
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
 export const api = {
   login: (email, password) => request('/auth/login', { method: 'POST', body: { email, password }, auth: false }),
   register: (payload) => request('/auth/register', { method: 'POST', body: payload, auth: false }),
@@ -65,6 +98,16 @@ export const api = {
     const qs = new URLSearchParams(params).toString();
     return request(`/rewards${qs ? `?${qs}` : ''}`);
   },
+  exportDistributionsCsv: (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return downloadFile(`/distributions/export${qs ? `?${qs}` : ''}`);
+  },
+  exportRewardsCsv: (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return downloadFile(`/rewards/export${qs ? `?${qs}` : ''}`);
+  },
+  downloadCampaignReport: (id) => downloadFile(`/campaigns/${id}/report.pdf`),
+  getCampaignAlerts: (id) => request(`/campaigns/${id}/alerts`),
   // Manual fallback for when scanning the QR fails — an already-logged-in
   // operator looks up a reward by ID and gets back the same signed code
   // the email's QR encodes, then opens the normal /redeem/:code page.
