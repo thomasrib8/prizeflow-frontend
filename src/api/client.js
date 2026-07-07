@@ -57,6 +57,8 @@ export const api = {
   pauseCampaign: (id) => request(`/campaigns/${id}/pause`, { method: 'POST' }),
   endCampaign: (id) => request(`/campaigns/${id}/end`, { method: 'POST' }),
   archiveCampaign: (id) => request(`/campaigns/${id}/archive`, { method: 'POST' }),
+  setCampaignGoogleReview: (id, required) =>
+    request(`/campaigns/${id}/google-review`, { method: 'PATCH', body: { required } }),
 
   spinStatus: () => request('/spin/status'),
   wheelCommand: (command) => request('/spin/command', { method: 'POST', body: { command } }),
@@ -65,6 +67,8 @@ export const api = {
   // Staff-facing: the account's guest QR token + a live snapshot of the queue.
   getQrToken: () => request('/account/qr-token'),
   getGuestQueueSnapshot: () => request('/account/guest-queue'),
+  getAccountSettings: () => request('/account/settings'),
+  updateAccountSettings: (payload) => request('/account/settings', { method: 'PATCH', body: payload }),
 
   // Guest-facing (public, unauthenticated — scanned via QR, no login).
   getGuestCampaign: (token) => request(`/guest/${token}/campaign`, { auth: false }),

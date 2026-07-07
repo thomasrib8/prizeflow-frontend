@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import WheelSVG from './WheelSVG';
+import GoogleSignInButton from './GoogleSignInButton';
 
 const RETRY_MESSAGES = {
   SPIN_ABNORMAL_STOP: '⚠ An unexpected stop was detected during the spin. Please spin the wheel again.',
@@ -28,8 +29,20 @@ function averageTouchY(touches) {
 /// meant to see an exit, so it's deliberately not obvious: a hover-only
 /// button tucked in the bottom-right corner on desktop, a 3-finger swipe
 /// down on touch devices.
-export default function GuestFlowScreen({ view, form, setForm, error, busy, status, onSubmit, onRestart, onClose }) {
+export default function GuestFlowScreen({
+  view, form, setForm, error, busy, status, onSubmit, onRestart, onClose,
+  reviewState, onOpenReview, onReviewContinue,
+}) {
   const [hoveringCorner, setHoveringCorner] = useState(false);
+
+  const handleGoogleCredential = useCallback((profile) => {
+    setForm((prev) => ({
+      ...prev,
+      firstName: profile.given_name || prev.firstName,
+      lastName: profile.family_name || prev.lastName,
+      email: profile.email || prev.email,
+    }));
+  }, [setForm]);
 
   useEffect(() => {
     if (!onClose) return undefined;
@@ -105,6 +118,37 @@ export default function GuestFlowScreen({ view, form, setForm, error, busy, stat
           background: 'white', color: '#0F1C3F', border: 'none', borderRadius: 10,
           padding: '13px 28px', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
         }}>Try again</button>
+      </div>
+    );
+  }
+
+  if (view === 'review') {
+    const ready = reviewState === 'ready';
+    return (
+      <div style={fullScreenBase}>
+        {cornerCloseZone}
+        <div style={{ color: 'white', maxWidth: 420 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: '#60A5FA', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 10 }}>
+            One more step
+          </div>
+          <div style={{ fontSize: 20, fontWeight: 800, lineHeight: 1.4, marginBottom: 8 }}>
+            Leave us a review on Google to unlock your spin!
+          </div>
+          <div style={{ fontSize: 13, color: '#94A3B8' }}>
+            {reviewState === 'idle' && 'Tap below, leave your review, then come back here.'}
+            {reviewState === 'waiting' && 'Waiting for you to finish leaving your review…'}
+            {ready && 'Thanks! You can spin the wheel now.'}
+          </div>
+        </div>
+        <button onClick={onOpenReview} style={{
+          background: 'white', color: '#0F1C3F', border: 'none', borderRadius: 10,
+          padding: '13px 28px', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+        }}>{reviewState === 'idle' ? 'Open Google Reviews' : 'Reopen Google Reviews'}</button>
+        <button onClick={onReviewContinue} disabled={!ready} style={{
+          background: ready ? '#10B981' : 'rgba(255,255,255,0.15)', color: ready ? 'white' : '#64748B',
+          border: 'none', borderRadius: 10, padding: '13px 28px', fontSize: 15, fontWeight: 700,
+          cursor: ready ? 'pointer' : 'not-allowed', fontFamily: 'inherit',
+        }}>Continue to spin</button>
       </div>
     );
   }
@@ -199,6 +243,8 @@ export default function GuestFlowScreen({ view, form, setForm, error, busy, stat
         </div>
 
         {error && <div className="error-banner">{error}</div>}
+
+        <GoogleSignInButton onCredential={handleGoogleCredential} />
 
         <form onSubmit={onSubmit}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>

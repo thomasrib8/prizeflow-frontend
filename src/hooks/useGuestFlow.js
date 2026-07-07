@@ -4,6 +4,12 @@ import { api } from '../api/client';
 const POLL_INTERVAL_MS = 1500;
 const EMPTY_FORM = { firstName: '', lastName: '', email: '', phone: '', consent: false };
 
+// Google gives no API/webhook to confirm a specific guest actually posted a
+// review — this is an honor-system friction gate, not real verification: we
+// just require the guest to have been away from our tab (presumably on the
+// Google review page) for at least this long before "Continue" unlocks.
+const REVIEW_MIN_AWAY_MS = 25000;
+
 /// Shared logic behind the guest queue experience — used both by the public
 /// per-guest page (Guest.jsx, one phone = one session, persisted so a re-scan
 /// resumes) and the staff-triggered kiosk overlay (LaunchCampaign.jsx, one
@@ -11,16 +17,19 @@ const EMPTY_FORM = { firstName: '', lastName: '', email: '', phone: '', consent:
 /// auto-returns to the form after the reveal instead of staying on it).
 export function useGuestFlow({ token, persistSession = false, autoReturnMs = null }) {
   const storageKey = `prizeflow_guest_session_${token}`;
-  const [view, setView] = useState('loading'); // loading | no_campaign | form | queue | expired
+  const [view, setView] = useState('loading'); // loading | no_campaign | form | review | queue | expired
+  const [campaignInfo, setCampaignInfo] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState(null);
+  const [reviewState, setReviewState] = useState('idle'); // idle | waiting | ready
   const sessionTokenRef = useRef(persistSession ? localStorage.getItem(storageKey) : null);
+  const reviewHiddenAtRef = useRef(null);
 
   function checkCampaign() {
     return api.getGuestCampaign(token)
-      .then((res) => setView(res.active ? 'form' : 'no_campaign'))
+      .then((res) => { setCampaignInfo(res); setView(res.active ? 'form' : 'no_campaign'); })
       .catch(() => setView('no_campaign'));
   }
 
@@ -47,8 +56,9 @@ export function useGuestFlow({ token, persistSession = false, autoReturnMs = nul
           return;
         }
         setStatus(res);
-        if (res.status === 'expired' && persistSession) {
-          localStorage.removeItem(storageKey);
+        if (res.status === 'expired') {
+          if (persistSession) localStorage.removeItem(storageKey);
+          setView('expired');
         }
       } catch {
         // transient network hiccup — just try again next tick
@@ -70,11 +80,45 @@ export function useGuestFlow({ token, persistSession = false, autoReturnMs = nul
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, autoReturnMs]);
 
+  // Review-gate: track how long the guest was away from this tab (presumably
+  // on the Google review page opened via openReviewLink) while waiting.
+  useEffect(() => {
+    if (view !== 'review' || reviewState !== 'waiting') return undefined;
+
+    function handleVisibility() {
+      if (document.visibilityState === 'hidden') {
+        reviewHiddenAtRef.current = Date.now();
+      } else if (document.visibilityState === 'visible' && reviewHiddenAtRef.current) {
+        const awayMs = Date.now() - reviewHiddenAtRef.current;
+        reviewHiddenAtRef.current = null;
+        if (awayMs >= REVIEW_MIN_AWAY_MS) setReviewState('ready');
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [view, reviewState]);
+
+  function openReviewLink() {
+    window.open(campaignInfo.googleReviewUrl, '_blank', 'noopener');
+    setReviewState('waiting');
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     if (!form.consent) { setError('Consent is required to claim your reward.'); return; }
     setError('');
+    if (campaignInfo?.googleReviewRequired && campaignInfo.googleReviewUrl) {
+      setReviewState('idle');
+      setView('review');
+      return;
+    }
+    await joinQueue();
+  }
+
+  async function joinQueue() {
     setBusy(true);
+    setError('');
     try {
       const res = await api.joinGuestQueue(token, form);
       if (persistSession) localStorage.setItem(storageKey, res.sessionToken);
@@ -94,8 +138,12 @@ export function useGuestFlow({ token, persistSession = false, autoReturnMs = nul
     setStatus(null);
     setForm(EMPTY_FORM);
     setError('');
+    setReviewState('idle');
     checkCampaign();
   }
 
-  return { view, form, setForm, error, busy, status, handleSubmit, restart };
+  return {
+    view, form, setForm, error, busy, status, handleSubmit, restart,
+    reviewState, openReviewLink, onReviewContinue: joinQueue,
+  };
 }

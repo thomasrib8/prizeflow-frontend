@@ -10,6 +10,7 @@ import LaunchCampaign from './pages/LaunchCampaign';
 import Guest from './pages/Guest';
 import Calibration from './pages/Calibration';
 import History from './pages/History';
+import Settings from './pages/Settings';
 
 function PrivateRoute({ children }) {
   const { user } = useAuth();
@@ -32,6 +33,7 @@ export default function App() {
           <Route path="/launch" element={<PrivateRoute><LaunchCampaign /></PrivateRoute>} />
           <Route path="/calibration" element={<PrivateRoute><Calibration /></PrivateRoute>} />
           <Route path="/history" element={<PrivateRoute><History /></PrivateRoute>} />
+          <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

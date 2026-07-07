@@ -24,6 +24,9 @@ function KioskOverlay({ token, onClose }) {
       onSubmit={flow.handleSubmit}
       onRestart={flow.restart}
       onClose={onClose}
+      reviewState={flow.reviewState}
+      onOpenReview={flow.openReviewLink}
+      onReviewContinue={flow.onReviewContinue}
     />
   );
 }

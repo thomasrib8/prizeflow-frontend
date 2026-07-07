@@ -16,6 +16,9 @@ export default function Guest() {
       status={flow.status}
       onSubmit={flow.handleSubmit}
       onRestart={flow.restart}
+      reviewState={flow.reviewState}
+      onOpenReview={flow.openReviewLink}
+      onReviewContinue={flow.onReviewContinue}
     />
   );
 }
