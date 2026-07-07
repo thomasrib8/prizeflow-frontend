@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../api/client';
 import { Card, Button, Badge, EmptyState } from '../components/ui';
@@ -7,6 +8,7 @@ const STATUS_TONE = { pending: 'orange', approved: 'green', deactivated: 'red' }
 
 export default function Users() {
   const { user: me } = useAuth();
+  const navigate = useNavigate();
   const [users, setUsers] = useState(null);
   const [error, setError] = useState('');
   const [busyId, setBusyId] = useState(null);
@@ -65,7 +67,9 @@ export default function Users() {
             <tbody>
               {pending.map((u) => (
                 <tr key={u.id}>
-                  <td style={{ fontWeight: 500 }}>{u.name || '—'}</td>
+                  <td style={{ fontWeight: 500 }}>
+                    <button className="link-button" onClick={() => navigate(`/users/${u.id}`)}>{u.name || '—'}</button>
+                  </td>
                   <td style={{ color: 'var(--text-muted)' }}>{u.email}</td>
                   <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{u.created_at}</td>
                   <td style={{ display: 'flex', gap: 8 }}>
@@ -89,7 +93,10 @@ export default function Users() {
                   const isSelf = u.id === me?.id;
                   return (
                     <tr key={u.id}>
-                      <td style={{ fontWeight: 500 }}>{u.name || '—'}{isSelf ? ' (you)' : ''}</td>
+                      <td style={{ fontWeight: 500 }}>
+                        <button className="link-button" onClick={() => navigate(`/users/${u.id}`)}>{u.name || '—'}</button>
+                        {isSelf ? ' (you)' : ''}
+                      </td>
                       <td style={{ color: 'var(--text-muted)' }}>{u.email}</td>
                       <td>
                         <select

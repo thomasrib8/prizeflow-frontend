@@ -18,7 +18,7 @@ export function AuthProvider({ children }) {
 
   // New accounts are pending until an admin approves them — this never logs
   // the caller in, it just returns the backend's confirmation message.
-  const register = useCallback((email, password, name) => api.register(email, password, name), []);
+  const register = useCallback((payload) => api.register(payload), []);
 
   const logout = useCallback(() => {
     localStorage.removeItem('prizeflow_token');

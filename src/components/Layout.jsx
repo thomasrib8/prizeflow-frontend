@@ -1,7 +1,9 @@
+import { useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useAdmin } from '../hooks/useAdmin';
 import { useWheelSocket } from '../hooks/useWheelSocket';
+import { api } from '../api/client';
 import './Layout.css';
 
 const NAV_ITEMS = [
@@ -13,15 +15,32 @@ const NAV_ITEMS = [
   { to: '/settings', label: 'Settings', icon: IconSettings },
 ];
 
-const ADMIN_NAV_ITEM = { to: '/users', label: 'Users', icon: IconUsers };
+const ADMIN_NAV_ITEMS = [
+  { to: '/users', label: 'Users', icon: IconUsers, badgeKey: 'pendingCount' },
+  { to: '/health', label: 'Health', icon: IconHeart },
+];
+
+const PENDING_COUNT_POLL_MS = 30000;
 
 export default function Layout({ children }) {
   const { user, logout } = useAuth();
   const { isAdmin } = useAdmin();
   const navigate = useNavigate();
   const { agentConnected } = useWheelSocket();
+  const [pendingCount, setPendingCount] = useState(0);
   const initials = (user?.name || user?.email || '?').slice(0, 2).toUpperCase();
-  const navItems = isAdmin ? [...NAV_ITEMS, ADMIN_NAV_ITEM] : NAV_ITEMS;
+  const navItems = isAdmin ? [...NAV_ITEMS, ...ADMIN_NAV_ITEMS] : NAV_ITEMS;
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    let cancelled = false;
+    function poll() {
+      api.getUsersPendingCount().then((res) => { if (!cancelled) setPendingCount(res.count); }).catch(() => {});
+    }
+    poll();
+    const id = setInterval(poll, PENDING_COUNT_POLL_MS);
+    return () => { cancelled = true; clearInterval(id); };
+  }, [isAdmin]);
 
   return (
     <div className="shell">
@@ -35,7 +54,7 @@ export default function Layout({ children }) {
         </div>
 
         <nav className="nav">
-          {navItems.map(({ to, label, icon: Icon }) => (
+          {navItems.map(({ to, label, icon: Icon, badgeKey }) => (
             <NavLink
               key={to}
               to={to}
@@ -44,6 +63,9 @@ export default function Layout({ children }) {
             >
               <Icon />
               <span>{label}</span>
+              {badgeKey === 'pendingCount' && pendingCount > 0 && (
+                <span className="nav-badge">{pendingCount}</span>
+              )}
             </NavLink>
           ))}
         </nav>
@@ -89,4 +111,7 @@ function IconSettings() {
 }
 function IconUsers() {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M17 21v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>;
+}
+function IconHeart() {
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M20.8 8.6c0 4.6-8.8 10.4-8.8 10.4S3.2 13.2 3.2 8.6a4.6 4.6 0 0 1 8.8-1.8 4.6 4.6 0 0 1 8.8 1.8Z"/></svg>;
 }

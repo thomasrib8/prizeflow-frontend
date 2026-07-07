@@ -17,6 +17,8 @@ import Calibration from './pages/Calibration';
 import History from './pages/History';
 import Settings from './pages/Settings';
 import Users from './pages/Users';
+import UserDetail from './pages/UserDetail';
+import AppHealth from './pages/AppHealth';
 
 function PrivateRoute({ children }) {
   const { user } = useAuth();
@@ -54,6 +56,8 @@ export default function App() {
           <Route path="/history" element={<PrivateRoute><History /></PrivateRoute>} />
           <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
           <Route path="/users" element={<AdminRoute><Users /></AdminRoute>} />
+          <Route path="/users/:id" element={<AdminRoute><UserDetail /></AdminRoute>} />
+          <Route path="/health" element={<AdminRoute><AppHealth /></AdminRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

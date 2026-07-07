@@ -30,8 +30,7 @@ async function request(path, { method = 'GET', body, auth = true } = {}) {
 
 export const api = {
   login: (email, password) => request('/auth/login', { method: 'POST', body: { email, password }, auth: false }),
-  register: (email, password, name) =>
-    request('/auth/register', { method: 'POST', body: { email, password, name }, auth: false }),
+  register: (payload) => request('/auth/register', { method: 'POST', body: payload, auth: false }),
   forgotPassword: (email) => request('/auth/forgot-password', { method: 'POST', body: { email }, auth: false }),
   resetPassword: (token, password) =>
     request('/auth/reset-password', { method: 'POST', body: { token, password }, auth: false }),
@@ -41,8 +40,17 @@ export const api = {
 
   // Admin-only account management.
   listUsers: () => request('/users'),
+  getUsersPendingCount: () => request('/users/pending-count'),
   setUserStatus: (id, status) => request(`/users/${id}/status`, { method: 'PATCH', body: { status } }),
   setUserRole: (id, role) => request(`/users/${id}/role`, { method: 'PATCH', body: { role } }),
+  getUserDetail: (id) => request(`/users/${id}`),
+  getUserOverview: (id) => request(`/users/${id}/overview`),
+  getUserActivity: (id) => request(`/users/${id}/activity`),
+  getUserNotes: (id) => request(`/users/${id}/notes`),
+  addUserNote: (id, body) => request(`/users/${id}/notes`, { method: 'POST', body: { body } }),
+  adminResetUserPassword: (id) => request(`/users/${id}/reset-password`, { method: 'POST' }),
+  deleteUser: (id) => request(`/users/${id}`, { method: 'DELETE' }),
+  getAppHealth: () => request('/admin/health'),
 
   dashboard: () => request('/dashboard'),
   dashboardChart: (days = '7') => request(`/dashboard/chart?days=${days}`),

@@ -59,6 +59,18 @@
 .nav-item:hover { background: rgba(255,255,255,0.05); color: #94A3B8; }
 .nav-item.active { background: #1E3A6E; color: #60A5FA; }
 .nav-item svg { flex-shrink: 0; width: 15px; height: 15px; }
+.nav-badge {
+  margin-left: auto;
+  background: #EF4444;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 3px 6px;
+  border-radius: 10px;
+  min-width: 16px;
+  text-align: center;
+}
 
 .sidebar-footer {
   border-top: 1px solid #1E2D50;
