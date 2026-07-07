@@ -46,7 +46,10 @@ export const api = {
     const qs = new URLSearchParams(params).toString();
     return request(`/rewards${qs ? `?${qs}` : ''}`);
   },
-  redeemReward: (id) => request(`/rewards/${id}/redeem`, { method: 'POST' }),
+  // Manual fallback for when scanning the QR fails — an already-logged-in
+  // operator looks up a reward by ID and gets back the same signed code
+  // the email's QR encodes, then opens the normal /redeem/:code page.
+  getRewardRedeemCode: (id) => request(`/rewards/${id}/redeem-code`),
 
   listCampaigns: () => request('/campaigns'),
   getCampaign: (id) => request(`/campaigns/${id}`),
@@ -82,6 +85,13 @@ export const api = {
     request(`/guest/${token}/join`, { method: 'POST', body: payload, auth: false }),
   getGuestStatus: (token, sessionToken) =>
     request(`/guest/${token}/status?session=${encodeURIComponent(sessionToken)}`, { auth: false }),
+
+  // Reward redemption — scanned via QR (public) or reached via the manual
+  // fallback above. Status check is public; distributing requires an
+  // operator to be logged in (see routes/redeem.js).
+  getRedeemStatus: (code) => request(`/redeem/${encodeURIComponent(code)}`, { auth: false }),
+  distributeReward: (code, payload) =>
+    request(`/redeem/${encodeURIComponent(code)}/distribute`, { method: 'POST', body: payload }),
 };
 
 export function connectWs() {

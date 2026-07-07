@@ -8,6 +8,7 @@ import NewCampaign from './pages/NewCampaign';
 import CampaignDetail from './pages/CampaignDetail';
 import LaunchCampaign from './pages/LaunchCampaign';
 import Guest from './pages/Guest';
+import RedeemPage from './pages/RedeemPage';
 import Calibration from './pages/Calibration';
 import History from './pages/History';
 import Settings from './pages/Settings';
@@ -26,6 +27,8 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           {/* Public guest flow — scanned via QR code, no login, outside the authenticated shell */}
           <Route path="/play/:token" element={<Guest />} />
+          {/* Public reward redemption — scanned via the QR code in the reward email */}
+          <Route path="/redeem/:code" element={<RedeemPage />} />
           <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
           <Route path="/campaigns" element={<PrivateRoute><Campaigns /></PrivateRoute>} />
           <Route path="/campaigns/new" element={<PrivateRoute><NewCampaign /></PrivateRoute>} />
