@@ -81,6 +81,10 @@ export default function CampaignDetail() {
             <Button onClick={() => navigate('/launch')}>Go to Launch →</Button>
           </>}
           {campaign.status === 'paused' && <Button disabled={busy} onClick={() => runAction(() => api.startCampaign(campaign.id))}>Resume</Button>}
+          {campaign.status === 'completed' && <Button variant="secondary" disabled={busy} onClick={() => runAction(() => api.archiveCampaign(campaign.id))}>Archive</Button>}
+          {campaign.status !== 'archived' && (
+            <Button variant="secondary" onClick={() => navigate(`/campaigns/new?from=${campaign.id}`)}>Duplicate</Button>
+          )}
           {isAdmin && campaign.is_test && (
             <Button variant="secondary" onClick={showSeq ? () => setShowSeq(false) : loadSequence} disabled={seqLoading}>
               {seqLoading ? 'Loading…' : showSeq ? 'Hide sequence' : '🔧 View sequence'}
@@ -89,6 +93,14 @@ export default function CampaignDetail() {
         </div>
       </div>
       {error && <div className="error-banner">{error}</div>}
+      {campaign.status === 'archived' && (
+        <div style={{
+          background: '#F1F5F9', border: '1px solid #E2E8F0', borderRadius: 10, padding: '10px 16px',
+          fontSize: 13, color: '#64748B', marginBottom: 16,
+        }}>
+          📦 This campaign is archived and read-only. Its distribution history remains available below.
+        </div>
+      )}
 
       {/* Gift distribution */}
       <Card title="Gift distribution">

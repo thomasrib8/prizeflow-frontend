@@ -52,13 +52,19 @@ export const api = {
   getCampaign: (id) => request(`/campaigns/${id}`),
   getCampaignSequence: (id) => request(`/campaigns/${id}/sequence`),
   createCampaign: (payload) => request('/campaigns', { method: 'POST', body: payload }),
-  duplicateCampaign: (id, name) => request(`/campaigns/${id}/duplicate`, { method: 'POST', body: { name } }),
   startCampaign: (id) => request(`/campaigns/${id}/start`, { method: 'POST' }),
   pauseCampaign: (id) => request(`/campaigns/${id}/pause`, { method: 'POST' }),
   endCampaign: (id) => request(`/campaigns/${id}/end`, { method: 'POST' }),
   archiveCampaign: (id) => request(`/campaigns/${id}/archive`, { method: 'POST' }),
   setCampaignGoogleReview: (id, required) =>
     request(`/campaigns/${id}/google-review`, { method: 'PATCH', body: { required } }),
+
+  // Reusable slot/gift configs — "start from template" and "duplicate an
+  // existing campaign" both prefill NewCampaign.jsx's form (stock reset to 0,
+  // adjustable before creating), rather than silently creating a copy.
+  listCampaignTemplates: () => request('/campaign-templates'),
+  getCampaignTemplate: (id) => request(`/campaign-templates/${id}`),
+  saveCampaignTemplate: (name, slots) => request('/campaign-templates', { method: 'POST', body: { name, slots } }),
 
   spinStatus: () => request('/spin/status'),
   wheelCommand: (command) => request('/spin/command', { method: 'POST', body: { command } }),

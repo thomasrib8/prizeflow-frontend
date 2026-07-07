@@ -1,26 +1,80 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/client';
 import { Card, Button } from '../components/ui';
 import { useAdmin } from '../hooks/useAdmin';
 import WheelSVG from '../components/WheelSVG';
 
+const EMPTY_SLOTS = Array.from({ length: 12 }, (_, i) => ({ slotIndex: i, giftName: '', stock: 0 }));
+
 export default function NewCampaign() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const fromCampaignId = searchParams.get('from');
   const { isAdmin } = useAdmin();
   const [isTest, setIsTest] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [slots, setSlots] = useState(
-    Array.from({ length: 12 }, (_, i) => ({ slotIndex: i, giftName: '', stock: 0 }))
-  );
+  const [slots, setSlots] = useState(EMPTY_SLOTS);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
   const [previewAngle, setPreviewAngle] = useState(0);
+  const [templates, setTemplates] = useState(null);
+  const [templateMsg, setTemplateMsg] = useState('');
+  const [savingTemplate, setSavingTemplate] = useState(false);
 
   const previewCase = Math.floor((((previewAngle % 360) + 360) % 360) / 30) + 1;
-
   const totalStock = slots.reduce((sum, s) => sum + (Number(s.stock) || 0), 0);
+
+  // Duplicate an existing campaign's slot/gift config — stock always starts
+  // at 0 here, adjustable before creating (per roadmap: never a silent copy).
+  useEffect(() => {
+    if (!fromCampaignId) return;
+    api.getCampaign(fromCampaignId).then((source) => {
+      setName(`Copy of ${source.name}`);
+      applySlotConfig(source.slots.map((s) => ({ slotIndex: s.slot_index, giftName: s.gift_name })));
+    }).catch((e) => setError(e.message));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fromCampaignId]);
+
+  useEffect(() => {
+    api.listCampaignTemplates().then(setTemplates).catch(() => setTemplates([]));
+  }, []);
+
+  function applySlotConfig(configSlots) {
+    const byIndex = new Map(configSlots.map((s) => [s.slotIndex, s.giftName]));
+    setSlots(EMPTY_SLOTS.map((s) => ({ ...s, giftName: byIndex.get(s.slotIndex) || '' })));
+  }
+
+  async function handleUseTemplate(e) {
+    const id = e.target.value;
+    e.target.value = '';
+    if (!id) return;
+    try {
+      const template = await api.getCampaignTemplate(id);
+      applySlotConfig(template.slots);
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  async function handleSaveTemplate() {
+    const configured = slots.filter((s) => s.giftName.trim());
+    if (configured.length === 0) { setError('Configure at least one gift name before saving a template.'); return; }
+    const templateName = window.prompt('Name this template:');
+    if (!templateName) return;
+    setSavingTemplate(true);
+    try {
+      await api.saveCampaignTemplate(templateName, configured.map((s) => ({ slotIndex: s.slotIndex, giftName: s.giftName })));
+      setTemplates(await api.listCampaignTemplates());
+      setTemplateMsg('Template saved');
+      setTimeout(() => setTemplateMsg(''), 2000);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSavingTemplate(false);
+    }
+  }
 
   function updateSlot(i, field, value) {
     setSlots(prev => prev.map((s, idx) => idx === i ? { ...s, [field]: value } : s));
@@ -65,6 +119,15 @@ export default function NewCampaign() {
             <label>Description (optional)</label>
             <textarea value={description} onChange={e => setDescription(e.target.value)} rows={2} placeholder="Short note…" />
           </div>
+          {templates && templates.length > 0 && (
+            <div className="field">
+              <label>Start from a saved template (optional)</label>
+              <select defaultValue="" onChange={handleUseTemplate} style={{ width: '100%', padding: '10px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 14, fontFamily: 'inherit' }}>
+                <option value="">— Select a template —</option>
+                {templates.map(t => <option key={t.id} value={t.id}>{t.name} ({t.slotCount} slots)</option>)}
+              </select>
+            </div>
+          )}
           {isAdmin && (
             <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', marginTop: 4, padding: '10px 14px', background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 8 }}>
               <input type="checkbox" checked={isTest} onChange={e => setIsTest(e.target.checked)} />
@@ -90,7 +153,15 @@ export default function NewCampaign() {
         </Card>
 
         <Card title="Products (12 wheel slots)" className="mt-card"
-          action={<span className="badge badge-blue">Total stock: {totalStock}</span>}>
+          action={
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              {templateMsg && <span style={{ fontSize: 12, color: '#10B981', fontWeight: 600 }}>{templateMsg}</span>}
+              <button type="button" onClick={handleSaveTemplate} disabled={savingTemplate} className="btn btn-ghost btn-sm" style={{ cursor: savingTemplate ? 'not-allowed' : 'pointer' }}>
+                {savingTemplate ? 'Saving…' : 'Save as template'}
+              </button>
+              <span className="badge badge-blue">Total stock: {totalStock}</span>
+            </div>
+          }>
           <div className="slots-grid">
             {slots.map((s, i) => {
               const pct = totalStock ? ((Number(s.stock) || 0) / totalStock) * 100 : 0;
