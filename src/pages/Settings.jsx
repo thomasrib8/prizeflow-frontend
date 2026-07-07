@@ -10,6 +10,7 @@ export default function Settings() {
   const [campaigns, setCampaigns] = useState(null);
   const [error, setError] = useState('');
   const [togglingId, setTogglingId] = useState(null);
+  const [showVideo, setShowVideo] = useState(false);
 
   function load() {
     api.getAccountSettings()
@@ -86,10 +87,53 @@ export default function Settings() {
           <Button type="submit" disabled={saving || !urlDirty}>{saving ? 'Saving…' : 'Save'}</Button>
           {saveMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{saveMsg}</span>}
         </form>
-        <a href="https://youtu.be/JC0GybvQDts" target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: '#2563EB', textDecoration: 'none', marginTop: 8, display: 'inline-block' }}>
+        <button
+          onClick={() => setShowVideo(true)}
+          style={{
+            fontSize: 12, color: '#2563EB', background: 'none', border: 'none', padding: 0,
+            marginTop: 8, cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'underline',
+          }}
+        >
           Not sure where to find it? Watch this quick video →
-        </a>
+        </button>
       </Card>
+
+      {showVideo && (
+        <div
+          onClick={() => setShowVideo(false)}
+          style={{
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 300,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: 'white', borderRadius: 16, padding: 16, width: 720, maxWidth: '92vw',
+              boxShadow: '0 30px 80px rgba(0,0,0,0.4)',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+              <button
+                onClick={() => setShowVideo(false)}
+                style={{
+                  background: 'none', border: '1px solid #E2E8F0', borderRadius: 8, padding: '5px 12px',
+                  fontSize: 13, color: '#64748B', cursor: 'pointer', fontFamily: 'inherit',
+                }}
+              >Close</button>
+            </div>
+            <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0 }}>
+              <iframe
+                src="https://www.youtube.com/embed/JC0GybvQDts"
+                title="Where to find your Google review link"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none', borderRadius: 8 }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       <Card title="Require a Google review before spinning" className="mt-card">
         <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 16px' }}>
