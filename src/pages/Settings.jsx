@@ -349,7 +349,7 @@ export default function Settings() {
 
       {module === 'information' && <InformationModule />}
       {module === 'google-review' && <GoogleReviewModule />}
-      {module === 'calibration' && <Calibration exitTo="/settings" />}
+      {module === 'calibration' && <Calibration onExit={() => setModule('information')} />}
     </div>
   );
 }
