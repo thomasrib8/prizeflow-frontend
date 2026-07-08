@@ -148,6 +148,14 @@ export default function UserDetail() {
           )}
         </div>
 
+        {overview?.wheel.identity && (overview.wheel.identity.modelNumber || overview.wheel.identity.serialNumber || overview.wheel.identity.securityKey) && (
+          <div style={{ display: 'flex', gap: 24, fontSize: 12, color: '#64748B', marginBottom: 16, flexWrap: 'wrap' }}>
+            {overview.wheel.identity.modelNumber && <span>Model Number : <strong style={{ color: '#0F172A' }}>{overview.wheel.identity.modelNumber}</strong></span>}
+            {overview.wheel.identity.serialNumber && <span>Serial Number : <strong style={{ color: '#0F172A' }}>{overview.wheel.identity.serialNumber}</strong></span>}
+            {overview.wheel.identity.securityKey && <span>Security Key : <strong style={{ color: '#0F172A' }}>{overview.wheel.identity.securityKey}</strong></span>}
+          </div>
+        )}
+
         {!overview && <p className="page-subtitle">Loading…</p>}
         {overview && overview.campaigns.length === 0 && <EmptyState title="Aucune campagne pour ce compte" />}
         {overview && overview.campaigns.length > 0 && (

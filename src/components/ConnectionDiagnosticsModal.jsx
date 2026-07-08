@@ -65,6 +65,7 @@ export default function ConnectionDiagnosticsModal({ onClose, agentConnected, co
   const wheelLocal = diagnostics?.wheelLocal;
   const wifi = diagnostics?.wifiSignal;
   const agent = diagnostics?.agent;
+  const identity = diagnostics?.wheelIdentity;
 
   return (
     <div
@@ -121,6 +122,17 @@ export default function ConnectionDiagnosticsModal({ onClose, agentConnected, co
             </span>
           ) : 'Information pas encore reçue'}
         </Row>
+
+        {identity && (identity.modelNumber || identity.serialNumber || identity.securityKey) && (
+          <div style={{ padding: '12px 0', borderTop: '1px solid #F1F5F9', marginTop: 4 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#0F172A', marginBottom: 6 }}>Identité de la roue</div>
+            <div style={{ fontSize: 12, color: '#64748B', lineHeight: 1.8 }}>
+              {identity.modelNumber && <div>Model Number : <strong style={{ color: '#0F172A' }}>{identity.modelNumber}</strong></div>}
+              {identity.serialNumber && <div>Serial Number : <strong style={{ color: '#0F172A' }}>{identity.serialNumber}</strong></div>}
+              {identity.securityKey && <div>Security Key : <strong style={{ color: '#0F172A' }}>{identity.securityKey}</strong></div>}
+            </div>
+          </div>
+        )}
 
         <p style={{ fontSize: 11, color: '#94A3B8', marginTop: 12, marginBottom: 0 }}>
           Se rafraîchit automatiquement toutes les 5 secondes.
