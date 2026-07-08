@@ -137,7 +137,7 @@ export default function CampaignDetail() {
       <Card title="Gift distribution">
         <table className="data-table">
           <thead>
-            <tr><th>Case</th><th>Gift</th><th>Stock</th><th>%</th><th>Remaining</th><th>Alert threshold</th><th>Progress</th></tr>
+            <tr><th>Case</th><th>Gift</th><th>Stock</th><th>%</th><th>Remaining</th><th>Alert threshold</th><th>Redeem</th><th>Progress</th></tr>
           </thead>
           <tbody>
             {campaign.slots.map(s => {
@@ -151,6 +151,7 @@ export default function CampaignDetail() {
                   <td style={{ color: 'var(--text-muted)' }}>{((s.stock_initial / total) * 100).toFixed(1)}%</td>
                   <td style={{ fontWeight: 600, color: isAlerting ? '#EF4444' : undefined }}>{s.stock_remaining}</td>
                   <td style={{ color: 'var(--text-muted)' }}>{s.alert_threshold ?? '—'}</td>
+                  <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{s.redeem_method === 'code' ? 'Code' : 'QR'}</td>
                   <td><MiniBar pct={pct} color={SLOT_COLORS[s.slot_index % SLOT_COLORS.length]} /></td>
                 </tr>
               );

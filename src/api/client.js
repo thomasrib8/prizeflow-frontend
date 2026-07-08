@@ -112,6 +112,9 @@ export const api = {
   // operator looks up a reward by ID and gets back the same signed code
   // the email's QR encodes, then opens the normal /redeem/:code page.
   getRewardRedeemCode: (id) => request(`/rewards/${id}/redeem-code`),
+  // Same, but for the 'code' redemption flow — operator types the guest's
+  // 8-char human code on the Rewards page instead of scanning.
+  getRewardCodeLookup: (code) => request(`/rewards/code/${encodeURIComponent(code)}/redeem-code`),
 
   listCampaigns: () => request('/campaigns'),
   getCampaign: (id) => request(`/campaigns/${id}`),
@@ -148,12 +151,11 @@ export const api = {
   getGuestStatus: (token, sessionToken) =>
     request(`/guest/${token}/status?session=${encodeURIComponent(sessionToken)}`, { auth: false }),
 
-  // Reward redemption — scanned via QR (public) or reached via the manual
-  // fallback above. Status check is public; distributing requires an
-  // operator to be logged in (see routes/redeem.js).
-  getRedeemStatus: (code) => request(`/redeem/${encodeURIComponent(code)}`, { auth: false }),
-  distributeReward: (code, payload) =>
-    request(`/redeem/${encodeURIComponent(code)}/distribute`, { method: 'POST', body: payload }),
+  // Reward redemption — scanned via QR or reached via a manual code lookup
+  // above. Both viewing and distributing require an operator to be signed
+  // in (see routes/redeem.js) — RedeemPage.jsx redirects to /login first if not.
+  getRedeemStatus: (code) => request(`/redeem/${encodeURIComponent(code)}`),
+  distributeReward: (code) => request(`/redeem/${encodeURIComponent(code)}/distribute`, { method: 'POST' }),
 };
 
 export function connectWs() {

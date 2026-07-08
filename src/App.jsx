@@ -13,6 +13,7 @@ import CampaignDetail from './pages/CampaignDetail';
 import LaunchCampaign from './pages/LaunchCampaign';
 import Guest from './pages/Guest';
 import RedeemPage from './pages/RedeemPage';
+import Rewards from './pages/Rewards';
 import Calibration from './pages/Calibration';
 import History from './pages/History';
 import Settings from './pages/Settings';
@@ -45,7 +46,9 @@ export default function App() {
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           {/* Public guest flow — scanned via QR code, no login, outside the authenticated shell */}
           <Route path="/play/:token" element={<Guest />} />
-          {/* Public reward redemption — scanned via the QR code in the reward email */}
+          {/* Reward redemption — scanned via the QR code in the reward email. Not
+              wrapped in PrivateRoute: it's its own full-screen page (not the
+              app shell) that redirects to /login itself if not signed in. */}
           <Route path="/redeem/:code" element={<RedeemPage />} />
           <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
           <Route path="/campaigns" element={<PrivateRoute><Campaigns /></PrivateRoute>} />
@@ -54,6 +57,7 @@ export default function App() {
           <Route path="/launch" element={<PrivateRoute><LaunchCampaign /></PrivateRoute>} />
           <Route path="/calibration" element={<PrivateRoute><Calibration /></PrivateRoute>} />
           <Route path="/history" element={<PrivateRoute><History /></PrivateRoute>} />
+          <Route path="/rewards" element={<PrivateRoute><Rewards /></PrivateRoute>} />
           <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
           <Route path="/users" element={<AdminRoute><Users /></AdminRoute>} />
           <Route path="/users/:id" element={<AdminRoute><UserDetail /></AdminRoute>} />

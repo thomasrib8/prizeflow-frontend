@@ -5,7 +5,7 @@ import { Card, Button } from '../components/ui';
 import { useAdmin } from '../hooks/useAdmin';
 import WheelSVG from '../components/WheelSVG';
 
-const EMPTY_SLOTS = Array.from({ length: 12 }, (_, i) => ({ slotIndex: i, giftName: '', stock: 0, alertThreshold: '' }));
+const EMPTY_SLOTS = Array.from({ length: 12 }, (_, i) => ({ slotIndex: i, giftName: '', stock: 0, alertThreshold: '', redeemMethod: 'qr' }));
 
 export default function NewCampaign() {
   const navigate = useNavigate();
@@ -95,6 +95,7 @@ export default function NewCampaign() {
           giftName: s.giftName,
           stock: Number(s.stock),
           ...(s.alertThreshold !== '' && s.alertThreshold !== undefined ? { alertThreshold: Number(s.alertThreshold) } : {}),
+          redeemMethod: s.redeemMethod === 'code' ? 'code' : 'qr',
         }))
       });
       navigate(`/campaigns/${created.id}`);
@@ -169,6 +170,7 @@ export default function NewCampaign() {
           }>
           <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 12px' }}>
             "Alert" is an optional low-stock threshold — you'll get an email (and a banner on the campaign page) once that gift's remaining stock drops to or below it.
+            "Redeem" chooses how the guest confirms their gift: <b>QR</b> links straight to it, <b>Code</b> emails an 8-character code to type in on the Rewards page.
           </p>
           <div className="slots-grid">
             {slots.map((s, i) => {
@@ -179,6 +181,10 @@ export default function NewCampaign() {
                   <input placeholder="Gift name" value={s.giftName} onChange={e => updateSlot(i, 'giftName', e.target.value)} />
                   <input type="number" min="0" placeholder="Stock" value={s.stock || ''} onChange={e => updateSlot(i, 'stock', e.target.value)} />
                   <input type="number" min="0" placeholder="Alert" title="Low-stock alert threshold (optional)" value={s.alertThreshold} onChange={e => updateSlot(i, 'alertThreshold', e.target.value)} />
+                  <select value={s.redeemMethod} title="How the guest confirms their gift" onChange={e => updateSlot(i, 'redeemMethod', e.target.value)}>
+                    <option value="qr">QR</option>
+                    <option value="code">Code</option>
+                  </select>
                   <div className="slot-pct">{pct ? `${pct.toFixed(1)}%` : '—'}</div>
                 </div>
               );

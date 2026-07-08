@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 
@@ -10,42 +10,41 @@ const STATUS_INFO = {
   cancelled: { color: '#EF4444', label: 'Cancelled' },
 };
 
-/// Public page reached by scanning the QR code in a reward email (or via the
-/// "Redeem by ID" fallback in History.jsx, which resolves to the same signed
-/// code). Anyone can view the status — no PrizeFlow login required, this
-/// works with any camera app or QR scanner. Only an operator who is already
-/// logged into this same app (checked via useAuth, not a separate login
-/// step) sees the "Mark as distributed" action.
+function formatDT(s) {
+  if (!s) return null;
+  return new Date(s.replace(' ', 'T') + 'Z').toLocaleString();
+}
+
+/// Reached by scanning the QR code in a reward email (or via a manual code
+/// lookup — see History.jsx and Rewards.jsx). An operator must be signed
+/// into PrizeFlow to view or act on it: unauthenticated visitors are sent to
+/// /login first, then bounced back here (see the returnTo param handled by
+/// Login.jsx). The reward's own PII is never shown without that sign-in.
 export default function RedeemPage() {
   const { code } = useParams();
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [state, setState] = useState('loading'); // loading | invalid | loaded
   const [reward, setReward] = useState(null);
   const [error, setError] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
+    if (!user) {
+      navigate(`/login?returnTo=${encodeURIComponent(location.pathname)}`, { replace: true });
+      return;
+    }
     api.getRedeemStatus(code)
       .then((res) => { setReward(res); setState('loaded'); })
       .catch((e) => { setError(e.message); setState('invalid'); });
-  }, [code]);
+  }, [code, user]);
 
-  useEffect(() => {
-    if (!user) return;
-    const parts = (user.name || '').trim().split(/\s+/);
-    setFirstName(parts[0] || '');
-    setLastName(parts.slice(1).join(' ') || '');
-  }, [user]);
-
-  async function handleDistribute(e) {
-    e.preventDefault();
-    if (!firstName.trim() || !lastName.trim()) { setError('Enter your first and last name.'); return; }
+  async function handleDistribute() {
     setBusy(true);
     setError('');
     try {
-      const res = await api.distributeReward(code, { operatorFirstName: firstName, operatorLastName: lastName });
+      const res = await api.distributeReward(code);
       setReward((prev) => ({ ...prev, status: 'redeemed', distributedBy: res.distributedBy }));
     } catch (err) {
       setError(err.message);
@@ -53,6 +52,8 @@ export default function RedeemPage() {
       setBusy(false);
     }
   }
+
+  if (!user) return null;
 
   return (
     <div style={{
@@ -82,39 +83,31 @@ export default function RedeemPage() {
               {STATUS_INFO[reward.status]?.label || reward.status}
             </div>
             <h1 style={{ fontSize: 22, fontWeight: 800, margin: '0 0 6px', color: '#0F172A' }}>{reward.giftName}</h1>
-            <p style={{ fontSize: 14, color: '#64748B', margin: '0 0 24px' }}>
+            <p style={{ fontSize: 14, color: '#64748B', margin: '0 0 4px' }}>
               For {reward.firstName} {reward.lastName}
             </p>
-
-            {reward.status === 'redeemed' && reward.distributedBy && (
-              <p style={{ fontSize: 12, color: '#94A3B8', marginBottom: 8 }}>
-                Distributed by {reward.distributedBy}{reward.distributedAt ? ` · ${new Date(reward.distributedAt.replace(' ', 'T') + 'Z').toLocaleString()}` : ''}
+            {reward.launchedAt && (
+              <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 24px' }}>
+                Wheel launched {formatDT(reward.launchedAt)}
               </p>
             )}
 
-            {reward.status === 'active' && !user && (
-              <p style={{ fontSize: 13, color: '#94A3B8' }}>Please show this to a staff member to confirm redemption.</p>
+            {error && <div className="error-banner">{error}</div>}
+
+            {reward.status === 'redeemed' && reward.distributedBy && (
+              <p style={{ fontSize: 12, color: '#94A3B8', marginBottom: 8 }}>
+                Distributed by {reward.distributedBy}{reward.distributedAt ? ` · ${formatDT(reward.distributedAt)}` : ''}
+              </p>
             )}
 
-            {reward.status === 'active' && user && (
-              <form onSubmit={handleDistribute} style={{ textAlign: 'left' }}>
-                {error && <div className="error-banner">{error}</div>}
-                <div className="field">
-                  <label>Your first name</label>
-                  <input value={firstName} onChange={e => setFirstName(e.target.value)} required />
-                </div>
-                <div className="field">
-                  <label>Your last name</label>
-                  <input value={lastName} onChange={e => setLastName(e.target.value)} required />
-                </div>
-                <button type="submit" disabled={busy} style={{
-                  width: '100%', background: '#0F1C3F', color: 'white', border: 'none',
-                  borderRadius: 10, padding: '13px', fontSize: 14, fontWeight: 700,
-                  cursor: busy ? 'not-allowed' : 'pointer', opacity: busy ? 0.6 : 1, fontFamily: 'inherit',
-                }}>
-                  {busy ? 'Confirming…' : 'Mark as distributed'}
-                </button>
-              </form>
+            {reward.status === 'active' && (
+              <button type="button" onClick={handleDistribute} disabled={busy} style={{
+                width: '100%', background: '#0F1C3F', color: 'white', border: 'none',
+                borderRadius: 10, padding: '13px', fontSize: 14, fontWeight: 700,
+                cursor: busy ? 'not-allowed' : 'pointer', opacity: busy ? 0.6 : 1, fontFamily: 'inherit',
+              }}>
+                {busy ? 'Confirming…' : 'Mark as distributed'}
+              </button>
             )}
           </>
         )}

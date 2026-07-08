@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { to: '/campaigns', label: 'Campaigns', icon: IconBox },
   { to: '/launch', label: 'Launch', icon: IconWheel },
   { to: '/history', label: 'History', icon: IconClock },
+  { to: '/rewards', label: 'Rewards', icon: IconGift },
   { to: '/calibration', label: 'Calibration', icon: IconTarget },
   { to: '/settings', label: 'Settings', icon: IconSettings },
 ];
@@ -116,6 +117,9 @@ function IconWheel() {
 }
 function IconClock() {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>;
+}
+function IconGift() {
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="8" width="18" height="4" rx="1"/><rect x="4" y="12" width="16" height="9" rx="1"/><path d="M12 8v13"/><path d="M12 8c-1.5-3-3-4-4.5-4A2 2 0 0 0 6 6c0 1.5 2 2 6 2Z"/><path d="M12 8c1.5-3 3-4 4.5-4A2 2 0 0 1 18 6c0 1.5-2 2-6 2Z"/></svg>;
 }
 function IconTarget() {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg>;
