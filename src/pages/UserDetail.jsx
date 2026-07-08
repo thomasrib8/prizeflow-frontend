@@ -29,6 +29,7 @@ export default function UserDetail() {
   const [newNote, setNewNote] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [tokenCopied, setTokenCopied] = useState(false);
 
   function load() {
     api.getUserDetail(id).then(setDetail).catch((e) => setError(e.message));
@@ -91,6 +92,13 @@ export default function UserDetail() {
     }
   }
 
+  async function handleCopyAgentToken() {
+    if (!detail.agent_token) return;
+    await navigator.clipboard.writeText(detail.agent_token);
+    setTokenCopied(true);
+    setTimeout(() => setTokenCopied(false), 2000);
+  }
+
   async function handleAddNote(e) {
     e.preventDefault();
     if (!newNote.trim()) return;
@@ -141,14 +149,33 @@ export default function UserDetail() {
       </div>
 
       {module === 'profile' && (
-        <Card title="Client profile" className="mt-card">
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, fontSize: 13 }}>
-            <div><span style={{ color: '#94A3B8' }}>Adresse</span><div>{detail.address || '—'}</div></div>
-            <div><span style={{ color: '#94A3B8' }}>Téléphone</span><div>{detail.phone || '—'}</div></div>
-            <div><span style={{ color: '#94A3B8' }}>Secteur d'activité</span><div>{detail.industry_sector || '—'}</div></div>
-            <div><span style={{ color: '#94A3B8' }}>Compte créé le</span><div>{formatDT(detail.created_at)}</div></div>
-          </div>
-        </Card>
+        <>
+          <Card title="Client profile" className="mt-card">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, fontSize: 13 }}>
+              <div><span style={{ color: '#94A3B8' }}>Adresse</span><div>{detail.address || '—'}</div></div>
+              <div><span style={{ color: '#94A3B8' }}>Téléphone</span><div>{detail.phone || '—'}</div></div>
+              <div><span style={{ color: '#94A3B8' }}>Secteur d'activité</span><div>{detail.industry_sector || '—'}</div></div>
+              <div><span style={{ color: '#94A3B8' }}>Compte créé le</span><div>{formatDT(detail.created_at)}</div></div>
+            </div>
+          </Card>
+
+          <Card title="Token de la roue (agent)" className="mt-card">
+            <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px' }}>
+              À coller dans le <code>.env</code> du Raspberry Pi de ce client (variable <code>AGENT_SECRET</code>) quand sa roue physique est mise en service.
+            </p>
+            {detail.agent_token ? (
+              <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                <code style={{
+                  flex: 1, padding: '9px 12px', background: '#F8FAFC', border: '1px solid #E2E8F0',
+                  borderRadius: 8, fontSize: 13, wordBreak: 'break-all',
+                }}>{detail.agent_token}</code>
+                <Button variant="ghost" onClick={handleCopyAgentToken}>{tokenCopied ? 'Copié ✓' : 'Copier'}</Button>
+              </div>
+            ) : (
+              <p className="page-subtitle">Pas encore généré — disponible une fois le compte approuvé.</p>
+            )}
+          </Card>
+        </>
       )}
 
       {/* A. Operational overview — no guest personal data, ever. */}
@@ -161,11 +188,6 @@ export default function UserDetail() {
                 {overview.wheel.connected ? 'En ligne' : 'Hors ligne'}
               </Badge>
             ) : <span style={{ fontSize: 13, color: '#94A3B8' }}>…</span>}
-            {overview?.wheel.shared && (
-              <span style={{ fontSize: 11, color: '#94A3B8' }}>
-                (roue partagée pour le moment — sera isolée par compte quand le multi-roues sera en place)
-              </span>
-            )}
           </div>
 
           {overview?.wheel.diagnostics && (
