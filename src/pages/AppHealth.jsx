@@ -7,6 +7,21 @@ function formatDT(s) {
   return new Date(s).toLocaleString([], { dateStyle: 'short', timeStyle: 'medium' });
 }
 
+const SERVICE_TONE = { operational: 'green', degraded: 'orange', outage: 'red', unknown: 'neutral' };
+const SERVICE_LABEL = { operational: 'Opérationnel', degraded: 'Dégradé', outage: 'Panne', unknown: 'Inconnu' };
+
+function ServiceBadge({ name, status }) {
+  const tone = SERVICE_TONE[status?.tone] || 'neutral';
+  const label = SERVICE_LABEL[status?.tone] || 'Inconnu';
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <span style={{ fontSize: 13, fontWeight: 600 }}>{name}</span>
+      <Badge tone={tone}>{label}</Badge>
+      {status?.description && <span style={{ fontSize: 12, color: '#94A3B8' }}>{status.description}</span>}
+    </div>
+  );
+}
+
 export default function AppHealth() {
   const [health, setHealth] = useState(null);
   const [error, setError] = useState('');
@@ -42,22 +57,20 @@ export default function AppHealth() {
           </div>
 
           <Card title="Statut des services" className="mt-card">
-            <p style={{ fontSize: 12, color: '#94A3B8', marginBottom: 12 }}>{health.serviceStatus.note}</p>
-            <div style={{ display: 'flex', gap: 20 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 13, fontWeight: 600 }}>Render</span>
-                <Badge tone="neutral">{health.serviceStatus.render}</Badge>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 13, fontWeight: 600 }}>Netlify</span>
-                <Badge tone="neutral">{health.serviceStatus.netlify}</Badge>
-              </div>
+            <p style={{ fontSize: 12, color: '#94A3B8', marginBottom: 12 }}>
+              Lu directement depuis les pages de statut publiques de Render et Netlify.
+            </p>
+            <div style={{ display: 'flex', gap: 28 }}>
+              <ServiceBadge name="Render" status={health.serviceStatus.render} />
+              <ServiceBadge name="Netlify" status={health.serviceStatus.netlify} />
             </div>
           </Card>
 
           <Card title="Erreurs backend récentes" className="mt-card">
             <p style={{ fontSize: 12, color: '#94A3B8', marginBottom: 12 }}>
-              Capturées en mémoire depuis le dernier redémarrage du serveur — pas encore d'outil externe (type Sentry) branché.
+              {health.sentryEnabled
+                ? 'Envoyées à Sentry pour un suivi persistant (avec alertes) — la liste ci-dessous reste la vue rapide en mémoire depuis le dernier redémarrage.'
+                : "Capturées en mémoire depuis le dernier redémarrage du serveur — pas encore d'outil externe (type Sentry) branché."}
             </p>
             {health.recentErrors.length === 0 ? (
               <EmptyState title="Aucune erreur récente" />
