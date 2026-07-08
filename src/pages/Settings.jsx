@@ -105,7 +105,7 @@ export default function Settings() {
       <div className="page-header">
         <div>
           <h1 className="page-title">Settings</h1>
-          <p className="page-subtitle">Manage your profile and the Google review gate for guest spins</p>
+          <p className="page-subtitle">Manage your profile and the post-spin Google review invitation</p>
         </div>
       </div>
 
@@ -144,7 +144,7 @@ export default function Settings() {
 
       <Card title="Google review link" className="mt-card">
         <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 10px', lineHeight: 1.6 }}>
-          Guests are sent to this link when a campaign requires a review before spinning. Paste the link to
+          Guests who won a gift are optionally invited to open this link afterwards. Paste the link to
           your Google page where people can leave a review.
         </p>
         <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 16px', lineHeight: 1.7 }}>
@@ -211,10 +211,11 @@ export default function Settings() {
         </div>
       )}
 
-      <Card title="Require a Google review before spinning" className="mt-card">
+      <Card title="Invite for a Google review after spinning" className="mt-card">
         <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 16px' }}>
-          Per campaign — when enabled, guests must open the review link and stay away long enough before their
-          spin unlocks. This isn't a verified check (Google doesn't expose that), just a friction gate.
+          Per campaign — when enabled, guests see an optional "Leave us a review" button once their gift is
+          already won. It's never a condition to play or to claim the reward — Google's policies prohibit
+          tying a game or reward to leaving a review, even as an unverified gate.
         </p>
         {!campaigns && <p className="page-subtitle">Loading…</p>}
         {campaigns && campaigns.length === 0 && <p className="page-subtitle">No campaigns yet.</p>}
@@ -236,7 +237,7 @@ export default function Settings() {
                     disabled={togglingId === c.id || !savedUrl}
                     onChange={() => handleToggleReview(c)}
                   />
-                  Require review
+                  Invite for review
                 </label>
               </div>
             ))}

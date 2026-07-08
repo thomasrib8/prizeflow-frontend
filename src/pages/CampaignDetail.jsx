@@ -19,17 +19,10 @@ export default function CampaignDetail() {
   const [seqLoading, setSeqLoading] = useState(false);
   const [showSeq, setShowSeq] = useState(false);
   const [seqFilter, setSeqFilter] = useState('all'); // all | remaining | consumed
-  const [alerts, setAlerts] = useState([]);
   const [reportBusy, setReportBusy] = useState(false);
 
   const load = () => api.getCampaign(id).then(setCampaign).catch(e => setError(e.message));
   useEffect(() => { load(); }, [id]);
-
-  useEffect(() => {
-    api.getCampaignAlerts(id).then(setAlerts).catch(() => {});
-    const t = setInterval(() => api.getCampaignAlerts(id).then(setAlerts).catch(() => {}), 10000);
-    return () => clearInterval(t);
-  }, [id]);
 
   async function handleDownloadReport() {
     setReportBusy(true);
@@ -116,14 +109,6 @@ export default function CampaignDetail() {
         </div>
       </div>
       {error && <div className="error-banner">{error}</div>}
-      {alerts.length > 0 && (
-        <div style={{
-          background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 10, padding: '10px 16px',
-          fontSize: 13, color: '#991B1B', marginBottom: 16,
-        }}>
-          ⚠️ Low stock: {alerts.map((a) => `${a.giftName} (${a.remaining} left)`).join(' · ')}
-        </div>
-      )}
       {campaign.status === 'archived' && (
         <div style={{
           background: '#F1F5F9', border: '1px solid #E2E8F0', borderRadius: 10, padding: '10px 16px',
@@ -137,20 +122,18 @@ export default function CampaignDetail() {
       <Card title="Gift distribution">
         <table className="data-table">
           <thead>
-            <tr><th>Case</th><th>Gift</th><th>Stock</th><th>%</th><th>Remaining</th><th>Alert threshold</th><th>Redeem</th><th>Progress</th></tr>
+            <tr><th>Case</th><th>Gift</th><th>Stock</th><th>%</th><th>Remaining</th><th>Redeem</th><th>Progress</th></tr>
           </thead>
           <tbody>
             {campaign.slots.map(s => {
               const pct = s.stock_initial ? Math.round(((s.stock_initial - s.stock_remaining) / s.stock_initial) * 100) : 0;
-              const isAlerting = alerts.some((a) => a.slotIndex === s.slot_index);
               return (
-                <tr key={s.slot_index} style={isAlerting ? { background: '#FEF2F2' } : undefined}>
+                <tr key={s.slot_index}>
                   <td style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)' }}>{s.slot_index + 1}</td>
                   <td><GiftPill slotIndex={s.slot_index} name={s.gift_name} /></td>
                   <td style={{ color: 'var(--text-muted)' }}>{s.stock_initial}</td>
                   <td style={{ color: 'var(--text-muted)' }}>{((s.stock_initial / total) * 100).toFixed(1)}%</td>
-                  <td style={{ fontWeight: 600, color: isAlerting ? '#EF4444' : undefined }}>{s.stock_remaining}</td>
-                  <td style={{ color: 'var(--text-muted)' }}>{s.alert_threshold ?? '—'}</td>
+                  <td style={{ fontWeight: 600 }}>{s.stock_remaining}</td>
                   <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{s.redeem_method === 'code' ? 'Code' : 'QR'}</td>
                   <td><MiniBar pct={pct} color={SLOT_COLORS[s.slot_index % SLOT_COLORS.length]} /></td>
                 </tr>

@@ -4,17 +4,6 @@ import { api } from '../api/client';
 const POLL_INTERVAL_MS = 1500;
 const EMPTY_FORM = { firstName: '', lastName: '', email: '', phone: '', consent: false };
 
-// Google gives no API/webhook to confirm a specific guest actually posted a
-// review — this is an honor-system friction gate, not real verification: we
-// just require the guest to click through to the review page, then wait this
-// long before "Continue" unlocks. Earlier this also tried to detect the tab
-// actually going hidden/visible (Page Visibility API) to prove they left and
-// came back, but that's unreliable across mobile browsers (Safari in
-// particular doesn't always fire visibilitychange the same way depending on
-// how the new tab opens) — a plain timer from the click is simpler and
-// actually works everywhere, at the cost of being slightly easier to game.
-const REVIEW_MIN_AWAY_MS = 25000;
-
 /// Shared logic behind the guest queue experience — used both by the public
 /// per-guest page (Guest.jsx, one phone = one session, persisted so a re-scan
 /// resumes) and the staff-triggered kiosk overlay (LaunchCampaign.jsx, one
@@ -22,13 +11,12 @@ const REVIEW_MIN_AWAY_MS = 25000;
 /// auto-returns to the form after the reveal instead of staying on it).
 export function useGuestFlow({ token, persistSession = false, autoReturnMs = null }) {
   const storageKey = `prizeflow_guest_session_${token}`;
-  const [view, setView] = useState('loading'); // loading | no_campaign | form | review | queue | expired
+  const [view, setView] = useState('loading'); // loading | no_campaign | form | queue | expired
   const [campaignInfo, setCampaignInfo] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState(null);
-  const [reviewState, setReviewState] = useState('idle'); // idle | waiting | ready
   const sessionTokenRef = useRef(persistSession ? localStorage.getItem(storageKey) : null);
 
   function checkCampaign() {
@@ -84,29 +72,18 @@ export function useGuestFlow({ token, persistSession = false, autoReturnMs = nul
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, autoReturnMs]);
 
-  // Review-gate: once the guest has clicked through to the review page, wait
-  // out the minimum delay before "Continue" unlocks (see REVIEW_MIN_AWAY_MS
-  // above for why this is a plain timer and not tab-visibility detection).
-  useEffect(() => {
-    if (view !== 'review' || reviewState !== 'waiting') return undefined;
-    const t = setTimeout(() => setReviewState('ready'), REVIEW_MIN_AWAY_MS);
-    return () => clearTimeout(t);
-  }, [view, reviewState]);
-
+  // The Google review invite is shown only AFTER the gift is won (see the
+  // "done" view in GuestFlowScreen) and is purely optional — Google's terms
+  // forbid conditioning any reward or game access on leaving a review, even
+  // as an unverified "friction gate". Nothing here blocks or delays the spin.
   function openReviewLink() {
     window.open(campaignInfo.googleReviewUrl, '_blank', 'noopener');
-    setReviewState('waiting');
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
     if (!form.consent) { setError('Consent is required to claim your reward.'); return; }
     setError('');
-    if (campaignInfo?.googleReviewRequired && campaignInfo.googleReviewUrl) {
-      setReviewState('idle');
-      setView('review');
-      return;
-    }
     await joinQueue();
   }
 
@@ -136,12 +113,8 @@ export function useGuestFlow({ token, persistSession = false, autoReturnMs = nul
     setStatus(null);
     setForm(EMPTY_FORM);
     setError('');
-    setReviewState('idle');
     checkCampaign();
   }
 
-  return {
-    view, form, setForm, error, busy, status, handleSubmit, restart,
-    reviewState, openReviewLink, onReviewContinue: joinQueue,
-  };
+  return { view, campaignInfo, form, setForm, error, busy, status, handleSubmit, restart, openReviewLink };
 }

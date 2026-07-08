@@ -107,7 +107,6 @@ export const api = {
     return downloadFile(`/rewards/export${qs ? `?${qs}` : ''}`);
   },
   downloadCampaignReport: (id) => downloadFile(`/campaigns/${id}/report.pdf`),
-  getCampaignAlerts: (id) => request(`/campaigns/${id}/alerts`),
   // Manual fallback for when scanning the QR fails — an already-logged-in
   // operator looks up a reward by ID and gets back the same signed code
   // the email's QR encodes, then opens the normal /redeem/:code page.

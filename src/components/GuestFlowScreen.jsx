@@ -30,10 +30,17 @@ function averageTouchY(touches) {
 /// button tucked in the bottom-right corner on desktop, a 3-finger swipe
 /// down on touch devices.
 export default function GuestFlowScreen({
-  view, form, setForm, error, busy, status, onSubmit, onRestart, onClose,
-  reviewState, onOpenReview, onReviewContinue,
+  view, campaignInfo, form, setForm, error, busy, status, onSubmit, onRestart, onClose,
+  onOpenReview,
 }) {
   const [hoveringCorner, setHoveringCorner] = useState(false);
+  const [reviewClicked, setReviewClicked] = useState(false);
+
+  // Reset the "thanks for reviewing" note once a new guest's form appears
+  // (kiosk mode cycles through multiple guests in one overlay session).
+  useEffect(() => {
+    if (view === 'form') setReviewClicked(false);
+  }, [view]);
 
   const handleGoogleCredential = useCallback((profile) => {
     setForm((prev) => ({
@@ -122,45 +129,10 @@ export default function GuestFlowScreen({
     );
   }
 
-  if (view === 'review') {
-    const ready = reviewState === 'ready';
-    return (
-      <div style={fullScreenBase}>
-        {cornerCloseZone}
-        {error && (
-          <div style={{ fontSize: 13, color: '#FCA5A5', background: 'rgba(239,68,68,0.15)', padding: '8px 16px', borderRadius: 20, maxWidth: 420 }}>
-            {error}
-          </div>
-        )}
-        <div style={{ color: 'white', maxWidth: 420 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: '#60A5FA', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 10 }}>
-            One more step
-          </div>
-          <div style={{ fontSize: 20, fontWeight: 800, lineHeight: 1.4, marginBottom: 8 }}>
-            Leave us a review on Google to unlock your spin!
-          </div>
-          <div style={{ fontSize: 13, color: '#94A3B8' }}>
-            {reviewState === 'idle' && 'Tap below, leave your review, then come back here.'}
-            {reviewState === 'waiting' && 'Waiting for you to finish leaving your review…'}
-            {ready && 'Thanks! You can spin the wheel now.'}
-          </div>
-        </div>
-        <button onClick={onOpenReview} style={{
-          background: 'white', color: '#0F1C3F', border: 'none', borderRadius: 10,
-          padding: '13px 28px', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
-        }}>{reviewState === 'idle' ? 'Open Google Reviews' : 'Reopen Google Reviews'}</button>
-        <button onClick={onReviewContinue} disabled={!ready} style={{
-          background: ready ? '#10B981' : 'rgba(255,255,255,0.15)', color: ready ? 'white' : '#64748B',
-          border: 'none', borderRadius: 10, padding: '13px 28px', fontSize: 15, fontWeight: 700,
-          cursor: ready ? 'pointer' : 'not-allowed', fontFamily: 'inherit',
-        }}>Continue to spin</button>
-      </div>
-    );
-  }
-
   if (view === 'queue' && status) {
     if (status.status === 'done') {
       const result = status.result || {};
+      const showReviewInvite = !!campaignInfo?.googleReviewRequired && !!campaignInfo?.googleReviewUrl;
       return (
         <div style={fullScreenBase} key="done">
           {cornerCloseZone}
@@ -183,6 +155,28 @@ export default function GuestFlowScreen({
             )}
           </div>
           {!!result.isTest && <WheelSVG positionAngle={0} size={180} />}
+
+          {/* Purely optional — the gift is already won, this never gates or
+              delays anything. Google's review policies forbid conditioning
+              any reward on leaving a review, even as an unverified gate. */}
+          {showReviewInvite && (
+            <div style={{
+              marginTop: 12, padding: '16px 20px', borderRadius: 14,
+              background: 'rgba(255,255,255,0.08)', maxWidth: 420,
+            }}>
+              <div style={{ color: 'white', fontSize: 15, fontWeight: 600, marginBottom: 12 }}>
+                ❤️ Did you enjoy your experience? Leave us a review on Google!
+              </div>
+              <button
+                onClick={() => { onOpenReview(); setReviewClicked(true); }}
+                style={{
+                  background: reviewClicked ? 'rgba(255,255,255,0.15)' : 'white',
+                  color: reviewClicked ? '#94A3B8' : '#0F1C3F', border: 'none', borderRadius: 10,
+                  padding: '11px 22px', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+                }}
+              >{reviewClicked ? 'Thanks! ✓' : 'Leave a review'}</button>
+            </div>
+          )}
         </div>
       );
     }

@@ -16,6 +16,7 @@ function KioskOverlay({ token, onClose }) {
   return (
     <GuestFlowScreen
       view={flow.view}
+      campaignInfo={flow.campaignInfo}
       form={flow.form}
       setForm={flow.setForm}
       error={flow.error}
@@ -24,9 +25,7 @@ function KioskOverlay({ token, onClose }) {
       onSubmit={flow.handleSubmit}
       onRestart={flow.restart}
       onClose={onClose}
-      reviewState={flow.reviewState}
       onOpenReview={flow.openReviewLink}
-      onReviewContinue={flow.onReviewContinue}
     />
   );
 }
