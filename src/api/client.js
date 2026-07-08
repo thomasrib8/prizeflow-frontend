@@ -138,9 +138,9 @@ export const api = {
   wheelCommand: (command) => request('/spin/command', { method: 'POST', body: { command } }),
   spinDemo: (slotIndex) => request('/spin/demo', { method: 'POST', body: { slotIndex } }),
 
-  // Staff-facing: the account's guest QR token + a live snapshot of the queue.
-  getQrToken: () => request('/account/qr-token'),
-  getGuestQueueSnapshot: () => request('/account/guest-queue'),
+  // Staff-facing: live snapshot of one campaign's guest queue. The QR itself
+  // is built from that campaign's own public_token (see listCampaigns/getCampaign).
+  getGuestQueueSnapshot: (campaignId) => request(`/account/guest-queue?campaignId=${encodeURIComponent(campaignId)}`),
   getAccountSettings: () => request('/account/settings'),
   updateAccountSettings: (payload) => request('/account/settings', { method: 'PATCH', body: payload }),
 

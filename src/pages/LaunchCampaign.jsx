@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
 import { api } from '../api/client';
-import { Card, Badge, Button } from '../components/ui';
+import { Card, Badge, Button, EmptyState } from '../components/ui';
 import { useWheelSocket } from '../hooks/useWheelSocket';
 import { useGuestFlow } from '../hooks/useGuestFlow';
 import GuestFlowScreen from '../components/GuestFlowScreen';
@@ -32,37 +32,40 @@ function KioskOverlay({ token, onClose }) {
 }
 
 // Staff-facing: guests never see this page. It shows the QR code that leads
-// to the guest flow (/play/:token), a live view of the queue, so the active
-// campaign's real-time results are visible from the dashboard side while
-// guests play from their own phones — plus a "Spin the wheel" button that
-// opens the same guest flow full-screen on this device, for walk-up guests
-// without a phone.
+// to the guest flow (/play/:token) for whichever campaign is currently
+// active — each campaign has its own token (so guests from a past campaign
+// never collide with a new one) — plus a "Spin the wheel" button that opens
+// the same guest flow full-screen on this device, for walk-up guests without
+// a phone.
 export default function LaunchCampaign() {
   const { agentConnected } = useWheelSocket();
   const [qrDataUrl, setQrDataUrl] = useState(null);
   const [guestUrl, setGuestUrl] = useState('');
-  const [token, setToken] = useState(null);
+  const [campaign, setCampaign] = useState(undefined); // undefined while loading, null if none active
   const [error, setError] = useState('');
   const [queue, setQueue] = useState(null);
   const [showKiosk, setShowKiosk] = useState(false);
 
   useEffect(() => {
-    api.getQrToken()
-      .then(({ token: t }) => {
-        setToken(t);
-        const url = `${window.location.origin}/play/${t}`;
+    api.listCampaigns()
+      .then((rows) => {
+        const active = rows.find((c) => c.status === 'active') || null;
+        setCampaign(active);
+        if (!active) return null;
+        const url = `${window.location.origin}/play/${active.public_token}`;
         setGuestUrl(url);
         return QRCode.toDataURL(url, { width: 320, margin: 1 });
       })
-      .then(setQrDataUrl)
+      .then((dataUrl) => { if (dataUrl) setQrDataUrl(dataUrl); })
       .catch((e) => setError(e.message));
   }, []);
 
   useEffect(() => {
+    if (!campaign) return undefined;
     let cancelled = false;
     async function poll() {
       try {
-        const res = await api.getGuestQueueSnapshot();
+        const res = await api.getGuestQueueSnapshot(campaign.id);
         if (!cancelled) setQueue(res);
       } catch {
         // transient network hiccup — just try again next tick
@@ -71,7 +74,7 @@ export default function LaunchCampaign() {
     poll();
     const t = setInterval(poll, POLL_INTERVAL_MS);
     return () => { cancelled = true; clearInterval(t); };
-  }, []);
+  }, [campaign]);
 
   return (
     <div>
@@ -82,14 +85,21 @@ export default function LaunchCampaign() {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <Badge tone={agentConnected ? 'green' : 'red'}>{agentConnected ? 'Wheel ready' : 'Wheel offline'}</Badge>
-          <Button onClick={() => setShowKiosk(true)}>SPIN THE WHEEL</Button>
+          <Button onClick={() => setShowKiosk(true)} disabled={!campaign}>SPIN THE WHEEL</Button>
         </div>
       </div>
 
-      {showKiosk && token && <KioskOverlay token={token} onClose={() => setShowKiosk(false)} />}
+      {showKiosk && campaign && <KioskOverlay token={campaign.public_token} onClose={() => setShowKiosk(false)} />}
 
       {error && <div className="error-banner">{error}</div>}
 
+      {campaign === null && (
+        <Card className="mt-card">
+          <EmptyState title="No campaign is currently active" description="Start one from the Campaigns page to get its QR code." />
+        </Card>
+      )}
+
+      {campaign !== null && (
       <div className="grid-stats" style={{ gridTemplateColumns: '360px 1fr', alignItems: 'start' }}>
         <Card title="Guest QR code">
           <div style={{ textAlign: 'center', padding: '12px 0' }}>
@@ -100,6 +110,9 @@ export default function LaunchCampaign() {
             )}
             {guestUrl && (
               <p style={{ fontSize: 12, color: '#94A3B8', marginTop: 12, wordBreak: 'break-all' }}>{guestUrl}</p>
+            )}
+            {campaign && (
+              <p style={{ fontSize: 12, color: '#94A3B8', marginTop: 4 }}>Campaign: {campaign.name}</p>
             )}
           </div>
         </Card>
@@ -157,6 +170,7 @@ export default function LaunchCampaign() {
           )}
         </Card>
       </div>
+      )}
     </div>
   );
 }
