@@ -68,8 +68,11 @@ export const api = {
   resetPassword: (token, password) =>
     request('/auth/reset-password', { method: 'POST', body: { token, password }, auth: false }),
 
-  // Self-service profile — name and/or password (requires currentPassword).
+  // Self-service profile — all registration fields, email, and/or password
+  // (password change requires currentPassword).
+  getProfile: () => request('/account/profile'),
   updateProfile: (payload) => request('/account/profile', { method: 'PATCH', body: payload }),
+  requestAccountDeletion: () => request('/account/request-deletion', { method: 'POST' }),
 
   // Admin-only account management.
   listUsers: () => request('/users'),
@@ -106,7 +109,16 @@ export const api = {
     const qs = new URLSearchParams(params).toString();
     return downloadFile(`/rewards/export${qs ? `?${qs}` : ''}`);
   },
+  exportDistributionsPdf: (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return downloadFile(`/distributions/report.pdf${qs ? `?${qs}` : ''}`);
+  },
+  exportRewardsPdf: (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return downloadFile(`/rewards/report.pdf${qs ? `?${qs}` : ''}`);
+  },
   downloadCampaignReport: (id) => downloadFile(`/campaigns/${id}/report.pdf`),
+  downloadCampaignQrPdf: (id) => downloadFile(`/campaigns/${id}/qr.pdf`),
   // Manual fallback for when scanning the QR fails — an already-logged-in
   // operator looks up a reward by ID and gets back the same signed code
   // the email's QR encodes, then opens the normal /redeem/:code page.

@@ -2,18 +2,166 @@ import { useEffect, useState } from 'react';
 import { api } from '../api/client';
 import { Card, Button, Badge } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
+import Calibration from './Calibration';
 
-export default function Settings() {
-  const { user, updateStoredUser } = useAuth();
-  const [name, setName] = useState(user?.name || '');
-  const [nameSaving, setNameSaving] = useState(false);
-  const [nameMsg, setNameMsg] = useState('');
+const MODULES = [
+  { key: 'information', label: 'Information' },
+  { key: 'google-review', label: 'Google review' },
+  { key: 'calibration', label: 'Calibration' },
+];
+
+const PROFILE_FIELDS = [
+  { key: 'lastName', label: 'Nom' },
+  { key: 'firstName', label: 'Prénom' },
+  { key: 'company', label: 'Société' },
+  { key: 'industrySector', label: "Secteur d'activité" },
+  { key: 'address', label: 'Adresse' },
+  { key: 'email', label: 'Email', type: 'email' },
+  { key: 'phone', label: 'Téléphone', type: 'tel' },
+];
+
+function InformationModule() {
+  const { updateStoredUser } = useAuth();
+  const [profile, setProfile] = useState(null);
+  const [form, setForm] = useState({});
+  const [saving, setSaving] = useState(false);
+  const [saveMsg, setSaveMsg] = useState('');
+  const [error, setError] = useState('');
+
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [pwSaving, setPwSaving] = useState(false);
   const [pwMsg, setPwMsg] = useState('');
   const [pwError, setPwError] = useState('');
 
+  const [deletionRequested, setDeletionRequested] = useState(false);
+  const [deletionBusy, setDeletionBusy] = useState(false);
+
+  useEffect(() => {
+    api.getProfile().then(({ user: u }) => {
+      setProfile(u);
+      setForm({
+        lastName: u.last_name || '', firstName: u.first_name || '', company: u.company || '',
+        industrySector: u.industry_sector || '', address: u.address || '', email: u.email || '', phone: u.phone || '',
+      });
+    }).catch((e) => setError(e.message));
+  }, []);
+
+  async function handleSaveProfile(e) {
+    e.preventDefault();
+    setSaving(true);
+    setError('');
+    setSaveMsg('');
+    try {
+      const { user: updated } = await api.updateProfile(form);
+      setProfile(updated);
+      updateStoredUser({ name: updated.name });
+      setSaveMsg('Saved');
+      setTimeout(() => setSaveMsg(''), 2000);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleChangePassword(e) {
+    e.preventDefault();
+    setPwSaving(true);
+    setPwError('');
+    setPwMsg('');
+    try {
+      await api.updateProfile({ currentPassword, newPassword });
+      setCurrentPassword('');
+      setNewPassword('');
+      setPwMsg('Password updated');
+      setTimeout(() => setPwMsg(''), 2000);
+    } catch (err) {
+      setPwError(err.message);
+    } finally {
+      setPwSaving(false);
+    }
+  }
+
+  async function handleRequestDeletion() {
+    if (!confirm("Request that an admin delete your account? They'll be notified and can act on it — this doesn't delete it immediately.")) return;
+    setDeletionBusy(true);
+    setError('');
+    try {
+      await api.requestAccountDeletion();
+      setDeletionRequested(true);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setDeletionBusy(false);
+    }
+  }
+
+  if (!profile) return <Card className="mt-card"><p className="page-subtitle">Loading…</p></Card>;
+
+  return (
+    <>
+      {error && <div className="error-banner">{error}</div>}
+
+      <Card title="Your information" className="mt-card">
+        <form onSubmit={handleSaveProfile}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+            {PROFILE_FIELDS.map((f) => (
+              <div className="field" key={f.key} style={{ margin: 0 }}>
+                <label>{f.label}</label>
+                <input
+                  type={f.type || 'text'}
+                  value={form[f.key] || ''}
+                  onChange={(e) => setForm((prev) => ({ ...prev, [f.key]: e.target.value }))}
+                />
+              </div>
+            ))}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 16 }}>
+            <Button type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save'}</Button>
+            {saveMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{saveMsg}</span>}
+          </div>
+        </form>
+      </Card>
+
+      <Card title="Password" className="mt-card">
+        <form onSubmit={handleChangePassword}>
+          {pwError && <div className="error-banner">{pwError}</div>}
+          <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end' }}>
+            <div className="field" style={{ flex: 1, margin: 0 }}>
+              <label>Current password</label>
+              <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
+            </div>
+            <div className="field" style={{ flex: 1, margin: 0 }}>
+              <label>New password</label>
+              <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} minLength={8} placeholder="At least 8 characters" />
+            </div>
+            <Button type="submit" disabled={pwSaving || !currentPassword || !newPassword}>
+              {pwSaving ? 'Saving…' : 'Change password'}
+            </Button>
+          </div>
+          {pwMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{pwMsg}</span>}
+        </form>
+      </Card>
+
+      <Card title="Delete account" className="mt-card">
+        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px' }}>
+          You can't delete your own account directly — this sends a request to an admin, who can review and
+          delete it (GDPR-compliant anonymization) from the Users page.
+        </p>
+        {deletionRequested ? (
+          <p style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>Request sent — an admin has been notified.</p>
+        ) : (
+          <Button variant="ghost" disabled={deletionBusy} onClick={handleRequestDeletion} style={{ color: '#EF4444' }}>
+            {deletionBusy ? 'Sending…' : 'Request account deletion'}
+          </Button>
+        )}
+      </Card>
+    </>
+  );
+}
+
+function GoogleReviewModule() {
   const [googleReviewUrl, setGoogleReviewUrl] = useState('');
   const [savedUrl, setSavedUrl] = useState('');
   const [saving, setSaving] = useState(false);
@@ -23,16 +171,14 @@ export default function Settings() {
   const [togglingId, setTogglingId] = useState(null);
   const [showVideo, setShowVideo] = useState(false);
 
-  function load() {
+  useEffect(() => {
     api.getAccountSettings()
       .then((res) => { setGoogleReviewUrl(res.googleReviewUrl); setSavedUrl(res.googleReviewUrl); })
       .catch((e) => setError(e.message));
     api.listCampaigns()
       .then(setCampaigns)
       .catch((e) => setError(e.message));
-  }
-
-  useEffect(load, []);
+  }, []);
 
   async function handleSaveUrl(e) {
     e.preventDefault();
@@ -66,81 +212,9 @@ export default function Settings() {
 
   const urlDirty = googleReviewUrl !== savedUrl;
 
-  async function handleSaveName(e) {
-    e.preventDefault();
-    setNameSaving(true);
-    setNameMsg('');
-    try {
-      const { user: updated } = await api.updateProfile({ name });
-      updateStoredUser({ name: updated.name });
-      setNameMsg('Saved');
-      setTimeout(() => setNameMsg(''), 2000);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setNameSaving(false);
-    }
-  }
-
-  async function handleChangePassword(e) {
-    e.preventDefault();
-    setPwSaving(true);
-    setPwError('');
-    setPwMsg('');
-    try {
-      await api.updateProfile({ currentPassword, newPassword });
-      setCurrentPassword('');
-      setNewPassword('');
-      setPwMsg('Password updated');
-      setTimeout(() => setPwMsg(''), 2000);
-    } catch (err) {
-      setPwError(err.message);
-    } finally {
-      setPwSaving(false);
-    }
-  }
-
   return (
-    <div>
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">Settings</h1>
-          <p className="page-subtitle">Manage your profile and the post-spin Google review invitation</p>
-        </div>
-      </div>
-
+    <>
       {error && <div className="error-banner">{error}</div>}
-
-      <Card title="Your profile" className="mt-card">
-        <form onSubmit={handleSaveName} style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 20 }}>
-          <div className="field" style={{ flex: 1, margin: 0 }}>
-            <label>Name</label>
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" />
-          </div>
-          <Button type="submit" disabled={nameSaving || name === (user?.name || '')} style={{ marginTop: 20 }}>
-            {nameSaving ? 'Saving…' : 'Save'}
-          </Button>
-          {nameMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600, marginTop: 20 }}>{nameMsg}</span>}
-        </form>
-
-        <form onSubmit={handleChangePassword}>
-          {pwError && <div className="error-banner">{pwError}</div>}
-          <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end' }}>
-            <div className="field" style={{ flex: 1, margin: 0 }}>
-              <label>Current password</label>
-              <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
-            </div>
-            <div className="field" style={{ flex: 1, margin: 0 }}>
-              <label>New password</label>
-              <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} minLength={8} placeholder="At least 8 characters" />
-            </div>
-            <Button type="submit" disabled={pwSaving || !currentPassword || !newPassword}>
-              {pwSaving ? 'Saving…' : 'Change password'}
-            </Button>
-          </div>
-          {pwMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{pwMsg}</span>}
-        </form>
-      </Card>
 
       <Card title="Google review link" className="mt-card">
         <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 10px', lineHeight: 1.6 }}>
@@ -249,6 +323,33 @@ export default function Settings() {
           </p>
         )}
       </Card>
+    </>
+  );
+}
+
+export default function Settings() {
+  const [module, setModule] = useState('information');
+
+  return (
+    <div>
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">Settings</h1>
+          <p className="page-subtitle">Manage your profile, the Google review invitation, and wheel calibration</p>
+        </div>
+      </div>
+
+      <div className="tabs">
+        {MODULES.map((m) => (
+          <button key={m.key} className={`tab${module === m.key ? ' active' : ''}`} onClick={() => setModule(m.key)}>
+            {m.label}
+          </button>
+        ))}
+      </div>
+
+      {module === 'information' && <InformationModule />}
+      {module === 'google-review' && <GoogleReviewModule />}
+      {module === 'calibration' && <Calibration exitTo="/settings" />}
     </div>
   );
 }

@@ -44,6 +44,28 @@ export default function LaunchCampaign() {
   const [error, setError] = useState('');
   const [queue, setQueue] = useState(null);
   const [showKiosk, setShowKiosk] = useState(false);
+  const [pdfBusy, setPdfBusy] = useState(false);
+
+  function handleDownloadPng() {
+    if (!qrDataUrl || !campaign) return;
+    const a = document.createElement('a');
+    a.href = qrDataUrl;
+    a.download = `${campaign.id}-qr.png`;
+    a.click();
+  }
+
+  async function handleDownloadPdf() {
+    if (!campaign) return;
+    setPdfBusy(true);
+    setError('');
+    try {
+      await api.downloadCampaignQrPdf(campaign.id);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setPdfBusy(false);
+    }
+  }
 
   useEffect(() => {
     api.listCampaigns()
@@ -112,6 +134,14 @@ export default function LaunchCampaign() {
             )}
             {campaign && (
               <p style={{ fontSize: 12, color: '#94A3B8', marginTop: 4 }}>Campaign: {campaign.name}</p>
+            )}
+            {qrDataUrl && (
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 16 }}>
+                <Button size="sm" variant="secondary" onClick={handleDownloadPng}>Download PNG</Button>
+                <Button size="sm" variant="secondary" disabled={pdfBusy} onClick={handleDownloadPdf}>
+                  {pdfBusy ? 'Generating…' : 'Download PDF'}
+                </Button>
+              </div>
             )}
           </div>
         </Card>

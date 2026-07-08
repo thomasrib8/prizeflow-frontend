@@ -72,6 +72,24 @@
   text-align: center;
 }
 
+.nav-separator {
+  height: 1px;
+  background: #1E2D50;
+  margin: 10px 12px 8px;
+}
+.nav-section-title {
+  padding: 0 12px 6px;
+  color: #475569;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.settings-footer-link {
+  margin-top: 4px;
+}
+
 .sidebar-footer {
   border-top: 1px solid #1E2D50;
   padding-top: 12px;

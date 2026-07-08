@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/client';
-import { Card, Badge, EmptyState, GiftPill, MiniBar } from '../components/ui';
+import { Badge, EmptyState, GiftPill, MiniBar } from '../components/ui';
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis,
   CartesianGrid, Tooltip, Legend,
@@ -65,10 +65,6 @@ export default function Dashboard() {
   const { kpi, rewards, recentActivity } = data;
   const campaign = kpi?.campaign;
 
-  const successRate = kpi && kpi.planned > 0
-    ? Math.round((kpi.distributed / kpi.planned) * 100)
-    : 0;
-
   return (
     <div>
       {/* Header */}
@@ -81,16 +77,13 @@ export default function Dashboard() {
       </div>
 
       {/* 4 KPI cards */}
-      <div className="grid-stats">
+      <div className="grid-stats" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
         <StatCard label="Remaining gifts" value={kpi ? kpi.remaining.toLocaleString() : '—'}
           sub={kpi ? `${Math.round((kpi.remaining/kpi.planned)*100)}% of total` : undefined}
           accent="orange" pct={kpi ? Math.round((kpi.remaining/kpi.planned)*100) : 0} />
         <StatCard label="Gifts distributed" value={kpi ? kpi.distributed.toLocaleString() : '—'}
           sub={kpi ? `${kpi.progressPct}% of total` : undefined}
           accent="blue" pct={kpi?.progressPct} />
-        <StatCard label="Success rate" value={kpi ? `${successRate}%` : '—'}
-          sub={successRate >= 100 ? 'On target' : successRate > 50 ? 'On track' : 'Behind target'}
-          accent="green" pct={successRate} />
         <StatCard label="Campaign progress" value={kpi ? `${kpi.progressPct}%` : '—'}
           sub={kpi ? `${kpi.distributed} / ${kpi.planned} spins` : undefined}
           pct={kpi?.progressPct} />

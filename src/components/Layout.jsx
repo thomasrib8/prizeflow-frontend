@@ -13,8 +13,6 @@ const NAV_ITEMS = [
   { to: '/launch', label: 'Launch', icon: IconWheel },
   { to: '/history', label: 'History', icon: IconClock },
   { to: '/rewards', label: 'Rewards', icon: IconGift },
-  { to: '/calibration', label: 'Calibration', icon: IconTarget },
-  { to: '/settings', label: 'Settings', icon: IconSettings },
 ];
 
 const ADMIN_NAV_ITEMS = [
@@ -32,7 +30,6 @@ export default function Layout({ children }) {
   const [pendingCount, setPendingCount] = useState(0);
   const [showDiagnostics, setShowDiagnostics] = useState(false);
   const initials = (user?.name || user?.email || '?').slice(0, 2).toUpperCase();
-  const navItems = isAdmin ? [...NAV_ITEMS, ...ADMIN_NAV_ITEMS] : NAV_ITEMS;
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -57,7 +54,7 @@ export default function Layout({ children }) {
         </div>
 
         <nav className="nav">
-          {navItems.map(({ to, label, icon: Icon, badgeKey }) => (
+          {NAV_ITEMS.map(({ to, label, icon: Icon, badgeKey }) => (
             <NavLink
               key={to}
               to={to}
@@ -71,6 +68,26 @@ export default function Layout({ children }) {
               )}
             </NavLink>
           ))}
+
+          {isAdmin && (
+            <>
+              <div className="nav-separator" />
+              <div className="nav-section-title">Admin</div>
+              {ADMIN_NAV_ITEMS.map(({ to, label, icon: Icon, badgeKey }) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+                >
+                  <Icon />
+                  <span>{label}</span>
+                  {badgeKey === 'pendingCount' && pendingCount > 0 && (
+                    <span className="nav-badge">{pendingCount}</span>
+                  )}
+                </NavLink>
+              ))}
+            </>
+          )}
         </nav>
 
         <div className="sidebar-footer">
@@ -91,6 +108,10 @@ export default function Layout({ children }) {
               </button>
             </div>
           </div>
+          <NavLink to="/settings" className={({ isActive }) => `nav-item settings-footer-link${isActive ? ' active' : ''}`}>
+            <IconSettings />
+            <span>Settings</span>
+          </NavLink>
         </div>
       </aside>
       <main className="content">{children}</main>
@@ -120,9 +141,6 @@ function IconClock() {
 }
 function IconGift() {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="8" width="18" height="4" rx="1"/><rect x="4" y="12" width="16" height="9" rx="1"/><path d="M12 8v13"/><path d="M12 8c-1.5-3-3-4-4.5-4A2 2 0 0 0 6 6c0 1.5 2 2 6 2Z"/><path d="M12 8c1.5-3 3-4 4.5-4A2 2 0 0 1 18 6c0 1.5-2 2-6 2Z"/></svg>;
-}
-function IconTarget() {
-  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg>;
 }
 function IconSettings() {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>;

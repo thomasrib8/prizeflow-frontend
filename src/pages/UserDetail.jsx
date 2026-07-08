@@ -2,8 +2,16 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { api } from '../api/client';
 import { Card, Button, Badge, EmptyState } from '../components/ui';
+import WheelDiagnosticsRows from '../components/WheelDiagnosticsRows';
 
 const STATUS_TONE = { pending: 'orange', approved: 'green', deactivated: 'red' };
+const MODULES = [
+  { key: 'profile', label: 'Client profile' },
+  { key: 'overview', label: "Vue d'ensemble" },
+  { key: 'activity', label: "Journal d'activité" },
+  { key: 'actions', label: 'Actions sur le compte' },
+  { key: 'notes', label: 'Notes internes' },
+];
 
 function formatDT(s) {
   if (!s) return '—';
@@ -13,6 +21,7 @@ function formatDT(s) {
 export default function UserDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [module, setModule] = useState('profile');
   const [detail, setDetail] = useState(null);
   const [overview, setOverview] = useState(null);
   const [activity, setActivity] = useState(null);
@@ -123,124 +132,142 @@ export default function UserDetail() {
 
       {error && <div className="error-banner">{error}</div>}
 
-      <Card title="Client profile" className="mt-card">
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, fontSize: 13 }}>
-          <div><span style={{ color: '#94A3B8' }}>Adresse</span><div>{detail.address || '—'}</div></div>
-          <div><span style={{ color: '#94A3B8' }}>Téléphone</span><div>{detail.phone || '—'}</div></div>
-          <div><span style={{ color: '#94A3B8' }}>Secteur d'activité</span><div>{detail.industry_sector || '—'}</div></div>
-          <div><span style={{ color: '#94A3B8' }}>Compte créé le</span><div>{formatDT(detail.created_at)}</div></div>
-        </div>
-      </Card>
+      <div className="tabs">
+        {MODULES.map((m) => (
+          <button key={m.key} className={`tab${module === m.key ? ' active' : ''}`} onClick={() => setModule(m.key)}>
+            {m.label}
+          </button>
+        ))}
+      </div>
+
+      {module === 'profile' && (
+        <Card title="Client profile" className="mt-card">
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, fontSize: 13 }}>
+            <div><span style={{ color: '#94A3B8' }}>Adresse</span><div>{detail.address || '—'}</div></div>
+            <div><span style={{ color: '#94A3B8' }}>Téléphone</span><div>{detail.phone || '—'}</div></div>
+            <div><span style={{ color: '#94A3B8' }}>Secteur d'activité</span><div>{detail.industry_sector || '—'}</div></div>
+            <div><span style={{ color: '#94A3B8' }}>Compte créé le</span><div>{formatDT(detail.created_at)}</div></div>
+          </div>
+        </Card>
+      )}
 
       {/* A. Operational overview — no guest personal data, ever. */}
-      <Card title="Vue d'ensemble opérationnelle" className="mt-card">
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 14 }}>
-          <span style={{ fontSize: 13, color: '#64748B' }}>État de la roue :</span>
-          {overview ? (
-            <Badge tone={overview.wheel.connected ? 'green' : 'red'}>
-              {overview.wheel.connected ? 'En ligne' : 'Hors ligne'}
-            </Badge>
-          ) : <span style={{ fontSize: 13, color: '#94A3B8' }}>…</span>}
-          {overview?.wheel.shared && (
-            <span style={{ fontSize: 11, color: '#94A3B8' }}>
-              (roue partagée pour le moment — sera isolée par compte quand le multi-roues sera en place)
-            </span>
-          )}
-        </div>
-
-        {overview?.wheel.identity && (overview.wheel.identity.modelNumber || overview.wheel.identity.serialNumber || overview.wheel.identity.securityKey) && (
-          <div style={{ display: 'flex', gap: 24, fontSize: 12, color: '#64748B', marginBottom: 16, flexWrap: 'wrap' }}>
-            {overview.wheel.identity.modelNumber && <span>Model Number : <strong style={{ color: '#0F172A' }}>{overview.wheel.identity.modelNumber}</strong></span>}
-            {overview.wheel.identity.serialNumber && <span>Serial Number : <strong style={{ color: '#0F172A' }}>{overview.wheel.identity.serialNumber}</strong></span>}
-            {overview.wheel.identity.securityKey && <span>Security Key : <strong style={{ color: '#0F172A' }}>{overview.wheel.identity.securityKey}</strong></span>}
+      {module === 'overview' && (
+        <Card title="Vue d'ensemble opérationnelle" className="mt-card">
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 14 }}>
+            <span style={{ fontSize: 13, color: '#64748B' }}>État de la roue :</span>
+            {overview ? (
+              <Badge tone={overview.wheel.connected ? 'green' : 'red'}>
+                {overview.wheel.connected ? 'En ligne' : 'Hors ligne'}
+              </Badge>
+            ) : <span style={{ fontSize: 13, color: '#94A3B8' }}>…</span>}
+            {overview?.wheel.shared && (
+              <span style={{ fontSize: 11, color: '#94A3B8' }}>
+                (roue partagée pour le moment — sera isolée par compte quand le multi-roues sera en place)
+              </span>
+            )}
           </div>
-        )}
 
-        {!overview && <p className="page-subtitle">Loading…</p>}
-        {overview && overview.campaigns.length === 0 && <EmptyState title="Aucune campagne pour ce compte" />}
-        {overview && overview.campaigns.length > 0 && (
-          <table className="data-table">
-            <thead><tr><th>Campagne</th><th>Statut</th><th>Stock</th><th>Progression</th></tr></thead>
-            <tbody>
-              {overview.campaigns.map((c) => (
-                <tr key={c.id}>
-                  <td style={{ fontWeight: 500 }}>{c.name}{c.is_test ? ' (test)' : ''}</td>
-                  <td><Badge tone={c.status === 'active' ? 'green' : 'neutral'}>{c.status}</Badge></td>
-                  <td>{c.total_distributed} / {c.total_stock}</td>
-                  <td>{c.progressPct}%</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </Card>
+          {overview?.wheel.diagnostics && (
+            <div style={{ marginBottom: 16 }}>
+              <WheelDiagnosticsRows diagnostics={overview.wheel.diagnostics} />
+            </div>
+          )}
+
+          {!overview && <p className="page-subtitle">Loading…</p>}
+          {overview && overview.campaigns.length === 0 && <EmptyState title="Aucune campagne pour ce compte" />}
+          {overview && overview.campaigns.length > 0 && (
+            <table className="data-table">
+              <thead><tr><th>Campagne</th><th>Statut</th><th>Stock</th><th>Progression</th></tr></thead>
+              <tbody>
+                {overview.campaigns.map((c) => (
+                  <tr key={c.id}>
+                    <td style={{ fontWeight: 500 }}>{c.name}{c.is_test ? ' (test)' : ''}</td>
+                    <td><Badge tone={c.status === 'active' ? 'green' : 'neutral'}>{c.status}</Badge></td>
+                    <td>{c.total_distributed} / {c.total_stock}</td>
+                    <td>{c.progressPct}%</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </Card>
+      )}
 
       {/* B. Activity log — metadata only, never the content of what was configured. */}
-      <Card title="Journal d'activité" className="mt-card">
-        {!activity && <p className="page-subtitle">Loading…</p>}
-        {activity && activity.length === 0 && <EmptyState title="Aucune activité enregistrée" />}
-        {activity && activity.length > 0 && (
-          <table className="data-table">
-            <thead><tr><th>Action</th><th>Date</th></tr></thead>
-            <tbody>
-              {activity.map((a, i) => (
-                <tr key={i}>
-                  <td>{a.label}</td>
-                  <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{formatDT(a.created_at)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </Card>
+      {module === 'activity' && (
+        <Card title="Journal d'activité" className="mt-card">
+          {!activity && <p className="page-subtitle">Loading…</p>}
+          {activity && activity.length === 0 && <EmptyState title="Aucune activité enregistrée" />}
+          {activity && activity.length > 0 && (
+            <table className="data-table">
+              <thead><tr><th>Action</th><th>Date</th></tr></thead>
+              <tbody>
+                {activity.map((a, i) => (
+                  <tr key={i}>
+                    <td>{a.label}</td>
+                    <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{formatDT(a.created_at)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </Card>
+      )}
 
       {/* C. Actions on the account */}
-      <Card title="Actions sur le compte" className="mt-card">
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 16 }}>
-          {detail.status === 'deactivated' ? (
-            <Button disabled={busy} onClick={() => handleStatus('approved')}>Activer le compte</Button>
-          ) : (
-            <Button variant="ghost" disabled={busy} onClick={() => handleStatus('deactivated')}>Désactiver le compte</Button>
-          )}
-          <Button variant="ghost" disabled={busy} onClick={handleResetPassword}>Réinitialiser le mot de passe</Button>
-          <select
-            value={detail.role}
-            disabled={busy}
-            onChange={(e) => handleRole(e.target.value)}
-            style={{ padding: '9px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13 }}
-          >
-            <option value="operator">Operator</option>
-            <option value="admin">Admin</option>
-          </select>
-          <Button variant="ghost" disabled={busy} onClick={handleDelete} style={{ color: '#EF4444' }}>
-            Supprimer le compte (RGPD)
-          </Button>
-        </div>
-
-        <h4 style={{ fontSize: 13, fontWeight: 600, margin: '0 0 10px' }}>Notes internes (visibles admin uniquement)</h4>
-        <form onSubmit={handleAddNote} style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
-          <input
-            value={newNote}
-            onChange={(e) => setNewNote(e.target.value)}
-            placeholder="Ajouter une note…"
-            style={{ flex: 1, padding: '9px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13 }}
-          />
-          <Button type="submit" disabled={busy || !newNote.trim()}>Ajouter</Button>
-        </form>
-        {notes && notes.length === 0 && <p className="page-subtitle">Aucune note pour ce compte.</p>}
-        {notes && notes.length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {notes.map((n) => (
-              <div key={n.id} style={{ padding: '10px 12px', border: '1px solid #F1F5F9', borderRadius: 8, fontSize: 13 }}>
-                <div>{n.body}</div>
-                <div style={{ fontSize: 11, color: '#94A3B8', marginTop: 4 }}>
-                  {n.author_name || 'Admin'} · {formatDT(n.created_at)}
-                </div>
-              </div>
-            ))}
+      {module === 'actions' && (
+        <Card title="Actions sur le compte" className="mt-card">
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            {detail.status === 'deactivated' ? (
+              <Button disabled={busy} onClick={() => handleStatus('approved')}>Activer le compte</Button>
+            ) : (
+              <Button variant="ghost" disabled={busy} onClick={() => handleStatus('deactivated')}>Désactiver le compte</Button>
+            )}
+            <Button variant="ghost" disabled={busy} onClick={handleResetPassword}>Réinitialiser le mot de passe</Button>
+            <select
+              value={detail.role}
+              disabled={busy}
+              onChange={(e) => handleRole(e.target.value)}
+              style={{ padding: '9px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13 }}
+            >
+              <option value="operator">Operator</option>
+              <option value="admin">Admin</option>
+            </select>
+            <Button variant="ghost" disabled={busy} onClick={handleDelete} style={{ color: '#EF4444' }}>
+              Supprimer le compte (RGPD)
+            </Button>
           </div>
-        )}
-      </Card>
+        </Card>
+      )}
+
+      {/* Internal notes — admin-only visibility, enforced server-side. */}
+      {module === 'notes' && (
+        <Card title="Notes internes (visibles admin uniquement)" className="mt-card">
+          <form onSubmit={handleAddNote} style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+            <input
+              value={newNote}
+              onChange={(e) => setNewNote(e.target.value)}
+              placeholder="Ajouter une note…"
+              style={{ flex: 1, padding: '9px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13 }}
+            />
+            <Button type="submit" disabled={busy || !newNote.trim()}>Ajouter</Button>
+          </form>
+          {notes && notes.length === 0 && <p className="page-subtitle">Aucune note pour ce compte.</p>}
+          {notes && notes.length > 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {notes.map((n) => (
+                <div key={n.id} style={{ padding: '10px 12px', border: '1px solid #F1F5F9', borderRadius: 8, fontSize: 13 }}>
+                  <div>{n.body}</div>
+                  <div style={{ fontSize: 11, color: '#94A3B8', marginTop: 4 }}>
+                    {n.author_name || 'Admin'} · {formatDT(n.created_at)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
+      )}
     </div>
   );
 }

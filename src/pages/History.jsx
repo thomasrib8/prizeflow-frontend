@@ -27,15 +27,18 @@ export default function History() {
     api.rewards().then(setRewards).catch(e => setError(e.message));
   }, []);
 
-  async function handleExport() {
+  async function handleExport(format) {
     setExportBusy(true);
     setError('');
     const params = {};
     if (exportFrom) params.from = exportFrom;
     if (exportTo) params.to = exportTo;
     try {
-      if (tab === 'distributions') await api.exportDistributionsCsv(params);
-      else await api.exportRewardsCsv(params);
+      if (tab === 'distributions') {
+        await (format === 'pdf' ? api.exportDistributionsPdf(params) : api.exportDistributionsCsv(params));
+      } else {
+        await (format === 'pdf' ? api.exportRewardsPdf(params) : api.exportRewardsCsv(params));
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -76,7 +79,7 @@ export default function History() {
 
       <Card className="mt-card">
         <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 13, color: '#64748B' }}>Export CSV</span>
+          <span style={{ fontSize: 13, color: '#64748B' }}>Export</span>
           <label style={{ fontSize: 12, color: '#94A3B8' }}>From
             <input type="date" value={exportFrom} onChange={(e) => setExportFrom(e.target.value)}
               style={{ marginLeft: 6, padding: '7px 10px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13 }} />
@@ -85,8 +88,11 @@ export default function History() {
             <input type="date" value={exportTo} onChange={(e) => setExportTo(e.target.value)}
               style={{ marginLeft: 6, padding: '7px 10px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13 }} />
           </label>
-          <Button size="sm" disabled={exportBusy} onClick={handleExport}>
+          <Button size="sm" disabled={exportBusy} onClick={() => handleExport('csv')}>
             {exportBusy ? 'Exporting…' : `Download ${tab === 'distributions' ? 'distributions' : 'rewards'} CSV`}
+          </Button>
+          <Button size="sm" variant="secondary" disabled={exportBusy} onClick={() => handleExport('pdf')}>
+            {exportBusy ? 'Exporting…' : `Download PDF`}
           </Button>
         </div>
       </Card>

@@ -65,7 +65,7 @@ function Btn({ children, onClick, variant = 'primary', disabled }) {
 }
 
 // ─── Main Calibration component ───────────────────────────────────────────────
-export default function Calibration() {
+export default function Calibration({ exitTo = '/' }) {
   const navigate = useNavigate();
   const { wheelStatus, agentConnected } = useWheelSocket();
   const [inCalibration, setInCalibration] = useState(false); // true once Cal is sent
@@ -212,7 +212,7 @@ export default function Calibration() {
     if (inCalibration && step < 5) {
       setShowCancelWarning(true);
     } else {
-      navigate('/');
+      navigate(exitTo);
     }
   }
 
@@ -222,7 +222,7 @@ export default function Calibration() {
     setInCalibration(false);
     setBaseCalLaunch(0);
     setSpinPhase(3);
-    navigate('/');
+    navigate(exitTo);
   }
 
   const stepTitles = { 1: 'Step 1 of 4', 2: 'Step 2 of 4', 3: 'Step 3 of 4', 4: 'Step 4 of 4' };
@@ -277,7 +277,7 @@ export default function Calibration() {
                   {interruptedMessage}
                 </p>
                 <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-                  <Btn variant="secondary" onClick={() => { setInterruptedMessage(''); navigate('/'); }}>Cancel</Btn>
+                  <Btn variant="secondary" onClick={() => { setInterruptedMessage(''); navigate(exitTo); }}>Cancel</Btn>
                   <Btn onClick={handleConfirmEntry} disabled={busy || !agentConnected}>
                     {busy ? 'Restarting…' : 'Restart calibration'}
                   </Btn>
@@ -293,7 +293,7 @@ export default function Calibration() {
                   You are about to start the calibration procedure. This operation takes approximately <strong>10 minutes</strong> and will recalibrate the wheel's section detection.
                 </p>
                 <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-                  <Btn variant="secondary" onClick={() => navigate('/')}>Cancel</Btn>
+                  <Btn variant="secondary" onClick={() => navigate(exitTo)}>Cancel</Btn>
                   <Btn onClick={handleConfirmEntry} disabled={busy || !agentConnected}>
                     {busy ? 'Starting…' : 'Start calibration'}
                   </Btn>
@@ -474,7 +474,7 @@ export default function Calibration() {
               silently refuse every spin until it is restarted. Unplug and replug the wheel's power (or power-cycle
               the Raspberry Pi) now, then wait for it to reconnect before starting a campaign.
             </div>
-            <Btn onClick={() => { send('Free'); setInCalibration(false); navigate('/'); }}>Back to dashboard</Btn>
+            <Btn onClick={() => { send('Free'); setInCalibration(false); navigate(exitTo); }}>Back to dashboard</Btn>
           </div>
         </Modal>
       )}
@@ -505,7 +505,7 @@ export default function Calibration() {
       {/* Background content (visible when no modal) */}
       {step === 0 && (
         <div className="card" style={{ padding: 40, textAlign: 'center', marginTop: 120 }}>
-          <p style={{ color: '#64748B', fontSize: 14 }}>Click "Calibration" in the sidebar to start the calibration procedure.</p>
+          <p style={{ color: '#64748B', fontSize: 14 }}>Confirm above to start the calibration procedure.</p>
         </div>
       )}
     </div>
