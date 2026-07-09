@@ -18,6 +18,8 @@ const NAV_ITEMS = [
 const ADMIN_NAV_ITEMS = [
   { to: '/users', label: 'Users', icon: IconUsers, badgeKey: 'pendingCount' },
   { to: '/health', label: 'Health', icon: IconHeart },
+  { to: '/magic', label: 'Magic', icon: IconMagic },
+  { to: '/sequence', label: 'Sequence', icon: IconSequence },
 ];
 
 const PENDING_COUNT_POLL_MS = 30000;
@@ -152,6 +154,12 @@ export default function Layout({ children }) {
   );
 }
 
+function IconMagic() {
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M15 4V2M15 16v-2M8 9h2M20 9h2M17.8 11.8L19 13M17.8 6.2L19 5M12.2 6.2L11 5M12.2 11.8L11 13"/><path d="M3 21l9-9M12.5 8.5l3 3"/></svg>;
+}
+function IconSequence() {
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="5" cy="6" r="2.2"/><circle cx="12" cy="12" r="2.2"/><circle cx="19" cy="18" r="2.2"/><path d="M7 7.5l3 3M14 13.5l3 3"/></svg>;
+}
 function IconMenu() {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>;
 }

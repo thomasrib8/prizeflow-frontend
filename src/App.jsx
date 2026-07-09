@@ -20,6 +20,8 @@ import Settings from './pages/Settings';
 import Users from './pages/Users';
 import UserDetail from './pages/UserDetail';
 import AppHealth from './pages/AppHealth';
+import Magic from './pages/Magic';
+import SequenceBuilder from './pages/SequenceBuilder';
 
 function PrivateRoute({ children }) {
   const { user } = useAuth();
@@ -62,6 +64,8 @@ export default function App() {
           <Route path="/users" element={<AdminRoute><Users /></AdminRoute>} />
           <Route path="/users/:id" element={<AdminRoute><UserDetail /></AdminRoute>} />
           <Route path="/health" element={<AdminRoute><AppHealth /></AdminRoute>} />
+          <Route path="/magic" element={<AdminRoute><Magic /></AdminRoute>} />
+          <Route path="/sequence" element={<AdminRoute><SequenceBuilder /></AdminRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

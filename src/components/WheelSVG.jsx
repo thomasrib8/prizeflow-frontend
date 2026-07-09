@@ -24,7 +24,7 @@ export function posToAngle(currentPos) {
   return ((raw % 360) + 360) % 360;
 }
 
-export default function WheelSVG({ positionAngle = 0, size = 220, highlightSection = null, interactive = false, onRotate }) {
+export default function WheelSVG({ positionAngle = 0, size = 220, highlightSection = null, interactive = false, onRotate, onSectionClick }) {
   const svgRef = useRef(null);
   const cx = 160, cy = 160, r = 130;
   const sections = 12;
@@ -100,6 +100,8 @@ export default function WheelSVG({ positionAngle = 0, size = 220, highlightSecti
             d={`M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 0 1 ${x2} ${y2} Z`}
             fill={isHighlighted ? '#EFF6FF' : 'white'}
             stroke="#111" strokeWidth="1.5"
+            onClick={onSectionClick ? () => onSectionClick(i) : undefined}
+            style={{ cursor: onSectionClick ? 'pointer' : undefined }}
           />
         );
       })}

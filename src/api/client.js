@@ -170,6 +170,13 @@ export const api = {
   wheelCommand: (command) => request('/spin/command', { method: 'POST', body: { command } }),
   spinDemo: (slotIndex) => request('/spin/demo', { method: 'POST', body: { slotIndex } }),
 
+  listAdminSequences: () => request('/admin-sequences'),
+  createAdminSequence: (name, steps) => request('/admin-sequences', { method: 'POST', body: { name, steps } }),
+  deleteAdminSequence: (id) => request(`/admin-sequences/${id}`, { method: 'DELETE' }),
+  activateAdminSequence: (id) => request(`/admin-sequences/${id}/activate`, { method: 'POST' }),
+  stopAdminSequence: () => request('/admin-sequences/stop', { method: 'POST' }),
+  getAdminSequenceStatus: () => request('/admin-sequences/status'),
+
   // Staff-facing: live snapshot of one campaign's guest queue. The QR itself
   // is built from that campaign's own public_token (see listCampaigns/getCampaign).
   getGuestQueueSnapshot: (campaignId) => request(`/account/guest-queue?campaignId=${encodeURIComponent(campaignId)}`),
