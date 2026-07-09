@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/client';
 import { Card, Stat, Badge, EmptyState } from '../components/ui';
+import EmailQuotaTable from '../components/EmailQuotaTable';
 
 function formatDT(s) {
   if (!s) return '—';
@@ -71,6 +72,10 @@ export default function AppHealth() {
               <ServiceBadge name="Render" status={health.serviceStatus.render} />
               <ServiceBadge name="Netlify" status={health.serviceStatus.netlify} />
             </div>
+          </Card>
+
+          <Card title="Quota email" className="mt-card" action={<span style={{ fontSize: 11, color: '#94A3B8' }}>Brevo</span>}>
+            <EmailQuotaTable status={health.emailStatus} />
           </Card>
 
           {health.emailStatus?.quotaPercentUsed !== null && health.emailStatus?.quotaPercentUsed !== undefined && (
