@@ -22,6 +22,21 @@ async function request(path, { method = 'GET', body, auth = true } = {}) {
   } catch (e) {
     // no body
   }
+  // A previously-signed-in session went stale (12h JWT expiry, deactivated
+  // account, etc.) — AuthContext only checks whether a token/user is present
+  // in localStorage, not whether it's still valid, so without this an
+  // operator scanning a reward QR (or doing anything else) hours after their
+  // last login would see this raw backend error instead of being sent back
+  // to sign in. `auth: false` calls (login/register/forgot-password/guest
+  // routes) never send a token, so they can't hit this — only a rejected
+  // Bearer token does.
+  if (res.status === 401 && auth) {
+    localStorage.removeItem('prizeflow_token');
+    localStorage.removeItem('prizeflow_user');
+    const returnTo = encodeURIComponent(window.location.pathname + window.location.search);
+    window.location.href = `/login?returnTo=${returnTo}`;
+    return new Promise(() => {}); // navigation is already underway
+  }
   if (!res.ok) {
     throw new Error((data && data.error) || `Request failed (${res.status})`);
   }
