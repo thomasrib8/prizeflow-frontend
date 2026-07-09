@@ -89,6 +89,8 @@ export const api = {
   adminResetUserPassword: (id) => request(`/users/${id}/reset-password`, { method: 'POST' }),
   deleteUser: (id) => request(`/users/${id}`, { method: 'DELETE' }),
   getAppHealth: () => request('/admin/health'),
+  getEmailStatus: () => request('/admin/email-status'),
+  getEmailLog: (limit = 30) => request(`/admin/email-log?limit=${limit}`),
 
   dashboard: () => request('/dashboard'),
   dashboardChart: (days = '7') => request(`/dashboard/chart?days=${days}`),

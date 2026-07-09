@@ -1,10 +1,127 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/client';
 import { Badge, EmptyState, GiftPill, MiniBar } from '../components/ui';
+import { useAdmin } from '../hooks/useAdmin';
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis,
   CartesianGrid, Tooltip, Legend,
 } from 'recharts';
+
+function formatRelative(s) {
+  if (!s) return null;
+  const then = new Date(s.replace(' ', 'T') + 'Z').getTime();
+  const diffSec = Math.round((Date.now() - then) / 1000);
+  if (diffSec < 5) return "à l'instant";
+  if (diffSec < 60) return `il y a ${diffSec}s`;
+  const diffMin = Math.round(diffSec / 60);
+  if (diffMin < 60) return `il y a ${diffMin} min`;
+  const diffH = Math.round(diffMin / 60);
+  if (diffH < 24) return `il y a ${diffH} h`;
+  const diffD = Math.round(diffH / 24);
+  return `il y a ${diffD} j`;
+}
+
+function EmailQuotaCard() {
+  const [status, setStatus] = useState(null);
+
+  useEffect(() => {
+    api.getEmailStatus().then(setStatus).catch(() => {});
+  }, []);
+
+  const etat = !status
+    ? { icon: '⚪', label: '—' }
+    : !status.configured
+    ? { icon: '⚪', label: 'Non configuré' }
+    : status.apiKeyValid
+    ? { icon: '🟢', label: 'Connecté' }
+    : { icon: '🔴', label: 'Déconnecté' };
+
+  const apiKeyLabel = !status || !status.configured ? '—' : status.apiKeyValid ? 'Valide' : 'Invalide';
+  const quotaLabel =
+    status?.quotaTotal && status?.quotaUsed !== null && status?.quotaUsed !== undefined
+      ? `${status.quotaUsed.toLocaleString()} / ${status.quotaTotal.toLocaleString()}`
+      : status?.quotaRemaining !== null && status?.quotaRemaining !== undefined
+      ? `${status.quotaRemaining.toLocaleString()} restants`
+      : '—';
+
+  const rows = [
+    ['Etat', <span>{etat.icon} {etat.label}</span>],
+    ['API Key', apiKeyLabel],
+    ['Quota', quotaLabel],
+    ['Emails aujourd\'hui', status ? status.emailsToday : '—'],
+    ['Taux d\'ouverture', status?.openRatePct !== null && status?.openRatePct !== undefined ? `${status.openRatePct} %` : '—'],
+    ['Dernier email', status ? (formatRelative(status.lastEmailAt) || '—') : '—'],
+    ['Dernière erreur', status ? (status.lastError ? formatRelative(status.lastError.at) : 'Aucune') : '—'],
+  ];
+
+  return (
+    <div className="card">
+      <div className="card-head">
+        <h3 className="card-title">Quota email</h3>
+        <span style={{ fontSize: 11, color: 'var(--text-light)' }}>Brevo</span>
+      </div>
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+        <tbody>
+          {rows.map(([label, value], i) => (
+            <tr key={i}>
+              <td style={{ padding: '7px 0', color: 'var(--text-muted)', borderBottom: '1px solid var(--border-light)' }}>{label}</td>
+              <td style={{ padding: '7px 0', fontWeight: 500, textAlign: 'right', borderBottom: '1px solid var(--border-light)' }}>{value}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {status && !status.configured && (
+        <p style={{ fontSize: 11, color: 'var(--text-light)', marginTop: 10 }}>
+          Définir BREVO_API_KEY (et BREVO_MONTHLY_QUOTA pour le suivi du quota) pour activer ce module.
+        </p>
+      )}
+    </div>
+  );
+}
+
+function EmailHistoryCard() {
+  const [log, setLog] = useState(null);
+
+  useEffect(() => {
+    api.getEmailLog(20).then(setLog).catch(() => {});
+  }, []);
+
+  function formatTimeOnly(s) {
+    return new Date(s.replace(' ', 'T') + 'Z').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  return (
+    <div className="card">
+      <div className="card-head">
+        <h3 className="card-title">Historique des emails</h3>
+      </div>
+      {!log ? (
+        <p className="page-subtitle">Chargement…</p>
+      ) : log.length === 0 ? (
+        <EmptyState title="Aucun email envoyé" />
+      ) : (
+        <div className="activity-list">
+          {log.map((e) => (
+            <div className="activity-item" key={e.id}>
+              <div className="act-icon spin">
+                <svg viewBox="0 0 24 24" fill="none" stroke={e.status === 'error' ? '#EF4444' : '#2563EB'} strokeWidth="2">
+                  <rect x="3" y="5" width="18" height="14" rx="2" />
+                  <path d="M3 7l9 6 9-6" />
+                </svg>
+              </div>
+              <div className="act-info">
+                <div className="act-title">{e.label}</div>
+                <div className="act-time">
+                  {formatTimeOnly(e.created_at)} · → {e.recipient}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 const SLOT_COLORS = ['#2563EB','#10B981','#F59E0B','#9333EA','#E11D48','#15803D','#D97706','#4F46E5','#BE185D','#0D9488','#A16207','#7C3AED'];
 const CHART_FILTERS = ['7D', '30D', '90D', 'All'];
@@ -43,6 +160,7 @@ function CustomTooltip({ active, payload, label }) {
 }
 
 export default function Dashboard() {
+  const { isAdmin } = useAdmin();
   const [data, setData] = useState(null);
   const [chart, setChart] = useState([]);
   const [topRewards, setTopRewards] = useState([]);
@@ -244,6 +362,14 @@ export default function Dashboard() {
         </div>
 
       </div>
+
+      {/* Admin-only: Brevo email monitoring */}
+      {isAdmin && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.6fr', gap: 12 }}>
+          <EmailQuotaCard />
+          <EmailHistoryCard />
+        </div>
+      )}
     </div>
   );
 }

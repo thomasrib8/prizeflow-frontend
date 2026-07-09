@@ -10,6 +10,13 @@ function formatDT(s) {
 const SERVICE_TONE = { operational: 'green', degraded: 'orange', outage: 'red', unknown: 'neutral' };
 const SERVICE_LABEL = { operational: 'Opérationnel', degraded: 'Dégradé', outage: 'Panne', unknown: 'Inconnu' };
 
+// Thresholds requested for the quota alert: green under 70%, orange past 80%,
+// red past 95% — mirrors emailStatus.js's quotaAlertTone computed server-side
+// (kept here only for the icon/wording, the tone itself is authoritative
+// from the backend).
+const QUOTA_TONE_ICON = { green: '🟢', orange: '🟠', red: '🔴' };
+const QUOTA_TONE_BADGE = { green: 'green', orange: 'orange', red: 'red' };
+
 function ServiceBadge({ name, status }) {
   const tone = SERVICE_TONE[status?.tone] || 'neutral';
   const label = SERVICE_LABEL[status?.tone] || 'Inconnu';
@@ -65,6 +72,28 @@ export default function AppHealth() {
               <ServiceBadge name="Netlify" status={health.serviceStatus.netlify} />
             </div>
           </Card>
+
+          {health.emailStatus?.quotaPercentUsed !== null && health.emailStatus?.quotaPercentUsed !== undefined && (
+            <Card title="Alertes Brevo" className="mt-card">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: health.emailStatus.quotaAlertTone !== 'green' ? 10 : 0 }}>
+                <span style={{ fontSize: 13, fontWeight: 600 }}>
+                  {QUOTA_TONE_ICON[health.emailStatus.quotaAlertTone]} Quota email
+                </span>
+                <Badge tone={QUOTA_TONE_BADGE[health.emailStatus.quotaAlertTone] || 'neutral'}>
+                  {health.emailStatus.quotaPercentUsed}% utilisé
+                </Badge>
+              </div>
+              {health.emailStatus.quotaAlertTone !== 'green' && (
+                <p style={{
+                  fontSize: 13, margin: 0, padding: '10px 14px', borderRadius: 8,
+                  background: health.emailStatus.quotaAlertTone === 'red' ? '#FEF2F2' : '#FFFBEB',
+                  color: health.emailStatus.quotaAlertTone === 'red' ? '#991B1B' : '#92400E',
+                }}>
+                  Attention, votre quota Brevo est presque atteint. Les prochains emails risquent de ne plus être envoyés.
+                </p>
+              )}
+            </Card>
+          )}
 
           <Card title="Erreurs backend récentes" className="mt-card">
             <p style={{ fontSize: 12, color: '#94A3B8', marginBottom: 12 }}>
