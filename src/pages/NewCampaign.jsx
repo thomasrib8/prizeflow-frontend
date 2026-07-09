@@ -3,7 +3,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/client';
 import { Card, Button } from '../components/ui';
 import { useAdmin } from '../hooks/useAdmin';
-import WheelSVG from '../components/WheelSVG';
+import { useWheelSocket } from '../hooks/useWheelSocket';
+import WheelSVG, { posToAngle } from '../components/WheelSVG';
 
 const EMPTY_SLOTS = Array.from({ length: 12 }, (_, i) => ({ slotIndex: i, giftName: '', stock: 0, redeemMethod: 'qr' }));
 
@@ -19,9 +20,27 @@ export default function NewCampaign() {
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
   const [previewAngle, setPreviewAngle] = useState(0);
+  const [manualOverride, setManualOverride] = useState(false);
   const [templates, setTemplates] = useState(null);
   const [templateMsg, setTemplateMsg] = useState('');
   const [savingTemplate, setSavingTemplate] = useState(false);
+  const { wheelStatus, agentConnected } = useWheelSocket();
+
+  // Mirror the real physical wheel live whenever it's connected — the on-screen
+  // cleat should visibly move together with the real one instead of sitting
+  // wherever it was last dragged. Manual dragging (below) is only meant as a
+  // fallback for when no wheel is connected, or to nudge it back in sync if the
+  // operator ever needs to; "Resync with live wheel" clears the override.
+  useEffect(() => {
+    if (manualOverride) return;
+    if (!agentConnected || !wheelStatus) return;
+    setPreviewAngle(posToAngle(wheelStatus.currentPos));
+  }, [agentConnected, wheelStatus, manualOverride]);
+
+  function handleManualRotate(angle) {
+    setManualOverride(true);
+    setPreviewAngle(angle);
+  }
 
   const previewCase = Math.floor((((previewAngle % 360) + 360) % 360) / 30) + 1;
   const totalStock = slots.reduce((sum, s) => sum + (Number(s.stock) || 0), 0);
@@ -146,13 +165,25 @@ export default function NewCampaign() {
 
         <Card title="Wheel orientation helper" className="mt-card">
           <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 16px' }}>
-            Lost track of which physical case is which? Drag the red cleat below to match what you see on the
-            real wheel.
+            {agentConnected && !manualOverride
+              ? 'Tracking the physical wheel live — the red cleat moves together with the real one.'
+              : 'Lost track of which physical case is which? Drag the red cleat below to match what you see on the real wheel.'}
           </p>
           <div style={{ display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
-            <WheelSVG positionAngle={previewAngle} size={200} interactive onRotate={setPreviewAngle} />
+            <WheelSVG positionAngle={previewAngle} size={200} interactive onRotate={handleManualRotate} />
             <div style={{ fontSize: 14, color: '#334155' }}>
               Red cleat is pointing at <strong>Case {previewCase}</strong>
+              {agentConnected && manualOverride && (
+                <div style={{ marginTop: 8 }}>
+                  <button
+                    type="button"
+                    onClick={() => setManualOverride(false)}
+                    style={{ background: 'none', border: 'none', padding: 0, color: '#2563EB', textDecoration: 'underline', cursor: 'pointer', fontSize: 13, fontFamily: 'inherit' }}
+                  >
+                    Resync with live wheel
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </Card>

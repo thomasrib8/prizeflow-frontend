@@ -48,6 +48,19 @@ export default function RedeemPage() {
     }
   }
 
+  async function handleCancel() {
+    setBusy(true);
+    setError('');
+    try {
+      await api.cancelReward(code);
+      setReward((prev) => ({ ...prev, status: 'cancelled' }));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function handleUndo() {
     setBusy(true);
     setError('');
@@ -83,7 +96,7 @@ export default function RedeemPage() {
         )}
 
         {state === 'loaded' && reward && (
-          <RewardCard reward={reward} error={error} busy={busy} onDistribute={handleDistribute} onUndo={handleUndo} />
+          <RewardCard reward={reward} error={error} busy={busy} onDistribute={handleDistribute} onCancel={handleCancel} onUndo={handleUndo} />
         )}
       </div>
     </div>

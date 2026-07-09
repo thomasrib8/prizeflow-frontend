@@ -173,6 +173,7 @@ export const api = {
   // in (see routes/redeem.js) — RedeemPage.jsx redirects to /login first if not.
   getRedeemStatus: (code) => request(`/redeem/${encodeURIComponent(code)}`),
   distributeReward: (code) => request(`/redeem/${encodeURIComponent(code)}/distribute`, { method: 'POST' }),
+  cancelReward: (code) => request(`/redeem/${encodeURIComponent(code)}/cancel`, { method: 'POST' }),
   undistributeReward: (code) => request(`/redeem/${encodeURIComponent(code)}/undo`, { method: 'POST' }),
 };
 

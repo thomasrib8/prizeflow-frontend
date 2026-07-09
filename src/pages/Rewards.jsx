@@ -25,6 +25,7 @@ export default function Rewards() {
   const [rewards, setRewards] = useState(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [historyOpen, setHistoryOpen] = useState(true);
 
   function loadList() {
     api.rewards().then(setRewards).catch((e) => setError(e.message));
@@ -63,6 +64,20 @@ export default function Rewards() {
     try {
       const res = await api.distributeReward(signedCode);
       setReward((prev) => ({ ...prev, status: 'redeemed', distributedBy: res.distributedBy }));
+      loadList();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleCancel() {
+    setBusy(true);
+    setError('');
+    try {
+      await api.cancelReward(signedCode);
+      setReward((prev) => ({ ...prev, status: 'cancelled' }));
       loadList();
     } catch (err) {
       setError(err.message);
@@ -116,12 +131,24 @@ export default function Rewards() {
 
       {reward && (
         <Card className="mt-card">
-          <RewardCard reward={reward} error="" busy={busy} onDistribute={handleDistribute} onUndo={handleUndo} />
+          <RewardCard reward={reward} error="" busy={busy} onDistribute={handleDistribute} onCancel={handleCancel} onUndo={handleUndo} />
         </Card>
       )}
 
-      <Card title="Rewards" className="mt-card">
-        {!rewards ? <p className="page-subtitle">Loading…</p> : rewards.length === 0 ? (
+      <Card
+        title="Rewards history"
+        className="mt-card"
+        action={
+          <button
+            type="button"
+            onClick={() => setHistoryOpen((v) => !v)}
+            style={{ background: 'none', border: 'none', padding: 0, color: '#2563EB', cursor: 'pointer', fontSize: 12, fontWeight: 600, fontFamily: 'inherit' }}
+          >
+            {historyOpen ? 'Collapse ▲' : 'Expand ▼'}
+          </button>
+        }
+      >
+        {!historyOpen ? null : !rewards ? <p className="page-subtitle">Loading…</p> : rewards.length === 0 ? (
           <EmptyState title="No rewards yet" />
         ) : (
           <table className="data-table">
