@@ -2,34 +2,10 @@ import { useEffect, useState } from 'react';
 import { api } from '../api/client';
 import { Badge, EmptyState, GiftPill, MiniBar } from '../components/ui';
 import { useAdmin } from '../hooks/useAdmin';
-import EmailQuotaTable from '../components/EmailQuotaTable';
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis,
   CartesianGrid, Tooltip, Legend,
 } from 'recharts';
-
-function EmailQuotaCard() {
-  const [status, setStatus] = useState(null);
-
-  useEffect(() => {
-    api.getEmailStatus().then(setStatus).catch(() => {});
-  }, []);
-
-  return (
-    <div className="card">
-      <div className="card-head">
-        <h3 className="card-title">Quota email</h3>
-        <span style={{ fontSize: 11, color: 'var(--text-light)' }}>Brevo</span>
-      </div>
-      <EmailQuotaTable status={status} />
-      {status && !status.configured && (
-        <p style={{ fontSize: 11, color: 'var(--text-light)', marginTop: 10 }}>
-          Set BREVO_API_KEY (and BREVO_DAILY_QUOTA to track quota usage) to enable this module.
-        </p>
-      )}
-    </div>
-  );
-}
 
 function EmailHistoryCard() {
   const [log, setLog] = useState(null);
@@ -43,9 +19,9 @@ function EmailHistoryCard() {
   }
 
   return (
-    <div className="card">
+    <div className="card mt-card">
       <div className="card-head">
-        <h3 className="card-title">Historique des emails</h3>
+        <h3 className="card-title">Email history</h3>
       </div>
       {!log ? (
         <p className="page-subtitle">Loading…</p>
@@ -315,13 +291,9 @@ export default function Dashboard() {
 
       </div>
 
-      {/* Admin-only: Brevo email monitoring */}
-      {isAdmin && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.6fr', gap: 12 }}>
-          <EmailQuotaCard />
-          <EmailHistoryCard />
-        </div>
-      )}
+      {/* Admin-only: email send log. Quota/Brevo status now lives only on
+          the Health page — see AppHealth.jsx. */}
+      {isAdmin && <EmailHistoryCard />}
     </div>
   );
 }
