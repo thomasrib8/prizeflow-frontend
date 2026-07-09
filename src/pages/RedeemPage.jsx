@@ -2,24 +2,19 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
-
-const STATUS_INFO = {
-  active: { color: '#10B981', label: 'Valid — ready to redeem' },
-  redeemed: { color: '#F59E0B', label: 'Already used' },
-  expired: { color: '#EF4444', label: 'Expired' },
-  cancelled: { color: '#EF4444', label: 'Cancelled' },
-};
-
-function formatDT(s) {
-  if (!s) return null;
-  return new Date(s.replace(' ', 'T') + 'Z').toLocaleString();
-}
+import RewardCard from '../components/RewardCard';
 
 /// Reached by scanning the QR code in a reward email (or via a manual code
 /// lookup — see History.jsx and Rewards.jsx). An operator must be signed
 /// into PrizeFlow to view or act on it: unauthenticated visitors are sent to
 /// /login first, then bounced back here (see the returnTo param handled by
 /// Login.jsx). The reward's own PII is never shown without that sign-in.
+///
+/// This is a standalone full-screen page (not wrapped in the app's sidebar
+/// Layout) because it's reached by scanning a QR code from outside the app
+/// entirely — there's no persistent shell to render into yet. The Rewards
+/// page (Rewards.jsx) is the in-app equivalent for code lookups done while
+/// already navigating the app, and keeps the sidebar visible.
 export default function RedeemPage() {
   const { code } = useParams();
   const { user } = useAuth();
@@ -53,6 +48,19 @@ export default function RedeemPage() {
     }
   }
 
+  async function handleUndo() {
+    setBusy(true);
+    setError('');
+    try {
+      await api.undistributeReward(code);
+      setReward((prev) => ({ ...prev, status: 'active', distributedBy: null, distributedAt: null }));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   if (!user) return null;
 
   return (
@@ -62,54 +70,20 @@ export default function RedeemPage() {
     }}>
       <div style={{
         background: 'white', borderRadius: 20, padding: '40px 36px', width: 440, maxWidth: '94vw',
-        boxShadow: '0 30px 80px rgba(0,0,0,0.15)', textAlign: 'center',
+        boxShadow: '0 30px 80px rgba(0,0,0,0.15)',
       }}>
-        {state === 'loading' && <p style={{ color: '#64748B' }}>Loading…</p>}
+        {state === 'loading' && <p style={{ color: '#64748B', textAlign: 'center' }}>Loading…</p>}
 
         {state === 'invalid' && (
-          <>
+          <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 40, marginBottom: 14 }}>⚠️</div>
             <h1 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 8px', color: '#0F172A' }}>Invalid code</h1>
             <p style={{ fontSize: 14, color: '#64748B' }}>{error || 'This redemption link is not valid.'}</p>
-          </>
+          </div>
         )}
 
         {state === 'loaded' && reward && (
-          <>
-            <div style={{
-              display: 'inline-block', padding: '5px 14px', borderRadius: 20, fontSize: 12, fontWeight: 700,
-              color: 'white', background: STATUS_INFO[reward.status]?.color || '#64748B', marginBottom: 18,
-            }}>
-              {STATUS_INFO[reward.status]?.label || reward.status}
-            </div>
-            <h1 style={{ fontSize: 22, fontWeight: 800, margin: '0 0 6px', color: '#0F172A' }}>{reward.giftName}</h1>
-            <p style={{ fontSize: 14, color: '#64748B', margin: '0 0 4px' }}>
-              For {reward.firstName} {reward.lastName}
-            </p>
-            {reward.launchedAt && (
-              <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 24px' }}>
-                Wheel launched {formatDT(reward.launchedAt)}
-              </p>
-            )}
-
-            {error && <div className="error-banner">{error}</div>}
-
-            {reward.status === 'redeemed' && reward.distributedBy && (
-              <p style={{ fontSize: 12, color: '#94A3B8', marginBottom: 8 }}>
-                Distributed by {reward.distributedBy}{reward.distributedAt ? ` · ${formatDT(reward.distributedAt)}` : ''}
-              </p>
-            )}
-
-            {reward.status === 'active' && (
-              <button type="button" onClick={handleDistribute} disabled={busy} style={{
-                width: '100%', background: '#0F1C3F', color: 'white', border: 'none',
-                borderRadius: 10, padding: '13px', fontSize: 14, fontWeight: 700,
-                cursor: busy ? 'not-allowed' : 'pointer', opacity: busy ? 0.6 : 1, fontFamily: 'inherit',
-              }}>
-                {busy ? 'Confirming…' : 'Mark as distributed'}
-              </button>
-            )}
-          </>
+          <RewardCard reward={reward} error={error} busy={busy} onDistribute={handleDistribute} onUndo={handleUndo} />
         )}
       </div>
     </div>

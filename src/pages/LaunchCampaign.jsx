@@ -12,7 +12,7 @@ const POLL_INTERVAL_MS = 2000;
 // the personal-phone guest page: never persist the session, and auto-return
 // to the form 7s after the reveal instead of staying on it.
 function KioskOverlay({ token, onClose }) {
-  const flow = useGuestFlow({ token, persistSession: false, autoReturnMs: 7000 });
+  const flow = useGuestFlow({ token, persistSession: false, autoReturnMs: 7000, source: 'kiosk' });
   return (
     <GuestFlowScreen
       view={flow.view}

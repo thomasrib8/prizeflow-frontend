@@ -77,6 +77,8 @@ export const api = {
   // Admin-only account management.
   listUsers: () => request('/users'),
   getUsersPendingCount: () => request('/users/pending-count'),
+  getWheelIdentities: () => request('/users/wheel-identities'),
+  generateWheelIdentity: (id, series) => request(`/users/${id}/wheel-identity`, { method: 'POST', body: { series } }),
   setUserStatus: (id, status) => request(`/users/${id}/status`, { method: 'PATCH', body: { status } }),
   setUserRole: (id, role) => request(`/users/${id}/role`, { method: 'PATCH', body: { role } }),
   getUserDetail: (id) => request(`/users/${id}`),
@@ -167,6 +169,7 @@ export const api = {
   // in (see routes/redeem.js) — RedeemPage.jsx redirects to /login first if not.
   getRedeemStatus: (code) => request(`/redeem/${encodeURIComponent(code)}`),
   distributeReward: (code) => request(`/redeem/${encodeURIComponent(code)}/distribute`, { method: 'POST' }),
+  undistributeReward: (code) => request(`/redeem/${encodeURIComponent(code)}/undo`, { method: 'POST' }),
 };
 
 export function connectWs() {

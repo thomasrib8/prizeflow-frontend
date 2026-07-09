@@ -9,7 +9,13 @@ const EMPTY_FORM = { firstName: '', lastName: '', email: '', phone: '', consent:
 /// resumes) and the staff-triggered kiosk overlay (LaunchCampaign.jsx, one
 /// shared device cycling through walk-up guests, never persisted, and
 /// auto-returns to the form after the reveal instead of staying on it).
-export function useGuestFlow({ token, persistSession = false, autoReturnMs = null }) {
+///
+/// `source` is recorded on the resulting distribution's Operator column in
+/// History (see guestQueue.js) so staff can tell "a guest scanned this on
+/// their own phone" (source: 'guest') apart from "an operator ran this from
+/// the Launch page's kiosk button for a walk-up guest without a phone"
+/// (source: 'kiosk').
+export function useGuestFlow({ token, persistSession = false, autoReturnMs = null, source = 'guest' }) {
   const storageKey = `prizeflow_guest_session_${token}`;
   const [view, setView] = useState('loading'); // loading | no_campaign | form | queue | expired
   const [campaignInfo, setCampaignInfo] = useState(null);
@@ -91,7 +97,7 @@ export function useGuestFlow({ token, persistSession = false, autoReturnMs = nul
     setBusy(true);
     setError('');
     try {
-      const res = await api.joinGuestQueue(token, form);
+      const res = await api.joinGuestQueue(token, { ...form, source });
       if (persistSession) localStorage.setItem(storageKey, res.sessionToken);
       sessionTokenRef.current = res.sessionToken;
       setStatus(null);

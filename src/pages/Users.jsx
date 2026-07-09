@@ -6,15 +6,22 @@ import { Card, Button, Badge, EmptyState } from '../components/ui';
 
 const STATUS_TONE = { pending: 'orange', approved: 'green', deactivated: 'red' };
 
+function formatDT(s) {
+  if (!s) return '—';
+  return new Date(s.replace(' ', 'T') + 'Z').toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+}
+
 export default function Users() {
   const { user: me } = useAuth();
   const navigate = useNavigate();
   const [users, setUsers] = useState(null);
+  const [wheels, setWheels] = useState(null);
   const [error, setError] = useState('');
   const [busyId, setBusyId] = useState(null);
 
   function load() {
     api.listUsers().then(setUsers).catch((e) => setError(e.message));
+    api.getWheelIdentities().then(setWheels).catch((e) => setError(e.message));
   }
 
   useEffect(load, []);
@@ -122,6 +129,29 @@ export default function Users() {
                     </tr>
                   );
                 })}
+              </tbody>
+            </table>
+          )}
+        </Card>
+      )}
+
+      {wheels && (
+        <Card title="Wheels in service" className="mt-card">
+          {wheels.length === 0 ? <EmptyState title="No wheel identities generated yet" /> : (
+            <table className="data-table">
+              <thead><tr><th>Name</th><th>Model Number</th><th>Serial Number</th><th>Security Key</th><th>Put into service</th></tr></thead>
+              <tbody>
+                {wheels.map((w) => (
+                  <tr key={w.id}>
+                    <td style={{ fontWeight: 500 }}>
+                      <button className="link-button" onClick={() => navigate(`/users/${w.id}`)}>{w.name || w.email}</button>
+                    </td>
+                    <td>{w.wheel_model_number}</td>
+                    <td style={{ fontFamily: 'var(--font-mono)', fontSize: 12 }}>{w.wheel_serial_number}</td>
+                    <td style={{ fontFamily: 'var(--font-mono)', fontSize: 12 }}>{w.wheel_security_key}</td>
+                    <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{formatDT(w.wheel_identity_generated_at)}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           )}
