@@ -110,7 +110,7 @@ export default function Rewards() {
       </div>
 
       <Card className="mt-card">
-        <form onSubmit={handleSubmit} style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
           <input
             placeholder="e.g. K8Q7F3N2"
             value={code}
@@ -118,11 +118,11 @@ export default function Rewards() {
             autoFocus
             maxLength={8}
             style={{
-              flex: 1, padding: '11px 14px', border: '1px solid #E2E8F0', borderRadius: 8,
+              flex: '1 1 180px', minWidth: 0, padding: '11px 14px', border: '1px solid #E2E8F0', borderRadius: 8,
               fontSize: 16, letterSpacing: '0.1em', fontFamily: 'var(--font-mono, monospace)', textTransform: 'uppercase',
             }}
           />
-          <Button type="submit" disabled={busy || !code.trim()}>
+          <Button type="submit" disabled={busy || !code.trim()} style={{ flexShrink: 0 }}>
             {busy ? 'Looking up…' : 'Open reward'}
           </Button>
         </form>

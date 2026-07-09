@@ -183,6 +183,22 @@ table.data-table td {
 table.data-table tr:last-child td { border-bottom: none; }
 table.data-table tr:hover td { background: #FAFBFC; }
 
+/* On phones, let wide tables scroll horizontally within their own card
+   instead of squishing columns unreadably or overflowing the whole page. */
+@media (max-width: 768px) {
+  table.data-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+  table.data-table thead, table.data-table tbody, table.data-table tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+  }
+}
+
 /* Mini progress bar */
 .mini-bar { height: 4px; background: var(--border); border-radius: 2px; width: 70px; }
 .mini-fill { height: 100%; border-radius: 2px; }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useAdmin } from '../hooks/useAdmin';
 import { useWheelSocket } from '../hooks/useWheelSocket';
@@ -26,10 +26,18 @@ export default function Layout({ children }) {
   const { user, logout } = useAuth();
   const { isAdmin } = useAdmin();
   const navigate = useNavigate();
+  const location = useLocation();
   const { agentConnected, connectedSince, latencyMs } = useWheelSocket();
   const [pendingCount, setPendingCount] = useState(0);
   const [showDiagnostics, setShowDiagnostics] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const initials = (user?.name || user?.email || '?').slice(0, 2).toUpperCase();
+
+  // Close the mobile drawer automatically whenever the route changes, so
+  // tapping a nav link doesn't leave the menu open over the new page.
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -44,7 +52,24 @@ export default function Layout({ children }) {
 
   return (
     <div className="shell">
-      <aside className="sidebar">
+      <div className="mobile-topbar">
+        <button
+          className="mobile-menu-btn"
+          aria-label="Open menu"
+          onClick={() => setMobileMenuOpen(true)}
+        >
+          <IconMenu />
+        </button>
+        <img src="/logo.svg" alt="PrizeFlow" className="mobile-topbar-logo" />
+        <span className="mobile-topbar-name">PrizeFlow</span>
+      </div>
+
+      <div
+        className={`mobile-menu-backdrop${mobileMenuOpen ? ' open' : ''}`}
+        onClick={() => setMobileMenuOpen(false)}
+      />
+
+      <aside className={`sidebar${mobileMenuOpen ? ' open' : ''}`}>
         <div className="brand">
           <img src="/logo.svg" alt="PrizeFlow" className="brand-logo" />
           <div className="brand-text">
@@ -127,6 +152,9 @@ export default function Layout({ children }) {
   );
 }
 
+function IconMenu() {
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>;
+}
 function IconGrid() {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/></svg>;
 }
