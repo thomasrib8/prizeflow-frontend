@@ -114,6 +114,7 @@ export default function UserDetail() {
         wheel_serial_number: identity.wheel_serial_number,
         wheel_security_key: identity.wheel_security_key,
         wheel_identity_generated_at: identity.wheel_identity_generated_at,
+        wheel_first_connected_at: identity.wheel_first_connected_at,
       }));
     } catch (err) {
       setError(err.message);
@@ -228,7 +229,12 @@ export default function UserDetail() {
                 <div>Model Number: <strong>{detail.wheel_model_number}</strong></div>
                 <div>Serial Number: <strong>{detail.wheel_serial_number}</strong></div>
                 <div>Security Key: <strong>{detail.wheel_security_key}</strong></div>
-                <div style={{ fontSize: 12, color: '#94A3B8', marginTop: 6 }}>Put into service: {formatDT(detail.wheel_identity_generated_at)}</div>
+                <div style={{ fontSize: 12, color: '#94A3B8', marginTop: 6 }}>Generated: {formatDT(detail.wheel_identity_generated_at)}</div>
+                <div style={{ fontSize: 12, marginTop: 4, color: detail.wheel_first_connected_at ? '#10B981' : '#F59E0B' }}>
+                  {detail.wheel_first_connected_at
+                    ? `Confirmed in service: ${formatDT(detail.wheel_first_connected_at)}`
+                    : 'Not yet confirmed — waiting for the wheel to connect with this identity'}
+                </div>
               </div>
             )}
           </Card>

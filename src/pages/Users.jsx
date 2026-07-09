@@ -137,7 +137,7 @@ export default function Users() {
 
       {wheels && (
         <Card title="Wheels in service" className="mt-card">
-          {wheels.length === 0 ? <EmptyState title="No wheel identities generated yet" /> : (
+          {wheels.length === 0 ? <EmptyState title="No wheels in service yet" /> : (
             <table className="data-table">
               <thead><tr><th>Name</th><th>Model Number</th><th>Serial Number</th><th>Security Key</th><th>Put into service</th></tr></thead>
               <tbody>
@@ -149,7 +149,7 @@ export default function Users() {
                     <td>{w.wheel_model_number}</td>
                     <td style={{ fontFamily: 'var(--font-mono)', fontSize: 12 }}>{w.wheel_serial_number}</td>
                     <td style={{ fontFamily: 'var(--font-mono)', fontSize: 12 }}>{w.wheel_security_key}</td>
-                    <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{formatDT(w.wheel_identity_generated_at)}</td>
+                    <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{formatDT(w.wheel_first_connected_at)}</td>
                   </tr>
                 ))}
               </tbody>
