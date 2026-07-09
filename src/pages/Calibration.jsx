@@ -421,7 +421,7 @@ export default function Calibration({ onExit }) {
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: '#2563EB', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>{stepTitles[4]}</div>
             <h2 style={{ fontSize: 28, fontWeight: 900, margin: '0 0 4px', color: '#0F172A', letterSpacing: '-0.01em' }}>2</h2>
-            <h3 style={{ fontSize: 16, fontWeight: 800, margin: '0 0 24px', color: '#0F172A', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Spin the wheel clockwise direction</h3>
+            <h3 style={{ fontSize: 16, fontWeight: 800, margin: '0 0 24px', color: '#0F172A', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Spin the wheel counter clockwise direction</h3>
 
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
               <WheelSVG positionAngle={posAngle} />

@@ -14,8 +14,14 @@ import { useRef } from 'react';
 const FULL_ROT = 12; // encoder units per full revolution
 
 export function posToAngle(currentPos) {
-  // Same formula as original app: 360/12 * pos, wrapped to [0, 360)
-  return (currentPos * (360 / FULL_ROT)) % 360;
+  // Same formula as original app (360/12 * pos), with a half-section (15°)
+  // correction: standing exactly on the physical peg between two cases was
+  // rendering the red cleat a half-section further clockwise (mid-case
+  // instead of on the boundary) — the encoder's real reading at that peg is
+  // offset by half a unit from what the raw formula assumes.
+  const sectionAngle = 360 / FULL_ROT;
+  const raw = currentPos * sectionAngle - sectionAngle / 2;
+  return ((raw % 360) + 360) % 360;
 }
 
 export default function WheelSVG({ positionAngle = 0, size = 220, highlightSection = null, interactive = false, onRotate }) {
