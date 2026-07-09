@@ -37,22 +37,22 @@ export default function ConnectionDiagnosticsModal({ onClose, agentConnected, co
         style={{ background: 'white', borderRadius: 16, padding: '20px 24px', width: 440, maxWidth: '92vw', boxShadow: '0 30px 80px rgba(0,0,0,0.3)' }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#0F172A' }}>Diagnostic de connexion</h3>
+          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#0F172A' }}>Connection diagnostics</h3>
           <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 18, color: '#94A3B8', cursor: 'pointer' }}>✕</button>
         </div>
 
-        <Row tone={connectedSince ? (latencyTone(latencyMs)) : 'red'} title="Tablette ↔ Cloud">
-          {connectedSince ? `Connectée depuis ${since(connectedSince)}` : 'Non connectée'}
-          {latencyMs !== null && latencyMs !== undefined && ` · latence ${latencyMs} ms`}
+        <Row tone={connectedSince ? (latencyTone(latencyMs)) : 'red'} title="Tablet ↔ Cloud">
+          {connectedSince ? `Connected for ${since(connectedSince)}` : 'Not connected'}
+          {latencyMs !== null && latencyMs !== undefined && ` · latency ${latencyMs} ms`}
         </Row>
 
         <Row tone={agentConnected ? 'green' : 'red'} title="Cloud ↔ Agent (Pi)">
           {agentConnected && diagnostics?.agent?.connectedSince
-            ? `Connecté depuis ${since(diagnostics.agent.connectedSince)}`
-            : 'Non connecté'}
+            ? `Connected for ${since(diagnostics.agent.connectedSince)}`
+            : 'Not connected'}
           {diagnostics?.agent?.disconnectHistory?.length > 0 && (
             <div style={{ marginTop: 6, fontSize: 11, color: '#94A3B8' }}>
-              Dernières coupures : {diagnostics.agent.disconnectHistory.slice(0, 3).map((d) => new Date(d.disconnectedAt).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })).join(' · ')}
+              Last disconnects: {diagnostics.agent.disconnectHistory.slice(0, 3).map((d) => new Date(d.disconnectedAt).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })).join(' · ')}
             </div>
           )}
         </Row>
@@ -60,7 +60,7 @@ export default function ConnectionDiagnosticsModal({ onClose, agentConnected, co
         <WheelDiagnosticsRows diagnostics={diagnostics} />
 
         <p style={{ fontSize: 11, color: '#94A3B8', marginTop: 12, marginBottom: 0 }}>
-          Se rafraîchit automatiquement toutes les 5 secondes.
+          Refreshes automatically every 5 seconds.
         </p>
       </div>
     </div>

@@ -11,13 +11,13 @@ const MODULES = [
 ];
 
 const PROFILE_FIELDS = [
-  { key: 'lastName', label: 'Nom' },
-  { key: 'firstName', label: 'Prénom' },
-  { key: 'company', label: 'Société' },
-  { key: 'industrySector', label: "Secteur d'activité" },
-  { key: 'address', label: 'Adresse' },
+  { key: 'lastName', label: 'Last name' },
+  { key: 'firstName', label: 'First name' },
+  { key: 'company', label: 'Company' },
+  { key: 'industrySector', label: 'Industry sector' },
+  { key: 'address', label: 'Address' },
   { key: 'email', label: 'Email', type: 'email' },
-  { key: 'phone', label: 'Téléphone', type: 'tel' },
+  { key: 'phone', label: 'Phone', type: 'tel' },
 ];
 
 function InformationModule() {

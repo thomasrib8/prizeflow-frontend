@@ -24,7 +24,7 @@ function EmailQuotaCard() {
       <EmailQuotaTable status={status} />
       {status && !status.configured && (
         <p style={{ fontSize: 11, color: 'var(--text-light)', marginTop: 10 }}>
-          Définir BREVO_API_KEY (et BREVO_DAILY_QUOTA pour le suivi du quota) pour activer ce module.
+          Set BREVO_API_KEY (and BREVO_DAILY_QUOTA to track quota usage) to enable this module.
         </p>
       )}
     </div>
@@ -48,9 +48,9 @@ function EmailHistoryCard() {
         <h3 className="card-title">Historique des emails</h3>
       </div>
       {!log ? (
-        <p className="page-subtitle">Chargement…</p>
+        <p className="page-subtitle">Loading…</p>
       ) : log.length === 0 ? (
-        <EmptyState title="Aucun email envoyé" />
+        <EmptyState title="No emails sent" />
       ) : (
         <div className="activity-list">
           {log.map((e) => (

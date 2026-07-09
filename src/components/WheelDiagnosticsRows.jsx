@@ -40,7 +40,7 @@ function wifiTone(pct) {
 /// The wheel-side telemetry rows that are always purely derived from a
 /// polled diagnostics snapshot (Agent↔Wheel local, Wifi signal) plus the
 /// wheel identity block — shared between the operator-facing
-/// ConnectionDiagnosticsModal (which renders its own Tablette↔Cloud and
+/// ConnectionDiagnosticsModal (which renders its own Tablet↔Cloud and
 /// Cloud↔Agent rows on top, since those mix in a live useWheelSocket push)
 /// and the admin's read-only UserDetail fiche (which only ever has a polled
 /// snapshot of the same shared wheel, via GET /users/:id/overview).
@@ -51,13 +51,13 @@ export default function WheelDiagnosticsRows({ diagnostics }) {
 
   return (
     <>
-      <Row tone={wheelLocal?.connected === true ? 'green' : wheelLocal?.connected === false ? 'red' : 'gray'} title="Agent ↔ Roue (locale sur le Pi)">
-        {wheelLocal?.connected === true && 'Connecté'}
-        {wheelLocal?.connected === false && 'Déconnecté'}
-        {(wheelLocal?.connected === null || wheelLocal?.connected === undefined) && 'Information pas encore reçue'}
+      <Row tone={wheelLocal?.connected === true ? 'green' : wheelLocal?.connected === false ? 'red' : 'gray'} title="Agent ↔ Wheel (local on the Pi)">
+        {wheelLocal?.connected === true && 'Connected'}
+        {wheelLocal?.connected === false && 'Disconnected'}
+        {(wheelLocal?.connected === null || wheelLocal?.connected === undefined) && 'No information received yet'}
       </Row>
 
-      <Row tone={wifiTone(wifi?.percent)} title="Signal wifi du Pi">
+      <Row tone={wifiTone(wifi?.percent)} title="Pi wifi signal">
         {wifi?.percent !== null && wifi?.percent !== undefined ? (
           <span>
             {wifi.percent}%
@@ -71,16 +71,16 @@ export default function WheelDiagnosticsRows({ diagnostics }) {
               ))}
             </span>
           </span>
-        ) : 'Information pas encore reçue'}
+        ) : 'No information received yet'}
       </Row>
 
       {identity && (identity.modelNumber || identity.serialNumber || identity.securityKey) && (
         <div style={{ padding: '12px 0', borderTop: '1px solid #F1F5F9', marginTop: 4 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: '#0F172A', marginBottom: 6 }}>Identité de la roue</div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: '#0F172A', marginBottom: 6 }}>Wheel identity</div>
           <div style={{ fontSize: 12, color: '#64748B', lineHeight: 1.8 }}>
-            {identity.modelNumber && <div>Model Number : <strong style={{ color: '#0F172A' }}>{identity.modelNumber}</strong></div>}
-            {identity.serialNumber && <div>Serial Number : <strong style={{ color: '#0F172A' }}>{identity.serialNumber}</strong></div>}
-            {identity.securityKey && <div>Security Key : <strong style={{ color: '#0F172A' }}>{identity.securityKey}</strong></div>}
+            {identity.modelNumber && <div>Model Number: <strong style={{ color: '#0F172A' }}>{identity.modelNumber}</strong></div>}
+            {identity.serialNumber && <div>Serial Number: <strong style={{ color: '#0F172A' }}>{identity.serialNumber}</strong></div>}
+            {identity.securityKey && <div>Security Key: <strong style={{ color: '#0F172A' }}>{identity.securityKey}</strong></div>}
           </div>
         </div>
       )}

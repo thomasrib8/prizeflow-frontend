@@ -3,14 +3,14 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const FIELDS = [
-  { key: 'lastName', label: 'Nom', placeholder: 'Dupont' },
-  { key: 'firstName', label: 'Prénom', placeholder: 'Jean' },
-  { key: 'company', label: 'Société', placeholder: 'Hôtel Belle Vue' },
-  { key: 'industrySector', label: "Secteur d'activité", placeholder: 'Hôtellerie' },
-  { key: 'address', label: 'Adresse', placeholder: '12 rue des Lilas, 75000 Paris' },
-  { key: 'email', label: 'Email', placeholder: 'contact@votresociete.com', type: 'email' },
-  { key: 'phone', label: 'Téléphone', placeholder: '06 12 34 56 78', type: 'tel' },
-  { key: 'password', label: 'Mot de passe', placeholder: '8 caractères minimum', type: 'password' },
+  { key: 'lastName', label: 'Last name', placeholder: 'Smith' },
+  { key: 'firstName', label: 'First name', placeholder: 'John' },
+  { key: 'company', label: 'Company', placeholder: 'Belle Vue Hotel' },
+  { key: 'industrySector', label: 'Industry sector', placeholder: 'Hospitality' },
+  { key: 'address', label: 'Address', placeholder: '12 Main Street, City' },
+  { key: 'email', label: 'Email', placeholder: 'contact@yourcompany.com', type: 'email' },
+  { key: 'phone', label: 'Phone', placeholder: '06 12 34 56 78', type: 'tel' },
+  { key: 'password', label: 'Password', placeholder: 'At least 8 characters', type: 'password' },
 ];
 
 export default function Register() {
@@ -29,7 +29,7 @@ export default function Register() {
     setError('');
     const missing = FIELDS.filter((f) => !String(values[f.key] || '').trim());
     if (missing.length) {
-      setError(`Merci de renseigner : ${missing.map((f) => f.label).join(', ')}.`);
+      setError(`Please fill in: ${missing.map((f) => f.label).join(', ')}.`);
       return;
     }
     setLoading(true);
@@ -48,13 +48,13 @@ export default function Register() {
       <div className="auth-screen">
         <div className="auth-card" style={{ textAlign: 'center' }}>
           <div style={{ fontSize: 40, marginBottom: 14 }}>✅</div>
-          <h1 className="auth-title">Demande envoyée</h1>
+          <h1 className="auth-title">Request sent</h1>
           <p className="auth-subtitle">
-            Votre compte a été créé et est en attente de validation par un administrateur. Vous pourrez vous
-            connecter une fois qu'il sera approuvé.
+            Your account has been created and is awaiting approval by an administrator. You'll be able to sign in
+            once it's approved.
           </p>
           <Link to="/login" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', marginTop: 16 }}>
-            Retour à la connexion
+            Back to sign in
           </Link>
         </div>
       </div>
@@ -68,8 +68,8 @@ export default function Register() {
           <img src="/logo2.svg" alt="PrizeFlow" style={{ width: 100, height: 100, objectFit: 'contain' }} />
         </div>
 
-        <h1 className="auth-title" style={{ textAlign: 'center' }}>Créer un compte</h1>
-        <p className="auth-subtitle" style={{ textAlign: 'center' }}>Un administrateur devra le valider avant que vous puissiez vous connecter</p>
+        <h1 className="auth-title" style={{ textAlign: 'center' }}>Create an account</h1>
+        <p className="auth-subtitle" style={{ textAlign: 'center' }}>An administrator will need to approve it before you can sign in</p>
 
         {error && <div className="error-banner" style={{ textAlign: 'left' }}>{error}</div>}
 
@@ -90,11 +90,11 @@ export default function Register() {
 
         <button className="btn btn-primary" type="submit" disabled={loading}
           style={{ width: '100%', justifyContent: 'center', marginTop: 6 }}>
-          {loading ? 'Création…' : 'Créer le compte'}
+          {loading ? 'Creating…' : 'Create account'}
         </button>
 
         <p style={{ fontSize: 13, color: '#64748B', marginTop: 16 }}>
-          Déjà un compte ? <Link to="/login">Se connecter</Link>
+          Already have an account? <Link to="/login">Sign in</Link>
         </p>
       </form>
     </div>

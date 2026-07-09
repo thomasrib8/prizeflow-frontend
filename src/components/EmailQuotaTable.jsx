@@ -2,44 +2,44 @@ function formatRelative(s) {
   if (!s) return null;
   const then = new Date(s.replace(' ', 'T') + 'Z').getTime();
   const diffSec = Math.round((Date.now() - then) / 1000);
-  if (diffSec < 5) return "à l'instant";
-  if (diffSec < 60) return `il y a ${diffSec}s`;
+  if (diffSec < 5) return 'just now';
+  if (diffSec < 60) return `${diffSec}s ago`;
   const diffMin = Math.round(diffSec / 60);
-  if (diffMin < 60) return `il y a ${diffMin} min`;
+  if (diffMin < 60) return `${diffMin} min ago`;
   const diffH = Math.round(diffMin / 60);
-  if (diffH < 24) return `il y a ${diffH} h`;
+  if (diffH < 24) return `${diffH}h ago`;
   const diffD = Math.round(diffH / 24);
-  return `il y a ${diffD} j`;
+  return `${diffD}d ago`;
 }
 
-/// Shared "Quota email" row table — rendered on the Dashboard (inline,
+/// Shared "Email quota" row table — rendered on the Dashboard (inline,
 /// admin-only) and on the App Health page (inside a Card), so the exact same
 /// fields/logic aren't duplicated between the two.
 export default function EmailQuotaTable({ status }) {
-  const etat = !status
+  const state = !status
     ? { icon: '⚪', label: '—' }
     : !status.configured
-    ? { icon: '⚪', label: 'Non configuré' }
+    ? { icon: '⚪', label: 'Not configured' }
     : status.apiKeyValid
-    ? { icon: '🟢', label: 'Connecté' }
-    : { icon: '🔴', label: 'Déconnecté' };
+    ? { icon: '🟢', label: 'Connected' }
+    : { icon: '🔴', label: 'Disconnected' };
 
-  const apiKeyLabel = !status || !status.configured ? '—' : status.apiKeyValid ? 'Valide' : 'Invalide';
+  const apiKeyLabel = !status || !status.configured ? '—' : status.apiKeyValid ? 'Valid' : 'Invalid';
   const quotaLabel =
     status?.quotaTotal && status?.quotaUsed !== null && status?.quotaUsed !== undefined
       ? `${status.quotaUsed.toLocaleString()} / ${status.quotaTotal.toLocaleString()}`
       : status?.quotaRemaining !== null && status?.quotaRemaining !== undefined
-      ? `${status.quotaRemaining.toLocaleString()} restants`
+      ? `${status.quotaRemaining.toLocaleString()} remaining`
       : '—';
 
   const rows = [
-    ['Etat', <span>{etat.icon} {etat.label}</span>],
+    ['State', <span>{state.icon} {state.label}</span>],
     ['API Key', apiKeyLabel],
     ['Quota', quotaLabel],
-    ["Emails aujourd'hui", status ? status.emailsToday : '—'],
-    ["Taux d'ouverture", status?.openRatePct !== null && status?.openRatePct !== undefined ? `${status.openRatePct} %` : '—'],
-    ['Dernier email', status ? (formatRelative(status.lastEmailAt) || '—') : '—'],
-    ['Dernière erreur', status ? (status.lastError ? formatRelative(status.lastError.at) : 'Aucune') : '—'],
+    ['Emails today', status ? status.emailsToday : '—'],
+    ['Open rate', status?.openRatePct !== null && status?.openRatePct !== undefined ? `${status.openRatePct} %` : '—'],
+    ['Last email', status ? (formatRelative(status.lastEmailAt) || '—') : '—'],
+    ['Last error', status ? (status.lastError ? formatRelative(status.lastError.at) : 'None') : '—'],
   ];
 
   return (

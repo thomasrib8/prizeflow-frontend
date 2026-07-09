@@ -153,17 +153,17 @@ export default function Calibration({ onExit }) {
 
     if (droppedFrom === 'CalIndex0' || droppedFrom === 'CalIndex1') {
       setInterruptedMessage(
-        "Position du taquet non validée par la roue à l'étape 2 : l'écart mesuré entre les positions " +
-        "des étapes 1 et 2 est hors de la plage acceptée. Repositionnez le taquet le plus précisément " +
-        "possible sur la goupille (toujours le même bord de taquet aux deux étapes) et recommencez la calibration."
+        'Cleat position not validated by the wheel at step 2: the measured gap between the step 1 and step 2 ' +
+        'positions is outside the accepted range. Reposition the cleat as precisely as possible on the pin ' +
+        '(always the same edge of the cleat at both steps) and restart the calibration.'
       );
     } else if (droppedFrom === 'CalRun') {
       setInterruptedMessage(
-        "La communication avec le moteur a été interrompue pendant l'enregistrement des lancers. " +
-        "Veuillez recommencer la calibration depuis le début."
+        'Communication with the motor was interrupted while recording the spins. ' +
+        'Please restart the calibration from the beginning.'
       );
     } else {
-      setInterruptedMessage('La calibration a été interrompue de façon inattendue par la roue. Veuillez recommencer.');
+      setInterruptedMessage('The calibration was unexpectedly interrupted by the wheel. Please restart.');
     }
   }, [inCalibration, wheelState]);
 

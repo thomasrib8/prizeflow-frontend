@@ -6,11 +6,11 @@ import WheelDiagnosticsRows from '../components/WheelDiagnosticsRows';
 
 const STATUS_TONE = { pending: 'orange', approved: 'green', deactivated: 'red' };
 const MODULES = [
+  { key: 'overview', label: 'Overview' },
   { key: 'profile', label: 'Client profile' },
-  { key: 'overview', label: "Vue d'ensemble" },
-  { key: 'activity', label: "Journal d'activité" },
-  { key: 'actions', label: 'Actions sur le compte' },
-  { key: 'notes', label: 'Notes internes' },
+  { key: 'activity', label: 'Activity log' },
+  { key: 'actions', label: 'Account actions' },
+  { key: 'notes', label: 'Internal notes' },
 ];
 
 function formatDT(s) {
@@ -21,7 +21,7 @@ function formatDT(s) {
 export default function UserDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [module, setModule] = useState('profile');
+  const [module, setModule] = useState('overview');
   const [detail, setDetail] = useState(null);
   const [overview, setOverview] = useState(null);
   const [activity, setActivity] = useState(null);
@@ -210,16 +210,16 @@ export default function UserDetail() {
         <>
           <Card title="Client profile" className="mt-card">
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, fontSize: 13 }}>
-              <div><span style={{ color: '#94A3B8' }}>Adresse</span><div>{detail.address || '—'}</div></div>
-              <div><span style={{ color: '#94A3B8' }}>Téléphone</span><div>{detail.phone || '—'}</div></div>
-              <div><span style={{ color: '#94A3B8' }}>Secteur d'activité</span><div>{detail.industry_sector || '—'}</div></div>
-              <div><span style={{ color: '#94A3B8' }}>Compte créé le</span><div>{formatDT(detail.created_at)}</div></div>
+              <div><span style={{ color: '#94A3B8' }}>Address</span><div>{detail.address || '—'}</div></div>
+              <div><span style={{ color: '#94A3B8' }}>Phone</span><div>{detail.phone || '—'}</div></div>
+              <div><span style={{ color: '#94A3B8' }}>Industry sector</span><div>{detail.industry_sector || '—'}</div></div>
+              <div><span style={{ color: '#94A3B8' }}>Account created on</span><div>{formatDT(detail.created_at)}</div></div>
             </div>
           </Card>
 
-          <Card title="Token de la roue (agent)" className="mt-card">
+          <Card title="Wheel token (agent)" className="mt-card">
             <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px' }}>
-              À coller dans le <code>.env</code> du Raspberry Pi de ce client (variable <code>AGENT_SECRET</code>) quand sa roue physique est mise en service.{' '}
+              Paste this into this client's Raspberry Pi <code>.env</code> (<code>AGENT_SECRET</code> variable) once their physical wheel is put into service.{' '}
               <button
                 type="button"
                 onClick={() => setShowSetupHelp(true)}
@@ -234,10 +234,10 @@ export default function UserDetail() {
                   flex: 1, padding: '9px 12px', background: '#F8FAFC', border: '1px solid #E2E8F0',
                   borderRadius: 8, fontSize: 13, wordBreak: 'break-all',
                 }}>{detail.agent_token}</code>
-                <Button variant="ghost" onClick={handleCopyAgentToken}>{tokenCopied ? 'Copié ✓' : 'Copier'}</Button>
+                <Button variant="ghost" onClick={handleCopyAgentToken}>{tokenCopied ? 'Copied ✓' : 'Copy'}</Button>
               </div>
             ) : (
-              <p className="page-subtitle">Pas encore généré — disponible une fois le compte approuvé.</p>
+              <p className="page-subtitle">Not generated yet — available once the account is approved.</p>
             )}
           </Card>
 
@@ -367,7 +367,7 @@ WHEEL_SECURITY_KEY=...`}
               <p>Replace the values with what was just generated, save the same way, and restart the agent again (same command as above).</p>
 
               <h4 style={{ fontSize: 13, fontWeight: 700, color: '#0F172A', margin: '16px 0 6px' }}>3. Verify it worked</h4>
-              <p>In the client's own app, clicking the "Wheel connected" / "Wheel offline" badge in the sidebar opens a diagnostics popup showing a "Wheel identity" section — the Model Number, Serial Number and Security Key shown there should match what you just entered. The same values are also visible here, under this client's "Vue d'ensemble opérationnelle" tab.</p>
+              <p>In the client's own app, clicking the "Wheel connected" / "Wheel offline" badge in the sidebar opens a diagnostics popup showing a "Wheel identity" section — the Model Number, Serial Number and Security Key shown there should match what you just entered. The same values are also visible here, under this client's "Overview" tab.</p>
             </div>
           </div>
         </div>
@@ -375,12 +375,12 @@ WHEEL_SECURITY_KEY=...`}
 
       {/* A. Operational overview — no guest personal data, ever. */}
       {module === 'overview' && (
-        <Card title="Vue d'ensemble opérationnelle" className="mt-card">
+        <Card title="Operational overview" className="mt-card">
           <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 14 }}>
-            <span style={{ fontSize: 13, color: '#64748B' }}>État de la roue :</span>
+            <span style={{ fontSize: 13, color: '#64748B' }}>Wheel status:</span>
             {overview ? (
               <Badge tone={overview.wheel.connected ? 'green' : 'red'}>
-                {overview.wheel.connected ? 'En ligne' : 'Hors ligne'}
+                {overview.wheel.connected ? 'Online' : 'Offline'}
               </Badge>
             ) : <span style={{ fontSize: 13, color: '#94A3B8' }}>…</span>}
           </div>
@@ -392,10 +392,10 @@ WHEEL_SECURITY_KEY=...`}
           )}
 
           {!overview && <p className="page-subtitle">Loading…</p>}
-          {overview && overview.campaigns.length === 0 && <EmptyState title="Aucune campagne pour ce compte" />}
+          {overview && overview.campaigns.length === 0 && <EmptyState title="No campaigns for this account" />}
           {overview && overview.campaigns.length > 0 && (
             <table className="data-table">
-              <thead><tr><th>Campagne</th><th>Statut</th><th>Stock</th><th>Progression</th></tr></thead>
+              <thead><tr><th>Campaign</th><th>Status</th><th>Stock</th><th>Progress</th></tr></thead>
               <tbody>
                 {overview.campaigns.map((c) => (
                   <tr key={c.id}>
@@ -413,9 +413,9 @@ WHEEL_SECURITY_KEY=...`}
 
       {/* B. Activity log — metadata only, never the content of what was configured. */}
       {module === 'activity' && (
-        <Card title="Journal d'activité" className="mt-card">
+        <Card title="Activity log" className="mt-card">
           {!activity && <p className="page-subtitle">Loading…</p>}
-          {activity && activity.length === 0 && <EmptyState title="Aucune activité enregistrée" />}
+          {activity && activity.length === 0 && <EmptyState title="No activity recorded" />}
           {activity && activity.length > 0 && (
             <table className="data-table">
               <thead><tr><th>Action</th><th>Date</th></tr></thead>
@@ -434,14 +434,14 @@ WHEEL_SECURITY_KEY=...`}
 
       {/* C. Actions on the account */}
       {module === 'actions' && (
-        <Card title="Actions sur le compte" className="mt-card">
+        <Card title="Account actions" className="mt-card">
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
             {detail.status === 'deactivated' ? (
-              <Button disabled={busy} onClick={() => handleStatus('approved')}>Activer le compte</Button>
+              <Button disabled={busy} onClick={() => handleStatus('approved')}>Activate account</Button>
             ) : (
-              <Button variant="ghost" disabled={busy} onClick={() => handleStatus('deactivated')}>Désactiver le compte</Button>
+              <Button variant="ghost" disabled={busy} onClick={() => handleStatus('deactivated')}>Deactivate account</Button>
             )}
-            <Button variant="ghost" disabled={busy} onClick={handleResetPassword}>Réinitialiser le mot de passe</Button>
+            <Button variant="ghost" disabled={busy} onClick={handleResetPassword}>Reset password</Button>
             <select
               value={detail.role}
               disabled={busy}
@@ -452,7 +452,7 @@ WHEEL_SECURITY_KEY=...`}
               <option value="admin">Admin</option>
             </select>
             <Button variant="ghost" disabled={busy} onClick={handleDelete} style={{ color: '#EF4444' }}>
-              Supprimer le compte (RGPD)
+              Delete account (GDPR)
             </Button>
           </div>
         </Card>
@@ -460,17 +460,17 @@ WHEEL_SECURITY_KEY=...`}
 
       {/* Internal notes — admin-only visibility, enforced server-side. */}
       {module === 'notes' && (
-        <Card title="Notes internes (visibles admin uniquement)" className="mt-card">
+        <Card title="Internal notes (admin-only visibility)" className="mt-card">
           <form onSubmit={handleAddNote} style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
             <input
               value={newNote}
               onChange={(e) => setNewNote(e.target.value)}
-              placeholder="Ajouter une note…"
+              placeholder="Add a note…"
               style={{ flex: 1, padding: '9px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13 }}
             />
-            <Button type="submit" disabled={busy || !newNote.trim()}>Ajouter</Button>
+            <Button type="submit" disabled={busy || !newNote.trim()}>Add</Button>
           </form>
-          {notes && notes.length === 0 && <p className="page-subtitle">Aucune note pour ce compte.</p>}
+          {notes && notes.length === 0 && <p className="page-subtitle">No notes for this account.</p>}
           {notes && notes.length > 0 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {notes.map((n) => (
