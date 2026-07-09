@@ -79,6 +79,8 @@ export const api = {
   getUsersPendingCount: () => request('/users/pending-count'),
   getWheelIdentities: () => request('/users/wheel-identities'),
   generateWheelIdentity: (id, series) => request(`/users/${id}/wheel-identity`, { method: 'POST', body: { series } }),
+  recordWheelIdentity: (id, modelNumber, serialNumber, securityKey) =>
+    request(`/users/${id}/wheel-identity`, { method: 'POST', body: { modelNumber, serialNumber, securityKey } }),
   setUserStatus: (id, status) => request(`/users/${id}/status`, { method: 'PATCH', body: { status } }),
   setUserRole: (id, role) => request(`/users/${id}/role`, { method: 'PATCH', body: { role } }),
   getUserDetail: (id) => request(`/users/${id}`),

@@ -33,6 +33,10 @@ export default function UserDetail() {
   const [showSetupHelp, setShowSetupHelp] = useState(false);
   const [series, setSeries] = useState('1');
   const [wheelBusy, setWheelBusy] = useState(false);
+  const [showManualWheelEntry, setShowManualWheelEntry] = useState(false);
+  const [manualModelNumber, setManualModelNumber] = useState('');
+  const [manualSerialNumber, setManualSerialNumber] = useState('');
+  const [manualSecurityKey, setManualSecurityKey] = useState('');
 
   function load() {
     api.getUserDetail(id).then(setDetail).catch((e) => setError(e.message));
@@ -116,6 +120,36 @@ export default function UserDetail() {
         wheel_identity_generated_at: identity.wheel_identity_generated_at,
         wheel_first_connected_at: identity.wheel_first_connected_at,
       }));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setWheelBusy(false);
+    }
+  }
+
+  async function handleRecordManualWheelIdentity() {
+    if (!manualModelNumber.trim() || !manualSerialNumber.trim() || !manualSecurityKey.trim()) return;
+    setWheelBusy(true);
+    setError('');
+    try {
+      const identity = await api.recordWheelIdentity(
+        id,
+        manualModelNumber.trim(),
+        manualSerialNumber.trim(),
+        manualSecurityKey.trim()
+      );
+      setDetail((prev) => ({
+        ...prev,
+        wheel_model_number: identity.wheel_model_number,
+        wheel_serial_number: identity.wheel_serial_number,
+        wheel_security_key: identity.wheel_security_key,
+        wheel_identity_generated_at: identity.wheel_identity_generated_at,
+        wheel_first_connected_at: identity.wheel_first_connected_at,
+      }));
+      setShowManualWheelEntry(false);
+      setManualModelNumber('');
+      setManualSerialNumber('');
+      setManualSecurityKey('');
     } catch (err) {
       setError(err.message);
     } finally {
@@ -224,6 +258,58 @@ export default function UserDetail() {
                 {wheelBusy ? 'Generating…' : detail.wheel_serial_number ? 'Regenerate' : 'Generate'}
               </Button>
             </div>
+
+            {!showManualWheelEntry ? (
+              <button
+                type="button"
+                onClick={() => setShowManualWheelEntry(true)}
+                style={{ background: 'none', border: 'none', padding: 0, marginBottom: detail.wheel_serial_number ? 16 : 0, color: '#2563EB', textDecoration: 'underline', cursor: 'pointer', fontSize: 12, fontFamily: 'inherit' }}
+              >
+                Already set on the Pi manually? Record the existing values instead
+              </button>
+            ) : (
+              <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end', flexWrap: 'wrap', marginBottom: 16, padding: '12px', background: '#F8FAFC', borderRadius: 8 }}>
+                <label style={{ fontSize: 12, color: '#64748B' }}>Model Number
+                  <input
+                    value={manualModelNumber}
+                    onChange={(e) => setManualModelNumber(e.target.value)}
+                    placeholder="PF-ALPHA-V1"
+                    style={{ display: 'block', marginTop: 4, width: 130, padding: '7px 9px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13 }}
+                  />
+                </label>
+                <label style={{ fontSize: 12, color: '#64748B' }}>Serial Number
+                  <input
+                    value={manualSerialNumber}
+                    onChange={(e) => setManualSerialNumber(e.target.value)}
+                    placeholder="PF260000152"
+                    style={{ display: 'block', marginTop: 4, width: 130, padding: '7px 9px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13 }}
+                  />
+                </label>
+                <label style={{ fontSize: 12, color: '#64748B' }}>Security Key
+                  <input
+                    value={manualSecurityKey}
+                    onChange={(e) => setManualSecurityKey(e.target.value)}
+                    placeholder="K8Q7F3"
+                    style={{ display: 'block', marginTop: 4, width: 100, padding: '7px 9px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13 }}
+                  />
+                </label>
+                <Button
+                  variant="ghost"
+                  disabled={wheelBusy || !manualModelNumber.trim() || !manualSerialNumber.trim() || !manualSecurityKey.trim()}
+                  onClick={handleRecordManualWheelIdentity}
+                >
+                  {wheelBusy ? 'Saving…' : 'Save'}
+                </Button>
+                <button
+                  type="button"
+                  onClick={() => setShowManualWheelEntry(false)}
+                  style={{ background: 'none', border: 'none', color: '#94A3B8', cursor: 'pointer', fontSize: 12, fontFamily: 'inherit', padding: '8px 0' }}
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+
             {detail.wheel_serial_number && (
               <div style={{ fontSize: 13, color: '#0F172A', lineHeight: 1.9 }}>
                 <div>Model Number: <strong>{detail.wheel_model_number}</strong></div>
