@@ -104,46 +104,51 @@ function LibraryModule({ sequences, status, agentConnected, busyId, onActivate, 
     return <EmptyState title="No sequences yet" description="Build one in the Settings tab first." />;
   }
   return (
-    <Card title="Sequence library" className="mt-card">
-      <table className="data-table">
-        <thead><tr><th>Name</th><th>Steps</th><th>Status</th><th></th></tr></thead>
-        <tbody>
-          {sequences.map((seq) => {
-            const isActive = status?.active && status.sequenceId === seq.id;
-            return (
-              <tr key={seq.id}>
-                <td style={{ fontWeight: 500 }}>{seq.name}</td>
-                <td style={{ color: 'var(--text-muted)' }}>{seq.steps.map((s) => s + 1).join(', ')}</td>
-                <td>
-                  {isActive
-                    ? <Badge tone="orange">Running ({status.position}/{status.steps.length})</Badge>
-                    : <Badge tone="neutral">Ready</Badge>}
-                </td>
-                <td style={{ display: 'flex', gap: 8 }}>
-                  {isActive ? (
-                    <>
-                      <Button size="sm" variant="ghost" onClick={() => onView(seq)}>View</Button>
-                      <Button size="sm" variant="ghost" disabled={busyId === 'stop'} onClick={onStop} style={{ color: '#EF4444' }}>
-                        {busyId === 'stop' ? 'Stopping…' : 'Stop'}
-                      </Button>
-                    </>
-                  ) : (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      disabled={busyId === seq.id || !agentConnected || status?.active}
-                      onClick={() => onActivate(seq)}
-                    >
-                      {busyId === seq.id ? 'Activating…' : 'Activate'}
-                    </Button>
-                  )}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </Card>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 16, marginTop: 20 }}>
+      {sequences.map((seq) => {
+        const isActive = status?.active && status.sequenceId === seq.id;
+        return (
+          <Card key={seq.id}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10, marginBottom: 12 }}>
+              <h3 style={{ fontSize: 15, fontWeight: 700, margin: 0, color: '#0F172A' }}>{seq.name}</h3>
+              {isActive
+                ? <Badge tone="orange">Running ({status.position}/{status.steps.length})</Badge>
+                : <Badge tone="neutral">Ready</Badge>}
+            </div>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 20 }}>
+              {seq.steps.map((s, i) => (
+                <span key={i} style={{
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                  width: 26, height: 26, borderRadius: '50%', background: '#EFF6FF', color: '#2563EB',
+                  fontSize: 12, fontWeight: 700,
+                }}>
+                  {s + 1}
+                </span>
+              ))}
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              {isActive ? (
+                <>
+                  <Button size="sm" variant="ghost" onClick={() => onView(seq)}>View</Button>
+                  <Button size="sm" variant="ghost" disabled={busyId === 'stop'} onClick={onStop} style={{ color: '#EF4444' }}>
+                    {busyId === 'stop' ? 'Stopping…' : 'Stop'}
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  size="sm"
+                  variant="success"
+                  disabled={busyId === seq.id || !agentConnected || status?.active}
+                  onClick={() => onActivate(seq)}
+                >
+                  {busyId === seq.id ? 'Activating…' : 'Activate'}
+                </Button>
+              )}
+            </div>
+          </Card>
+        );
+      })}
+    </div>
   );
 }
 

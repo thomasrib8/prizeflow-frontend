@@ -4,6 +4,8 @@ import { Card, Badge } from '../components/ui';
 import { useWheelSocket } from '../hooks/useWheelSocket';
 import WheelSVG, { posToAngle } from '../components/WheelSVG';
 
+const CONFIRM_FLASH_MS = 5000;
+
 /// Revives the standalone wheel-control tool from the old webapp (before
 /// PrizeFlow's campaign/guest layer existed): pick a case, it gets forced on
 /// the wheel's next physical spin, or release the wheel back to free/neutral
@@ -18,15 +20,19 @@ import WheelSVG, { posToAngle } from '../components/WheelSVG';
 /// (force a case, force a different one, or free) fires immediately and is
 /// never blocked by a previous one still "in flight".
 ///
-/// Per Main.cpp, once a forced spin lands the wheel holds in RunWait forever
-/// with no auto-Free — watched here via the live wheel_status stream so a
-/// validated landing releases the wheel back to Free automatically.
+/// The wheel stays forced on the armed case indefinitely — spinning it again
+/// should keep landing on the same case — until the operator either arms a
+/// different one or explicitly frees it. A confirmed landing (the wheel's
+/// own RunWait state, per Main.cpp, plus a matching currentIndex) only flips
+/// the inline banner green for a few seconds as a "yes, that worked"
+/// confirmation; it never sends Free on its own.
 export default function Magic() {
   const { wheelStatus, agentConnected } = useWheelSocket();
   const [armedSlot, setArmedSlot] = useState(null);
+  const [justLanded, setJustLanded] = useState(false);
   const [error, setError] = useState('');
-  const [lastResult, setLastResult] = useState('');
   const armedSlotRef = useRef(null);
+  const flashTimeoutRef = useRef(null);
   armedSlotRef.current = armedSlot;
 
   const posAngle = posToAngle(wheelStatus?.currentPos ?? 0);
@@ -37,20 +43,25 @@ export default function Magic() {
     if (wheelState !== 'RunWait' || armedSlotRef.current === null) return;
     const target = armedSlotRef.current;
     if (wheelStatus?.currentIndex === target) {
-      setArmedSlot(null);
-      setLastResult(`Landed on Case ${target + 1}`);
-      api.wheelCommand('Free').catch((e) => setError(e.message));
+      setError('');
+      setJustLanded(true);
+      clearTimeout(flashTimeoutRef.current);
+      flashTimeoutRef.current = setTimeout(() => setJustLanded(false), CONFIRM_FLASH_MS);
     } else {
       // Spin too weak/off — stay armed on the same target and let the
       // operator try again rather than falsely reporting a landing.
+      setJustLanded(false);
       setError(`Missed — landed on Case ${(wheelStatus?.currentIndex ?? 0) + 1}. Still forcing Case ${target + 1}, spin again.`);
       api.wheelCommand(`Run;${target}`).catch((e) => setError(e.message));
     }
   }, [wheelState]);
 
+  useEffect(() => () => clearTimeout(flashTimeoutRef.current), []);
+
   async function handleSectionClick(slotIndex) {
     setError('');
-    setLastResult('');
+    setJustLanded(false);
+    clearTimeout(flashTimeoutRef.current);
     setArmedSlot(slotIndex);
     try {
       await api.wheelCommand(`Run;${slotIndex}`);
@@ -62,7 +73,8 @@ export default function Magic() {
 
   async function handleFree() {
     setError('');
-    setLastResult('');
+    setJustLanded(false);
+    clearTimeout(flashTimeoutRef.current);
     setArmedSlot(null);
     try {
       await api.wheelCommand('Free');
@@ -96,14 +108,15 @@ export default function Magic() {
           />
 
           {armedSlot !== null && (
-            <div style={{ fontSize: 13, fontWeight: 700, color: '#F59E0B', background: '#FFFBEB', padding: '8px 18px', borderRadius: 20 }}>
-              ⟳ Case {armedSlot + 1} armed — spin the wheel now
-            </div>
-          )}
-          {armedSlot === null && lastResult && (
-            <div style={{ fontSize: 13, fontWeight: 700, color: '#10B981', background: '#ECFDF5', padding: '8px 18px', borderRadius: 20 }}>
-              ✓ {lastResult}
-            </div>
+            justLanded ? (
+              <div style={{ fontSize: 13, fontWeight: 700, color: '#10B981', background: '#ECFDF5', padding: '8px 18px', borderRadius: 20 }}>
+                ✓ Case {armedSlot + 1} forced
+              </div>
+            ) : (
+              <div style={{ fontSize: 13, fontWeight: 700, color: '#F59E0B', background: '#FFFBEB', padding: '8px 18px', borderRadius: 20 }}>
+                ⟳ Case {armedSlot + 1} armed — spin the wheel now
+              </div>
+            )
           )}
 
           <button
