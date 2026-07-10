@@ -121,7 +121,7 @@ export default function LaunchCampaign() {
       )}
 
       {campaign !== null && (
-      <div className="grid-stats" style={{ gridTemplateColumns: '360px 1fr', alignItems: 'start' }}>
+      <div className="qr-layout">
         <Card title="Guest QR code">
           <div style={{ textAlign: 'center', padding: '12px 0' }}>
             {qrDataUrl ? (

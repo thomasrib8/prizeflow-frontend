@@ -68,7 +68,7 @@ export default function AppHealth() {
             <p style={{ fontSize: 12, color: '#94A3B8', marginBottom: 12 }}>
               Read directly from Render's and Netlify's public status pages.
             </p>
-            <div style={{ display: 'flex', gap: 28 }}>
+            <div style={{ display: 'flex', gap: 28, flexWrap: 'wrap', rowGap: 12 }}>
               <ServiceBadge name="Render" status={health.serviceStatus.render} />
               <ServiceBadge name="Netlify" status={health.serviceStatus.netlify} />
             </div>

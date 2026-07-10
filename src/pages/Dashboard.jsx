@@ -123,7 +123,7 @@ export default function Dashboard() {
       </div>
 
       {/* 4 KPI cards */}
-      <div className="grid-stats" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+      <div className="grid-stats-3">
         <StatCard label="Remaining gifts" value={kpi ? kpi.remaining.toLocaleString() : '—'}
           sub={kpi ? `${Math.round((kpi.remaining/kpi.planned)*100)}% of total` : undefined}
           accent="orange" pct={kpi ? Math.round((kpi.remaining/kpi.planned)*100) : 0} />
@@ -136,7 +136,7 @@ export default function Dashboard() {
       </div>
 
       {/* Chart + Campaign Summary */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: 12, marginBottom: 12 }}>
+      <div className="dash-row-wide">
 
         {/* Distribution overview chart */}
         <div className="card">
@@ -216,7 +216,7 @@ export default function Dashboard() {
       </div>
 
       {/* Top Rewards + Recent Activity */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: 12, marginBottom: 12 }}>
+      <div className="dash-row-wide">
 
         {/* Top Rewards */}
         <div className="card">

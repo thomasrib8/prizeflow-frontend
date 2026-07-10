@@ -39,7 +39,7 @@ function Modal({ children, wide }) {
     }}>
       <div style={{
         background: 'white', borderRadius: 16, padding: '36px 40px',
-        width: wide ? 700 : 460, maxHeight: '90vh', overflowY: 'auto',
+        width: wide ? 700 : 460, maxWidth: '92vw', maxHeight: '90vh', overflowY: 'auto',
         boxShadow: '0 30px 80px rgba(0,0,0,0.3)',
       }}>
         {children}
@@ -313,7 +313,7 @@ export default function Calibration({ onExit }) {
       {/* ── STEP 1: Place cleat near 1-12 boundary (FENETRE 1) ── */}
       {step === 1 && (
         <Modal wide>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40, alignItems: 'center' }}>
+          <div className="cal-step-grid">
             <div>
               <div style={{ fontSize: 11, fontWeight: 700, color: '#2563EB', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>{stepTitles[1]} — Defining section 1</div>
               <h2 style={{ fontSize: 20, fontWeight: 700, margin: '0 0 16px', color: '#0F172A' }}>Position the cleat</h2>
@@ -339,7 +339,7 @@ export default function Calibration({ onExit }) {
       {/* ── STEP 2: Place cleat near 1-2 boundary (FENETRE 2) ── */}
       {step === 2 && (
         <Modal wide>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40, alignItems: 'center' }}>
+          <div className="cal-step-grid">
             <div>
               <div style={{ fontSize: 11, fontWeight: 700, color: '#2563EB', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>{stepTitles[2]} — Defining section 1</div>
               <h2 style={{ fontSize: 20, fontWeight: 700, margin: '0 0 16px', color: '#0F172A' }}>Reposition the cleat</h2>
@@ -488,7 +488,7 @@ export default function Calibration({ onExit }) {
       {/* ── Cancel warning popup ── */}
       {showCancelWarning && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 300 }}>
-          <div style={{ background: 'white', borderRadius: 16, padding: '32px 36px', width: 420, boxShadow: '0 30px 80px rgba(0,0,0,0.4)' }}>
+          <div style={{ background: 'white', borderRadius: 16, padding: '32px 36px', width: 420, maxWidth: '92vw', boxShadow: '0 30px 80px rgba(0,0,0,0.4)' }}>
             <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start', marginBottom: 20 }}>
               <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#FEF2F2', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>

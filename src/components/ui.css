@@ -161,6 +161,48 @@
   margin-bottom: 16px;
 }
 @media (max-width: 900px) { .grid-stats { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .grid-stats { grid-template-columns: 1fr; } }
+
+/* Same idea, 3-up (Dashboard KPI row) — a plain inline gridTemplateColumns
+   override always wins over a class's media query (higher specificity),
+   so pages needing a non-4-column count must use one of these dedicated
+   classes instead of overriding .grid-stats inline, or the mobile collapse
+   silently stops working. */
+.grid-stats-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+@media (max-width: 900px) { .grid-stats-3 { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .grid-stats-3 { grid-template-columns: 1fr; } }
+
+/* Two-column row, wider left column (chart/list + a narrower side card) —
+   same collapse-to-one-column behavior as .dash-row, different ratio. */
+.dash-row-wide {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+@media (max-width: 900px) { .dash-row-wide { grid-template-columns: 1fr; } }
+
+/* Fixed-width QR card + flexible side card (LaunchCampaign) — the fixed
+   360px column doesn't shrink on its own, so it must collapse to a single
+   column well before the viewport gets anywhere near 360px wide. */
+.qr-layout {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  align-items: start;
+  gap: 12px;
+}
+@media (max-width: 900px) { .qr-layout { grid-template-columns: 1fr; } }
+
+/* Text + fixed-size WheelSVG side-by-side (Calibration steps 1-2) — even
+   inside the modal's 92vw cap, a 220px wheel graphic plus a paragraph of
+   text can't share two equal columns on a phone, so this stacks them. */
+.cal-step-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+@media (max-width: 640px) { .cal-step-grid { grid-template-columns: 1fr; gap: 20px; text-align: center; } }
 
 /* Data table */
 table.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -230,8 +272,9 @@ table.data-table tr:hover td { background: #FAFBFC; }
   outline: none;
 }
 
-/* Tabs */
-.tabs { display: flex; gap: 4px; margin-bottom: 14px; border-bottom: 1px solid var(--border); }
+/* Tabs — scrolls horizontally instead of overflowing/wrapping when there
+   are too many tabs to fit a phone's width (e.g. UserDetail's 5 tabs). */
+.tabs { display: flex; gap: 4px; margin-bottom: 14px; border-bottom: 1px solid var(--border); overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .tab {
   background: none;
   border: none;
@@ -243,6 +286,8 @@ table.data-table tr:hover td { background: #FAFBFC; }
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
   font-family: inherit;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 .tab.active { color: var(--blue); border-bottom-color: var(--blue); }
 
@@ -290,7 +335,12 @@ table.data-table tr:hover td { background: #FAFBFC; }
 /* Slots grid */
 .slots-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px 16px; }
 @media (max-width: 900px) { .slots-grid { grid-template-columns: 1fr; } }
-.slot-row { display: grid; grid-template-columns: 52px 1fr 80px 64px 52px; gap: 8px; align-items: center; }
+/* minmax(0, 1fr), not plain 1fr: a bare 1fr track still won't shrink below
+   its content's min-content width, and a text input's default min-content
+   is ~170-200px — wide enough on its own to blow this row past a phone's
+   viewport width even though every other column is a fixed, already-narrow
+   size. minmax(0, 1fr) lets the input's own width actually follow the track. */
+.slot-row { display: grid; grid-template-columns: 52px minmax(0, 1fr) 80px 64px 52px; gap: 8px; align-items: center; }
 .slot-index { font-size: 11px; font-weight: 700; color: var(--text-muted); font-family: var(--font-mono); }
 .slot-row input, .slot-row select { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 10px; font-size: 13px; font-family: inherit; }
 .slot-pct { font-size: 11px; font-weight: 700; color: var(--blue); font-family: var(--font-mono); text-align: right; }

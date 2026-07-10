@@ -30,7 +30,7 @@ export default function Campaigns() {
       {error && <div className="error-banner">{error}</div>}
 
       {campaigns && campaigns.length > 0 && (
-        <div style={{ display: 'flex', gap: 6, marginBottom: 14 }}>
+        <div style={{ display: 'flex', gap: 6, marginBottom: 14, flexWrap: 'wrap' }}>
           {STATUS_FILTERS.map(f => (
             <button key={f} onClick={() => setStatusFilter(f)} style={{
               padding: '6px 14px', borderRadius: 20, border: 'none', fontSize: 12, fontWeight: 600,
