@@ -109,11 +109,14 @@ export default function WheelSVG({ positionAngle = 0, size = 220, highlightSecti
       {/* Outer circle */}
       <circle cx={cx} cy={cy} r={r} fill="none" stroke="#111" strokeWidth="2" />
 
-      {/* Labels */}
+      {/* Labels — pointerEvents: 'none' so clicks (and drag-to-select) pass
+          straight through to the section path underneath instead of hitting
+          the text itself, which sits on top in SVG paint order. */}
       {labels.map(l => (
         <text key={l.idx} x={l.x} y={l.y} textAnchor="middle" dominantBaseline="central"
           fontSize="18" fontWeight="900" fontFamily="Arial Black, sans-serif"
           fill={highlightSection === l.idx ? '#2563EB' : '#111'}
+          style={{ pointerEvents: 'none', userSelect: 'none' }}
           transform={`rotate(${(l.idx + 0.5) * sectionAngle}, ${l.x}, ${l.y})`}>
           {l.num}
         </text>
