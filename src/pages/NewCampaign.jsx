@@ -113,7 +113,7 @@ export default function NewCampaign() {
           slotIndex: s.slotIndex,
           giftName: s.giftName,
           stock: Number(s.stock),
-          redeemMethod: s.redeemMethod === 'code' ? 'code' : 'qr',
+          redeemMethod: ['code', 'voucher'].includes(s.redeemMethod) ? s.redeemMethod : 'qr',
         }))
       });
       navigate(`/campaigns/${created.id}`);
@@ -199,7 +199,7 @@ export default function NewCampaign() {
             </div>
           }>
           <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 12px' }}>
-            "Redeem" chooses how the guest confirms their gift: <b>QR</b> links straight to it, <b>Code</b> emails an 8-character code to type in on the Rewards page.
+            "Redeem" chooses how the guest confirms their gift: <b>QR</b> links straight to it, <b>Code</b> emails an 8-character code to type in on the Rewards page, <b>Voucher</b> just tells the guest to see a staff member for their physical voucher.
           </p>
           <div className="slots-grid">
             {slots.map((s, i) => {
@@ -212,6 +212,7 @@ export default function NewCampaign() {
                   <select value={s.redeemMethod} title="How the guest confirms their gift" onChange={e => updateSlot(i, 'redeemMethod', e.target.value)}>
                     <option value="qr">QR</option>
                     <option value="code">Code</option>
+                    <option value="voucher">Voucher</option>
                   </select>
                   <div className="slot-pct">{pct ? `${pct.toFixed(1)}%` : '—'}</div>
                 </div>
