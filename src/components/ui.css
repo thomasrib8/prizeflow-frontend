@@ -226,18 +226,20 @@ table.data-table tr:last-child td { border-bottom: none; }
 table.data-table tr:hover td { background: #FAFBFC; }
 
 /* On phones, let wide tables scroll horizontally within their own card
-   instead of squishing columns unreadably or overflowing the whole page. */
+   instead of squishing columns unreadably or overflowing the whole page.
+   Deliberately does NOT force thead/tbody/tr to their own `display: table`
+   — that splits the header and every row into separate, independently-
+   sized tables with no shared column grid between them, which is what was
+   producing garbled/overlapping header and cell text on real phones. Just
+   making the outer <table> a scrollable block box is enough: browsers
+   auto-generate the anonymous table wrapper needed to keep thead/tbody/tr
+   laid out as one normal, correctly-aligned table inside it. */
 @media (max-width: 768px) {
   table.data-table {
     display: block;
     overflow-x: auto;
     white-space: nowrap;
     -webkit-overflow-scrolling: touch;
-  }
-  table.data-table thead, table.data-table tbody, table.data-table tr {
-    display: table;
-    width: 100%;
-    table-layout: fixed;
   }
 }
 
