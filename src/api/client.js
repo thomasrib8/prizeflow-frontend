@@ -171,7 +171,7 @@ export const api = {
   spinDemo: (slotIndex) => request('/spin/demo', { method: 'POST', body: { slotIndex } }),
 
   listAdminSequences: () => request('/admin-sequences'),
-  createAdminSequence: (name, steps) => request('/admin-sequences', { method: 'POST', body: { name, steps } }),
+  createAdminSequence: (name, steps, description) => request('/admin-sequences', { method: 'POST', body: { name, steps, description } }),
   deleteAdminSequence: (id) => request(`/admin-sequences/${id}`, { method: 'DELETE' }),
   activateAdminSequence: (id) => request(`/admin-sequences/${id}/activate`, { method: 'POST' }),
   stopAdminSequence: () => request('/admin-sequences/stop', { method: 'POST' }),

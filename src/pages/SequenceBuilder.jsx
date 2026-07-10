@@ -109,12 +109,15 @@ function LibraryModule({ sequences, status, agentConnected, busyId, onActivate, 
         const isActive = status?.active && status.sequenceId === seq.id;
         return (
           <Card key={seq.id}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10, marginBottom: 12 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10, marginBottom: seq.description ? 6 : 12 }}>
               <h3 style={{ fontSize: 15, fontWeight: 700, margin: 0, color: '#0F172A' }}>{seq.name}</h3>
               {isActive
                 ? <Badge tone="orange">Running ({status.position}/{status.steps.length})</Badge>
                 : <Badge tone="neutral">Ready</Badge>}
             </div>
+            {seq.description && (
+              <p style={{ fontSize: 12, color: '#64748B', margin: '0 0 12px', lineHeight: 1.5 }}>{seq.description}</p>
+            )}
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 20 }}>
               {seq.steps.map((s, i) => (
                 <span key={i} style={{
@@ -155,6 +158,7 @@ function LibraryModule({ sequences, status, agentConnected, busyId, onActivate, 
 function SettingsModule({ wheelStatus, agentConnected, sequences, busyId, saving, isSeqActive, onSave, onDelete }) {
   const [steps, setSteps] = useState([]);
   const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
 
   const posAngle = posToAngle(wheelStatus?.currentPos ?? 0);
   const currentCase = Math.floor((((posAngle % 360) + 360) % 360) / 30); // 0-11
@@ -169,8 +173,9 @@ function SettingsModule({ wheelStatus, agentConnected, sequences, busyId, saving
 
   async function handleSave() {
     if (!name.trim() || steps.length === 0) return;
-    await onSave(name.trim(), steps);
+    await onSave(name.trim(), steps, description.trim());
     setName('');
+    setDescription('');
     setSteps([]);
   }
 
@@ -216,13 +221,23 @@ function SettingsModule({ wheelStatus, agentConnected, sequences, busyId, saving
           )}
         </div>
 
-        <div style={{ display: 'flex', gap: 10, marginTop: 18, alignItems: 'center', flexWrap: 'wrap' }}>
+        <div style={{ marginTop: 18 }}>
           <input
             placeholder="Sequence name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            style={{ flex: '1 1 200px', minWidth: 0, padding: '10px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 14 }}
+            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 14, marginBottom: 10, boxSizing: 'border-box' }}
           />
+          <textarea
+            placeholder="Description (optional)"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={2}
+            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 14, fontFamily: 'inherit', resize: 'vertical', boxSizing: 'border-box' }}
+          />
+        </div>
+
+        <div style={{ marginTop: 12 }}>
           <Button onClick={handleSave} disabled={saving || !name.trim() || steps.length === 0}>
             {saving ? 'Saving…' : 'Save sequence'}
           </Button>
@@ -240,7 +255,12 @@ function SettingsModule({ wheelStatus, agentConnected, sequences, busyId, saving
             <tbody>
               {sequences.map((seq) => (
                 <tr key={seq.id}>
-                  <td style={{ fontWeight: 500 }}>{seq.name}</td>
+                  <td>
+                    <div style={{ fontWeight: 500 }}>{seq.name}</div>
+                    {seq.description && (
+                      <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{seq.description}</div>
+                    )}
+                  </td>
                   <td style={{ color: 'var(--text-muted)' }}>{seq.steps.map((s) => s + 1).join(', ')}</td>
                   <td>
                     <Button
@@ -319,11 +339,11 @@ export default function SequenceBuilder() {
     }
   }
 
-  async function handleSave(name, steps) {
+  async function handleSave(name, steps, description) {
     setSaving(true);
     setError('');
     try {
-      await api.createAdminSequence(name, steps);
+      await api.createAdminSequence(name, steps, description);
       loadSequences();
     } catch (e) {
       setError(e.message);
