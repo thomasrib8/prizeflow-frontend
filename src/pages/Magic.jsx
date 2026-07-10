@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { api } from '../api/client';
 import { Card, Badge } from '../components/ui';
 import { useWheelSocket } from '../hooks/useWheelSocket';
@@ -7,42 +7,63 @@ import WheelSVG, { posToAngle } from '../components/WheelSVG';
 /// Revives the standalone wheel-control tool from the old webapp (before
 /// PrizeFlow's campaign/guest layer existed): pick a case, it gets forced on
 /// the wheel's next physical spin, or release the wheel back to free/neutral
-/// play. Deliberately reuses the exact same primitives as everywhere else —
-/// api.spinDemo (Run;X, awaits a confirmed landing, logs a "Demo" row in
-/// History so a force-test never gets mistaken for a real distribution) and
-/// api.wheelCommand('Free') (the same raw passthrough Calibration.jsx uses).
-/// The FORCE/FREE badge is read straight off the wheel's own live-reported
-/// state rather than tracked separately, so it always reflects reality.
+/// play at any time.
+///
+/// Uses raw passthrough commands (Run;X / Free — the same primitives
+/// Calibration.jsx and adminSequence.js already use) instead of the
+/// promise-based /spin/demo: that endpoint waits for hub.js's guest-oriented
+/// spin-confirmation heuristic (built around motor-driven spin speed curves)
+/// to resolve, which blocks re-arming to a different case for up to 90s and
+/// doesn't know how to react to a manual Free cutting in. Here every click
+/// (force a case, force a different one, or free) fires immediately and is
+/// never blocked by a previous one still "in flight".
+///
+/// Per Main.cpp, once a forced spin lands the wheel holds in RunWait forever
+/// with no auto-Free — watched here via the live wheel_status stream so a
+/// validated landing releases the wheel back to Free automatically.
 export default function Magic() {
   const { wheelStatus, agentConnected } = useWheelSocket();
   const [armedSlot, setArmedSlot] = useState(null);
-  const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [lastResult, setLastResult] = useState('');
+  const armedSlotRef = useRef(null);
+  armedSlotRef.current = armedSlot;
 
   const posAngle = posToAngle(wheelStatus?.currentPos ?? 0);
   const wheelState = wheelStatus?.state || '';
-  const isFree = !wheelState || wheelState === 'Free';
+  const isForced = armedSlot !== null || (!!wheelState && wheelState !== 'Free');
+
+  useEffect(() => {
+    if (wheelState !== 'RunWait' || armedSlotRef.current === null) return;
+    const target = armedSlotRef.current;
+    if (wheelStatus?.currentIndex === target) {
+      setArmedSlot(null);
+      setLastResult(`Landed on Case ${target + 1}`);
+      api.wheelCommand('Free').catch((e) => setError(e.message));
+    } else {
+      // Spin too weak/off — stay armed on the same target and let the
+      // operator try again rather than falsely reporting a landing.
+      setError(`Missed — landed on Case ${(wheelStatus?.currentIndex ?? 0) + 1}. Still forcing Case ${target + 1}, spin again.`);
+      api.wheelCommand(`Run;${target}`).catch((e) => setError(e.message));
+    }
+  }, [wheelState]);
 
   async function handleSectionClick(slotIndex) {
-    if (busy) return;
-    setBusy(true);
     setError('');
     setLastResult('');
     setArmedSlot(slotIndex);
     try {
-      await api.spinDemo(slotIndex);
-      setLastResult(`Landed on Case ${slotIndex + 1}`);
+      await api.wheelCommand(`Run;${slotIndex}`);
     } catch (e) {
       setError(e.message);
-    } finally {
-      setBusy(false);
       setArmedSlot(null);
     }
   }
 
   async function handleFree() {
     setError('');
+    setLastResult('');
+    setArmedSlot(null);
     try {
       await api.wheelCommand('Free');
     } catch (e) {
@@ -57,7 +78,7 @@ export default function Magic() {
           <h1 className="page-title">Magic</h1>
           <p className="page-subtitle">Click a case to force it on the wheel's next spin</p>
         </div>
-        <Badge tone={isFree ? 'green' : 'orange'}>{isFree ? 'FREE' : 'FORCE'}</Badge>
+        <Badge tone={isForced ? 'orange' : 'green'}>{isForced ? 'FORCE' : 'FREE'}</Badge>
       </div>
 
       {!agentConnected && (
@@ -71,15 +92,15 @@ export default function Magic() {
             positionAngle={posAngle}
             size={280}
             highlightSection={armedSlot}
-            onSectionClick={agentConnected && !busy ? handleSectionClick : undefined}
+            onSectionClick={agentConnected ? handleSectionClick : undefined}
           />
 
-          {busy && armedSlot !== null && (
+          {armedSlot !== null && (
             <div style={{ fontSize: 13, fontWeight: 700, color: '#F59E0B', background: '#FFFBEB', padding: '8px 18px', borderRadius: 20 }}>
               ⟳ Case {armedSlot + 1} armed — spin the wheel now
             </div>
           )}
-          {!busy && lastResult && (
+          {armedSlot === null && lastResult && (
             <div style={{ fontSize: 13, fontWeight: 700, color: '#10B981', background: '#ECFDF5', padding: '8px 18px', borderRadius: 20 }}>
               ✓ {lastResult}
             </div>
