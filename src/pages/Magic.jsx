@@ -7,9 +7,12 @@ import WheelSVG, { posToAngle } from '../components/WheelSVG';
 const CONFIRM_FLASH_MS = 5000;
 // Same constants as hub.js's own proven guest-spin landing detection
 // (ws/hub.js's pendingSpin stability check) — 5 consecutive near-identical
-// currentPos readings before treating the wheel as physically stopped.
+// currentPos readings before treating the wheel as physically stopped, and
+// a 0.5 minimum move-away-from-start before evaluating anything at all (see
+// MOVE_THRESHOLD below).
 const STABLE_SAMPLES = 5;
 const STABLE_EPSILON = 0.02;
+const MOVE_THRESHOLD = 0.5;
 
 /// Revives the standalone wheel-control tool from the old webapp (before
 /// PrizeFlow's campaign/guest layer existed): pick a case, it gets forced on
@@ -29,7 +32,12 @@ const STABLE_EPSILON = 0.02;
 /// hub.js's own working guest-spin confirmation does, rather than any
 /// particular wheel state string — an earlier version keyed off a literal
 /// "RunWait" state (inferred from a code comment, never confirmed against
-/// real hardware) and it never fired on the real wheel.
+/// real hardware) and it never fired on the real wheel. Crucially, it also
+/// waits for the wheel to have moved at least MOVE_THRESHOLD away from
+/// wherever it was sitting when armed before evaluating stability at all —
+/// without that, a wheel already sitting motionless from a previous spin
+/// looks instantly "stable" the moment a new case is armed, and falsely
+/// reports a mismatch before the operator has even touched the wheel.
 ///
 /// The wheel stays forced on the armed case indefinitely — spinning it again
 /// should keep landing on the same case — until the operator either arms a
@@ -43,7 +51,7 @@ export default function Magic() {
   const [error, setError] = useState('');
   const armedSlotRef = useRef(null);
   const flashTimeoutRef = useRef(null);
-  const stableRef = useRef({ count: 0, lastPos: null });
+  const trackingRef = useRef({ count: 0, lastPos: null, startPos: null, hasStartedMoving: false });
   armedSlotRef.current = armedSlot;
 
   const posAngle = posToAngle(wheelStatus?.currentPos ?? 0);
@@ -55,25 +63,32 @@ export default function Magic() {
     if (target === null || !wheelStatus) return;
 
     const pos = wheelStatus.currentPos;
-    const posStable = stableRef.current.lastPos !== null && Math.abs(pos - stableRef.current.lastPos) < STABLE_EPSILON;
-    stableRef.current.count = posStable ? stableRef.current.count + 1 : 0;
-    stableRef.current.lastPos = pos;
+    const tr = trackingRef.current;
 
-    if (stableRef.current.count !== STABLE_SAMPLES) return;
+    if (tr.startPos === null) tr.startPos = pos;
+    if (!tr.hasStartedMoving) {
+      if (Math.abs(pos - tr.startPos) >= MOVE_THRESHOLD) tr.hasStartedMoving = true;
+      tr.lastPos = pos;
+      return; // don't evaluate landing until the wheel has genuinely moved
+    }
+
+    const posStable = tr.lastPos !== null && Math.abs(pos - tr.lastPos) < STABLE_EPSILON;
+    tr.count = posStable ? tr.count + 1 : 0;
+    tr.lastPos = pos;
+
+    if (tr.count !== STABLE_SAMPLES) return;
 
     if (wheelStatus.currentIndex === target) {
-      setError('');
       setJustLanded(true);
       clearTimeout(flashTimeoutRef.current);
       flashTimeoutRef.current = setTimeout(() => setJustLanded(false), CONFIRM_FLASH_MS);
     } else {
-      // Stopped, but not on the armed case (spin too weak/off) — stay armed
-      // on the same target and let the operator try again rather than
-      // falsely reporting a landing.
+      // Stopped, but not on the armed case (spin too weak/off) — silently
+      // stay armed on the same target and let the operator try again; not
+      // worth surfacing as an error, it's an expected part of manual testing.
       setJustLanded(false);
-      setError(`Missed — landed on Case ${wheelStatus.currentIndex + 1}. Still forcing Case ${target + 1}, spin again.`);
-      api.wheelCommand(`Run;${target}`).catch((e) => setError(e.message));
-      stableRef.current.count = 0; // don't keep re-firing while sitting on the wrong case
+      api.wheelCommand(`Run;${target}`).catch(() => {});
+      tr.count = 0; // don't keep re-firing while sitting on the wrong case
     }
   }, [wheelStatus]);
 
@@ -83,7 +98,7 @@ export default function Magic() {
     setError('');
     setJustLanded(false);
     clearTimeout(flashTimeoutRef.current);
-    stableRef.current = { count: 0, lastPos: null };
+    trackingRef.current = { count: 0, lastPos: null, startPos: null, hasStartedMoving: false };
     setArmedSlot(slotIndex);
     try {
       await api.wheelCommand(`Run;${slotIndex}`);
@@ -97,7 +112,7 @@ export default function Magic() {
     setError('');
     setJustLanded(false);
     clearTimeout(flashTimeoutRef.current);
-    stableRef.current = { count: 0, lastPos: null };
+    trackingRef.current = { count: 0, lastPos: null, startPos: null, hasStartedMoving: false };
     setArmedSlot(null);
     try {
       await api.wheelCommand('Free');

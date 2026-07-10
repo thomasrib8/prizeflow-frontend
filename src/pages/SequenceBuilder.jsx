@@ -183,7 +183,7 @@ function SettingsModule({ wheelStatus, agentConnected, sequences, busyId, saving
             <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 10px' }}>
               Spin the wheel by hand, then click Add to append whichever case the cleat lands on.
             </p>
-            <Button variant="ghost" onClick={handleAddStep} disabled={!agentConnected}>
+            <Button variant="success" onClick={handleAddStep} disabled={!agentConnected}>
               Add Case {currentCase + 1}
             </Button>
           </div>
