@@ -92,7 +92,16 @@ export default function Magic() {
     }
   }, [wheelStatus]);
 
-  useEffect(() => () => clearTimeout(flashTimeoutRef.current), []);
+  useEffect(() => () => {
+    clearTimeout(flashTimeoutRef.current);
+    // Release the wheel when leaving this page — otherwise a case armed
+    // here and never explicitly freed stays forced on the physical wheel
+    // (RunWait holds forever, see the comment above), silently interfering
+    // the next time the wheel is used from Sequence or a live campaign.
+    if (armedSlotRef.current !== null) {
+      api.wheelCommand('Free').catch(() => {});
+    }
+  }, []);
 
   async function handleSectionClick(slotIndex) {
     setError('');
