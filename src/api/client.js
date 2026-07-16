@@ -183,6 +183,37 @@ export const api = {
   getAccountSettings: () => request('/account/settings'),
   updateAccountSettings: (payload) => request('/account/settings', { method: 'PATCH', body: payload }),
 
+  // Reward-win email customization (subject/body per redeem method + a
+  // shared header logo). Uploading/deleting the logo isn't plain JSON, so
+  // those two bypass the shared `request` helper.
+  getEmailTemplates: () => request('/account/email-templates'),
+  updateEmailTemplates: (templates) => request('/account/email-templates', { method: 'PATCH', body: { templates } }),
+  uploadEmailLogo: async (file) => {
+    const token = getToken();
+    const formData = new FormData();
+    formData.append('logo', file);
+    const res = await fetch(`${API_BASE}/account/email-logo`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) throw new Error((data && data.error) || `Request failed (${res.status})`);
+    return data;
+  },
+  deleteEmailLogo: () => request('/account/email-logo', { method: 'DELETE' }),
+  // Returns an object URL for the account's current custom logo, or null if
+  // none is set — caller is responsible for revoking it when done.
+  getEmailLogoPreviewUrl: async () => {
+    const token = getToken();
+    const res = await fetch(`${API_BASE}/account/email-logo`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    return URL.createObjectURL(blob);
+  },
+
   // Guest-facing (public, unauthenticated — scanned via QR, no login).
   getGuestCampaign: (token) => request(`/guest/${token}/campaign`, { auth: false }),
   joinGuestQueue: (token, payload) =>

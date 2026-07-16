@@ -7,7 +7,14 @@ import Calibration from './Calibration';
 const MODULES = [
   { key: 'information', label: 'Information' },
   { key: 'google-review', label: 'Google review' },
+  { key: 'email-templates', label: 'Reward emails' },
   { key: 'calibration', label: 'Calibration' },
+];
+
+const REDEEM_METHOD_TABS = [
+  { key: 'qr', label: 'QR code' },
+  { key: 'code', label: 'Code' },
+  { key: 'voucher', label: 'Voucher' },
 ];
 
 const PROFILE_FIELDS = [
@@ -327,6 +334,186 @@ function GoogleReviewModule() {
   );
 }
 
+function EmailTemplatesModule() {
+  const [templates, setTemplates] = useState(null);
+  const [defaults, setDefaults] = useState({ subject: '', bodyText: '' });
+  const [method, setMethod] = useState('qr');
+  const [hasCustomLogo, setHasCustomLogo] = useState(false);
+  const [logoPreviewUrl, setLogoPreviewUrl] = useState(null);
+  const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [saveMsg, setSaveMsg] = useState('');
+  const [logoBusy, setLogoBusy] = useState(false);
+
+  function loadLogoPreview() {
+    api.getEmailLogoPreviewUrl().then((url) => setLogoPreviewUrl((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return url;
+    }));
+  }
+
+  useEffect(() => {
+    api.getEmailTemplates()
+      .then((res) => {
+        setTemplates(res.templates);
+        setDefaults({ subject: res.defaultSubject, bodyText: res.defaultBodyText });
+        setHasCustomLogo(res.hasCustomLogo);
+        if (res.hasCustomLogo) loadLogoPreview();
+      })
+      .catch((e) => setError(e.message));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => () => { if (logoPreviewUrl) URL.revokeObjectURL(logoPreviewUrl); }, [logoPreviewUrl]);
+
+  function updateField(field, value) {
+    setTemplates((prev) => ({ ...prev, [method]: { ...prev[method], [field]: value } }));
+  }
+
+  function resetToDefault() {
+    setTemplates((prev) => ({ ...prev, [method]: { subject: '', bodyText: '' } }));
+  }
+
+  async function handleSave() {
+    setSaving(true);
+    setError('');
+    setSaveMsg('');
+    try {
+      await api.updateEmailTemplates(templates);
+      setSaveMsg('Saved');
+      setTimeout(() => setSaveMsg(''), 2000);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleLogoUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    setLogoBusy(true);
+    setError('');
+    try {
+      await api.uploadEmailLogo(file);
+      setHasCustomLogo(true);
+      loadLogoPreview();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLogoBusy(false);
+      e.target.value = '';
+    }
+  }
+
+  async function handleLogoRemove() {
+    setLogoBusy(true);
+    setError('');
+    try {
+      await api.deleteEmailLogo();
+      setHasCustomLogo(false);
+      setLogoPreviewUrl((prev) => { if (prev) URL.revokeObjectURL(prev); return null; });
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLogoBusy(false);
+    }
+  }
+
+  if (!templates) return <Card className="mt-card"><p className="page-subtitle">Loading…</p></Card>;
+
+  const current = templates[method];
+  const isCustomized = !!(current.subject || current.bodyText);
+
+  return (
+    <>
+      {error && <div className="error-banner">{error}</div>}
+
+      <Card title="Header logo" className="mt-card">
+        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px', lineHeight: 1.6 }}>
+          Shown at the top of every reward-win email, all three types (QR / Code / Voucher) share the same one.
+          PNG, JPEG, or WebP, up to 1MB. Leave unset to keep PrizeFlow's default logo.
+        </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <div style={{
+            width: 56, height: 56, borderRadius: 10, border: '1px solid #E2E8F0',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', background: '#F8FAFC',
+          }}>
+            {hasCustomLogo && logoPreviewUrl ? (
+              <img src={logoPreviewUrl} alt="Custom logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+            ) : (
+              <span style={{ fontSize: 11, color: '#94A3B8' }}>Default</span>
+            )}
+          </div>
+          <label style={{
+            display: 'inline-flex', alignItems: 'center', gap: 8, padding: '9px 16px', border: '1px solid #CBD5E1',
+            borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: logoBusy ? 'not-allowed' : 'pointer', color: '#0F1C3F',
+          }}>
+            {logoBusy ? 'Uploading…' : hasCustomLogo ? 'Replace logo' : 'Upload logo'}
+            <input type="file" accept="image/png,image/jpeg,image/webp" onChange={handleLogoUpload} disabled={logoBusy} style={{ display: 'none' }} />
+          </label>
+          {hasCustomLogo && (
+            <Button variant="ghost" disabled={logoBusy} onClick={handleLogoRemove} style={{ color: '#EF4444' }}>
+              Remove
+            </Button>
+          )}
+        </div>
+      </Card>
+
+      <Card title="Message text" className="mt-card">
+        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 16px', lineHeight: 1.6 }}>
+          Customize the subject and congratulations message for each reward type. The redemption instructions
+          (QR code, code box, voucher notice) always stay as-is below your message, so a gift can never fail to
+          be redeemable because of a wording change. Leave a type blank to keep PrizeFlow's default email for it.
+          Available placeholders: <code>{'{{firstName}}'}</code>, <code>{'{{giftName}}'}</code>
+          {method === 'code' && <> , <code>{'{{code}}'}</code></>}.
+        </p>
+
+        <div className="tabs" style={{ marginBottom: 16 }}>
+          {REDEEM_METHOD_TABS.map((t) => (
+            <button key={t.key} className={`tab${method === t.key ? ' active' : ''}`} onClick={() => setMethod(t.key)}>
+              {t.label}
+              {(templates[t.key].subject || templates[t.key].bodyText) && (
+                <span style={{ marginLeft: 6 }}><Badge tone="green">Custom</Badge></span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        <div className="field" style={{ margin: '0 0 14px' }}>
+          <label>Subject</label>
+          <input
+            type="text"
+            value={current.subject}
+            placeholder={defaults.subject}
+            onChange={(e) => updateField('subject', e.target.value)}
+            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 14 }}
+          />
+        </div>
+
+        <div className="field" style={{ margin: '0 0 14px' }}>
+          <label>Message</label>
+          <textarea
+            value={current.bodyText}
+            placeholder={defaults.bodyText}
+            onChange={(e) => updateField('bodyText', e.target.value)}
+            rows={4}
+            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 14, fontFamily: 'inherit', resize: 'vertical' }}
+          />
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <Button onClick={handleSave} disabled={saving}>{saving ? 'Saving…' : 'Save'}</Button>
+          {isCustomized && (
+            <Button variant="ghost" onClick={resetToDefault} disabled={saving}>Reset to default</Button>
+          )}
+          {saveMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{saveMsg}</span>}
+        </div>
+      </Card>
+    </>
+  );
+}
+
 export default function Settings() {
   const [module, setModule] = useState('information');
 
@@ -335,7 +522,7 @@ export default function Settings() {
       <div className="page-header">
         <div>
           <h1 className="page-title">Settings</h1>
-          <p className="page-subtitle">Manage your profile, the Google review invitation, and wheel calibration</p>
+          <p className="page-subtitle">Manage your profile, the Google review invitation, reward emails, and wheel calibration</p>
         </div>
       </div>
 
@@ -349,6 +536,7 @@ export default function Settings() {
 
       {module === 'information' && <InformationModule />}
       {module === 'google-review' && <GoogleReviewModule />}
+      {module === 'email-templates' && <EmailTemplatesModule />}
       {module === 'calibration' && <Calibration onExit={() => setModule('information')} />}
     </div>
   );
