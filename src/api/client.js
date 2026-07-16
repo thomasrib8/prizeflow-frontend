@@ -187,7 +187,9 @@ export const api = {
   // shared header logo). Uploading/deleting the logo isn't plain JSON, so
   // those two bypass the shared `request` helper.
   getEmailTemplates: () => request('/account/email-templates'),
-  updateEmailTemplates: (templates) => request('/account/email-templates', { method: 'PATCH', body: { templates } }),
+  // payload: { templates, headerColor?, footerText? } — headerColor/footerText
+  // are optional; omitting them leaves those fields untouched server-side.
+  updateEmailTemplates: (payload) => request('/account/email-templates', { method: 'PATCH', body: payload }),
   uploadEmailLogo: async (file) => {
     const token = getToken();
     const formData = new FormData();

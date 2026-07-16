@@ -345,6 +345,12 @@ function EmailTemplatesModule() {
   const [saveMsg, setSaveMsg] = useState('');
   const [logoBusy, setLogoBusy] = useState(false);
 
+  const [headerColor, setHeaderColor] = useState('');
+  const [footerText, setFooterText] = useState('');
+  const [brandingDefaults, setBrandingDefaults] = useState({ headerColor: '', footerText: '' });
+  const [brandingSaving, setBrandingSaving] = useState(false);
+  const [brandingSaveMsg, setBrandingSaveMsg] = useState('');
+
   function loadLogoPreview() {
     api.getEmailLogoPreviewUrl().then((url) => setLogoPreviewUrl((prev) => {
       if (prev) URL.revokeObjectURL(prev);
@@ -358,6 +364,9 @@ function EmailTemplatesModule() {
         setTemplates(res.templates);
         setDefaults({ subject: res.defaultSubject, bodyText: res.defaultBodyText });
         setHasCustomLogo(res.hasCustomLogo);
+        setHeaderColor(res.headerColor || '');
+        setFooterText(res.footerText || '');
+        setBrandingDefaults({ headerColor: res.defaultHeaderColor, footerText: res.defaultFooterText });
         if (res.hasCustomLogo) loadLogoPreview();
       })
       .catch((e) => setError(e.message));
@@ -379,7 +388,7 @@ function EmailTemplatesModule() {
     setError('');
     setSaveMsg('');
     try {
-      await api.updateEmailTemplates(templates);
+      await api.updateEmailTemplates({ templates });
       setSaveMsg('Saved');
       setTimeout(() => setSaveMsg(''), 2000);
     } catch (err) {
@@ -387,6 +396,26 @@ function EmailTemplatesModule() {
     } finally {
       setSaving(false);
     }
+  }
+
+  async function handleSaveBranding() {
+    setBrandingSaving(true);
+    setError('');
+    setBrandingSaveMsg('');
+    try {
+      await api.updateEmailTemplates({ templates: {}, headerColor, footerText });
+      setBrandingSaveMsg('Saved');
+      setTimeout(() => setBrandingSaveMsg(''), 2000);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBrandingSaving(false);
+    }
+  }
+
+  function resetBrandingToDefault() {
+    setHeaderColor('');
+    setFooterText('');
   }
 
   async function handleLogoUpload(e) {
@@ -457,6 +486,50 @@ function EmailTemplatesModule() {
               Remove
             </Button>
           )}
+        </div>
+      </Card>
+
+      <Card title="Branding" className="mt-card">
+        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 16px', lineHeight: 1.6 }}>
+          The header banner color and footer line shown at the top/bottom of every reward-win email. Leave blank
+          to keep PrizeFlow's defaults.
+        </p>
+        <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', marginBottom: 14 }}>
+          <div className="field" style={{ margin: 0 }}>
+            <label>Header color</label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <input
+                type="color"
+                value={headerColor || brandingDefaults.headerColor || '#2563EB'}
+                onChange={(e) => setHeaderColor(e.target.value)}
+                style={{ width: 40, height: 38, padding: 0, border: '1px solid #E2E8F0', borderRadius: 8, cursor: 'pointer' }}
+              />
+              <input
+                type="text"
+                value={headerColor}
+                placeholder={brandingDefaults.headerColor}
+                onChange={(e) => setHeaderColor(e.target.value)}
+                style={{ width: 110, padding: '10px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 14 }}
+              />
+            </div>
+          </div>
+          <div className="field" style={{ margin: 0, flex: 1, minWidth: 220 }}>
+            <label>Footer text</label>
+            <input
+              type="text"
+              value={footerText}
+              placeholder={brandingDefaults.footerText}
+              onChange={(e) => setFooterText(e.target.value)}
+              style={{ width: '100%', padding: '10px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 14 }}
+            />
+          </div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <Button onClick={handleSaveBranding} disabled={brandingSaving}>{brandingSaving ? 'Saving…' : 'Save'}</Button>
+          {(headerColor || footerText) && (
+            <Button variant="ghost" onClick={resetBrandingToDefault} disabled={brandingSaving}>Reset to default</Button>
+          )}
+          {brandingSaveMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{brandingSaveMsg}</span>}
         </div>
       </Card>
 
