@@ -347,7 +347,8 @@ function EmailTemplatesModule() {
 
   const [headerColor, setHeaderColor] = useState('');
   const [footerText, setFooterText] = useState('');
-  const [brandingDefaults, setBrandingDefaults] = useState({ headerColor: '', footerText: '' });
+  const [logoSize, setLogoSize] = useState(null);
+  const [brandingDefaults, setBrandingDefaults] = useState({ headerColor: '', footerText: '', logoSize: 120, min: 40, max: 220 });
   const [brandingSaving, setBrandingSaving] = useState(false);
   const [brandingSaveMsg, setBrandingSaveMsg] = useState('');
 
@@ -366,7 +367,14 @@ function EmailTemplatesModule() {
         setHasCustomLogo(res.hasCustomLogo);
         setHeaderColor(res.headerColor || '');
         setFooterText(res.footerText || '');
-        setBrandingDefaults({ headerColor: res.defaultHeaderColor, footerText: res.defaultFooterText });
+        setLogoSize(res.logoSize || null);
+        setBrandingDefaults({
+          headerColor: res.defaultHeaderColor,
+          footerText: res.defaultFooterText,
+          logoSize: res.defaultLogoSize,
+          min: res.minLogoSize,
+          max: res.maxLogoSize,
+        });
         if (res.hasCustomLogo) loadLogoPreview();
       })
       .catch((e) => setError(e.message));
@@ -403,7 +411,7 @@ function EmailTemplatesModule() {
     setError('');
     setBrandingSaveMsg('');
     try {
-      await api.updateEmailTemplates({ templates: {}, headerColor, footerText });
+      await api.updateEmailTemplates({ templates: {}, headerColor, footerText, logoSize });
       setBrandingSaveMsg('Saved');
       setTimeout(() => setBrandingSaveMsg(''), 2000);
     } catch (err) {
@@ -416,6 +424,7 @@ function EmailTemplatesModule() {
   function resetBrandingToDefault() {
     setHeaderColor('');
     setFooterText('');
+    setLogoSize(null);
   }
 
   async function handleLogoUpload(e) {
@@ -491,7 +500,7 @@ function EmailTemplatesModule() {
 
       <Card title="Branding" className="mt-card">
         <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 16px', lineHeight: 1.6 }}>
-          The header banner color and footer line shown at the top/bottom of every reward-win email. Leave blank
+          The header banner color, logo size, and footer line shown on every reward-win email. Leave blank
           to keep PrizeFlow's defaults.
         </p>
         <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', marginBottom: 14 }}>
@@ -524,9 +533,37 @@ function EmailTemplatesModule() {
             />
           </div>
         </div>
+        <div className="field" style={{ margin: '0 0 14px' }}>
+          <label>Logo size in the email — {logoSize || brandingDefaults.logoSize}px</label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <input
+              type="range"
+              min={brandingDefaults.min}
+              max={brandingDefaults.max}
+              value={logoSize || brandingDefaults.logoSize}
+              onChange={(e) => setLogoSize(Number(e.target.value))}
+              style={{ flex: 1, maxWidth: 320 }}
+            />
+            {hasCustomLogo && logoPreviewUrl && (
+              <img
+                src={logoPreviewUrl}
+                alt="Logo size preview"
+                style={{
+                  width: logoSize || brandingDefaults.logoSize,
+                  height: logoSize || brandingDefaults.logoSize,
+                  objectFit: 'contain',
+                  borderRadius: 8,
+                  background: headerColor || brandingDefaults.headerColor,
+                  padding: 8,
+                  transition: 'width 0.1s, height 0.1s',
+                }}
+              />
+            )}
+          </div>
+        </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <Button onClick={handleSaveBranding} disabled={brandingSaving}>{brandingSaving ? 'Saving…' : 'Save'}</Button>
-          {(headerColor || footerText) && (
+          {(headerColor || footerText || logoSize) && (
             <Button variant="ghost" onClick={resetBrandingToDefault} disabled={brandingSaving}>Reset to default</Button>
           )}
           {brandingSaveMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{brandingSaveMsg}</span>}
