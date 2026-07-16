@@ -139,6 +139,7 @@ export const api = {
     return downloadFile(`/rewards/report.pdf${qs ? `?${qs}` : ''}`);
   },
   downloadCampaignReport: (id) => downloadFile(`/campaigns/${id}/report.pdf`),
+  exportCampaignGiftDistribution: (id) => downloadFile(`/campaigns/${id}/gift-distribution.csv`),
   downloadCampaignQrPdf: (id) => downloadFile(`/campaigns/${id}/qr.pdf`),
   // Manual fallback for when scanning the QR fails — an already-logged-in
   // operator looks up a reward by ID and gets back the same signed code

@@ -20,6 +20,7 @@ export default function CampaignDetail() {
   const [showSeq, setShowSeq] = useState(false);
   const [seqFilter, setSeqFilter] = useState('all'); // all | remaining | consumed
   const [reportBusy, setReportBusy] = useState(false);
+  const [exportBusy, setExportBusy] = useState(false);
 
   const load = () => api.getCampaign(id).then(setCampaign).catch(e => setError(e.message));
   useEffect(() => { load(); }, [id]);
@@ -33,6 +34,18 @@ export default function CampaignDetail() {
       setError(e.message);
     } finally {
       setReportBusy(false);
+    }
+  }
+
+  async function handleExportGiftDistribution() {
+    setExportBusy(true);
+    setError('');
+    try {
+      await api.exportCampaignGiftDistribution(id);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setExportBusy(false);
     }
   }
 
@@ -98,11 +111,14 @@ export default function CampaignDetail() {
           {campaign.status !== 'archived' && (
             <Button variant="secondary" onClick={() => navigate(`/campaigns/new?from=${campaign.id}`)}>Duplicate</Button>
           )}
-          {isAdmin && campaign.is_test && (
+          {isAdmin && !!campaign.is_test && (
             <Button variant="secondary" onClick={showSeq ? () => setShowSeq(false) : loadSequence} disabled={seqLoading}>
               {seqLoading ? 'Loading…' : showSeq ? 'Hide sequence' : '🔧 View sequence'}
             </Button>
           )}
+          <Button variant="secondary" disabled={exportBusy} onClick={handleExportGiftDistribution}>
+            {exportBusy ? 'Exporting…' : 'Export gift distribution (CSV)'}
+          </Button>
           <Button variant="secondary" disabled={reportBusy} onClick={handleDownloadReport}>
             {reportBusy ? 'Generating…' : 'Download PDF report'}
           </Button>
@@ -134,7 +150,7 @@ export default function CampaignDetail() {
                   <td style={{ color: 'var(--text-muted)' }}>{s.stock_initial}</td>
                   <td style={{ color: 'var(--text-muted)' }}>{((s.stock_initial / total) * 100).toFixed(1)}%</td>
                   <td style={{ fontWeight: 600 }}>{s.stock_remaining}</td>
-                  <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{s.redeem_method === 'code' ? 'Code' : 'QR'}</td>
+                  <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{s.redeem_method === 'code' ? 'Code' : s.redeem_method === 'voucher' ? 'Voucher' : 'QR'}</td>
                   <td><MiniBar pct={pct} color={SLOT_COLORS[s.slot_index % SLOT_COLORS.length]} /></td>
                 </tr>
               );
