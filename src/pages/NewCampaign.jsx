@@ -6,7 +6,7 @@ import { useAdmin } from '../hooks/useAdmin';
 import { useWheelSocket } from '../hooks/useWheelSocket';
 import WheelSVG, { posToAngle } from '../components/WheelSVG';
 
-const EMPTY_SLOTS = Array.from({ length: 12 }, (_, i) => ({ slotIndex: i, giftName: '', stock: 0, redeemMethod: 'qr', persoDelivery: 'qr', persoSubject: '', persoBody: '' }));
+const EMPTY_SLOTS = Array.from({ length: 12 }, (_, i) => ({ slotIndex: i, giftName: '', stock: 0, redeemMethod: 'qr', persoDelivery: 'qr', persoSubject: '', persoBody: '', persoAutoDistribute: false }));
 
 export default function NewCampaign() {
   const navigate = useNavigate();
@@ -119,7 +119,7 @@ export default function NewCampaign() {
           giftName: s.giftName,
           stock: Number(s.stock),
           redeemMethod: ['code', 'voucher', 'perso'].includes(s.redeemMethod) ? s.redeemMethod : 'qr',
-          ...(s.redeemMethod === 'perso' ? { persoDelivery: s.persoDelivery, persoSubject: s.persoSubject, persoBody: s.persoBody } : {}),
+          ...(s.redeemMethod === 'perso' ? { persoDelivery: s.persoDelivery, persoSubject: s.persoSubject, persoBody: s.persoBody, persoAutoDistribute: !!s.persoAutoDistribute } : {}),
         }))
       });
       navigate(`/campaigns/${created.id}`);
@@ -244,6 +244,13 @@ export default function NewCampaign() {
                         <label style={{ fontSize: 11 }}>Message ({'{{firstName}}'} / {'{{giftName}}'} available)</label>
                         <textarea rows={2} placeholder="Custom message shown in the email…" value={s.persoBody} onChange={e => updateSlot(i, 'persoBody', e.target.value)} style={{ width: '100%', fontFamily: 'inherit' }} />
                       </div>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, cursor: 'pointer' }}>
+                        <input type="checkbox" checked={!!s.persoAutoDistribute} onChange={e => updateSlot(i, 'persoAutoDistribute', e.target.checked)} />
+                        <span style={{ fontSize: 12, color: '#334155' }}>
+                          Mark this gift as automatically distributed
+                          <span style={{ display: 'block', fontSize: 11, color: '#94A3B8' }}>Skips manual confirmation in Rewards — use only when there's nothing to hand over in person.</span>
+                        </span>
+                      </label>
                     </div>
                   )}
                 </div>
