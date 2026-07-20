@@ -6,7 +6,7 @@ import { useAdmin } from '../hooks/useAdmin';
 import { useWheelSocket } from '../hooks/useWheelSocket';
 import WheelSVG, { posToAngle } from '../components/WheelSVG';
 
-const EMPTY_SLOTS = Array.from({ length: 12 }, (_, i) => ({ slotIndex: i, giftName: '', stock: 0, redeemMethod: 'qr' }));
+const EMPTY_SLOTS = Array.from({ length: 12 }, (_, i) => ({ slotIndex: i, giftName: '', stock: 0, redeemMethod: 'qr', persoDelivery: 'qr', persoSubject: '', persoBody: '' }));
 
 export default function NewCampaign() {
   const navigate = useNavigate();
@@ -105,6 +105,11 @@ export default function NewCampaign() {
     const active = slots.filter(s => s.giftName.trim() && Number(s.stock) > 0);
     if (!name.trim()) return setError('Campaign name is required');
     if (active.length === 0) return setError('Configure at least one gift with stock > 0');
+    for (const s of active) {
+      if (s.redeemMethod === 'perso' && (!s.persoSubject.trim() || !s.persoBody.trim())) {
+        return setError(`Case ${s.slotIndex + 1}: a Perso gift needs both a subject and a message`);
+      }
+    }
     setSaving(true);
     try {
       const created = await api.createCampaign({
@@ -113,7 +118,8 @@ export default function NewCampaign() {
           slotIndex: s.slotIndex,
           giftName: s.giftName,
           stock: Number(s.stock),
-          redeemMethod: ['code', 'voucher'].includes(s.redeemMethod) ? s.redeemMethod : 'qr',
+          redeemMethod: ['code', 'voucher', 'perso'].includes(s.redeemMethod) ? s.redeemMethod : 'qr',
+          ...(s.redeemMethod === 'perso' ? { persoDelivery: s.persoDelivery, persoSubject: s.persoSubject, persoBody: s.persoBody } : {}),
         }))
       });
       navigate(`/campaigns/${created.id}`);
@@ -199,22 +205,47 @@ export default function NewCampaign() {
             </div>
           }>
           <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 12px' }}>
-            "Redeem" chooses how the guest confirms their gift: <b>QR</b> links straight to it, <b>Code</b> emails an 8-character code to type in on the Rewards page, <b>Voucher</b> just tells the guest to see a staff member for their physical voucher.
+            "Redeem" chooses how the guest confirms their gift: <b>QR</b> links straight to it, <b>Code</b> emails an 8-character code to type in on the Rewards page, <b>Voucher</b> just tells the guest to see a staff member for their physical voucher, <b>Perso</b> sends this gift's own custom email (choose what it delivers below).
           </p>
           <div className="slots-grid">
             {slots.map((s, i) => {
               const pct = totalStock ? ((Number(s.stock) || 0) / totalStock) * 100 : 0;
               return (
-                <div className="slot-row" key={i}>
-                  <div className="slot-index">Case {i + 1}</div>
-                  <input placeholder="Gift name" value={s.giftName} onChange={e => updateSlot(i, 'giftName', e.target.value)} />
-                  <input type="number" min="0" placeholder="Stock" value={s.stock || ''} onChange={e => updateSlot(i, 'stock', e.target.value)} />
-                  <select value={s.redeemMethod} title="How the guest confirms their gift" onChange={e => updateSlot(i, 'redeemMethod', e.target.value)}>
-                    <option value="qr">QR</option>
-                    <option value="code">Code</option>
-                    <option value="voucher">Voucher</option>
-                  </select>
-                  <div className="slot-pct">{pct ? `${pct.toFixed(1)}%` : '—'}</div>
+                <div key={i} style={{ display: 'contents' }}>
+                  <div className="slot-row">
+                    <div className="slot-index">Case {i + 1}</div>
+                    <input placeholder="Gift name" value={s.giftName} onChange={e => updateSlot(i, 'giftName', e.target.value)} />
+                    <input type="number" min="0" placeholder="Stock" value={s.stock || ''} onChange={e => updateSlot(i, 'stock', e.target.value)} />
+                    <select value={s.redeemMethod} title="How the guest confirms their gift" onChange={e => updateSlot(i, 'redeemMethod', e.target.value)}>
+                      <option value="qr">QR</option>
+                      <option value="code">Code</option>
+                      <option value="voucher">Voucher</option>
+                      <option value="perso">Perso</option>
+                    </select>
+                    <div className="slot-pct">{pct ? `${pct.toFixed(1)}%` : '—'}</div>
+                  </div>
+                  {s.redeemMethod === 'perso' && (
+                    <div style={{ gridColumn: '1 / -1', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 8, padding: 12, margin: '-2px 0 4px' }}>
+                      <div style={{ display: 'flex', gap: 10, marginBottom: 8, flexWrap: 'wrap' }}>
+                        <div className="field" style={{ margin: 0, flex: '0 0 180px' }}>
+                          <label style={{ fontSize: 11 }}>Delivers</label>
+                          <select value={s.persoDelivery} onChange={e => updateSlot(i, 'persoDelivery', e.target.value)}>
+                            <option value="code">A code</option>
+                            <option value="qr">A QR</option>
+                            <option value="text">Just text</option>
+                          </select>
+                        </div>
+                        <div className="field" style={{ margin: 0, flex: '1 1 260px' }}>
+                          <label style={{ fontSize: 11 }}>Subject</label>
+                          <input placeholder="e.g. You won a free coffee!" value={s.persoSubject} onChange={e => updateSlot(i, 'persoSubject', e.target.value)} />
+                        </div>
+                      </div>
+                      <div className="field" style={{ margin: 0 }}>
+                        <label style={{ fontSize: 11 }}>Message ({'{{firstName}}'} / {'{{giftName}}'} available)</label>
+                        <textarea rows={2} placeholder="Custom message shown in the email…" value={s.persoBody} onChange={e => updateSlot(i, 'persoBody', e.target.value)} style={{ width: '100%', fontFamily: 'inherit' }} />
+                      </div>
+                    </div>
+                  )}
                 </div>
               );
             })}

@@ -150,7 +150,7 @@ export default function CampaignDetail() {
                   <td style={{ color: 'var(--text-muted)' }}>{s.stock_initial}</td>
                   <td style={{ color: 'var(--text-muted)' }}>{((s.stock_initial / total) * 100).toFixed(1)}%</td>
                   <td style={{ fontWeight: 600 }}>{s.stock_remaining}</td>
-                  <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{s.redeem_method === 'code' ? 'Code' : s.redeem_method === 'voucher' ? 'Voucher' : 'QR'}</td>
+                  <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{s.redeem_method === 'code' ? 'Code' : s.redeem_method === 'voucher' ? 'Voucher' : s.redeem_method === 'perso' ? 'Perso' : 'QR'}</td>
                   <td><MiniBar pct={pct} color={SLOT_COLORS[s.slot_index % SLOT_COLORS.length]} /></td>
                 </tr>
               );
