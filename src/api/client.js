@@ -238,4 +238,4 @@ export function connectWs() {
   return new WebSocket(`${WS_BASE}/ws?role=browser&token=${encodeURIComponent(token || '')}`);
 }
 
-export { getToken };
+export { getToken, API_BASE };

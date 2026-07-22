@@ -47,11 +47,22 @@ export default function NewCampaign() {
 
   // Duplicate an existing campaign's slot/gift config — stock always starts
   // at 0 here, adjustable before creating (per roadmap: never a silent copy).
+  // Everything else about each gift (redeem method, and for 'perso' its
+  // delivery/subject/body/auto-distribute) carries over as-is, so a duplicate
+  // is a real duplicate rather than just the gift names.
   useEffect(() => {
     if (!fromCampaignId) return;
     api.getCampaign(fromCampaignId).then((source) => {
       setName(`Copy of ${source.name}`);
-      applySlotConfig(source.slots.map((s) => ({ slotIndex: s.slot_index, giftName: s.gift_name })));
+      applySlotConfig(source.slots.map((s) => ({
+        slotIndex: s.slot_index,
+        giftName: s.gift_name,
+        redeemMethod: s.redeem_method,
+        persoDelivery: s.perso_delivery,
+        persoSubject: s.perso_subject,
+        persoBody: s.perso_body,
+        persoAutoDistribute: s.perso_auto_distribute,
+      })));
     }).catch((e) => setError(e.message));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fromCampaignId]);
@@ -60,9 +71,24 @@ export default function NewCampaign() {
     api.listCampaignTemplates().then(setTemplates).catch(() => setTemplates([]));
   }, []);
 
+  // Shared by campaign duplication (full slot config) and "start from
+  // template" (giftName only, see campaign_templates) — any field a caller
+  // doesn't provide simply falls back to EMPTY_SLOTS' default for that slot.
   function applySlotConfig(configSlots) {
-    const byIndex = new Map(configSlots.map((s) => [s.slotIndex, s.giftName]));
-    setSlots(EMPTY_SLOTS.map((s) => ({ ...s, giftName: byIndex.get(s.slotIndex) || '' })));
+    const byIndex = new Map(configSlots.map((s) => [s.slotIndex, s]));
+    setSlots(EMPTY_SLOTS.map((s) => {
+      const src = byIndex.get(s.slotIndex);
+      if (!src) return s;
+      return {
+        ...s,
+        giftName: src.giftName || '',
+        redeemMethod: ['code', 'voucher', 'perso'].includes(src.redeemMethod) ? src.redeemMethod : 'qr',
+        persoDelivery: src.persoDelivery || 'qr',
+        persoSubject: src.persoSubject || '',
+        persoBody: src.persoBody || '',
+        persoAutoDistribute: !!src.persoAutoDistribute,
+      };
+    }));
   }
 
   async function handleUseTemplate(e) {
@@ -241,8 +267,15 @@ export default function NewCampaign() {
                         </div>
                       </div>
                       <div className="field" style={{ margin: 0 }}>
-                        <label style={{ fontSize: 11 }}>Message ({'{{firstName}}'} / {'{{giftName}}'} available)</label>
+                        <label style={{ fontSize: 11 }}>
+                          Message ({'{{firstName}}'} / {'{{giftName}}'}{s.persoDelivery === 'code' ? ' / {{code}}' : ''} available)
+                        </label>
                         <textarea rows={2} placeholder="Custom message shown in the email…" value={s.persoBody} onChange={e => updateSlot(i, 'persoBody', e.target.value)} style={{ width: '100%', fontFamily: 'inherit' }} />
+                        {s.persoDelivery === 'code' && (
+                          <p style={{ fontSize: 11, color: '#94A3B8', margin: '4px 0 0' }}>
+                            The code, QR and redemption instructions are always added automatically below your message — no need to insert {'{{code}}'} yourself unless you also want to mention it in your own sentence.
+                          </p>
+                        )}
                       </div>
                       <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, cursor: 'pointer' }}>
                         <input type="checkbox" checked={!!s.persoAutoDistribute} onChange={e => updateSlot(i, 'persoAutoDistribute', e.target.checked)} />

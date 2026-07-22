@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import WheelSVG from './WheelSVG';
 import GoogleSignInButton from './GoogleSignInButton';
+import { API_BASE } from '../api/client';
 
 const RETRY_MESSAGES = {
   SPIN_ABNORMAL_STOP: '⚠ An unexpected stop was detected during the spin. Please spin the wheel again.',
@@ -236,7 +237,11 @@ export default function GuestFlowScreen({
         maxHeight: '92vh', overflowY: 'auto', boxShadow: '0 30px 80px rgba(0,0,0,0.15)',
       }}>
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
-          <img src="/logo.svg" alt="" style={{ width: 44, height: 44, marginBottom: 14 }} />
+          <img
+            src={campaignInfo?.guestFormLogoUrl ? `${API_BASE}${campaignInfo.guestFormLogoUrl}` : '/logo.svg'}
+            alt=""
+            style={{ width: 44, height: 44, marginBottom: 14, objectFit: 'contain' }}
+          />
           <h1 style={{ fontSize: 22, fontWeight: 800, margin: '0 0 6px', color: '#0F172A' }}>Win your reward!</h1>
           <p style={{ fontSize: 14, color: '#64748B', margin: 0 }}>Enter your details below to claim your gift.</p>
         </div>

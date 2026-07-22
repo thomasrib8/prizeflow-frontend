@@ -339,6 +339,7 @@ function EmailTemplatesModule() {
   const [defaults, setDefaults] = useState({ subject: '', bodyText: '' });
   const [method, setMethod] = useState('qr');
   const [hasCustomLogo, setHasCustomLogo] = useState(false);
+  const [guestFormLogoEnabled, setGuestFormLogoEnabled] = useState(false);
   const [logoPreviewUrl, setLogoPreviewUrl] = useState(null);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
@@ -365,6 +366,7 @@ function EmailTemplatesModule() {
         setTemplates(res.templates);
         setDefaults({ subject: res.defaultSubject, bodyText: res.defaultBodyText });
         setHasCustomLogo(res.hasCustomLogo);
+        setGuestFormLogoEnabled(!!res.guestFormLogoEnabled);
         setHeaderColor(res.headerColor || '');
         setFooterText(res.footerText || '');
         setLogoSize(res.logoSize || null);
@@ -425,6 +427,20 @@ function EmailTemplatesModule() {
     setHeaderColor('');
     setFooterText('');
     setLogoSize(null);
+  }
+
+  // Immediate save (like the upload/remove buttons below), not batched into
+  // the "Branding" card's Save button — this toggle lives with the logo
+  // itself, not the reward-email styling.
+  async function handleToggleGuestFormLogo(checked) {
+    setGuestFormLogoEnabled(checked);
+    setError('');
+    try {
+      await api.updateEmailTemplates({ templates: {}, guestFormLogoEnabled: checked });
+    } catch (err) {
+      setGuestFormLogoEnabled(!checked);
+      setError(err.message);
+    }
   }
 
   async function handleLogoUpload(e) {
@@ -496,6 +512,21 @@ function EmailTemplatesModule() {
             </Button>
           )}
         </div>
+        {hasCustomLogo && (
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 16, cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={guestFormLogoEnabled}
+              onChange={(e) => handleToggleGuestFormLogo(e.target.checked)}
+            />
+            <span style={{ fontSize: 13, color: '#334155' }}>
+              Use in pre-spin form
+              <span style={{ display: 'block', fontSize: 11, color: '#94A3B8' }}>
+                Shows this logo instead of PrizeFlow's on the guest form before they spin the wheel.
+              </span>
+            </span>
+          </label>
+        )}
       </Card>
 
       <Card title="Branding" className="mt-card">
