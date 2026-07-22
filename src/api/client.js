@@ -153,6 +153,7 @@ export const api = {
   getCampaign: (id) => request(`/campaigns/${id}`),
   getCampaignSequence: (id) => request(`/campaigns/${id}/sequence`),
   createCampaign: (payload) => request('/campaigns', { method: 'POST', body: payload }),
+  updateCampaignSlots: (id, payload) => request(`/campaigns/${id}/slots`, { method: 'PATCH', body: payload }),
   startCampaign: (id) => request(`/campaigns/${id}/start`, { method: 'POST' }),
   pauseCampaign: (id) => request(`/campaigns/${id}/pause`, { method: 'POST' }),
   endCampaign: (id) => request(`/campaigns/${id}/end`, { method: 'POST' }),

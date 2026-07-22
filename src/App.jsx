@@ -9,6 +9,7 @@ import ResetPassword from './pages/ResetPassword';
 import Dashboard from './pages/Dashboard';
 import Campaigns from './pages/Campaigns';
 import NewCampaign from './pages/NewCampaign';
+import EditCampaign from './pages/EditCampaign';
 import CampaignDetail from './pages/CampaignDetail';
 import LaunchCampaign from './pages/LaunchCampaign';
 import Guest from './pages/Guest';
@@ -55,6 +56,7 @@ export default function App() {
           <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
           <Route path="/campaigns" element={<PrivateRoute><Campaigns /></PrivateRoute>} />
           <Route path="/campaigns/new" element={<PrivateRoute><NewCampaign /></PrivateRoute>} />
+          <Route path="/campaigns/:id/edit" element={<PrivateRoute><EditCampaign /></PrivateRoute>} />
           <Route path="/campaigns/:id" element={<PrivateRoute><CampaignDetail /></PrivateRoute>} />
           <Route path="/launch" element={<PrivateRoute><LaunchCampaign /></PrivateRoute>} />
           <Route path="/calibration" element={<PrivateRoute><Calibration /></PrivateRoute>} />

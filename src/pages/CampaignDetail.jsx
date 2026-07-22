@@ -109,6 +109,9 @@ export default function CampaignDetail() {
           {campaign.status === 'paused' && <Button disabled={busy} onClick={() => runAction(() => api.startCampaign(campaign.id))}>Resume</Button>}
           {campaign.status === 'completed' && <Button variant="secondary" disabled={busy} onClick={() => runAction(() => api.archiveCampaign(campaign.id))}>Archive</Button>}
           {campaign.status !== 'archived' && (
+            <Button variant="secondary" onClick={() => navigate(`/campaigns/${campaign.id}/edit`)}>Edit gifts</Button>
+          )}
+          {campaign.status !== 'archived' && (
             <Button variant="secondary" onClick={() => navigate(`/campaigns/new?from=${campaign.id}`)}>Duplicate</Button>
           )}
           {isAdmin && !!campaign.is_test && (
