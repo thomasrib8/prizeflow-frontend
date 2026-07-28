@@ -7,8 +7,16 @@ import Calibration from './Calibration';
 const MODULES = [
   { key: 'information', label: 'Information' },
   { key: 'google-review', label: 'Google review' },
+  { key: 'social-media', label: 'Social media' },
   { key: 'email-templates', label: 'Reward emails' },
   { key: 'calibration', label: 'Calibration' },
+];
+
+const SOCIAL_PLATFORMS = [
+  { key: 'facebookUrl', label: 'Facebook', icon: '📘', placeholder: 'https://facebook.com/yourpage' },
+  { key: 'instagramUrl', label: 'Instagram', icon: '📷', placeholder: 'https://instagram.com/yourpage' },
+  { key: 'linkedinUrl', label: 'LinkedIn', icon: '💼', placeholder: 'https://linkedin.com/company/yourpage' },
+  { key: 'xUrl', label: 'X', icon: '✖️', placeholder: 'https://x.com/yourpage' },
 ];
 
 const REDEEM_METHOD_TABS = [
@@ -327,6 +335,128 @@ function GoogleReviewModule() {
         {!savedUrl && (
           <p style={{ fontSize: 12, color: '#EF4444', marginTop: 12 }}>
             Set a Google review link above before enabling this on a campaign.
+          </p>
+        )}
+      </Card>
+    </>
+  );
+}
+
+function SocialMediaModule() {
+  const [urls, setUrls] = useState({ facebookUrl: '', instagramUrl: '', linkedinUrl: '', xUrl: '' });
+  const [savedUrls, setSavedUrls] = useState({ facebookUrl: '', instagramUrl: '', linkedinUrl: '', xUrl: '' });
+  const [saving, setSaving] = useState(false);
+  const [saveMsg, setSaveMsg] = useState('');
+  const [campaigns, setCampaigns] = useState(null);
+  const [error, setError] = useState('');
+  const [togglingId, setTogglingId] = useState(null);
+
+  useEffect(() => {
+    api.getAccountSettings()
+      .then((res) => {
+        const loaded = { facebookUrl: res.facebookUrl, instagramUrl: res.instagramUrl, linkedinUrl: res.linkedinUrl, xUrl: res.xUrl };
+        setUrls(loaded);
+        setSavedUrls(loaded);
+      })
+      .catch((e) => setError(e.message));
+    api.listCampaigns().then(setCampaigns).catch((e) => setError(e.message));
+  }, []);
+
+  async function handleSave(e) {
+    e.preventDefault();
+    setSaving(true);
+    setSaveMsg('');
+    try {
+      await api.updateAccountSettings(urls);
+      setSavedUrls(urls);
+      setSaveMsg('Saved');
+      setTimeout(() => setSaveMsg(''), 2000);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleToggle(campaign) {
+    setTogglingId(campaign.id);
+    try {
+      await api.setCampaignSocialMedia(campaign.id, !campaign.social_media_required);
+      setCampaigns((prev) =>
+        prev.map((c) => (c.id === campaign.id ? { ...c, social_media_required: c.social_media_required ? 0 : 1 } : c))
+      );
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setTogglingId(null);
+    }
+  }
+
+  const dirty = SOCIAL_PLATFORMS.some((p) => urls[p.key] !== savedUrls[p.key]);
+  const hasAnyLink = SOCIAL_PLATFORMS.some((p) => savedUrls[p.key]);
+
+  return (
+    <>
+      {error && <div className="error-banner">{error}</div>}
+
+      <Card title="Social media links" className="mt-card">
+        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 16px', lineHeight: 1.6 }}>
+          Guests who won a gift are optionally invited to follow you afterwards. Only platforms with a link
+          filled in below will ever show a button — leave one blank to skip it entirely.
+        </p>
+        <form onSubmit={handleSave}>
+          {SOCIAL_PLATFORMS.map((p) => (
+            <div className="field" key={p.key}>
+              <label>{p.icon} {p.label}</label>
+              <input
+                type="url"
+                placeholder={p.placeholder}
+                value={urls[p.key]}
+                onChange={(e) => setUrls((prev) => ({ ...prev, [p.key]: e.target.value }))}
+              />
+            </div>
+          ))}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <Button type="submit" disabled={saving || !dirty}>{saving ? 'Saving…' : 'Save'}</Button>
+            {saveMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{saveMsg}</span>}
+          </div>
+        </form>
+      </Card>
+
+      <Card title="Invite to follow after spinning" className="mt-card">
+        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 16px' }}>
+          Per campaign — when enabled, guests see optional "Follow us" buttons once their gift is already
+          won, alongside the Google review invite if that's also enabled. Never a condition to play.
+        </p>
+        {!campaigns && <p className="page-subtitle">Loading…</p>}
+        {campaigns && campaigns.length === 0 && <p className="page-subtitle">No campaigns yet.</p>}
+        {campaigns && campaigns.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {campaigns.map((c) => (
+              <div key={c.id} style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '12px 14px', border: '1px solid #F1F5F9', borderRadius: 10,
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: '#0F172A' }}>{c.name}</span>
+                  <Badge tone={c.status === 'active' ? 'green' : 'neutral'}>{c.status}</Badge>
+                </div>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 13, color: '#64748B' }}>
+                  <input
+                    type="checkbox"
+                    checked={!!c.social_media_required}
+                    disabled={togglingId === c.id || !hasAnyLink}
+                    onChange={() => handleToggle(c)}
+                  />
+                  Invite to follow
+                </label>
+              </div>
+            ))}
+          </div>
+        )}
+        {!hasAnyLink && (
+          <p style={{ fontSize: 12, color: '#EF4444', marginTop: 12 }}>
+            Set at least one social media link above before enabling this on a campaign.
           </p>
         )}
       </Card>
@@ -677,6 +807,7 @@ export default function Settings() {
 
       {module === 'information' && <InformationModule />}
       {module === 'google-review' && <GoogleReviewModule />}
+      {module === 'social-media' && <SocialMediaModule />}
       {module === 'email-templates' && <EmailTemplatesModule />}
       {module === 'calibration' && <Calibration onExit={() => setModule('information')} />}
     </div>

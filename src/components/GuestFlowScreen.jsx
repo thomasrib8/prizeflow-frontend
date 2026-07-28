@@ -9,6 +9,13 @@ const RETRY_MESSAGES = {
   SPIN_TOO_SHORT: "⏱ The wheel didn't reach the right slot in time. Please spin again.",
 };
 
+const SOCIAL_PLATFORMS = [
+  { key: 'facebook', label: 'Facebook', icon: '📘' },
+  { key: 'instagram', label: 'Instagram', icon: '📷' },
+  { key: 'linkedin', label: 'LinkedIn', icon: '💼' },
+  { key: 'x', label: 'X', icon: '✖️' },
+];
+
 const fullScreenBase = {
   position: 'fixed', inset: 0, background: 'linear-gradient(160deg, #0F1C3F 0%, #1a2d5a 100%)',
   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
@@ -134,6 +141,8 @@ export default function GuestFlowScreen({
     if (status.status === 'done') {
       const result = status.result || {};
       const showReviewInvite = !!campaignInfo?.googleReviewRequired && !!campaignInfo?.googleReviewUrl;
+      const activeSocialLinks = SOCIAL_PLATFORMS.filter((p) => campaignInfo?.socialLinks?.[p.key]);
+      const showSocialInvite = !!campaignInfo?.socialMediaRequired && activeSocialLinks.length > 0;
       return (
         <div style={fullScreenBase} key="done">
           {cornerCloseZone}
@@ -176,6 +185,34 @@ export default function GuestFlowScreen({
                   padding: '11px 22px', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
                 }}
               >{reviewClicked ? 'Thanks! ✓' : 'Leave a review'}</button>
+            </div>
+          )}
+
+          {/* Same non-blocking, purely optional treatment as the review
+              invite above — only platforms with a link actually set ever
+              show a button (see Settings.jsx's Social media tab). */}
+          {showSocialInvite && (
+            <div style={{
+              marginTop: 12, padding: '16px 20px', borderRadius: 14,
+              background: 'rgba(255,255,255,0.08)', maxWidth: 420,
+            }}>
+              <div style={{ color: 'white', fontSize: 15, fontWeight: 600, marginBottom: 12 }}>
+                👋 Follow us on social media!
+              </div>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
+                {activeSocialLinks.map((p) => (
+                  <a
+                    key={p.key}
+                    href={campaignInfo.socialLinks[p.key]}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      background: 'white', color: '#0F1C3F', textDecoration: 'none', borderRadius: 10,
+                      padding: '11px 18px', fontSize: 14, fontWeight: 700, fontFamily: 'inherit',
+                    }}
+                  >{p.icon} {p.label}</a>
+                ))}
+              </div>
             </div>
           )}
         </div>

@@ -160,6 +160,8 @@ export const api = {
   archiveCampaign: (id) => request(`/campaigns/${id}/archive`, { method: 'POST' }),
   setCampaignGoogleReview: (id, required) =>
     request(`/campaigns/${id}/google-review`, { method: 'PATCH', body: { required } }),
+  setCampaignSocialMedia: (id, required) =>
+    request(`/campaigns/${id}/social-media`, { method: 'PATCH', body: { required } }),
 
   // Reusable slot/gift configs — "start from template" and "duplicate an
   // existing campaign" both prefill NewCampaign.jsx's form (stock reset to 0,
