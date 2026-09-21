@@ -33,14 +33,6 @@
   letter-spacing: -0.01em;
   line-height: 1.2;
 }
-.brand-sub {
-  color: #475569;
-  font-size: 9px;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  margin-top: 1px;
-}
 
 .nav { display: flex; flex-direction: column; gap: 1px; flex: 1; }
 
@@ -50,14 +42,14 @@
   gap: 9px;
   padding: 9px 12px;
   border-radius: var(--radius-md);
-  color: #64748B;
+  color: rgba(255,255,255,0.7);
   text-decoration: none;
   font-size: 13px;
   font-weight: 500;
   transition: background 0.1s, color 0.1s;
 }
-.nav-item:hover { background: rgba(255,255,255,0.05); color: #94A3B8; }
-.nav-item.active { background: #1E3A6E; color: #60A5FA; }
+.nav-item:hover { background: rgba(255,255,255,0.08); color: white; }
+.nav-item.active { background: rgba(255,255,255,0.18); color: white; }
 .nav-item svg { flex-shrink: 0; width: 15px; height: 15px; }
 .nav-badge {
   margin-left: auto;
@@ -74,12 +66,12 @@
 
 .nav-separator {
   height: 1px;
-  background: #1E2D50;
+  background: var(--navy-light, #266FF9);
   margin: 10px 12px 8px;
 }
 .nav-section-title {
   padding: 0 12px 6px;
-  color: #475569;
+  color: rgba(255,255,255,0.45);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -91,7 +83,7 @@
 }
 
 .sidebar-footer {
-  border-top: 1px solid #1E2D50;
+  border-top: 1px solid var(--navy-light, #266FF9);
   padding-top: 12px;
   display: flex;
   flex-direction: column;
@@ -125,8 +117,8 @@
 .user-avatar {
   width: 30px; height: 30px;
   border-radius: 50%;
-  background: #1E3A6E;
-  color: #60A5FA;
+  background: rgba(255,255,255,0.15);
+  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -138,7 +130,7 @@
 .user-name {
   font-size: 12px;
   font-weight: 600;
-  color: #CBD5E1;
+  color: rgba(255,255,255,0.9);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -149,7 +141,7 @@
   border: none;
   padding: 0;
   font-size: 10px;
-  color: #475569;
+  color: rgba(255,255,255,0.5);
   cursor: pointer;
   text-align: left;
   font-family: inherit;

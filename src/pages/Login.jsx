@@ -35,7 +35,7 @@ export default function Login() {
 
         {/* Logo centered, larger */}
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
-          <img src="/logo2.svg" alt="PrizeFlow" style={{ width: 100, height: 100, objectFit: 'contain' }} />
+          <img src="/logo2.svg" alt="SPARK" style={{ width: 100, height: 100, objectFit: 'contain' }} />
         </div>
 
         <h1 className="auth-title" style={{ textAlign: 'center' }}>Welcome back</h1>

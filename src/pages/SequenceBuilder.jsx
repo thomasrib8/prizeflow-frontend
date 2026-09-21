@@ -29,8 +29,8 @@ function StepBubbles({ steps, position, active }) {
             width: 34, height: 34, borderRadius: '50%',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 13, fontWeight: 800, transition: 'all 0.3s',
-            background: done ? '#0F1C3F' : current ? '#FFFBEB' : 'white',
-            color: done ? 'white' : current ? '#F59E0B' : '#94A3B8',
+            background: done ? '#09B2FD' : current ? '#FFFBEB' : 'white',
+            color: done ? '#03041A' : current ? '#F59E0B' : '#94A3B8',
             border: current ? '2px solid #F59E0B' : '2px solid #CBD5E1',
           }}>
             {caseIndex + 1}
@@ -62,8 +62,8 @@ function SequenceRunModal({ sequence, wheelStatus, agentConnected, status, busyI
       <div style={{ background: 'white', borderRadius: 16, padding: '32px 40px', width: 480, maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 30px 80px rgba(0,0,0,0.3)', textAlign: 'center' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
           <div style={{ textAlign: 'left' }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#2563EB', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Sequence</div>
-            <h2 style={{ fontSize: 18, fontWeight: 700, margin: '2px 0 0', color: '#0F172A' }}>{sequence.name}</h2>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#09B2FD', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Sequence</div>
+            <h2 style={{ fontSize: 18, fontWeight: 700, margin: '2px 0 0', color: '#03041A' }}>{sequence.name}</h2>
           </div>
           <button type="button" onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 22, color: '#94A3B8', cursor: 'pointer', lineHeight: 1, padding: 0 }}>×</button>
         </div>
@@ -110,7 +110,7 @@ function LibraryModule({ sequences, status, agentConnected, busyId, onActivate, 
         return (
           <Card key={seq.id}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10, marginBottom: seq.description ? 6 : 12 }}>
-              <h3 style={{ fontSize: 15, fontWeight: 700, margin: 0, color: '#0F172A' }}>{seq.name}</h3>
+              <h3 style={{ fontSize: 15, fontWeight: 700, margin: 0, color: '#03041A' }}>{seq.name}</h3>
               {isActive
                 ? <Badge tone="orange">Running ({status.position}/{status.steps.length})</Badge>
                 : <Badge tone="neutral">Ready</Badge>}
@@ -122,7 +122,7 @@ function LibraryModule({ sequences, status, agentConnected, busyId, onActivate, 
               {seq.steps.map((s, i) => (
                 <span key={i} style={{
                   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                  width: 26, height: 26, borderRadius: '50%', background: '#EFF6FF', color: '#2563EB',
+                  width: 26, height: 26, borderRadius: '50%', background: '#EFF6FF', color: '#09B2FD',
                   fontSize: 12, fontWeight: 700,
                 }}>
                   {s + 1}
@@ -204,14 +204,14 @@ function SettingsModule({ wheelStatus, agentConnected, sequences, busyId, saving
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {steps.map((s, i) => (
                 <span key={i} style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 6, background: '#EFF6FF', color: '#2563EB',
+                  display: 'inline-flex', alignItems: 'center', gap: 6, background: '#EFF6FF', color: '#09B2FD',
                   fontWeight: 700, fontSize: 13, padding: '5px 6px 5px 12px', borderRadius: 20,
                 }}>
                   {s + 1}
                   <button
                     type="button"
                     onClick={() => handleRemoveStep(i)}
-                    style={{ background: 'none', border: 'none', color: '#2563EB', cursor: 'pointer', fontSize: 14, lineHeight: 1, padding: '2px 4px' }}
+                    style={{ background: 'none', border: 'none', color: '#09B2FD', cursor: 'pointer', fontSize: 14, lineHeight: 1, padding: '2px 4px' }}
                   >
                     ✕
                   </button>

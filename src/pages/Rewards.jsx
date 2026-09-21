@@ -142,7 +142,7 @@ export default function Rewards() {
           <button
             type="button"
             onClick={() => setHistoryOpen((v) => !v)}
-            style={{ background: 'none', border: 'none', padding: 0, color: '#2563EB', cursor: 'pointer', fontSize: 12, fontWeight: 600, fontFamily: 'inherit' }}
+            style={{ background: 'none', border: 'none', padding: 0, color: '#002881', cursor: 'pointer', fontSize: 12, fontWeight: 600, fontFamily: 'inherit' }}
           >
             {historyOpen ? 'Collapse ▲' : 'Expand ▼'}
           </button>

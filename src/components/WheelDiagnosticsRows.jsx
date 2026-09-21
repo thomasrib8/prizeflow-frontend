@@ -12,7 +12,7 @@ function Row({ tone, title, children }) {
     <div style={{ display: 'flex', gap: 12, padding: '12px 0', borderBottom: '1px solid #F1F5F9' }}>
       <div style={{ paddingTop: 4 }}><Dot color={tone} /></div>
       <div style={{ flex: 1 }}>
-        <div style={{ fontSize: 13, fontWeight: 700, color: '#0F172A', marginBottom: 3 }}>{title}</div>
+        <div style={{ fontSize: 13, fontWeight: 700, color: '#03041A', marginBottom: 3 }}>{title}</div>
         <div style={{ fontSize: 12, color: '#64748B', lineHeight: 1.6 }}>{children}</div>
       </div>
     </div>
@@ -76,11 +76,11 @@ export default function WheelDiagnosticsRows({ diagnostics }) {
 
       {identity && (identity.modelNumber || identity.serialNumber || identity.securityKey) && (
         <div style={{ padding: '12px 0', borderTop: '1px solid #F1F5F9', marginTop: 4 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: '#0F172A', marginBottom: 6 }}>Wheel identity</div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: '#03041A', marginBottom: 6 }}>Wheel identity</div>
           <div style={{ fontSize: 12, color: '#64748B', lineHeight: 1.8 }}>
-            {identity.modelNumber && <div>Model Number: <strong style={{ color: '#0F172A' }}>{identity.modelNumber}</strong></div>}
-            {identity.serialNumber && <div>Serial Number: <strong style={{ color: '#0F172A' }}>{identity.serialNumber}</strong></div>}
-            {identity.securityKey && <div>Security Key: <strong style={{ color: '#0F172A' }}>{identity.securityKey}</strong></div>}
+            {identity.modelNumber && <div>Model Number: <strong style={{ color: '#03041A' }}>{identity.modelNumber}</strong></div>}
+            {identity.serialNumber && <div>Serial Number: <strong style={{ color: '#03041A' }}>{identity.serialNumber}</strong></div>}
+            {identity.securityKey && <div>Security Key: <strong style={{ color: '#03041A' }}>{identity.securityKey}</strong></div>}
           </div>
         </div>
       )}

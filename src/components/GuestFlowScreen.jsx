@@ -9,7 +9,7 @@ const RETRY_MESSAGES = {
 };
 
 const fullScreenBase = {
-  position: 'fixed', inset: 0, background: 'linear-gradient(160deg, #0F1C3F 0%, #1a2d5a 100%)',
+  position: 'fixed', inset: 0, background: 'linear-gradient(160deg, #0055F8 0%, #266FF9 100%)',
   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
   zIndex: 50, gap: 24, padding: '0 24px', textAlign: 'center',
 };
@@ -89,7 +89,7 @@ export default function GuestFlowScreen({
       <button
         onClick={onClose}
         style={{
-          background: 'rgba(255,255,255,0.95)', color: '#0F172A', border: '1px solid #E2E8F0',
+          background: 'rgba(255,255,255,0.95)', color: '#03041A', border: '1px solid #E2E8F0',
           borderRadius: 8, padding: '7px 14px', fontSize: 13, cursor: 'pointer', fontFamily: 'inherit',
           boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
           opacity: hoveringCorner ? 1 : 0, pointerEvents: hoveringCorner ? 'auto' : 'none',
@@ -115,14 +115,20 @@ export default function GuestFlowScreen({
   }
 
   if (view === 'expired') {
+    const expiredMessage =
+      status?.status === 'skipped'
+        ? "You've been skipped — you can try again right away."
+        : status?.status === 'cancelled'
+        ? 'Your turn was cancelled by our team.'
+        : 'Your turn has timed out.';
     return (
       <div style={fullScreenBase}>
         {cornerCloseZone}
         <div style={{ color: 'white', fontSize: 20, fontWeight: 700, maxWidth: 420, lineHeight: 1.4 }}>
-          Your turn has timed out.
+          {expiredMessage}
         </div>
         <button onClick={onRestart} style={{
-          background: 'white', color: '#0F1C3F', border: 'none', borderRadius: 10,
+          background: 'white', color: '#002881', border: 'none', borderRadius: 10,
           padding: '13px 28px', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
         }}>Try again</button>
       </div>
@@ -142,14 +148,14 @@ export default function GuestFlowScreen({
           `}</style>
           <div style={{ fontSize: 56, animation: 'confetti 0.6s ease-in-out infinite alternate' }}>🎉</div>
           <div style={{ color: 'white', maxWidth: 480, animation: 'fadeIn 0.4s ease' }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: '#60A5FA', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 12 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#90DCFE', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 12 }}>
               Thank you{status.firstName ? `, ${status.firstName}` : ''}!
             </div>
             <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.01em', lineHeight: 1.4 }}>
               You will receive an email with your gift.
             </div>
             {!!result.isTest && (
-              <div style={{ marginTop: 20, fontSize: 32, fontWeight: 900, letterSpacing: '-0.02em', color: '#60A5FA' }}>
+              <div style={{ marginTop: 20, fontSize: 32, fontWeight: 900, letterSpacing: '-0.02em', color: '#90DCFE' }}>
                 {result.giftName}
               </div>
             )}
@@ -171,7 +177,7 @@ export default function GuestFlowScreen({
                 onClick={() => { onOpenReview(); setReviewClicked(true); }}
                 style={{
                   background: reviewClicked ? 'rgba(255,255,255,0.15)' : 'white',
-                  color: reviewClicked ? '#94A3B8' : '#0F1C3F', border: 'none', borderRadius: 10,
+                  color: reviewClicked ? '#94A3B8' : '#002881', border: 'none', borderRadius: 10,
                   padding: '11px 22px', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
                 }}
               >{reviewClicked ? 'Thanks! ✓' : 'Leave a review'}</button>
@@ -188,7 +194,7 @@ export default function GuestFlowScreen({
           <div style={{ color: 'white', fontSize: 20, fontWeight: 800, maxWidth: 420 }}>
             You're #{status.position + 1} in line
           </div>
-          <div style={{ color: '#60A5FA', fontSize: 14, fontWeight: 600 }}>
+          <div style={{ color: '#90DCFE', fontSize: 14, fontWeight: 600 }}>
             {status.activeFirstName
               ? `${status.activeFirstName} is currently playing`
               : 'You will be notified when it\'s your turn'}
@@ -213,7 +219,7 @@ export default function GuestFlowScreen({
           ) : (
             <>
               <img src="/logo.svg" alt="" style={{ width: 84, height: 84, animation: 'spin 1.2s linear infinite' }} />
-              <div style={{ color: '#60A5FA', fontSize: 15, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+              <div style={{ color: '#90DCFE', fontSize: 15, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
                 Please wait…
               </div>
               <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
@@ -237,7 +243,7 @@ export default function GuestFlowScreen({
       }}>
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
           <img src="/logo.svg" alt="" style={{ width: 44, height: 44, marginBottom: 14 }} />
-          <h1 style={{ fontSize: 22, fontWeight: 800, margin: '0 0 6px', color: '#0F172A' }}>Win your reward!</h1>
+          <h1 style={{ fontSize: 22, fontWeight: 800, margin: '0 0 6px', color: '#03041A' }}>Win your reward!</h1>
           <p style={{ fontSize: 14, color: '#64748B', margin: 0 }}>Enter your details below to claim your gift.</p>
         </div>
 
@@ -269,7 +275,7 @@ export default function GuestFlowScreen({
             I agree to receive my reward by email and consent to the processing of my personal data.
           </label>
           <button type="submit" disabled={busy} style={{
-            width: '100%', background: '#0F1C3F', color: 'white', border: 'none',
+            width: '100%', background: '#09B2FD', color: '#03041A', border: 'none',
             borderRadius: 10, padding: '15px', fontSize: 15, fontWeight: 700,
             cursor: busy ? 'not-allowed' : 'pointer', opacity: busy ? 0.5 : 1,
             fontFamily: 'inherit', letterSpacing: '0.02em',

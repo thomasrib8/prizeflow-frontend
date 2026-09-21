@@ -24,7 +24,7 @@ export default function RewardCard({ reward, error, busy, onDistribute, onCancel
       }}>
         {STATUS_INFO[reward.status]?.label || reward.status}
       </div>
-      <h1 style={{ fontSize: 22, fontWeight: 800, margin: '0 0 6px', color: '#0F172A' }}>{reward.giftName}</h1>
+      <h1 style={{ fontSize: 22, fontWeight: 800, margin: '0 0 6px', color: '#03041A' }}>{reward.giftName}</h1>
       <p style={{ fontSize: 14, color: '#64748B', margin: '0 0 4px' }}>
         For {reward.firstName} {reward.lastName}
       </p>
@@ -45,7 +45,7 @@ export default function RewardCard({ reward, error, busy, onDistribute, onCancel
       {reward.status === 'active' && (
         <div style={{ display: 'flex', gap: 10 }}>
           <button type="button" onClick={onDistribute} disabled={busy} style={{
-            flex: 1, background: '#0F1C3F', color: 'white', border: 'none',
+            flex: 1, background: '#09B2FD', color: '#03041A', border: 'none',
             borderRadius: 10, padding: '13px', fontSize: 14, fontWeight: 700,
             cursor: busy ? 'not-allowed' : 'pointer', opacity: busy ? 0.6 : 1, fontFamily: 'inherit',
           }}>
@@ -73,7 +73,7 @@ export default function RewardCard({ reward, error, busy, onDistribute, onCancel
 
       {reward.status === 'cancelled' && (
         <button type="button" onClick={onUndo} disabled={busy} style={{
-          width: '100%', background: 'white', color: '#0F1C3F', border: '1px solid #CBD5E1',
+          width: '100%', background: 'white', color: '#002881', border: '1px solid #CBD5E1',
           borderRadius: 10, padding: '13px', fontSize: 14, fontWeight: 700,
           cursor: busy ? 'not-allowed' : 'pointer', opacity: busy ? 0.6 : 1, fontFamily: 'inherit',
         }}>

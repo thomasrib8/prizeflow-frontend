@@ -21,6 +21,7 @@ export default function History() {
   const [exportFrom, setExportFrom] = useState('');
   const [exportTo, setExportTo] = useState('');
   const [exportBusy, setExportBusy] = useState(false);
+  const [openNote, setOpenNote] = useState(null); // full note text being shown in the popup, or null
 
   useEffect(() => {
     api.distributions().then(setDistributions).catch(e => setError(e.message));
@@ -74,7 +75,7 @@ export default function History() {
 
       <div className="tabs">
         <button className={`tab${tab === 'distributions' ? ' active' : ''}`} onClick={() => setTab('distributions')}>Distributions</button>
-        <button className={`tab${tab === 'rewards' ? ' active' : ''}`} onClick={() => setTab('rewards')}>Rewards (CRM)</button>
+        <button className={`tab${tab === 'rewards' ? ' active' : ''}`} onClick={() => setTab('rewards')}>CRM</button>
       </div>
 
       <Card className="mt-card">
@@ -119,14 +120,13 @@ export default function History() {
           distributions.length === 0 ? <EmptyState title="No distributions yet" /> : (
             <table className="data-table">
               <thead>
-                <tr><th>Date</th><th>Gift</th><th>Room</th><th>Type</th><th>Operator</th></tr>
+                <tr><th>Date</th><th>Gift</th><th>Type</th><th>Operator</th></tr>
               </thead>
               <tbody>
                 {distributions.map(d => (
                   <tr key={d.id}>
                     <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{formatDT(d.created_at)}</td>
                     <td><GiftPill slotIndex={d.slot_index} name={d.gift_name || `Case ${d.slot_index + 1}`} /></td>
-                    <td>{d.room_number || '—'}</td>
                     <td><Badge tone={d.is_demo ? 'neutral' : 'green'}>{d.is_demo ? 'Demo' : 'Real'}</Badge></td>
                     <td style={{ color: 'var(--text-muted)' }}>{d.operator_name || '—'}</td>
                   </tr>
@@ -140,7 +140,7 @@ export default function History() {
           rewards.length === 0 ? <EmptyState title="No rewards yet" /> : (
             <table className="data-table">
               <thead>
-                <tr><th>Reward ID</th><th>Name</th><th>Email</th><th>Gift</th><th>Status</th><th></th></tr>
+                <tr><th>Reward ID</th><th>Name</th><th>Email</th><th>Gift</th><th>Status</th><th>Segment</th><th>Note</th><th></th></tr>
               </thead>
               <tbody>
                 {rewards.map(r => (
@@ -150,6 +150,19 @@ export default function History() {
                     <td style={{ color: 'var(--text-muted)' }}>{r.email}</td>
                     <td><GiftPill slotIndex={0} name={r.gift_name} /></td>
                     <td><Badge tone={REWARD_TONE[r.status] || 'neutral'}>{r.status}</Badge></td>
+                    <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{r.segment || '—'}</td>
+                    <td style={{ maxWidth: 180 }}>
+                      {r.note ? (
+                        <button
+                          onClick={() => setOpenNote(r.note)}
+                          style={{
+                            background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontFamily: 'inherit',
+                            fontSize: 12, color: '#334155', textAlign: 'left',
+                            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block', width: '100%',
+                          }}
+                        >{r.note}</button>
+                      ) : <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>—</span>}
+                    </td>
                     <td>
                       <button
                         className="btn btn-ghost btn-sm"
@@ -164,6 +177,28 @@ export default function History() {
           )
         )}
       </Card>
+
+      {openNote && (
+        <div
+          onClick={() => setOpenNote(null)}
+          style={{
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200, padding: 16,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: 'white', borderRadius: 16, padding: 24, width: 440, maxWidth: '100%',
+              maxHeight: '80vh', overflowY: 'auto', boxShadow: '0 30px 80px rgba(0,0,0,0.3)',
+            }}
+          >
+            <h3 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 800 }}>Note</h3>
+            <p style={{ fontSize: 14, color: '#334155', whiteSpace: 'pre-wrap', margin: 0 }}>{openNote}</p>
+            <Button size="sm" variant="secondary" onClick={() => setOpenNote(null)} style={{ marginTop: 18 }}>Close</Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

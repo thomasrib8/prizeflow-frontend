@@ -113,7 +113,7 @@ export default function WheelSVG({ positionAngle = 0, size = 220, highlightSecti
       {labels.map(l => (
         <text key={l.idx} x={l.x} y={l.y} textAnchor="middle" dominantBaseline="central"
           fontSize="18" fontWeight="900" fontFamily="Arial Black, sans-serif"
-          fill={highlightSection === l.idx ? '#2563EB' : '#111'}
+          fill={highlightSection === l.idx ? '#09B2FD' : '#111'}
           transform={`rotate(${(l.idx + 0.5) * sectionAngle}, ${l.x}, ${l.y})`}>
           {l.num}
         </text>

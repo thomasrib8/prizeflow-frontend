@@ -35,8 +35,8 @@ export default function Campaigns() {
             <button key={f} onClick={() => setStatusFilter(f)} style={{
               padding: '6px 14px', borderRadius: 20, border: 'none', fontSize: 12, fontWeight: 600,
               cursor: 'pointer', fontFamily: 'inherit', textTransform: 'capitalize',
-              background: statusFilter === f ? '#0F1C3F' : '#F1F5F9',
-              color: statusFilter === f ? 'white' : '#64748B',
+              background: statusFilter === f ? '#09B2FD' : '#F1F5F9',
+              color: statusFilter === f ? '#03041A' : '#64748B',
             }}>{f}</button>
           ))}
         </div>

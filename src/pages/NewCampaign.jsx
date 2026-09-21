@@ -24,6 +24,7 @@ export default function NewCampaign() {
   const [templates, setTemplates] = useState(null);
   const [templateMsg, setTemplateMsg] = useState('');
   const [savingTemplate, setSavingTemplate] = useState(false);
+  const [segments, setSegments] = useState(['']);
   const { wheelStatus, agentConnected } = useWheelSocket();
 
   // Mirror the real physical wheel live whenever it's connected — the on-screen
@@ -99,6 +100,18 @@ export default function NewCampaign() {
     setSlots(prev => prev.map((s, idx) => idx === i ? { ...s, [field]: value } : s));
   }
 
+  function updateSegment(i, value) {
+    setSegments(prev => prev.map((s, idx) => idx === i ? value : s));
+  }
+
+  function addSegment() {
+    setSegments(prev => [...prev, '']);
+  }
+
+  function removeSegment(i) {
+    setSegments(prev => prev.filter((_, idx) => idx !== i));
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
@@ -114,7 +127,8 @@ export default function NewCampaign() {
           giftName: s.giftName,
           stock: Number(s.stock),
           redeemMethod: s.redeemMethod === 'code' ? 'code' : 'qr',
-        }))
+        })),
+        segments: segments.map(s => s.trim()).filter(Boolean),
       });
       navigate(`/campaigns/${created.id}`);
     } catch (err) {
@@ -163,6 +177,35 @@ export default function NewCampaign() {
           )}
         </Card>
 
+        <Card title="Segmentation client" className="mt-card">
+          <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px' }}>
+            Define the customer categories your team can tag guests with from the Launch page (e.g. "Prêt conso",
+            "Prêt habitat", "Assurance vie"). Optional — leave blank to skip segmentation for this campaign. You can
+            add or edit these later too, even once the campaign is active.
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {segments.map((s, i) => (
+              <div key={i} style={{ display: 'flex', gap: 8 }}>
+                <input
+                  placeholder="e.g. Prêt habitat"
+                  value={s}
+                  onChange={e => updateSegment(i, e.target.value)}
+                  style={{ flex: 1 }}
+                />
+                <button
+                  type="button"
+                  onClick={() => removeSegment(i)}
+                  className="btn btn-ghost btn-sm"
+                  style={{ color: '#EF4444' }}
+                >Remove</button>
+              </div>
+            ))}
+          </div>
+          <button type="button" onClick={addSegment} className="btn btn-ghost btn-sm" style={{ marginTop: 8 }}>
+            + Add category
+          </button>
+        </Card>
+
         <Card title="Wheel orientation helper" className="mt-card">
           <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 16px' }}>
             {agentConnected && !manualOverride
@@ -178,7 +221,7 @@ export default function NewCampaign() {
                   <button
                     type="button"
                     onClick={() => setManualOverride(false)}
-                    style={{ background: 'none', border: 'none', padding: 0, color: '#2563EB', textDecoration: 'underline', cursor: 'pointer', fontSize: 13, fontFamily: 'inherit' }}
+                    style={{ background: 'none', border: 'none', padding: 0, color: '#002881', textDecoration: 'underline', cursor: 'pointer', fontSize: 13, fontFamily: 'inherit' }}
                   >
                     Resync with live wheel
                   </button>

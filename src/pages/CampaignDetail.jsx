@@ -5,7 +5,7 @@ import { useAdmin } from '../hooks/useAdmin';
 import { Card, Button, Badge, GiftPill, MiniBar } from '../components/ui';
 
 const STATUS_TONE = { draft: 'neutral', active: 'green', paused: 'orange', completed: 'blue', archived: 'neutral' };
-const SLOT_COLORS = ['#2563EB','#10B981','#F59E0B','#9333EA','#E11D48','#15803D','#D97706','#4F46E5','#BE185D','#0D9488','#A16207','#7C3AED'];
+const SLOT_COLORS = ['#09B2FD','#10B981','#F59E0B','#9333EA','#E11D48','#15803D','#D97706','#4F46E5','#BE185D','#0D9488','#A16207','#7C3AED'];
 
 export default function CampaignDetail() {
   const { id } = useParams();
@@ -20,9 +20,40 @@ export default function CampaignDetail() {
   const [showSeq, setShowSeq] = useState(false);
   const [seqFilter, setSeqFilter] = useState('all'); // all | remaining | consumed
   const [reportBusy, setReportBusy] = useState(false);
+  const [segments, setSegments] = useState([]);
+  const [savingSegments, setSavingSegments] = useState(false);
+  const [segmentsMsg, setSegmentsMsg] = useState('');
 
-  const load = () => api.getCampaign(id).then(setCampaign).catch(e => setError(e.message));
+  const load = () => api.getCampaign(id).then((c) => {
+    setCampaign(c);
+    setSegments((c.segments || []).map((s) => s.name));
+  }).catch(e => setError(e.message));
   useEffect(() => { load(); }, [id]);
+
+  function updateSegment(i, value) {
+    setSegments(prev => prev.map((s, idx) => idx === i ? value : s));
+  }
+  function addSegment() {
+    setSegments(prev => [...prev, '']);
+  }
+  function removeSegment(i) {
+    setSegments(prev => prev.filter((_, idx) => idx !== i));
+  }
+  async function handleSaveSegments() {
+    setSavingSegments(true);
+    setError('');
+    setSegmentsMsg('');
+    try {
+      const res = await api.updateCampaignSegments(id, segments.map(s => s.trim()).filter(Boolean));
+      setSegments(res.segments.map(s => s.name));
+      setSegmentsMsg('Saved');
+      setTimeout(() => setSegmentsMsg(''), 2000);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setSavingSegments(false);
+    }
+  }
 
   async function handleDownloadReport() {
     setReportBusy(true);
@@ -98,7 +129,7 @@ export default function CampaignDetail() {
           {campaign.status !== 'archived' && (
             <Button variant="secondary" onClick={() => navigate(`/campaigns/new?from=${campaign.id}`)}>Duplicate</Button>
           )}
-          {isAdmin && campaign.is_test && (
+          {isAdmin && !!campaign.is_test && (
             <Button variant="secondary" onClick={showSeq ? () => setShowSeq(false) : loadSequence} disabled={seqLoading}>
               {seqLoading ? 'Loading…' : showSeq ? 'Hide sequence' : '🔧 View sequence'}
             </Button>
@@ -143,6 +174,34 @@ export default function CampaignDetail() {
         </table>
       </Card>
 
+      {/* Customer segmentation — editable at any time, including on an
+          active campaign, since these names are a snapshot (not a foreign
+          key) on any guest note that references them. */}
+      <Card title="Segmentation client" className="mt-card"
+        action={
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            {segmentsMsg && <span style={{ fontSize: 12, color: '#10B981', fontWeight: 600 }}>{segmentsMsg}</span>}
+            <Button size="sm" disabled={savingSegments} onClick={handleSaveSegments}>
+              {savingSegments ? 'Saving…' : 'Save'}
+            </Button>
+          </div>
+        }>
+        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px' }}>
+          Customer categories your team can tag guests with from the Launch page. Add, rename, or remove them at
+          any time — existing notes keep whatever segment name they were tagged with.
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {segments.map((s, i) => (
+            <div key={i} style={{ display: 'flex', gap: 8 }}>
+              <input placeholder="e.g. Prêt habitat" value={s} onChange={e => updateSegment(i, e.target.value)} style={{ flex: 1 }} />
+              <button type="button" onClick={() => removeSegment(i)} className="btn btn-ghost btn-sm" style={{ color: '#EF4444' }}>Remove</button>
+            </div>
+          ))}
+          {segments.length === 0 && <p className="page-subtitle" style={{ margin: 0 }}>No categories configured yet.</p>}
+        </div>
+        <button type="button" onClick={addSegment} className="btn btn-ghost btn-sm" style={{ marginTop: 8 }}>+ Add category</button>
+      </Card>
+
       {/* Sequence viewer — admin + test only */}
       {showSeq && sequence && (
         <div className="card mt-card" style={{ marginTop: 12 }}>
@@ -159,8 +218,8 @@ export default function CampaignDetail() {
                 <button key={f} onClick={() => setSeqFilter(f)} style={{
                   padding: '4px 10px', borderRadius: 6, border: 'none', fontSize: 11, fontWeight: 600,
                   cursor: 'pointer', fontFamily: 'inherit',
-                  background: seqFilter === f ? '#0F1C3F' : '#F1F5F9',
-                  color: seqFilter === f ? 'white' : '#64748B',
+                  background: seqFilter === f ? '#09B2FD' : '#F1F5F9',
+                  color: seqFilter === f ? '#03041A' : '#64748B',
                 }}>{f.charAt(0).toUpperCase() + f.slice(1)}</button>
               ))}
             </div>
@@ -196,7 +255,7 @@ export default function CampaignDetail() {
                     </td>
                     <td>
                       {s.isNext
-                        ? <span style={{ fontSize: 11, fontWeight: 700, color: '#2563EB' }}>→ Next</span>
+                        ? <span style={{ fontSize: 11, fontWeight: 700, color: '#09B2FD' }}>→ Next</span>
                         : s.consumed
                           ? <span style={{ fontSize: 11, color: '#10B981' }}>✓ Done</span>
                           : <span style={{ fontSize: 11, color: '#94A3B8' }}>Pending</span>
