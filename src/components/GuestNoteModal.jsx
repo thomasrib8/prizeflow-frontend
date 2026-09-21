@@ -85,14 +85,12 @@ export default function GuestNoteModal({ campaignId, guest, segments, onClose, o
 
   return (
     <div
-      onClick={onClose}
       style={{
         position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
         display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200, padding: 16,
       }}
     >
       <div
-        onClick={(e) => e.stopPropagation()}
         style={{
           background: 'white', borderRadius: 16, padding: 28, width: 440, maxWidth: '100%',
           maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 30px 80px rgba(0,0,0,0.3)',
