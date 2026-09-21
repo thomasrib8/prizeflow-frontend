@@ -38,10 +38,12 @@ export function useGuestFlow({ token, persistSession = false, autoReturnMs = nul
   }, [token]);
 
   // Poll while in queue, but stop once a terminal state is reached — no need
-  // to keep hitting the server once the turn is done or expired.
+  // to keep hitting the server once the turn is done, expired, or the guest
+  // was cancelled/skipped by staff from the Launch page.
+  const TERMINAL_STATUSES = ['expired', 'cancelled', 'skipped'];
   useEffect(() => {
     if (view !== 'queue') return undefined;
-    if (status && (status.status === 'done' || status.status === 'expired')) return undefined;
+    if (status && (status.status === 'done' || TERMINAL_STATUSES.includes(status.status))) return undefined;
     let cancelled = false;
 
     async function poll() {
@@ -54,7 +56,7 @@ export function useGuestFlow({ token, persistSession = false, autoReturnMs = nul
           return;
         }
         setStatus(res);
-        if (res.status === 'expired') {
+        if (TERMINAL_STATUSES.includes(res.status)) {
           if (persistSession) localStorage.removeItem(storageKey);
           setView('expired');
         }

@@ -5,6 +5,7 @@ import { Card, Badge, Button, EmptyState } from '../components/ui';
 import { useWheelSocket } from '../hooks/useWheelSocket';
 import { useGuestFlow } from '../hooks/useGuestFlow';
 import GuestFlowScreen from '../components/GuestFlowScreen';
+import GuestNoteModal from '../components/GuestNoteModal';
 
 const POLL_INTERVAL_MS = 2000;
 
@@ -45,6 +46,9 @@ export default function LaunchCampaign() {
   const [queue, setQueue] = useState(null);
   const [showKiosk, setShowKiosk] = useState(false);
   const [pdfBusy, setPdfBusy] = useState(false);
+  const [recentPlayers, setRecentPlayers] = useState(null);
+  const [noteGuest, setNoteGuest] = useState(null); // { email, firstName, lastName, note?, leadRating?, segment? } | null
+  const [queueActionBusy, setQueueActionBusy] = useState(false);
 
   function handleDownloadPng() {
     if (!qrDataUrl || !campaign) return;
@@ -71,15 +75,23 @@ export default function LaunchCampaign() {
     api.listCampaigns()
       .then((rows) => {
         const active = rows.find((c) => c.status === 'active') || null;
-        setCampaign(active);
-        if (!active) return null;
-        const url = `${window.location.origin}/play/${active.public_token}`;
-        setGuestUrl(url);
-        return QRCode.toDataURL(url, { width: 320, margin: 1 });
+        if (!active) { setCampaign(null); return null; }
+        // The list endpoint doesn't include segments (see routes/campaigns.js)
+        // — fetch the full campaign once we know which one is active.
+        return api.getCampaign(active.id).then((full) => {
+          setCampaign(full);
+          const url = `${window.location.origin}/play/${full.public_token}`;
+          setGuestUrl(url);
+          return QRCode.toDataURL(url, { width: 320, margin: 1 });
+        });
       })
       .then((dataUrl) => { if (dataUrl) setQrDataUrl(dataUrl); })
       .catch((e) => setError(e.message));
   }, []);
+
+  function loadRecentPlayers(campaignId) {
+    api.getRecentPlayers(campaignId).then(setRecentPlayers).catch(() => {});
+  }
 
   useEffect(() => {
     if (!campaign) return undefined;
@@ -93,9 +105,39 @@ export default function LaunchCampaign() {
       }
     }
     poll();
+    loadRecentPlayers(campaign.id);
     const t = setInterval(poll, POLL_INTERVAL_MS);
     return () => { cancelled = true; clearInterval(t); };
-  }, [campaign]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [campaign?.id]);
+
+  async function handleCancelPlayer() {
+    if (!campaign || queueActionBusy) return;
+    setQueueActionBusy(true);
+    try {
+      await api.cancelActivePlayer(campaign.id);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setQueueActionBusy(false);
+    }
+  }
+
+  async function handleSkipPlayer() {
+    if (!campaign || queueActionBusy) return;
+    setQueueActionBusy(true);
+    try {
+      await api.skipActivePlayer(campaign.id);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setQueueActionBusy(false);
+    }
+  }
+
+  function handleNoteSaved() {
+    if (campaign) loadRecentPlayers(campaign.id);
+  }
 
   return (
     <div>
@@ -155,11 +197,54 @@ export default function LaunchCampaign() {
                   Currently playing
                 </div>
                 {queue.active ? (
-                  <div style={{ fontSize: 15, fontWeight: 600, color: '#0F172A' }}>
-                    {queue.active.firstName} — {queue.active.launched ? 'spinning…' : 'waiting to spin'}
-                    {queue.active.retryMessage && (
-                      <span style={{ marginLeft: 10, fontSize: 12, color: '#EF4444' }}>({queue.active.retryMessage})</span>
+                  <div>
+                    <div style={{ fontSize: 15, fontWeight: 600, color: '#03041A' }}>
+                      <button
+                        type="button"
+                        onClick={() => setNoteGuest({ email: queue.active.email, firstName: queue.active.firstName, lastName: queue.active.lastName })}
+                        style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', fontWeight: 600, color: '#002881', textDecoration: 'underline', cursor: 'pointer' }}
+                      >
+                        {queue.active.firstName}
+                      </button>
+                      {' '}— {queue.active.launched ? 'spinning…' : 'waiting to spin'}
+                      {queue.active.retryMessage && (
+                        <span style={{ marginLeft: 10, fontSize: 12, color: '#EF4444' }}>({queue.active.retryMessage})</span>
+                      )}
+                    </div>
+                    {/* The gift order is predetermined (see sequence.js) — the
+                        wheel only announces it, so staff can see it before the
+                        spin happens. */}
+                    {queue.active.giftName && (
+                      <div style={{ fontSize: 13, color: '#64748B', marginTop: 2 }}>
+                        Will win: <strong style={{ color: '#0055F8' }}>{queue.active.giftName}</strong>
+                      </div>
                     )}
+                    <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                      <button
+                        type="button"
+                        disabled={queueActionBusy}
+                        onClick={handleSkipPlayer}
+                        style={{
+                          background: '#F59E0B', color: 'white', border: 'none', borderRadius: 8,
+                          padding: '7px 14px', fontSize: 12, fontWeight: 700, cursor: queueActionBusy ? 'not-allowed' : 'pointer',
+                          fontFamily: 'inherit', opacity: queueActionBusy ? 0.6 : 1,
+                        }}
+                      >
+                        Passer le joueur
+                      </button>
+                      <button
+                        type="button"
+                        disabled={queueActionBusy}
+                        onClick={handleCancelPlayer}
+                        style={{
+                          background: '#EF4444', color: 'white', border: 'none', borderRadius: 8,
+                          padding: '7px 14px', fontSize: 12, fontWeight: 700, cursor: queueActionBusy ? 'not-allowed' : 'pointer',
+                          fontFamily: 'inherit', opacity: queueActionBusy ? 0.6 : 1,
+                        }}
+                      >
+                        Annuler le joueur
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <p className="page-subtitle" style={{ margin: 0 }}>Nobody right now</p>
@@ -199,6 +284,49 @@ export default function LaunchCampaign() {
           )}
         </Card>
       </div>
+      )}
+
+      {campaign !== null && (
+        <Card title="Last 20 players" className="mt-card">
+          <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 12px' }}>
+            Click a name to add or edit a note, lead rating, or customer segment for them.
+          </p>
+          {!recentPlayers && <p className="page-subtitle">Loading…</p>}
+          {recentPlayers && recentPlayers.length === 0 && <p className="page-subtitle">No players yet.</p>}
+          {recentPlayers && recentPlayers.length > 0 && (
+            <table className="data-table">
+              <thead>
+                <tr><th>Name</th><th>Gift</th><th>Segment</th><th>Lead</th><th>Note</th></tr>
+              </thead>
+              <tbody>
+                {recentPlayers.map((p) => (
+                  <tr key={p.rewardId} style={{ cursor: 'pointer' }} onClick={() => setNoteGuest({
+                    email: p.email, firstName: p.first_name, lastName: p.last_name,
+                    note: p.note, leadRating: p.lead_rating, segment: p.segment,
+                  })}>
+                    <td style={{ color: '#002881', fontWeight: 600, textDecoration: 'underline' }}>{p.first_name} {p.last_name}</td>
+                    <td>{p.gift_name}</td>
+                    <td style={{ color: '#64748B' }}>{p.segment || '—'}</td>
+                    <td>{p.lead_rating ? '★'.repeat(p.lead_rating) + '☆'.repeat(3 - p.lead_rating) : '—'}</td>
+                    <td style={{ color: '#64748B', maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {p.note || '—'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </Card>
+      )}
+
+      {noteGuest && campaign && (
+        <GuestNoteModal
+          campaignId={campaign.id}
+          guest={noteGuest}
+          segments={campaign.segments}
+          onClose={() => setNoteGuest(null)}
+          onSaved={handleNoteSaved}
+        />
       )}
     </div>
   );

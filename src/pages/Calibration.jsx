@@ -17,12 +17,12 @@ function SpinDots({ total, recorded, label }) {
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <div style={{
               width: 28, height: 28, borderRadius: '50%',
-              background: i < recorded ? '#0F1C3F' : '#CBD5E1',
+              background: i < recorded ? '#09B2FD' : '#CBD5E1',
               color: i < recorded ? 'white' : '#94A3B8',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 11, fontWeight: 700, transition: 'background 0.3s',
             }}>{i + 1}</div>
-            {i < total - 1 && <div style={{ width: 12, height: 2, background: i < recorded - 1 ? '#0F1C3F' : '#E2E8F0', borderRadius: 1 }} />}
+            {i < total - 1 && <div style={{ width: 12, height: 2, background: i < recorded - 1 ? '#09B2FD' : '#E2E8F0', borderRadius: 1 }} />}
           </div>
         ))}
       </div>
@@ -50,8 +50,8 @@ function Modal({ children, wide }) {
 
 function Btn({ children, onClick, variant = 'primary', disabled }) {
   const styles = {
-    primary: { background: '#0F1C3F', color: 'white' },
-    secondary: { background: 'white', color: '#0F172A', border: '1px solid #E2E8F0' },
+    primary: { background: '#09B2FD', color: '#03041A' },
+    secondary: { background: 'white', color: '#03041A', border: '1px solid #E2E8F0' },
     danger: { background: '#EF4444', color: 'white' },
   };
   return (
@@ -260,7 +260,7 @@ export default function Calibration({ onExit }) {
         <Modal>
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 36, marginBottom: 14 }}>⟳</div>
-            <h2 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 10px', color: '#0F172A' }}>Calibration in progress</h2>
+            <h2 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 10px', color: '#03041A' }}>Calibration in progress</h2>
             <p style={{ fontSize: 14, color: '#64748B', lineHeight: 1.6, margin: '0 0 6px' }}>
               Waiting for the wheel to transition to the next step…
             </p>
@@ -278,7 +278,7 @@ export default function Calibration({ onExit }) {
                 <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#FEF2F2', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 18px' }}>
                   <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                 </div>
-                <h2 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 10px', color: '#0F172A' }}>Calibration interrompue</h2>
+                <h2 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 10px', color: '#03041A' }}>Calibration interrompue</h2>
                 <p style={{ fontSize: 14, color: '#64748B', lineHeight: 1.6, margin: '0 0 28px' }}>
                   {interruptedMessage}
                 </p>
@@ -292,9 +292,9 @@ export default function Calibration({ onExit }) {
             ) : (
               <>
                 <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 18px' }}>
-                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1" fill="#2563EB"/></svg>
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#09B2FD" strokeWidth="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1" fill="#09B2FD"/></svg>
                 </div>
-                <h2 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 10px', color: '#0F172A' }}>Wheel Calibration</h2>
+                <h2 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 10px', color: '#03041A' }}>Wheel Calibration</h2>
                 <p style={{ fontSize: 14, color: '#64748B', lineHeight: 1.6, margin: '0 0 28px' }}>
                   You are about to start the calibration procedure. This operation takes approximately <strong>10 minutes</strong> and will recalibrate the wheel's section detection.
                 </p>
@@ -315,8 +315,8 @@ export default function Calibration({ onExit }) {
         <Modal wide>
           <div className="cal-step-grid">
             <div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: '#2563EB', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>{stepTitles[1]} — Defining section 1</div>
-              <h2 style={{ fontSize: 20, fontWeight: 700, margin: '0 0 16px', color: '#0F172A' }}>Position the cleat</h2>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#09B2FD', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>{stepTitles[1]} — Defining section 1</div>
+              <h2 style={{ fontSize: 20, fontWeight: 700, margin: '0 0 16px', color: '#03041A' }}>Position the cleat</h2>
               <p style={{ fontSize: 14, color: '#334155', lineHeight: 1.7, margin: '0 0 28px' }}>
                 Place the cleat in <strong>section n°1</strong> as close as possible to the pin joining <strong>section n°1 and n°12</strong>.
                 <br /><br />
@@ -341,8 +341,8 @@ export default function Calibration({ onExit }) {
         <Modal wide>
           <div className="cal-step-grid">
             <div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: '#2563EB', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>{stepTitles[2]} — Defining section 1</div>
-              <h2 style={{ fontSize: 20, fontWeight: 700, margin: '0 0 16px', color: '#0F172A' }}>Reposition the cleat</h2>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#09B2FD', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>{stepTitles[2]} — Defining section 1</div>
+              <h2 style={{ fontSize: 20, fontWeight: 700, margin: '0 0 16px', color: '#03041A' }}>Reposition the cleat</h2>
               <p style={{ fontSize: 14, color: '#334155', lineHeight: 1.7, margin: '0 0 28px' }}>
                 Place the cleat in <strong>section n°1</strong> as close as possible to the pin joining <strong>section n°1 and n°2</strong>.
                 <br /><br />
@@ -366,9 +366,9 @@ export default function Calibration({ onExit }) {
       {step === 3 && (
         <Modal wide>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#2563EB', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>{stepTitles[3]}</div>
-            <h2 style={{ fontSize: 28, fontWeight: 900, margin: '0 0 4px', color: '#0F172A', letterSpacing: '-0.01em' }}>1</h2>
-            <h3 style={{ fontSize: 16, fontWeight: 800, margin: '0 0 24px', color: '#0F172A', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Spin the wheel clockwise direction</h3>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#09B2FD', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>{stepTitles[3]}</div>
+            <h2 style={{ fontSize: 28, fontWeight: 900, margin: '0 0 4px', color: '#03041A', letterSpacing: '-0.01em' }}>1</h2>
+            <h3 style={{ fontSize: 16, fontWeight: 800, margin: '0 0 24px', color: '#03041A', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Spin the wheel clockwise direction</h3>
 
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
               <WheelSVG positionAngle={posAngle} />
@@ -397,7 +397,7 @@ export default function Calibration({ onExit }) {
 
             {/* Clockwise arrow */}
             <div style={{ marginBottom: 20 }}>
-              <svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="#0F1C3F" strokeWidth="2.5">
+              <svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="#09B2FD" strokeWidth="2.5">
                 <path d="M 28 8 A 14 14 0 1 0 32 20" strokeLinecap="round"/>
                 <polyline points="28,3 28,9 34,9" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
@@ -419,9 +419,9 @@ export default function Calibration({ onExit }) {
       {step === 4 && (
         <Modal wide>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#2563EB', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>{stepTitles[4]}</div>
-            <h2 style={{ fontSize: 28, fontWeight: 900, margin: '0 0 4px', color: '#0F172A', letterSpacing: '-0.01em' }}>2</h2>
-            <h3 style={{ fontSize: 16, fontWeight: 800, margin: '0 0 24px', color: '#0F172A', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Spin the wheel counter clockwise direction</h3>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#09B2FD', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>{stepTitles[4]}</div>
+            <h2 style={{ fontSize: 28, fontWeight: 900, margin: '0 0 4px', color: '#03041A', letterSpacing: '-0.01em' }}>2</h2>
+            <h3 style={{ fontSize: 16, fontWeight: 800, margin: '0 0 24px', color: '#03041A', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Spin the wheel counter clockwise direction</h3>
 
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
               <WheelSVG positionAngle={posAngle} />
@@ -445,7 +445,7 @@ export default function Calibration({ onExit }) {
 
             {/* Counter-clockwise arrow */}
             <div style={{ marginBottom: 20 }}>
-              <svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="#0F1C3F" strokeWidth="2.5">
+              <svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="#09B2FD" strokeWidth="2.5">
                 <path d="M 12 8 A 14 14 0 1 1 8 20" strokeLinecap="round"/>
                 <polyline points="12,3 12,9 6,9" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
@@ -468,7 +468,7 @@ export default function Calibration({ onExit }) {
         <Modal>
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 48, marginBottom: 14 }}>✅</div>
-            <h2 style={{ fontSize: 20, fontWeight: 700, margin: '0 0 10px', color: '#0F172A' }}>Calibration complete</h2>
+            <h2 style={{ fontSize: 20, fontWeight: 700, margin: '0 0 10px', color: '#03041A' }}>Calibration complete</h2>
             <p style={{ fontSize: 14, color: '#64748B', lineHeight: 1.6, margin: '0 0 20px' }}>
               The wheel has calculated and saved the new calibration.
             </p>
@@ -494,7 +494,7 @@ export default function Calibration({ onExit }) {
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
               </div>
               <div>
-                <h3 style={{ fontSize: 16, fontWeight: 700, margin: '0 0 8px', color: '#0F172A' }}>Cancel calibration?</h3>
+                <h3 style={{ fontSize: 16, fontWeight: 700, margin: '0 0 8px', color: '#03041A' }}>Cancel calibration?</h3>
                 <p style={{ fontSize: 14, color: '#64748B', margin: 0, lineHeight: 1.6 }}>
                   Returning to the home page will cancel the calibration procedure. All progress will be lost.
                 </p>

@@ -6,7 +6,7 @@ import RewardCard from '../components/RewardCard';
 
 /// Reached by scanning the QR code in a reward email (or via a manual code
 /// lookup — see History.jsx and Rewards.jsx). An operator must be signed
-/// into PrizeFlow to view or act on it: unauthenticated visitors are sent to
+/// into SPARK to view or act on it: unauthenticated visitors are sent to
 /// /login first, then bounced back here (see the returnTo param handled by
 /// Login.jsx). The reward's own PII is never shown without that sign-in.
 ///
@@ -90,7 +90,7 @@ export default function RedeemPage() {
         {state === 'invalid' && (
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 40, marginBottom: 14 }}>⚠️</div>
-            <h1 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 8px', color: '#0F172A' }}>Invalid code</h1>
+            <h1 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 8px', color: '#03041A' }}>Invalid code</h1>
             <p style={{ fontSize: 14, color: '#64748B' }}>{error || 'This redemption link is not valid.'}</p>
           </div>
         )}

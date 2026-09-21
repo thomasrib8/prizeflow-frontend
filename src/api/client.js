@@ -154,6 +154,7 @@ export const api = {
   getCampaignSequence: (id) => request(`/campaigns/${id}/sequence`),
   createCampaign: (payload) => request('/campaigns', { method: 'POST', body: payload }),
   updateCampaignSlots: (id, payload) => request(`/campaigns/${id}/slots`, { method: 'PATCH', body: payload }),
+  updateCampaignSegments: (id, segments) => request(`/campaigns/${id}/segments`, { method: 'PUT', body: { segments } }),
   startCampaign: (id) => request(`/campaigns/${id}/start`, { method: 'POST' }),
   pauseCampaign: (id) => request(`/campaigns/${id}/pause`, { method: 'POST' }),
   endCampaign: (id) => request(`/campaigns/${id}/end`, { method: 'POST' }),
@@ -184,6 +185,13 @@ export const api = {
   // Staff-facing: live snapshot of one campaign's guest queue. The QR itself
   // is built from that campaign's own public_token (see listCampaigns/getCampaign).
   getGuestQueueSnapshot: (campaignId) => request(`/account/guest-queue?campaignId=${encodeURIComponent(campaignId)}`),
+  // Manual replacements for the old automatic per-guest timeout — see
+  // guestQueue.js's cancelActivePlayer/skipActivePlayer.
+  cancelActivePlayer: (campaignId) => request('/account/guest-queue/cancel', { method: 'POST', body: { campaignId } }),
+  skipActivePlayer: (campaignId) => request('/account/guest-queue/skip', { method: 'POST', body: { campaignId } }),
+  // Note/lead-rating/segment popup on the Launch page — upserts by (campaignId, email).
+  saveGuestNote: (payload) => request('/account/guest-notes', { method: 'PATCH', body: payload }),
+  getRecentPlayers: (campaignId) => request(`/account/recent-players?campaignId=${encodeURIComponent(campaignId)}`),
   getAccountSettings: () => request('/account/settings'),
   updateAccountSettings: (payload) => request('/account/settings', { method: 'PATCH', body: payload }),
 

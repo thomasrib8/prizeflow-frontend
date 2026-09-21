@@ -62,8 +62,8 @@ export default function Layout({ children }) {
         >
           <IconMenu />
         </button>
-        <img src="/logo.svg" alt="PrizeFlow" className="mobile-topbar-logo" />
-        <span className="mobile-topbar-name">PrizeFlow</span>
+        <img src="/logo-menu.svg" alt="SPARK" className="mobile-topbar-logo" />
+        <span className="mobile-topbar-name">SPARK</span>
       </div>
 
       <div
@@ -73,10 +73,9 @@ export default function Layout({ children }) {
 
       <aside className={`sidebar${mobileMenuOpen ? ' open' : ''}`}>
         <div className="brand">
-          <img src="/logo.svg" alt="PrizeFlow" className="brand-logo" />
+          <img src="/logo-menu.svg" alt="SPARK" className="brand-logo" />
           <div className="brand-text">
-            <div className="brand-name">PrizeFlow</div>
-            <div className="brand-sub">Reward Distribution</div>
+            <div className="brand-name">SPARK</div>
           </div>
         </div>
 

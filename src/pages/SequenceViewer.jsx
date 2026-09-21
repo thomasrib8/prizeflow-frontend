@@ -4,7 +4,7 @@ import { api } from '../api/client';
 import { useAdmin } from '../hooks/useAdmin';
 import { GiftPill } from '../components/ui';
 
-const SLOT_COLORS = ['#2563EB','#10B981','#F59E0B','#9333EA','#E11D48','#15803D','#D97706','#4F46E5','#BE185D','#0D9488','#A16207','#7C3AED'];
+const SLOT_COLORS = ['#09B2FD','#10B981','#F59E0B','#9333EA','#E11D48','#15803D','#D97706','#4F46E5','#BE185D','#0D9488','#A16207','#7C3AED'];
 
 export default function SequenceViewer() {
   const { id } = useParams();
@@ -88,8 +88,8 @@ export default function SequenceViewer() {
                 <button key={f} onClick={() => setFilter(f)} style={{
                   padding: '4px 10px', borderRadius: 6, border: 'none',
                   fontSize: 11, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
-                  background: filter === f ? '#0F1C3F' : 'var(--border-light)',
-                  color: filter === f ? 'white' : 'var(--text-muted)',
+                  background: filter === f ? '#09B2FD' : 'var(--border-light)',
+                  color: filter === f ? '#03041A' : 'var(--text-muted)',
                 }}>{f.charAt(0).toUpperCase() + f.slice(1)}</button>
               ))}
             </div>

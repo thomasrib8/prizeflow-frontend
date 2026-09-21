@@ -255,7 +255,7 @@ function GoogleReviewModule() {
         <button
           onClick={() => setShowVideo(true)}
           style={{
-            fontSize: 12, color: '#2563EB', background: 'none', border: 'none', padding: 0,
+            fontSize: 12, color: '#002881', background: 'none', border: 'none', padding: 0,
             marginTop: 8, cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'underline',
           }}
         >
@@ -316,7 +316,7 @@ function GoogleReviewModule() {
                 padding: '12px 14px', border: '1px solid #F1F5F9', borderRadius: 10,
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ fontSize: 14, fontWeight: 600, color: '#0F172A' }}>{c.name}</span>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: '#03041A' }}>{c.name}</span>
                   <Badge tone={c.status === 'active' ? 'green' : 'neutral'}>{c.status}</Badge>
                 </div>
                 <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 13, color: '#64748B' }}>

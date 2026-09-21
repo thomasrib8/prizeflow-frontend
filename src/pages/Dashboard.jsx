@@ -32,7 +32,7 @@ function EmailHistoryCard() {
           {log.map((e) => (
             <div className="activity-item" key={e.id}>
               <div className="act-icon spin">
-                <svg viewBox="0 0 24 24" fill="none" stroke={e.status === 'error' ? '#EF4444' : '#2563EB'} strokeWidth="2">
+                <svg viewBox="0 0 24 24" fill="none" stroke={e.status === 'error' ? '#EF4444' : '#09B2FD'} strokeWidth="2">
                   <rect x="3" y="5" width="18" height="14" rx="2" />
                   <path d="M3 7l9 6 9-6" />
                 </svg>
@@ -51,7 +51,7 @@ function EmailHistoryCard() {
   );
 }
 
-const SLOT_COLORS = ['#2563EB','#10B981','#F59E0B','#9333EA','#E11D48','#15803D','#D97706','#4F46E5','#BE185D','#0D9488','#A16207','#7C3AED'];
+const SLOT_COLORS = ['#09B2FD','#10B981','#F59E0B','#9333EA','#E11D48','#15803D','#D97706','#4F46E5','#BE185D','#0D9488','#A16207','#7C3AED'];
 const CHART_FILTERS = ['7D', '30D', '90D', 'All'];
 
 function StatCard({ label, value, sub, accent, pct }) {
@@ -77,7 +77,7 @@ function CustomTooltip({ active, payload, label }) {
   if (!active || !payload || !payload.length) return null;
   return (
     <div style={{ background: 'white', border: '1px solid #E2E8F0', borderRadius: 8, padding: '10px 14px', fontSize: 12, boxShadow: '0 4px 16px rgba(0,0,0,0.1)' }}>
-      <div style={{ fontWeight: 600, marginBottom: 6, color: '#0F172A' }}>{label}</div>
+      <div style={{ fontWeight: 600, marginBottom: 6, color: '#03041A' }}>{label}</div>
       {payload.map(p => (
         <div key={p.dataKey} style={{ color: p.color, display: 'flex', justifyContent: 'space-between', gap: 16 }}>
           <span>{p.name}</span><span style={{ fontWeight: 600 }}>{p.value}</span>
@@ -147,8 +147,8 @@ export default function Dashboard() {
                 <button key={f} onClick={() => setChartFilter(f)} style={{
                   padding: '4px 10px', borderRadius: 6, border: 'none', fontSize: 11, fontWeight: 600,
                   cursor: 'pointer', fontFamily: 'inherit',
-                  background: chartFilter === f ? 'var(--navy, #0F1C3F)' : 'var(--border-light, #F1F5F9)',
-                  color: chartFilter === f ? 'white' : 'var(--text-muted)',
+                  background: chartFilter === f ? 'var(--blue, #09B2FD)' : 'var(--border-light, #F1F5F9)',
+                  color: chartFilter === f ? '#03041A' : 'var(--text-muted)',
                 }}>{f}</button>
               ))}
             </div>
@@ -169,7 +169,7 @@ export default function Dashboard() {
                 <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
                 <Line type="monotone" dataKey="planned" name="Planned" stroke="#CBD5E1"
                   strokeWidth={1.5} strokeDasharray="4 3" dot={false} />
-                <Line type="monotone" dataKey="distributed" name="Distributed" stroke="#2563EB"
+                <Line type="monotone" dataKey="distributed" name="Distributed" stroke="#09B2FD"
                   strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
                 <Line type="monotone" dataKey="remaining" name="Remaining" stroke="#CBD5E1"
                   strokeWidth={1.5} strokeDasharray="4 3" dot={false} />
@@ -207,7 +207,7 @@ export default function Dashboard() {
           )}
           {campaign && (
             <div style={{ marginTop: 14, textAlign: 'center' }}>
-              <a href="/history" style={{ fontSize: 12, color: 'var(--blue)', fontWeight: 600, textDecoration: 'none' }}>
+              <a href="/history" style={{ fontSize: 12, color: 'var(--link)', fontWeight: 600, textDecoration: 'none' }}>
                 ↗ View full report
               </a>
             </div>
@@ -222,7 +222,7 @@ export default function Dashboard() {
         <div className="card">
           <div className="card-head">
             <h3 className="card-title">Top rewards</h3>
-            <a href="/campaigns" style={{ fontSize: 12, color: 'var(--blue)', fontWeight: 600, textDecoration: 'none' }}>View all rewards →</a>
+            <a href="/campaigns" style={{ fontSize: 12, color: 'var(--link)', fontWeight: 600, textDecoration: 'none' }}>View all rewards →</a>
           </div>
           {topRewards.length === 0 ? (
             <EmptyState title="No rewards yet" />
@@ -261,7 +261,7 @@ export default function Dashboard() {
         <div className="card">
           <div className="card-head">
             <h3 className="card-title">Recent activity</h3>
-            <a href="/history" style={{ fontSize: 12, color: 'var(--blue)', fontWeight: 600, textDecoration: 'none' }}>View all</a>
+            <a href="/history" style={{ fontSize: 12, color: 'var(--link)', fontWeight: 600, textDecoration: 'none' }}>View all</a>
           </div>
           {recentActivity.length === 0 ? (
             <EmptyState title="No activity yet" />
@@ -270,7 +270,7 @@ export default function Dashboard() {
               {recentActivity.slice(0, 6).map((row, i) => (
                 <div className="activity-item" key={i}>
                   <div className="act-icon spin">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#09B2FD" strokeWidth="2">
                       <circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="1.5"/>
                       <line x1="12" y1="3" x2="12" y2="7"/>
                     </svg>

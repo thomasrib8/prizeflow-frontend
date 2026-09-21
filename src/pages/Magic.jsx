@@ -15,7 +15,7 @@ const STABLE_EPSILON = 0.02;
 const MOVE_THRESHOLD = 0.5;
 
 /// Revives the standalone wheel-control tool from the old webapp (before
-/// PrizeFlow's campaign/guest layer existed): pick a case, it gets forced on
+/// SPARK's campaign/guest layer existed): pick a case, it gets forced on
 /// the wheel's next physical spin, or release the wheel back to free/neutral
 /// play at any time.
 ///
@@ -171,7 +171,7 @@ export default function Magic() {
             onClick={handleFree}
             disabled={!agentConnected}
             style={{
-              width: '100%', maxWidth: 280, background: 'white', color: '#0F1C3F', border: '1px solid #CBD5E1',
+              width: '100%', maxWidth: 280, background: 'white', color: '#002881', border: '1px solid #CBD5E1',
               borderRadius: 10, padding: '13px', fontSize: 14, fontWeight: 700,
               cursor: agentConnected ? 'pointer' : 'not-allowed', opacity: agentConnected ? 1 : 0.5, fontFamily: 'inherit',
             }}

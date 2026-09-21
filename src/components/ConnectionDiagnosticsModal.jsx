@@ -37,7 +37,7 @@ export default function ConnectionDiagnosticsModal({ onClose, agentConnected, co
         style={{ background: 'white', borderRadius: 16, padding: '20px 24px', width: 440, maxWidth: '92vw', boxShadow: '0 30px 80px rgba(0,0,0,0.3)' }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#0F172A' }}>Connection diagnostics</h3>
+          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#03041A' }}>Connection diagnostics</h3>
           <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 18, color: '#94A3B8', cursor: 'pointer' }}>✕</button>
         </div>
 

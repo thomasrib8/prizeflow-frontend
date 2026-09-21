@@ -1,12 +1,31 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&display=swap');
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/Montserrat-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/Montserrat-Bold.ttf') format('truetype');
+  font-weight: 700 900;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
-  --navy: #0F1C3F;
-  --navy-light: #1E2D50;
-  --navy-mid: #152040;
-  --blue: #2563EB;
-  --blue-dark: #1D4ED8;
-  --blue-pale: #EFF6FF;
+  /* SPARK brand: left menu / sidebar, buttons, links, text — see
+     index.css's own single source of truth for these four roles; every
+     other file reads them via var() instead of repeating literal hex. */
+  --navy: #0055F8;
+  --navy-light: #266FF9;
+  --navy-mid: #004BDA;
+  --blue: #09B2FD;
+  --blue-dark: #0792CF;
+  --blue-pale: #EBF9FF;
+  --link: #002881;
   --green: #10B981;
   --green-pale: #ECFDF5;
   --orange: #F59E0B;
@@ -18,7 +37,7 @@
 
   --bg: #F1F5F9;
   --surface: #FFFFFF;
-  --text: #0F172A;
+  --text: #03041A;
   --text-muted: #64748B;
   --text-light: #94A3B8;
   --border: #E2E8F0;
@@ -31,7 +50,8 @@
 
   --sidebar-w: 220px;
 
-  --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-ui: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-title: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 }
 

@@ -1,7 +1,7 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: linear-gradient(160deg, #0F1C3F 0%, #1a2d5a 100%);
+  background: linear-gradient(160deg, #0055F8 0%, #266FF9 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -18,9 +18,9 @@
   align-items: center;
 }
 .result-emoji { font-size: 64px; margin-bottom: 16px; }
-.result-title { font-size: 14px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #60A5FA; margin-bottom: 12px; }
+.result-title { font-size: 14px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #90DCFE; margin-bottom: 12px; }
 .result-gift { font-size: 44px; font-weight: 800; letter-spacing: -0.02em; color: white; line-height: 1.1; max-width: 400px; }
-.result-room { margin-top: 12px; font-size: 16px; color: #60A5FA; font-weight: 500; }
+.result-room { margin-top: 12px; font-size: 16px; color: #90DCFE; font-weight: 500; }
 .result-note { margin-top: 14px; font-size: 14px; color: #64748B; max-width: 320px; line-height: 1.6; }
 
 .overlay-form {

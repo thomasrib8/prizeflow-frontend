@@ -223,7 +223,7 @@ export default function UserDetail() {
               <button
                 type="button"
                 onClick={() => setShowSetupHelp(true)}
-                style={{ background: 'none', border: 'none', padding: 0, color: '#2563EB', textDecoration: 'underline', cursor: 'pointer', fontSize: 13, fontFamily: 'inherit' }}
+                style={{ background: 'none', border: 'none', padding: 0, color: '#002881', textDecoration: 'underline', cursor: 'pointer', fontSize: 13, fontFamily: 'inherit' }}
               >
                 How do I set this up?
               </button>
@@ -263,7 +263,7 @@ export default function UserDetail() {
               <button
                 type="button"
                 onClick={() => setShowManualWheelEntry(true)}
-                style={{ background: 'none', border: 'none', padding: 0, marginBottom: detail.wheel_serial_number ? 16 : 0, color: '#2563EB', textDecoration: 'underline', cursor: 'pointer', fontSize: 12, fontFamily: 'inherit' }}
+                style={{ background: 'none', border: 'none', padding: 0, marginBottom: detail.wheel_serial_number ? 16 : 0, color: '#002881', textDecoration: 'underline', cursor: 'pointer', fontSize: 12, fontFamily: 'inherit' }}
               >
                 Already set on the Pi manually? Record the existing values instead
               </button>
@@ -311,7 +311,7 @@ export default function UserDetail() {
             )}
 
             {detail.wheel_serial_number && (
-              <div style={{ fontSize: 13, color: '#0F172A', lineHeight: 1.9 }}>
+              <div style={{ fontSize: 13, color: '#03041A', lineHeight: 1.9 }}>
                 <div>Model Number: <strong>{detail.wheel_model_number}</strong></div>
                 <div>Serial Number: <strong>{detail.wheel_serial_number}</strong></div>
                 <div>Security Key: <strong>{detail.wheel_security_key}</strong></div>
@@ -343,30 +343,30 @@ export default function UserDetail() {
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#0F172A' }}>Setting up a new wheel</h3>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#03041A' }}>Setting up a new wheel</h3>
               <button onClick={() => setShowSetupHelp(false)} style={{ background: 'none', border: 'none', fontSize: 18, color: '#94A3B8', cursor: 'pointer' }}>✕</button>
             </div>
 
             <div style={{ fontSize: 13, color: '#334155', lineHeight: 1.7 }}>
-              <h4 style={{ fontSize: 13, fontWeight: 700, color: '#0F172A', margin: '0 0 6px' }}>1. Wheel token (AGENT_SECRET)</h4>
+              <h4 style={{ fontSize: 13, fontWeight: 700, color: '#03041A', margin: '0 0 6px' }}>1. Wheel token (AGENT_SECRET)</h4>
               <p>Copy the token above, then on the client's Raspberry Pi:</p>
-              <pre style={{ background: '#0F172A', color: '#E2E8F0', padding: '10px 12px', borderRadius: 8, fontSize: 12, overflowX: 'auto' }}>
+              <pre style={{ background: '#03041A', color: '#E2E8F0', padding: '10px 12px', borderRadius: 8, fontSize: 12, overflowX: 'auto' }}>
 {`ssh pi@<pi-address>
 nano /home/pi/wheel-agent/.env`}
               </pre>
               <p>Find the <code>AGENT_SECRET=...</code> line and replace the value after the <code>=</code> with the copied token (exactly, no spaces). Save with <code>Ctrl+O</code>, <code>Enter</code>, <code>Ctrl+X</code>, then restart the agent:</p>
-              <pre style={{ background: '#0F172A', color: '#E2E8F0', padding: '10px 12px', borderRadius: 8, fontSize: 12, overflowX: 'auto' }}>sudo systemctl restart wheel-agent</pre>
+              <pre style={{ background: '#03041A', color: '#E2E8F0', padding: '10px 12px', borderRadius: 8, fontSize: 12, overflowX: 'auto' }}>sudo systemctl restart wheel-agent</pre>
 
-              <h4 style={{ fontSize: 13, fontWeight: 700, color: '#0F172A', margin: '16px 0 6px' }}>2. Wheel identity (Model / Serial / Security Key)</h4>
+              <h4 style={{ fontSize: 13, fontWeight: 700, color: '#03041A', margin: '16px 0 6px' }}>2. Wheel identity (Model / Serial / Security Key)</h4>
               <p>Generate the identity above (pick a series number), then in the same <code>.env</code> file find these 3 lines (or add them at the end if they don't exist yet):</p>
-              <pre style={{ background: '#0F172A', color: '#E2E8F0', padding: '10px 12px', borderRadius: 8, fontSize: 12, overflowX: 'auto' }}>
+              <pre style={{ background: '#03041A', color: '#E2E8F0', padding: '10px 12px', borderRadius: 8, fontSize: 12, overflowX: 'auto' }}>
 {`WHEEL_MODEL_NUMBER=...
 WHEEL_SERIAL_NUMBER=...
 WHEEL_SECURITY_KEY=...`}
               </pre>
               <p>Replace the values with what was just generated, save the same way, and restart the agent again (same command as above).</p>
 
-              <h4 style={{ fontSize: 13, fontWeight: 700, color: '#0F172A', margin: '16px 0 6px' }}>3. Verify it worked</h4>
+              <h4 style={{ fontSize: 13, fontWeight: 700, color: '#03041A', margin: '16px 0 6px' }}>3. Verify it worked</h4>
               <p>In the client's own app, clicking the "Wheel connected" / "Wheel offline" badge in the sidebar opens a diagnostics popup showing a "Wheel identity" section — the Model Number, Serial Number and Security Key shown there should match what you just entered. The same values are also visible here, under this client's "Overview" tab.</p>
             </div>
           </div>
