@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import WheelSVG from './WheelSVG';
-import GoogleSignInButton from './GoogleSignInButton';
+import DynamicFieldInput from './DynamicFieldInput';
 import { API_BASE } from '../api/client';
 
 const RETRY_MESSAGES = {
@@ -49,15 +49,6 @@ export default function GuestFlowScreen({
   useEffect(() => {
     if (view === 'form') setReviewClicked(false);
   }, [view]);
-
-  const handleGoogleCredential = useCallback((profile) => {
-    setForm((prev) => ({
-      ...prev,
-      firstName: profile.given_name || prev.firstName,
-      lastName: profile.family_name || prev.lastName,
-      email: profile.email || prev.email,
-    }));
-  }, [setForm]);
 
   useEffect(() => {
     if (!onClose) return undefined;
@@ -291,8 +282,6 @@ export default function GuestFlowScreen({
 
         {error && <div className="error-banner">{error}</div>}
 
-        <GoogleSignInButton onCredential={handleGoogleCredential} />
-
         <form onSubmit={onSubmit}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
             <div className="field" style={{ marginBottom: 0 }}>
@@ -308,10 +297,19 @@ export default function GuestFlowScreen({
             <label>Email address</label>
             <input type="email" required value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
           </div>
-          <div className="field">
-            <label>Phone number</label>
-            <input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} />
-          </div>
+
+          {/* Fully customizable per campaign (see routes/campaigns.js's
+              campaign_fields, scope='guest') — firstName/lastName/email
+              above are the only fields that are always present and required. */}
+          {(campaignInfo?.guestFields || []).map((f) => (
+            <DynamicFieldInput
+              key={f.id}
+              field={f}
+              value={form.customFields[f.label]}
+              onChange={(v) => setForm({ ...form, customFields: { ...form.customFields, [f.label]: v } })}
+            />
+          ))}
+
           <label style={{ display: 'flex', gap: 10, alignItems: 'flex-start', fontSize: 12, color: '#64748B', cursor: 'pointer', margin: '12px 0 20px', lineHeight: 1.5 }}>
             <input type="checkbox" checked={form.consent} onChange={e => setForm({ ...form, consent: e.target.checked })} style={{ marginTop: 2, flexShrink: 0 }} />
             I agree to receive my reward by email and consent to the processing of my personal data.

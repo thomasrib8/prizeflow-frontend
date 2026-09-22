@@ -5,7 +5,7 @@ import { Card, Badge, Button, EmptyState } from '../components/ui';
 import { useWheelSocket } from '../hooks/useWheelSocket';
 import { useGuestFlow } from '../hooks/useGuestFlow';
 import GuestFlowScreen from '../components/GuestFlowScreen';
-import GuestNoteModal from '../components/GuestNoteModal';
+import ProspectCard from '../components/ProspectCard';
 
 const POLL_INTERVAL_MS = 2000;
 
@@ -302,7 +302,6 @@ export default function LaunchCampaign() {
                 {recentPlayers.map((p) => (
                   <tr key={p.rewardId} style={{ cursor: 'pointer' }} onClick={() => setNoteGuest({
                     email: p.email, firstName: p.first_name, lastName: p.last_name,
-                    note: p.note, leadRating: p.lead_rating, segment: p.segment,
                   })}>
                     <td style={{ color: '#002881', fontWeight: 600, textDecoration: 'underline' }}>{p.first_name} {p.last_name}</td>
                     <td>{p.gift_name}</td>
@@ -320,10 +319,10 @@ export default function LaunchCampaign() {
       )}
 
       {noteGuest && campaign && (
-        <GuestNoteModal
+        <ProspectCard
           campaignId={campaign.id}
           guest={noteGuest}
-          segments={campaign.segments}
+          initialMode="edit"
           onClose={() => setNoteGuest(null)}
           onSaved={handleNoteSaved}
         />

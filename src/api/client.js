@@ -163,6 +163,8 @@ export const api = {
   createCampaign: (payload) => request('/campaigns', { method: 'POST', body: payload }),
   updateCampaignSlots: (id, payload) => request(`/campaigns/${id}/slots`, { method: 'PATCH', body: payload }),
   updateCampaignSegments: (id, segments) => request(`/campaigns/${id}/segments`, { method: 'PUT', body: { segments } }),
+  updateCampaignSegmentCategories: (id, categories) => request(`/campaigns/${id}/segment-categories`, { method: 'PUT', body: { categories } }),
+  updateCampaignFields: (id, fields) => request(`/campaigns/${id}/fields`, { method: 'PUT', body: { fields } }),
   startCampaign: (id) => request(`/campaigns/${id}/start`, { method: 'POST' }),
   pauseCampaign: (id) => request(`/campaigns/${id}/pause`, { method: 'POST' }),
   endCampaign: (id) => request(`/campaigns/${id}/end`, { method: 'POST' }),
@@ -199,6 +201,7 @@ export const api = {
   skipActivePlayer: (campaignId) => request('/account/guest-queue/skip', { method: 'POST', body: { campaignId } }),
   // Note/lead-rating/segment popup on the Launch page — upserts by (campaignId, email).
   saveGuestNote: (payload) => request('/account/guest-notes', { method: 'PATCH', body: payload }),
+  getGuestNote: (campaignId, email) => request(`/account/guest-notes?campaignId=${encodeURIComponent(campaignId)}&email=${encodeURIComponent(email)}`),
   getRecentPlayers: (campaignId) => request(`/account/recent-players?campaignId=${encodeURIComponent(campaignId)}`),
   getAccountSettings: () => request('/account/settings'),
   updateAccountSettings: (payload) => request('/account/settings', { method: 'PATCH', body: payload }),

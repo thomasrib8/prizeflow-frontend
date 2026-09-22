@@ -21,40 +21,9 @@ export default function CampaignDetail() {
   const [seqFilter, setSeqFilter] = useState('all'); // all | remaining | consumed
   const [reportBusy, setReportBusy] = useState(false);
   const [exportBusy, setExportBusy] = useState(false);
-  const [segments, setSegments] = useState([]);
-  const [savingSegments, setSavingSegments] = useState(false);
-  const [segmentsMsg, setSegmentsMsg] = useState('');
 
-  const load = () => api.getCampaign(id).then((c) => {
-    setCampaign(c);
-    setSegments((c.segments || []).map((s) => s.name));
-  }).catch(e => setError(e.message));
+  const load = () => api.getCampaign(id).then(setCampaign).catch(e => setError(e.message));
   useEffect(() => { load(); }, [id]);
-
-  function updateSegment(i, value) {
-    setSegments(prev => prev.map((s, idx) => idx === i ? value : s));
-  }
-  function addSegment() {
-    setSegments(prev => [...prev, '']);
-  }
-  function removeSegment(i) {
-    setSegments(prev => prev.filter((_, idx) => idx !== i));
-  }
-  async function handleSaveSegments() {
-    setSavingSegments(true);
-    setError('');
-    setSegmentsMsg('');
-    try {
-      const res = await api.updateCampaignSegments(id, segments.map(s => s.trim()).filter(Boolean));
-      setSegments(res.segments.map(s => s.name));
-      setSegmentsMsg('Saved');
-      setTimeout(() => setSegmentsMsg(''), 2000);
-    } catch (e) {
-      setError(e.message);
-    } finally {
-      setSavingSegments(false);
-    }
-  }
 
   async function handleDownloadReport() {
     setReportBusy(true);
@@ -128,6 +97,7 @@ export default function CampaignDetail() {
           <p className="page-subtitle" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11 }}>{campaign.id}</span>
             <Badge tone={STATUS_TONE[campaign.status] || 'neutral'}>{campaign.status}</Badge>
+            {campaign.event_name && <span>· {campaign.event_name}</span>}
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -141,6 +111,9 @@ export default function CampaignDetail() {
           {campaign.status === 'completed' && <Button variant="secondary" disabled={busy} onClick={() => runAction(() => api.archiveCampaign(campaign.id))}>Archive</Button>}
           {campaign.status !== 'archived' && (
             <Button variant="secondary" onClick={() => navigate(`/campaigns/${campaign.id}/edit`)}>Edit gifts</Button>
+          )}
+          {campaign.status !== 'archived' && (
+            <Button variant="secondary" onClick={() => navigate(`/campaigns/${campaign.id}/edit-settings`)}>Edit segmentation & form</Button>
           )}
           {campaign.status !== 'archived' && (
             <Button variant="secondary" onClick={() => navigate(`/campaigns/new?from=${campaign.id}`)}>Duplicate</Button>
@@ -191,34 +164,6 @@ export default function CampaignDetail() {
             })}
           </tbody>
         </table>
-      </Card>
-
-      {/* Customer segmentation — editable at any time, including on an
-          active campaign, since these names are a snapshot (not a foreign
-          key) on any guest note that references them. */}
-      <Card title="Segmentation client" className="mt-card"
-        action={
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            {segmentsMsg && <span style={{ fontSize: 12, color: '#10B981', fontWeight: 600 }}>{segmentsMsg}</span>}
-            <Button size="sm" disabled={savingSegments} onClick={handleSaveSegments}>
-              {savingSegments ? 'Saving…' : 'Save'}
-            </Button>
-          </div>
-        }>
-        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px' }}>
-          Customer categories your team can tag guests with from the Launch page. Add, rename, or remove them at
-          any time — existing notes keep whatever segment name they were tagged with.
-        </p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {segments.map((s, i) => (
-            <div key={i} style={{ display: 'flex', gap: 8 }}>
-              <input placeholder="e.g. Prêt habitat" value={s} onChange={e => updateSegment(i, e.target.value)} style={{ flex: 1 }} />
-              <button type="button" onClick={() => removeSegment(i)} className="btn btn-ghost btn-sm" style={{ color: '#EF4444' }}>Remove</button>
-            </div>
-          ))}
-          {segments.length === 0 && <p className="page-subtitle" style={{ margin: 0 }}>No categories configured yet.</p>}
-        </div>
-        <button type="button" onClick={addSegment} className="btn btn-ghost btn-sm" style={{ marginTop: 8 }}>+ Add category</button>
       </Card>
 
       {/* Sequence viewer — admin + test only */}

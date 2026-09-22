@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { Card, Button, Badge, EmptyState, GiftPill } from '../components/ui';
+import ProspectCard from '../components/ProspectCard';
 
 const REWARD_TONE = { active: 'blue', redeemed: 'green', expired: 'orange', cancelled: 'red' };
 const NOTE_OPTIONS = [
@@ -59,6 +60,7 @@ export default function History() {
   const [exportTo, setExportTo] = useState('');
   const [exportBusy, setExportBusy] = useState(false);
   const [openNote, setOpenNote] = useState(null); // full note text being shown in the popup, or null
+  const [prospectGuest, setProspectGuest] = useState(null); // { campaignId, email, firstName, lastName } | null — opens ProspectCard in view mode
 
   const [search, setSearch] = useState('');
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -224,7 +226,16 @@ export default function History() {
                 {filteredRewards.map(r => (
                   <tr key={r.id}>
                     <td style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)' }}>{r.id}</td>
-                    <td style={{ fontWeight: 500 }}>{r.first_name} {r.last_name}</td>
+                    <td>
+                      {r.campaign_id ? (
+                        <button
+                          onClick={() => setProspectGuest({ campaignId: r.campaign_id, email: r.email, firstName: r.first_name, lastName: r.last_name })}
+                          style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, color: 'var(--link)', textDecoration: 'underline' }}
+                        >{r.first_name} {r.last_name}</button>
+                      ) : (
+                        <span style={{ fontWeight: 500 }}>{r.first_name} {r.last_name}</span>
+                      )}
+                    </td>
                     <td style={{ color: 'var(--text-muted)' }}>{r.email}</td>
                     <td><GiftPill slotIndex={0} name={r.gift_name} /></td>
                     <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{r.campaign_name || '—'}</td>
@@ -354,6 +365,15 @@ export default function History() {
             <Button variant="secondary" onClick={() => setExportOpen(false)} style={{ marginTop: 14 }}>Close</Button>
           </div>
         </div>
+      )}
+
+      {prospectGuest && (
+        <ProspectCard
+          campaignId={prospectGuest.campaignId}
+          guest={prospectGuest}
+          initialMode="view"
+          onClose={() => setProspectGuest(null)}
+        />
       )}
 
       {openNote && (

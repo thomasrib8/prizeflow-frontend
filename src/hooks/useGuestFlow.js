@@ -2,7 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { api } from '../api/client';
 
 const POLL_INTERVAL_MS = 1500;
-const EMPTY_FORM = { firstName: '', lastName: '', email: '', phone: '', consent: false };
+// Phone is no longer a fixed field — it's available as an optional custom
+// guest-form field (see routes/campaigns.js's campaign_fields, scope='guest')
+// like everything else beyond the three fixed firstName/lastName/email.
+const EMPTY_FORM = { firstName: '', lastName: '', email: '', consent: false, customFields: {} };
 
 /// Shared logic behind the guest queue experience — used both by the public
 /// per-guest page (Guest.jsx, one phone = one session, persisted so a re-scan
@@ -91,6 +94,15 @@ export function useGuestFlow({ token, persistSession = false, autoReturnMs = nul
   async function handleSubmit(e) {
     e.preventDefault();
     if (!form.consent) { setError('Consent is required to claim your reward.'); return; }
+    // Client-side check of this campaign's own required custom fields (see
+    // GuestFlowScreen.jsx) — the backend re-validates the same thing against
+    // its own current field list regardless, this is just faster feedback.
+    for (const f of campaignInfo?.guestFields || []) {
+      if (!f.required) continue;
+      const v = form.customFields[f.label];
+      const empty = f.fieldType === 'multi_choice' ? !(Array.isArray(v) && v.length) : f.fieldType === 'checkbox' ? !v : !String(v || '').trim();
+      if (empty) { setError(`"${f.label}" is required`); return; }
+    }
     setError('');
     await joinQueue();
   }
