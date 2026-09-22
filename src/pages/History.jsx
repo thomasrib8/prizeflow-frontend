@@ -12,7 +12,7 @@ function formatDT(s) {
 
 export default function History() {
   const navigate = useNavigate();
-  const [tab, setTab] = useState('distributions');
+  const [tab, setTab] = useState('rewards');
   const [distributions, setDistributions] = useState(null);
   const [rewards, setRewards] = useState(null);
   const [error, setError] = useState('');
@@ -67,15 +67,15 @@ export default function History() {
     <div>
       <div className="page-header">
         <div>
-          <h1 className="page-title">History</h1>
-          <p className="page-subtitle">Full record of distributions and customer rewards</p>
+          <h1 className="page-title">CRM</h1>
+          <p className="page-subtitle">Leads captured through SPARK, and the full distribution ledger</p>
         </div>
       </div>
       {error && <div className="error-banner">{error}</div>}
 
       <div className="tabs">
-        <button className={`tab${tab === 'distributions' ? ' active' : ''}`} onClick={() => setTab('distributions')}>Distributions</button>
         <button className={`tab${tab === 'rewards' ? ' active' : ''}`} onClick={() => setTab('rewards')}>CRM</button>
+        <button className={`tab${tab === 'distributions' ? ' active' : ''}`} onClick={() => setTab('distributions')}>Distributions</button>
       </div>
 
       <Card className="mt-card">

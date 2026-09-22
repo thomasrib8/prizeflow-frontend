@@ -104,7 +104,7 @@ export default function Rewards() {
     <div>
       <div className="page-header">
         <div>
-          <h1 className="page-title">Rewards</h1>
+          <h1 className="page-title">Redeem</h1>
           <p className="page-subtitle">Enter a guest's 8-character code to open their reward</p>
         </div>
       </div>

@@ -11,8 +11,8 @@ const NAV_ITEMS = [
   { to: '/', label: 'Dashboard', icon: IconGrid },
   { to: '/campaigns', label: 'Campaigns', icon: IconBox },
   { to: '/launch', label: 'Launch', icon: IconWheel },
-  { to: '/history', label: 'History', icon: IconClock },
-  { to: '/rewards', label: 'Rewards', icon: IconGift },
+  { to: '/history', label: 'CRM', icon: IconClock },
+  { to: '/rewards', label: 'Redeem', icon: IconGift },
 ];
 
 const ADMIN_NAV_ITEMS = [
