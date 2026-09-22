@@ -124,10 +124,6 @@ export default function Dashboard() {
         {campaign && <Badge tone="green">Active</Badge>}
       </div>
 
-<<<<<<< Updated upstream
-      {/* 4 KPI cards */}
-      <div className="grid-stats" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
-=======
       {/* Lead-gen KPIs — what SPARK is actually meant to measure: not just
           what was given away, but who was captured and how promising they are. */}
       <div className="grid-stats-3">
@@ -144,7 +140,6 @@ export default function Dashboard() {
       {/* Stock / operational KPIs — still useful on the floor, but secondary
           to the lead metrics above. */}
       <div className="grid-stats-3">
->>>>>>> Stashed changes
         <StatCard label="Remaining gifts" value={kpi ? kpi.remaining.toLocaleString() : '—'}
           sub={kpi ? `${Math.round((kpi.remaining/kpi.planned)*100)}% of total` : undefined}
           accent="orange" pct={kpi ? Math.round((kpi.remaining/kpi.planned)*100) : 0} />
