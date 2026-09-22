@@ -103,9 +103,9 @@ export default function LaunchCampaign() {
       } catch {
         // transient network hiccup — just try again next tick
       }
+      if (!cancelled) loadRecentPlayers(campaign.id);
     }
     poll();
-    loadRecentPlayers(campaign.id);
     const t = setInterval(poll, POLL_INTERVAL_MS);
     return () => { cancelled = true; clearInterval(t); };
     // eslint-disable-next-line react-hooks/exhaustive-deps

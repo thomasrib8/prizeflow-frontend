@@ -256,7 +256,7 @@ export default function GuestFlowScreen({
             </div>
           ) : (
             <>
-              <img src="/logo.svg" alt="" style={{ width: 84, height: 84, animation: 'spin 1.2s linear infinite' }} />
+              <img src="/logo-menu.svg" alt="" style={{ width: 84, height: 84, animation: 'spin 1.2s linear infinite' }} />
               <div style={{ color: '#90DCFE', fontSize: 15, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
                 Please wait…
               </div>
