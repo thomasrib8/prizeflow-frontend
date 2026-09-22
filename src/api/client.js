@@ -170,6 +170,7 @@ export const api = {
   pauseCampaign: (id) => request(`/campaigns/${id}/pause`, { method: 'POST' }),
   endCampaign: (id) => request(`/campaigns/${id}/end`, { method: 'POST' }),
   archiveCampaign: (id) => request(`/campaigns/${id}/archive`, { method: 'POST' }),
+  deleteCampaign: (id) => request(`/campaigns/${id}`, { method: 'DELETE' }),
   setCampaignGoogleReview: (id, required) =>
     request(`/campaigns/${id}/google-review`, { method: 'PATCH', body: { required } }),
   setCampaignSocialMedia: (id, required) =>

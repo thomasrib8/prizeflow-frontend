@@ -21,6 +21,9 @@ export default function CampaignDetail() {
   const [seqFilter, setSeqFilter] = useState('all'); // all | remaining | consumed
   const [reportBusy, setReportBusy] = useState(false);
   const [exportBusy, setExportBusy] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [deleting, setDeleting] = useState(false);
 
   const load = () => api.getCampaign(id).then(setCampaign).catch(e => setError(e.message));
   useEffect(() => { load(); }, [id]);
@@ -52,6 +55,17 @@ export default function CampaignDetail() {
   async function runAction(fn) {
     setBusy(true); setError('');
     try { await fn(); load(); } catch (e) { setError(e.message); } finally { setBusy(false); }
+  }
+
+  async function handleDelete() {
+    setDeleting(true); setError('');
+    try {
+      await api.deleteCampaign(campaign.id);
+      navigate('/campaigns');
+    } catch (e) {
+      setError(e.message);
+      setDeleting(false);
+    }
   }
 
   async function loadSequence() {
@@ -129,6 +143,18 @@ export default function CampaignDetail() {
           <Button variant="secondary" disabled={reportBusy} onClick={handleDownloadReport}>
             {reportBusy ? 'Generating…' : 'Download PDF report'}
           </Button>
+          {campaign.status !== 'active' && (
+            <button
+              onClick={() => { setDeleteConfirmText(''); setDeleteOpen(true); }}
+              style={{
+                padding: '8px 16px', borderRadius: 8, border: '1px solid #FCA5A5',
+                background: 'transparent', color: '#DC2626', fontSize: 13, fontWeight: 600,
+                cursor: 'pointer', fontFamily: 'inherit',
+              }}
+            >
+              Delete campaign
+            </button>
+          )}
         </div>
       </div>
       {error && <div className="error-banner">{error}</div>}
@@ -233,6 +259,41 @@ export default function CampaignDetail() {
           <p style={{ fontSize: 11, color: '#94A3B8', marginTop: 8 }}>
             Auto-refresh every 3s · Admin only · Not visible in production
           </p>
+        </div>
+      )}
+
+      {deleteOpen && (
+        <div className="modal-overlay">
+          <div className="modal-card" style={{ '--modal-w': '480px' }}>
+            <h3 style={{ margin: '0 0 8px', fontSize: 17, fontWeight: 700, color: '#DC2626' }}>Delete campaign</h3>
+            <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.5 }}>
+              This will permanently delete <strong>{campaign.name}</strong> and all associated data: gifts, distribution
+              history, and every lead / CRM record captured for this campaign. This cannot be undone.
+            </p>
+            <p style={{ fontSize: 12.5, fontWeight: 600, marginBottom: 6 }}>
+              Type the campaign name to confirm:
+            </p>
+            <input
+              type="text"
+              value={deleteConfirmText}
+              onChange={e => setDeleteConfirmText(e.target.value)}
+              placeholder={campaign.name}
+              style={{
+                width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: 8,
+                border: '1px solid #E2E8F0', fontSize: 14, fontFamily: 'inherit', marginBottom: 16,
+              }}
+            />
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+              <Button variant="secondary" disabled={deleting} onClick={() => setDeleteOpen(false)}>Cancel</Button>
+              <Button
+                variant="danger"
+                disabled={deleting || deleteConfirmText !== campaign.name}
+                onClick={handleDelete}
+              >
+                {deleting ? 'Deleting…' : 'Delete permanently'}
+              </Button>
+            </div>
+          </div>
         </div>
       )}
     </div>
