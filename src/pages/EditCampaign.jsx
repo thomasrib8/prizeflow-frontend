@@ -11,12 +11,18 @@ export default function EditCampaign() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [campaign, setCampaign] = useState(null);
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [eventName, setEventName] = useState('');
   const [slots, setSlots] = useState([]);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     api.getCampaign(id).then((source) => {
+      setName(source.name || '');
+      setDescription(source.description || '');
+      setEventName(source.event_name || '');
       if (source.status === 'archived') {
         setError('Archived campaigns are read-only.');
         setCampaign(source);
@@ -44,6 +50,7 @@ export default function EditCampaign() {
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
+    if (!name.trim()) return setError('Campaign name is required');
     for (const s of slots) {
       if (!s.giftName.trim()) return setError(`Case ${s.slotIndex + 1}: gift name is required`);
       if (s.redeemMethod === 'perso' && (!s.persoSubject.trim() || !s.persoBody.trim())) {
@@ -52,6 +59,7 @@ export default function EditCampaign() {
     }
     setSaving(true);
     try {
+      await api.updateCampaignDetails(id, { name, description, eventName });
       await api.updateCampaignSlots(id, {
         slots: slots.map((s) => ({
           slotIndex: s.slotIndex,
@@ -77,12 +85,27 @@ export default function EditCampaign() {
       <div className="page-header">
         <div>
           <h1 className="page-title">Edit {campaign.name}</h1>
-          <p className="page-subtitle">Update gift names, redeem methods, and Perso emails — stock isn't editable here.</p>
+          <p className="page-subtitle">Update campaign details, gift names, redeem methods, and Perso emails — stock isn't editable here.</p>
         </div>
       </div>
       {error && <div className="error-banner">{error}</div>}
       {campaign.status !== 'archived' && (
         <form onSubmit={handleSubmit}>
+          <Card title="Campaign details" className="mt-card">
+            <div className="field">
+              <label>Name</label>
+              <input value={name} onChange={(e) => setName(e.target.value)} required />
+            </div>
+            <div className="field">
+              <label>Description (optional)</label>
+              <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} />
+            </div>
+            <div className="field">
+              <label>Event name (optional)</label>
+              <input value={eventName} onChange={(e) => setEventName(e.target.value)} placeholder="e.g. Salon de l'Habitat Paris 2026" />
+            </div>
+          </Card>
+
           <Card title="Gifts" className="mt-card">
             <div className="slots-grid">
               {slots.map((s, i) => (

@@ -161,6 +161,7 @@ export const api = {
   getCampaign: (id) => request(`/campaigns/${id}`),
   getCampaignSequence: (id) => request(`/campaigns/${id}/sequence`),
   createCampaign: (payload) => request('/campaigns', { method: 'POST', body: payload }),
+  updateCampaignDetails: (id, payload) => request(`/campaigns/${id}/details`, { method: 'PATCH', body: payload }),
   updateCampaignSlots: (id, payload) => request(`/campaigns/${id}/slots`, { method: 'PATCH', body: payload }),
   updateCampaignSegments: (id, segments) => request(`/campaigns/${id}/segments`, { method: 'PUT', body: { segments } }),
   updateCampaignSegmentCategories: (id, categories) => request(`/campaigns/${id}/segment-categories`, { method: 'PUT', body: { categories } }),

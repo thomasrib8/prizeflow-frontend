@@ -274,7 +274,7 @@ export default function GuestFlowScreen({
           <img
             src={campaignInfo?.guestFormLogoUrl ? `${API_BASE}${campaignInfo.guestFormLogoUrl}` : '/logo.svg'}
             alt=""
-            style={{ width: 44, height: 44, marginBottom: 14, objectFit: 'contain' }}
+            style={{ maxWidth: 220, maxHeight: 88, width: 'auto', height: 'auto', marginBottom: 16, objectFit: 'contain' }}
           />
           <h1 style={{ fontSize: 22, fontWeight: 800, margin: '0 0 6px', color: '#0F172A' }}>Win your reward!</h1>
           <p style={{ fontSize: 14, color: '#64748B', margin: 0 }}>Enter your details below to claim your gift.</p>
