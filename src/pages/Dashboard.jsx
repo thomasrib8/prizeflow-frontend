@@ -53,6 +53,7 @@ function EmailHistoryCard() {
 
 const SLOT_COLORS = ['#09B2FD','#10B981','#F59E0B','#9333EA','#E11D48','#15803D','#D97706','#4F46E5','#BE185D','#0D9488','#A16207','#7C3AED'];
 const CHART_FILTERS = ['7D', '30D', '90D', 'All'];
+const CAMPAIGN_STATUS_TONE = { draft: 'neutral', active: 'green', paused: 'orange', completed: 'blue', archived: 'neutral' };
 
 function StatCard({ label, value, sub, accent, pct }) {
   const bar = pct !== undefined;
@@ -93,17 +94,28 @@ export default function Dashboard() {
   const [chart, setChart] = useState([]);
   const [topRewards, setTopRewards] = useState([]);
   const [chartFilter, setChartFilter] = useState('7D');
+  const [campaigns, setCampaigns] = useState([]);
+  const [campaignId, setCampaignId] = useState('all');
   const [error, setError] = useState('');
 
   useEffect(() => {
-    api.dashboard().then(setData).catch(e => setError(e.message));
-    api.dashboardTopRewards().then(setTopRewards).catch(() => {});
+    // Draft campaigns never launched (nothing to report yet) and test
+    // campaigns are excluded from reporting everywhere else in the app —
+    // same convention as the 'all' dashboard aggregate below.
+    api.listCampaigns()
+      .then(rows => setCampaigns(rows.filter(c => c.status !== 'draft' && !c.is_test)))
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
+    api.dashboard(campaignId).then(setData).catch(e => setError(e.message));
+    api.dashboardTopRewards(campaignId).then(setTopRewards).catch(() => {});
+  }, [campaignId]);
+
+  useEffect(() => {
     const days = chartFilter === 'All' ? 'all' : chartFilter.replace('D', '');
-    api.dashboardChart(days).then(setChart).catch(() => {});
-  }, [chartFilter]);
+    api.dashboardChart(days, campaignId).then(setChart).catch(() => {});
+  }, [chartFilter, campaignId]);
 
   if (error) return <div className="error-banner">{error}</div>;
   if (!data) return <p className="page-subtitle">Loading…</p>;
@@ -119,9 +131,23 @@ export default function Dashboard() {
       <div className="page-header">
         <div>
           <h1 className="page-title">Dashboard</h1>
-          <p className="page-subtitle">{campaign ? `Welcome back · ${campaign.name}` : 'No active campaign'}</p>
+          <p className="page-subtitle">
+            {campaignId === 'all'
+              ? (campaign ? `Welcome back · ${campaign.name}` : 'No active campaign')
+              : (campaign ? campaign.name : 'Campaign not found')}
+          </p>
         </div>
-        {campaign && <Badge tone="green">Active</Badge>}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <select
+            value={campaignId}
+            onChange={(e) => setCampaignId(e.target.value)}
+            style={{ padding: '8px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13, fontFamily: 'inherit', color: 'var(--text)' }}
+          >
+            <option value="all">All campaigns</option>
+            {campaigns.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
+          {campaign && <Badge tone={CAMPAIGN_STATUS_TONE[campaign.status] || 'neutral'}>{campaign.status}</Badge>}
+        </div>
       </div>
 
       {/* Lead-gen KPIs — what SPARK is actually meant to measure: not just
@@ -206,7 +232,7 @@ export default function Dashboard() {
               <tbody>
                 {[
                   ['Campaign', campaign.name],
-                  ['Status', <Badge tone="green">Active</Badge>],
+                  ['Status', <Badge tone={CAMPAIGN_STATUS_TONE[campaign.status] || 'neutral'}>{campaign.status}</Badge>],
                   ['Total spins', campaign.total_stock.toLocaleString()],
                   ['Spins completed', campaign.total_distributed.toLocaleString()],
                   ['Remaining spins', (campaign.total_stock - campaign.total_distributed).toLocaleString()],
@@ -234,7 +260,7 @@ export default function Dashboard() {
       {/* Segments — where the qualified leads actually sit, per the
           per-campaign "Segmentation client" categories set on Campaigns. */}
       {leads && leads.segmentBreakdown.length > 0 && (
-        <div className="card mt-card">
+        <div className="card mt-card" style={{ marginBottom: 12 }}>
           <div className="card-head">
             <h3 className="card-title">Leads by segment</h3>
           </div>

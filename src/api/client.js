@@ -109,9 +109,9 @@ export const api = {
   getEmailStatus: () => request('/admin/email-status'),
   getEmailLog: (limit = 30) => request(`/admin/email-log?limit=${limit}`),
 
-  dashboard: () => request('/dashboard'),
-  dashboardChart: (days = '7') => request(`/dashboard/chart?days=${days}`),
-  dashboardTopRewards: () => request('/dashboard/top-rewards'),
+  dashboard: (campaignId = 'all') => request(`/dashboard?campaignId=${encodeURIComponent(campaignId)}`),
+  dashboardChart: (days = '7', campaignId = 'all') => request(`/dashboard/chart?days=${days}&campaignId=${encodeURIComponent(campaignId)}`),
+  dashboardTopRewards: (campaignId = 'all') => request(`/dashboard/top-rewards?campaignId=${encodeURIComponent(campaignId)}`),
   adminSequence: (id) => request(`/admin/campaigns/${id}/sequence`),
   adminTestCampaigns: () => request('/admin/test-campaigns'),
   distributions: (params = {}) => {
@@ -134,9 +134,17 @@ export const api = {
     const qs = new URLSearchParams(params).toString();
     return downloadFile(`/distributions/report.pdf${qs ? `?${qs}` : ''}`);
   },
+  exportDistributionsJson: (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return downloadFile(`/distributions/export.json${qs ? `?${qs}` : ''}`);
+  },
   exportRewardsPdf: (params = {}) => {
     const qs = new URLSearchParams(params).toString();
     return downloadFile(`/rewards/report.pdf${qs ? `?${qs}` : ''}`);
+  },
+  exportRewardsJson: (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return downloadFile(`/rewards/export.json${qs ? `?${qs}` : ''}`);
   },
   downloadCampaignReport: (id) => downloadFile(`/campaigns/${id}/report.pdf`),
   downloadCampaignQrPdf: (id) => downloadFile(`/campaigns/${id}/qr.pdf`),
