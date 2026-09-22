@@ -108,8 +108,10 @@ export default function Dashboard() {
   if (error) return <div className="error-banner">{error}</div>;
   if (!data) return <p className="page-subtitle">Loading…</p>;
 
-  const { kpi, rewards, recentActivity } = data;
+  const { kpi, rewards, leads, recentActivity } = data;
   const campaign = kpi?.campaign;
+  const qualifiedPct = leads?.captured ? Math.round((leads.qualified / leads.captured) * 100) : 0;
+  const segmentedPct = leads?.captured ? Math.round((leads.segmented / leads.captured) * 100) : 0;
 
   return (
     <div>
@@ -122,7 +124,21 @@ export default function Dashboard() {
         {campaign && <Badge tone="green">Active</Badge>}
       </div>
 
-      {/* 4 KPI cards */}
+      {/* Lead-gen KPIs — what SPARK is actually meant to measure: not just
+          what was given away, but who was captured and how promising they are. */}
+      <div className="grid-stats-3">
+        <StatCard label="Leads captured" value={leads ? leads.captured.toLocaleString() : '—'}
+          sub="Guests identified via the wheel" accent="blue" />
+        <StatCard label="Qualified leads" value={leads ? leads.qualified.toLocaleString() : '—'}
+          sub={leads ? `${qualifiedPct}% of captured (★★★)` : undefined}
+          accent="green" pct={qualifiedPct} />
+        <StatCard label="Segmented leads" value={leads ? leads.segmented.toLocaleString() : '—'}
+          sub={leads ? `${segmentedPct}% of captured` : undefined}
+          accent="orange" pct={segmentedPct} />
+      </div>
+
+      {/* Stock / operational KPIs — still useful on the floor, but secondary
+          to the lead metrics above. */}
       <div className="grid-stats-3">
         <StatCard label="Remaining gifts" value={kpi ? kpi.remaining.toLocaleString() : '—'}
           sub={kpi ? `${Math.round((kpi.remaining/kpi.planned)*100)}% of total` : undefined}
@@ -214,6 +230,36 @@ export default function Dashboard() {
           )}
         </div>
       </div>
+
+      {/* Segments — where the qualified leads actually sit, per the
+          per-campaign "Segmentation client" categories set on Campaigns. */}
+      {leads && leads.segmentBreakdown.length > 0 && (
+        <div className="card mt-card">
+          <div className="card-head">
+            <h3 className="card-title">Leads by segment</h3>
+          </div>
+          <table className="data-table">
+            <thead><tr><th>Segment</th><th style={{ textAlign: 'right' }}>Leads</th><th>Share</th></tr></thead>
+            <tbody>
+              {leads.segmentBreakdown.map((s, i) => {
+                const pct = leads.segmented ? Math.round((s.count / leads.segmented) * 100) : 0;
+                return (
+                  <tr key={s.segment}>
+                    <td style={{ fontWeight: 500 }}>{s.segment}</td>
+                    <td style={{ textAlign: 'right', color: 'var(--text-muted)' }}>{s.count}</td>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <MiniBar pct={pct} color={SLOT_COLORS[i % SLOT_COLORS.length]} />
+                        <span style={{ fontSize: 11, color: 'var(--text-muted)', minWidth: 28 }}>{pct}%</span>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {/* Top Rewards + Recent Activity */}
       <div className="dash-row-wide">
