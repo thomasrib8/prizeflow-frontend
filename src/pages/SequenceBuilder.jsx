@@ -58,8 +58,8 @@ function SequenceRunModal({ sequence, wheelStatus, agentConnected, status, busyI
   }, [isRunningThis]);
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200 }}>
-      <div style={{ background: 'white', borderRadius: 16, padding: '32px 40px', width: 480, maxWidth: '92vw', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 30px 80px rgba(0,0,0,0.3)', textAlign: 'center' }}>
+    <div className="modal-overlay">
+      <div className="modal-card" style={{ '--modal-w': '480px', textAlign: 'center' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
           <div style={{ textAlign: 'left' }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: '#09B2FD', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Sequence</div>

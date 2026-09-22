@@ -138,8 +138,8 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
     .filter((s) => s.value);
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200, padding: 16 }}>
-      <div style={{ background: 'white', borderRadius: 16, padding: 28, width: 460, maxWidth: '100%', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 30px 80px rgba(0,0,0,0.3)' }}>
+    <div className="modal-overlay">
+      <div className="modal-card">
         {loading ? (
           <p className="page-subtitle">Loading…</p>
         ) : mode === 'view' ? (

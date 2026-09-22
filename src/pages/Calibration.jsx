@@ -33,15 +33,8 @@ function SpinDots({ total, recorded, label }) {
 // ─── Modal overlay wrapper ────────────────────────────────────────────────────
 function Modal({ children, wide }) {
   return (
-    <div style={{
-      position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200,
-    }}>
-      <div style={{
-        background: 'white', borderRadius: 16, padding: '36px 40px',
-        width: wide ? 700 : 460, maxWidth: '92vw', maxHeight: '90vh', overflowY: 'auto',
-        boxShadow: '0 30px 80px rgba(0,0,0,0.3)',
-      }}>
+    <div className="modal-overlay">
+      <div className="modal-card" style={{ '--modal-w': wide ? '700px' : '460px' }}>
         {children}
       </div>
     </div>

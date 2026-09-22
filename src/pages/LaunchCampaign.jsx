@@ -219,14 +219,14 @@ export default function LaunchCampaign() {
                         Will win: <strong style={{ color: '#0055F8' }}>{queue.active.giftName}</strong>
                       </div>
                     )}
-                    <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                    <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
                       <button
                         type="button"
                         disabled={queueActionBusy}
                         onClick={handleSkipPlayer}
                         style={{
                           background: '#F59E0B', color: 'white', border: 'none', borderRadius: 8,
-                          padding: '7px 14px', fontSize: 12, fontWeight: 700, cursor: queueActionBusy ? 'not-allowed' : 'pointer',
+                          padding: '13px 16px', minHeight: 44, fontSize: 13, fontWeight: 700, cursor: queueActionBusy ? 'not-allowed' : 'pointer',
                           fontFamily: 'inherit', opacity: queueActionBusy ? 0.6 : 1,
                         }}
                       >
@@ -238,7 +238,7 @@ export default function LaunchCampaign() {
                         onClick={handleCancelPlayer}
                         style={{
                           background: '#EF4444', color: 'white', border: 'none', borderRadius: 8,
-                          padding: '7px 14px', fontSize: 12, fontWeight: 700, cursor: queueActionBusy ? 'not-allowed' : 'pointer',
+                          padding: '13px 16px', minHeight: 44, fontSize: 13, fontWeight: 700, cursor: queueActionBusy ? 'not-allowed' : 'pointer',
                           fontFamily: 'inherit', opacity: queueActionBusy ? 0.6 : 1,
                         }}
                       >

@@ -330,17 +330,12 @@ export default function UserDetail() {
       {showSetupHelp && (
         <div
           onClick={() => setShowSetupHelp(false)}
-          style={{
-            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 300,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
-          }}
+          className="modal-overlay"
+          style={{ zIndex: 300 }}
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            style={{
-              background: 'white', borderRadius: 16, padding: '24px 28px', width: 560, maxWidth: '92vw',
-              maxHeight: '85vh', overflowY: 'auto', boxShadow: '0 30px 80px rgba(0,0,0,0.3)',
-            }}
+            className="modal-card"
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#03041A' }}>Setting up a new wheel</h3>

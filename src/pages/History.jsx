@@ -28,13 +28,13 @@ function FilterGroup({ title, options, selected, onToggle }) {
   return (
     <div style={{ marginBottom: 18 }}>
       <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', marginBottom: 8 }}>{title}</div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
         {options.map((opt) => {
           const value = typeof opt === 'string' ? opt : opt.value;
           const label = typeof opt === 'string' ? opt : opt.label;
           return (
-            <label key={value} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, cursor: 'pointer' }}>
-              <input type="checkbox" checked={selected.includes(value)} onChange={() => onToggle(value)} />
+            <label key={value} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, cursor: 'pointer', minHeight: 40, padding: '4px 0' }}>
+              <input type="checkbox" checked={selected.includes(value)} onChange={() => onToggle(value)} style={{ width: 18, height: 18, flexShrink: 0 }} />
               {label}
             </label>
           );
@@ -269,18 +269,8 @@ export default function History() {
       </Card>
 
       {filtersOpen && (
-        <div
-          style={{
-            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200, padding: 16,
-          }}
-        >
-          <div
-            style={{
-              background: 'white', borderRadius: 16, padding: 24, width: 440, maxWidth: '100%',
-              maxHeight: '85vh', overflowY: 'auto', boxShadow: '0 30px 80px rgba(0,0,0,0.3)',
-            }}
-          >
+        <div className="modal-overlay">
+          <div className="modal-card">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>Filters</h3>
               {activeFilterCount > 0 && (
@@ -308,18 +298,8 @@ export default function History() {
       )}
 
       {exportOpen && (
-        <div
-          style={{
-            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200, padding: 16,
-          }}
-        >
-          <div
-            style={{
-              background: 'white', borderRadius: 16, padding: 24, width: 440, maxWidth: '100%',
-              maxHeight: '85vh', overflowY: 'auto', boxShadow: '0 30px 80px rgba(0,0,0,0.3)',
-            }}
-          >
+        <div className="modal-overlay">
+          <div className="modal-card">
             <h3 style={{ margin: '0 0 4px', fontSize: 16, fontWeight: 800 }}>Export {tab === 'distributions' ? 'distributions' : 'CRM'}</h3>
             <p style={{ margin: '0 0 16px', fontSize: 12, color: 'var(--text-muted)' }}>
               {tab === 'rewards' ? 'Only the leads matching these filters and date range will be exported.' : 'Only distributions in this date range will be exported.'}
@@ -377,18 +357,8 @@ export default function History() {
       )}
 
       {openNote && (
-        <div
-          style={{
-            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200, padding: 16,
-          }}
-        >
-          <div
-            style={{
-              background: 'white', borderRadius: 16, padding: 24, width: 440, maxWidth: '100%',
-              maxHeight: '80vh', overflowY: 'auto', boxShadow: '0 30px 80px rgba(0,0,0,0.3)',
-            }}
-          >
+        <div className="modal-overlay">
+          <div className="modal-card">
             <h3 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 800 }}>Note</h3>
             <p style={{ fontSize: 14, color: '#334155', whiteSpace: 'pre-wrap', margin: 0 }}>{openNote}</p>
             <Button size="sm" variant="secondary" onClick={() => setOpenNote(null)} style={{ marginTop: 18 }}>Close</Button>

@@ -142,7 +142,7 @@ function InformationModule() {
       <Card title="Password" className="mt-card">
         <form onSubmit={handleChangePassword}>
           {pwError && <div className="error-banner">{pwError}</div>}
-          <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end' }}>
+          <div className="password-row">
             <div className="field" style={{ flex: 1, margin: 0 }}>
               <label>Current password</label>
               <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
@@ -266,17 +266,13 @@ function GoogleReviewModule() {
       {showVideo && (
         <div
           onClick={() => setShowVideo(false)}
-          style={{
-            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 300,
-          }}
+          className="modal-overlay"
+          style={{ zIndex: 300 }}
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            style={{
-              background: 'white', borderRadius: 16, padding: 16, width: 720, maxWidth: '92vw',
-              boxShadow: '0 30px 80px rgba(0,0,0,0.4)',
-            }}
+            className="modal-card"
+            style={{ padding: 16, '--modal-w': '720px' }}
           >
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
               <button

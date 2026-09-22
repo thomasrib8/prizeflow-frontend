@@ -325,6 +325,33 @@ table.data-table tr:hover td { background: #FAFBFC; }
 /* Register has twice the fields of Login — a fixed 380px column makes it a
    long single-file scroll. Wider + a 2-up field grid keeps it on one screen. */
 .auth-card-wide { width: 640px; max-width: 92vw; }
+/* Settings' password row (current/new/submit in one line on desktop) —
+   stacks below ~480px instead of squeezing all three into slivers. */
+.password-row { display: flex; gap: 10px; align-items: flex-end; }
+@media (max-width: 480px) {
+  .password-row { flex-direction: column; align-items: stretch; }
+  .password-row > .btn { width: 100%; justify-content: center; }
+}
+
+/* Shared centered-card modal/popup shell (note/filter/export popups,
+   ProspectCard, admin detail modals, etc.) — a floating rounded card with a
+   dimmed backdrop on desktop, edge-to-edge full screen on phones instead of
+   a small floating card with awkward margins on every side. */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+  display: flex; align-items: center; justify-content: center; z-index: 200; padding: 16px;
+}
+.modal-card {
+  /* --modal-w lets one instance ask for a wider card (e.g. a wizard step
+     with a diagram) without an inline `width` — an inline width would have
+     higher specificity than the mobile override below and defeat it. */
+  background: white; border-radius: 16px; padding: 28px; width: var(--modal-w, 460px); max-width: 100%;
+  max-height: 90vh; overflow-y: auto; box-shadow: 0 30px 80px rgba(0,0,0,0.3);
+}
+@media (max-width: 560px) {
+  .modal-overlay { padding: 0; }
+  .modal-card { width: 100%; max-width: 100%; height: 100%; max-height: 100%; border-radius: 0; padding: 20px; }
+}
 .register-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 16px; }
 .register-grid .field-full { grid-column: 1 / -1; }
 @media (max-width: 560px) { .register-grid { grid-template-columns: 1fr; } }
@@ -352,6 +379,23 @@ table.data-table tr:hover td { background: #FAFBFC; }
 .slot-index { font-size: 11px; font-weight: 700; color: var(--text-muted); font-family: var(--font-mono); }
 .slot-row input, .slot-row select { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 10px; font-size: 13px; font-family: inherit; }
 .slot-pct { font-size: 11px; font-weight: 700; color: var(--blue); font-family: var(--font-mono); text-align: right; }
+/* Below ~480px, four fixed-width columns (52+80+64+52px + gaps) leave the
+   Gift name input almost no room even with minmax(0,1fr) above — stack it
+   onto its own row instead of continuing to shrink it. Positional
+   nth-child selectors (not new classes) since the row's own child order
+   never changes: index, gift-name input, stock input, redeem select, pct. */
+@media (max-width: 480px) {
+  .slot-row {
+    grid-template-columns: 1fr auto;
+    grid-template-areas: "index pct" "name name" "stock redeem";
+    row-gap: 6px;
+  }
+  .slot-index { grid-area: index; }
+  .slot-pct { grid-area: pct; }
+  .slot-row > input:nth-child(2) { grid-area: name; width: 100%; }
+  .slot-row > input:nth-child(3) { grid-area: stock; width: 100%; }
+  .slot-row > select { grid-area: redeem; width: 100%; }
+}
 
 /* Recent activity */
 .activity-list { display: flex; flex-direction: column; gap: 10px; }
