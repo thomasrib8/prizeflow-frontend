@@ -322,6 +322,12 @@ table.data-table tr:hover td { background: #FAFBFC; }
   padding: 36px 32px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.3);
 }
+/* Register has twice the fields of Login — a fixed 380px column makes it a
+   long single-file scroll. Wider + a 2-up field grid keeps it on one screen. */
+.auth-card-wide { width: 640px; max-width: 92vw; }
+.register-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 16px; }
+.register-grid .field-full { grid-column: 1 / -1; }
+@media (max-width: 560px) { .register-grid { grid-template-columns: 1fr; } }
 .auth-logo { width: 48px; height: 48px; border-radius: 12px; object-fit: contain; margin-bottom: 10px; }
 .auth-title { font-size: 20px; font-weight: 700; color: var(--text); margin: 0 0 4px; }
 .auth-subtitle { font-size: 13px; color: var(--text-muted); margin: 0 0 24px; }

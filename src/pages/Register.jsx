@@ -7,10 +7,10 @@ const FIELDS = [
   { key: 'firstName', label: 'First name', placeholder: 'John' },
   { key: 'company', label: 'Company', placeholder: 'Belle Vue Hotel' },
   { key: 'industrySector', label: 'Industry sector', placeholder: 'Hospitality' },
-  { key: 'address', label: 'Address', placeholder: '12 Main Street, City' },
+  { key: 'address', label: 'Address', placeholder: '12 Main Street, City', fullWidth: true },
   { key: 'email', label: 'Email', placeholder: 'contact@yourcompany.com', type: 'email' },
   { key: 'phone', label: 'Phone', placeholder: '06 12 34 56 78', type: 'tel' },
-  { key: 'password', label: 'Password', placeholder: 'At least 8 characters', type: 'password' },
+  { key: 'password', label: 'Password', placeholder: 'At least 8 characters', type: 'password', fullWidth: true },
 ];
 
 export default function Register() {
@@ -63,7 +63,7 @@ export default function Register() {
 
   return (
     <div className="auth-screen">
-      <form className="auth-card" onSubmit={handleSubmit} style={{ textAlign: 'center', maxWidth: 460 }}>
+      <form className="auth-card auth-card-wide" onSubmit={handleSubmit} style={{ textAlign: 'center' }}>
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
           <img src="/logo2.svg" alt="SPARK" style={{ width: 100, height: 100, objectFit: 'contain' }} />
         </div>
@@ -73,29 +73,32 @@ export default function Register() {
 
         {error && <div className="error-banner" style={{ textAlign: 'left' }}>{error}</div>}
 
-        {FIELDS.map((f, i) => (
-          <div className="field" style={{ textAlign: 'left' }} key={f.key}>
-            <label>{f.label}</label>
-            <input
-              type={f.type || 'text'}
-              value={values[f.key] || ''}
-              onChange={(e) => setField(f.key, e.target.value)}
-              placeholder={f.placeholder}
-              minLength={f.key === 'password' ? 8 : undefined}
-              required
-              autoFocus={i === 0}
-            />
-          </div>
-        ))}
+        <div className="register-grid">
+          {FIELDS.map((f, i) => (
+            <div className={`field${f.fullWidth ? ' field-full' : ''}`} style={{ textAlign: 'left' }} key={f.key}>
+              <label>{f.label}</label>
+              <input
+                type={f.type || 'text'}
+                value={values[f.key] || ''}
+                onChange={(e) => setField(f.key, e.target.value)}
+                placeholder={f.placeholder}
+                minLength={f.key === 'password' ? 8 : undefined}
+                required
+                autoFocus={i === 0}
+              />
+            </div>
+          ))}
+        </div>
 
         <button className="btn btn-primary" type="submit" disabled={loading}
-          style={{ width: '100%', justifyContent: 'center', marginTop: 6 }}>
+          style={{ width: '100%', justifyContent: 'center', marginTop: 10 }}>
           {loading ? 'Creating…' : 'Create account'}
         </button>
 
-        <p style={{ fontSize: 13, color: '#64748B', marginTop: 16 }}>
-          Already have an account? <Link to="/login">Sign in</Link>
-        </p>
+        <Link to="/login" className="btn btn-secondary"
+          style={{ width: '100%', justifyContent: 'center', marginTop: 10 }}>
+          Sign in
+        </Link>
       </form>
     </div>
   );

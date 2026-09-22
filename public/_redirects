@@ -1,1 +1,9 @@
+# Old domain, kept live for already-printed QR codes/posters — redirects to
+# the current domain with the path preserved (e.g. /play/<token> still
+# works). Netlify only auto-redirects www<->apex of the SAME domain; two
+# unrelated domain names need an explicit rule like this. Must stay above
+# the catch-all SPA rule below (first match wins).
+https://prizeflowapp.com/*      https://sparkapp360.com/:splat  301!
+https://www.prizeflowapp.com/*  https://sparkapp360.com/:splat  301!
+
 /*  /index.html  200
