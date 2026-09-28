@@ -407,3 +407,35 @@ table.data-table tr:hover td { background: #FAFBFC; }
 .act-info { flex: 1; min-width: 0; }
 .act-title { font-size: 12px; font-weight: 500; color: var(--text); }
 .act-time { font-size: 10px; color: var(--text-light); margin-top: 1px; }
+
+/* ── Gift placement (WheelGiftPlanner.jsx) ───────────────────────────────
+   Wheel on the left, gifts on the right. The wheel stays in view while the
+   gift list scrolls, so a gift far down the list can still be dragged onto it. */
+.planner-layout { display: grid; grid-template-columns: minmax(280px, 340px) minmax(0, 1fr); gap: 16px; align-items: start; margin-top: 12px; }
+.planner-wheel { position: sticky; top: 16px; }
+@media (max-width: 900px) {
+  .planner-layout { grid-template-columns: 1fr; }
+  .planner-wheel { position: static; }
+}
+.gift-list { display: flex; flex-direction: column; gap: 10px; }
+.gift-card { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; background: white; transition: background 0.25s ease, border-color 0.25s ease; }
+.gift-card.placed { background: #ECFDF5; border-color: #6EE7B7; }
+.gift-row { display: grid; grid-template-columns: 84px minmax(0, 1fr) 76px 76px 48px; gap: 8px; align-items: center; }
+.gift-row input, .gift-row select { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 10px; font-size: 13px; font-family: inherit; }
+.gift-pct { font-size: 11px; font-weight: 700; color: var(--blue); font-family: var(--font-mono); text-align: right; }
+.gift-handle {
+  min-height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 8px;
+  font-size: 12px; font-weight: 700; background: #F1F5F9; color: #94A3B8; user-select: none; -webkit-user-select: none;
+}
+.gift-handle.ready { background: #0F172A; color: white; cursor: grab; touch-action: none; }
+.gift-handle.ready:active { cursor: grabbing; }
+.gift-place-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 8px; min-height: 22px; }
+.gift-link-btn { background: none; border: none; padding: 0; color: var(--link); font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; text-decoration: underline; }
+@media (max-width: 560px) {
+  .gift-row { grid-template-columns: 1fr auto; grid-template-areas: "handle pct" "name name" "stock redeem"; row-gap: 6px; }
+  .gift-row > .gift-handle { grid-area: handle; justify-self: start; padding: 0 16px; min-width: 84px; }
+  .gift-row > .gift-pct { grid-area: pct; }
+  .gift-row > input:nth-of-type(1) { grid-area: name; width: 100%; }
+  .gift-row > input:nth-of-type(2) { grid-area: stock; width: 100%; }
+  .gift-row > select { grid-area: redeem; width: 100%; }
+}

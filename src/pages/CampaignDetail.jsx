@@ -3,9 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAdmin } from '../hooks/useAdmin';
 import { Card, Button, Badge, GiftPill, MiniBar } from '../components/ui';
+import { SLOT_COLORS } from '../components/slotColors';
 
 const STATUS_TONE = { draft: 'neutral', active: 'green', paused: 'orange', completed: 'blue', archived: 'neutral' };
-const SLOT_COLORS = ['#09B2FD','#10B981','#F59E0B','#9333EA','#E11D48','#15803D','#D97706','#4F46E5','#BE185D','#0D9488','#A16207','#7C3AED'];
 
 export default function CampaignDetail() {
   const { id } = useParams();

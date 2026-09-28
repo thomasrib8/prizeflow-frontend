@@ -6,6 +6,13 @@ import { useRef } from 'react';
 // interactive + onRotate(angle): lets the user drag the red cleat by hand
 // (mouse or touch) — used in campaign config so an operator confused about
 // physical orientation can spin the on-screen wheel to match the real one.
+// sectionStyles: optional array of 12 { fill, title } — a placed gift's color
+// (fill) and native hover tooltip (title). `fill` is passed straight to the
+// SVG fill attribute, so a future per-case artwork can be supplied the same
+// way (an SVG <pattern>/image reference) without changing this component.
+// dropTarget: 0-11 case currently hovered by a gift being dragged.
+// Every section carries data-case so a drag can hit-test it with
+// document.elementFromPoint.
 //
 // Formula derived from original index.html line 227:
 //   transform: rotate(360/12 * pos + "deg")
@@ -24,7 +31,7 @@ export function posToAngle(currentPos) {
   return ((raw % 360) + 360) % 360;
 }
 
-export default function WheelSVG({ positionAngle = 0, size = 220, highlightSection = null, interactive = false, onRotate, onSectionClick }) {
+export default function WheelSVG({ positionAngle = 0, size = 220, highlightSection = null, interactive = false, onRotate, onSectionClick, sectionStyles = null, dropTarget = null }) {
   const svgRef = useRef(null);
   const cx = 160, cy = 160, r = 130;
   const sections = 12;
@@ -95,14 +102,19 @@ export default function WheelSVG({ positionAngle = 0, size = 220, highlightSecti
         const x1 = cx + r * Math.cos(startA), y1 = cy + r * Math.sin(startA);
         const x2 = cx + r * Math.cos(endA), y2 = cy + r * Math.sin(endA);
         const isHighlighted = highlightSection === i;
+        const style = sectionStyles?.[i];
+        const isDropTarget = dropTarget === i;
         return (
           <path key={i}
+            data-case={i}
             d={`M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 0 1 ${x2} ${y2} Z`}
-            fill={isHighlighted ? '#EFF6FF' : 'white'}
-            stroke="#111" strokeWidth="1.5"
+            fill={style?.fill || (isDropTarget ? '#BFDBFE' : isHighlighted ? '#EFF6FF' : 'white')}
+            stroke={isDropTarget ? '#0055F8' : '#111'} strokeWidth={isDropTarget ? 4 : 1.5}
             onClick={onSectionClick ? () => onSectionClick(i) : undefined}
-            style={{ cursor: onSectionClick ? 'pointer' : undefined }}
-          />
+            style={{ cursor: onSectionClick ? 'pointer' : undefined, transition: 'fill 0.25s ease' }}
+          >
+            {style?.title && <title>{style.title}</title>}
+          </path>
         );
       })}
 
@@ -115,7 +127,7 @@ export default function WheelSVG({ positionAngle = 0, size = 220, highlightSecti
       {labels.map(l => (
         <text key={l.idx} x={l.x} y={l.y} textAnchor="middle" dominantBaseline="central"
           fontSize="18" fontWeight="900" fontFamily="Arial Black, sans-serif"
-          fill={highlightSection === l.idx ? '#2563EB' : '#111'}
+          fill={sectionStyles?.[l.idx]?.fill ? 'white' : highlightSection === l.idx ? '#2563EB' : '#111'}
           style={{ pointerEvents: 'none', userSelect: 'none' }}
           transform={`rotate(${(l.idx + 0.5) * sectionAngle}, ${l.x}, ${l.y})`}>
           {l.num}

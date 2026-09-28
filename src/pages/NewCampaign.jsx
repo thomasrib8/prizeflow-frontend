@@ -4,12 +4,18 @@ import { api } from '../api/client';
 import { Card, Button } from '../components/ui';
 import { useAdmin } from '../hooks/useAdmin';
 import { useWheelSocket } from '../hooks/useWheelSocket';
-import WheelSVG, { posToAngle } from '../components/WheelSVG';
+import { posToAngle } from '../components/WheelSVG';
+import WheelGiftPlanner from '../components/WheelGiftPlanner';
+import { CASE_COUNT, isGiftReady } from '../components/giftPlanning';
 import SegmentationBuilder from '../components/SegmentationBuilder';
 import CampaignFieldsBuilder from '../components/CampaignFieldsBuilder';
 import { SALES_FIELD_TYPES, GUEST_FIELD_TYPES } from '../components/fieldTypes';
 
-const EMPTY_SLOTS = Array.from({ length: 12 }, (_, i) => ({ slotIndex: i, giftName: '', stock: 0, redeemMethod: 'qr', persoDelivery: 'qr', persoSubject: '', persoBody: '', persoAutoDistribute: false }));
+// The 12 gifts are defined first and only afterwards dragged onto a case of
+// the wheel: `id` is the gift's own fixed position in the list, `caseIndex`
+// (0-11, or null while it hasn't been placed yet) is the wheel case it ended
+// up on — that's what becomes the campaign slot's slotIndex on submit.
+const EMPTY_GIFTS = Array.from({ length: CASE_COUNT }, (_, i) => ({ id: i, caseIndex: null, giftName: '', stock: 0, redeemMethod: 'qr', persoDelivery: 'qr', persoSubject: '', persoBody: '', persoAutoDistribute: false }));
 const STEPS = [
   { n: 1, label: 'Gifts' },
   { n: 2, label: 'Segmentation & sales form' },
@@ -32,7 +38,7 @@ export default function NewCampaign() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [eventName, setEventName] = useState('');
-  const [slots, setSlots] = useState(EMPTY_SLOTS);
+  const [gifts, setGifts] = useState(EMPTY_GIFTS);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
   const [previewAngle, setPreviewAngle] = useState(0);
@@ -61,8 +67,8 @@ export default function NewCampaign() {
     setPreviewAngle(angle);
   }
 
+  const placedCount = gifts.filter((g) => g.caseIndex !== null).length;
   const previewCase = Math.floor((((previewAngle % 360) + 360) % 360) / 30) + 1;
-  const totalStock = slots.reduce((sum, s) => sum + (Number(s.stock) || 0), 0);
 
   // Duplicate an existing campaign's slot/gift config — stock always starts
   // at 0 here, adjustable before creating (per roadmap: never a silent copy).
@@ -91,15 +97,17 @@ export default function NewCampaign() {
   }, []);
 
   // Shared by campaign duplication (full slot config) and "start from
-  // template" (giftName only, see campaign_templates) — any field a caller
-  // doesn't provide simply falls back to EMPTY_SLOTS' default for that slot.
+  // template" (giftName only, see campaign_templates) — each incoming slot
+  // becomes one gift, already placed on the same case it had in the source,
+  // so a duplicate keeps the physical wheel's layout. Any field a caller
+  // doesn't provide falls back to EMPTY_GIFTS' default.
   function applySlotConfig(configSlots) {
-    const byIndex = new Map(configSlots.map((s) => [s.slotIndex, s]));
-    setSlots(EMPTY_SLOTS.map((s) => {
-      const src = byIndex.get(s.slotIndex);
-      if (!src) return s;
+    setGifts(EMPTY_GIFTS.map((g, i) => {
+      const src = configSlots[i];
+      if (!src) return g;
       return {
-        ...s,
+        ...g,
+        caseIndex: Number.isInteger(src.slotIndex) && src.slotIndex >= 0 && src.slotIndex < CASE_COUNT ? src.slotIndex : null,
         giftName: src.giftName || '',
         redeemMethod: ['code', 'voucher', 'perso'].includes(src.redeemMethod) ? src.redeemMethod : 'qr',
         persoDelivery: src.persoDelivery || 'qr',
@@ -123,13 +131,13 @@ export default function NewCampaign() {
   }
 
   async function handleSaveTemplate() {
-    const configured = slots.filter((s) => s.giftName.trim());
-    if (configured.length === 0) { setError('Configure at least one gift name before saving a template.'); return; }
+    const configured = gifts.filter((g) => g.giftName.trim() && g.caseIndex !== null);
+    if (configured.length === 0) { setError('Place at least one named gift on the wheel before saving a template.'); return; }
     const templateName = window.prompt('Name this template:');
     if (!templateName) return;
     setSavingTemplate(true);
     try {
-      await api.saveCampaignTemplate(templateName, configured.map((s) => ({ slotIndex: s.slotIndex, giftName: s.giftName })));
+      await api.saveCampaignTemplate(templateName, configured.map((g) => ({ slotIndex: g.caseIndex, giftName: g.giftName })));
       setTemplates(await api.listCampaignTemplates());
       setTemplateMsg('Template saved');
       setTimeout(() => setTemplateMsg(''), 2000);
@@ -140,17 +148,14 @@ export default function NewCampaign() {
     }
   }
 
-  function updateSlot(i, field, value) {
-    setSlots(prev => prev.map((s, idx) => idx === i ? { ...s, [field]: value } : s));
-  }
-
   function validateStep1() {
-    const active = slots.filter(s => s.giftName.trim() && Number(s.stock) > 0);
     if (!name.trim()) return 'Campaign name is required';
-    if (active.length === 0) return 'Configure at least one gift with stock > 0';
-    for (const s of active) {
-      if (s.redeemMethod === 'perso' && (!s.persoSubject.trim() || !s.persoBody.trim())) {
-        return `Case ${s.slotIndex + 1}: a Perso gift needs both a subject and a message`;
+    const placed = gifts.filter((g) => g.caseIndex !== null);
+    if (placed.length < CASE_COUNT) return `Place all ${CASE_COUNT} gifts on the wheel to continue (${placed.length}/${CASE_COUNT} so far).`;
+    for (const g of placed) {
+      if (!isGiftReady(g)) return `Case ${g.caseIndex + 1}: the gift needs a name and a stock above 0`;
+      if (g.redeemMethod === 'perso' && (!g.persoSubject.trim() || !g.persoBody.trim())) {
+        return `Case ${g.caseIndex + 1}: a Perso gift needs both a subject and a message`;
       }
     }
     return '';
@@ -178,16 +183,16 @@ export default function NewCampaign() {
     }
     setError('');
     setSaving(true);
-    const active = slots.filter(s => s.giftName.trim() && Number(s.stock) > 0);
+    const active = gifts.filter((g) => g.caseIndex !== null);
     try {
       const created = await api.createCampaign({
         name, description, eventName, isTest,
-        slots: active.map(s => ({
-          slotIndex: s.slotIndex,
-          giftName: s.giftName,
-          stock: Number(s.stock),
-          redeemMethod: ['code', 'voucher', 'perso'].includes(s.redeemMethod) ? s.redeemMethod : 'qr',
-          ...(s.redeemMethod === 'perso' ? { persoDelivery: s.persoDelivery, persoSubject: s.persoSubject, persoBody: s.persoBody, persoAutoDistribute: !!s.persoAutoDistribute } : {}),
+        slots: active.map(g => ({
+          slotIndex: g.caseIndex,
+          giftName: g.giftName,
+          stock: Number(g.stock),
+          redeemMethod: ['code', 'voucher', 'perso'].includes(g.redeemMethod) ? g.redeemMethod : 'qr',
+          ...(g.redeemMethod === 'perso' ? { persoDelivery: g.persoDelivery, persoSubject: g.persoSubject, persoBody: g.persoBody, persoAutoDistribute: !!g.persoAutoDistribute } : {}),
         })),
         segmentCategories: segmentCategories.filter((c) => c.name.trim() && (c.options || []).length),
         fields: [
@@ -262,106 +267,45 @@ export default function NewCampaign() {
               )}
             </Card>
 
-            <Card title="Wheel orientation helper" className="mt-card">
-              <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 16px' }}>
-                {agentConnected && !manualOverride
-                  ? 'Tracking the physical wheel live — the red cleat moves together with the real one.'
-                  : 'Lost track of which physical case is which? Drag the red cleat below to match what you see on the real wheel.'}
-              </p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
-                <WheelSVG positionAngle={previewAngle} size={200} interactive onRotate={handleManualRotate} />
-                <div style={{ fontSize: 14, color: '#334155' }}>
-                  Red cleat is pointing at <strong>Case {previewCase}</strong>
+            <WheelGiftPlanner
+              gifts={gifts}
+              setGifts={setGifts}
+              wheelProps={{ positionAngle: previewAngle, interactive: true, onRotate: handleManualRotate }}
+              wheelCaption={(
+                <>
+                  {agentConnected && !manualOverride
+                    ? 'Tracking the physical wheel live — the red cleat moves together with the real one.'
+                    : 'Lost track of which physical case is which? Drag the red cleat to match what you see on the real wheel.'}
+                  <div style={{ marginTop: 4 }}>Red cleat is pointing at <strong>Case {previewCase}</strong></div>
                   {agentConnected && manualOverride && (
-                    <div style={{ marginTop: 8 }}>
-                      <button
-                        type="button"
-                        onClick={() => setManualOverride(false)}
-                        style={{ background: 'none', border: 'none', padding: 0, color: '#002881', textDecoration: 'underline', cursor: 'pointer', fontSize: 13, fontFamily: 'inherit' }}
-                      >
-                        Resync with live wheel
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setManualOverride(false)}
+                      style={{ background: 'none', border: 'none', padding: 0, marginTop: 6, color: '#002881', textDecoration: 'underline', cursor: 'pointer', fontSize: 12, fontFamily: 'inherit' }}
+                    >
+                      Resync with live wheel
+                    </button>
                   )}
-                </div>
-              </div>
-            </Card>
-
-            <Card title="Products (12 wheel slots)" className="mt-card"
-              action={
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                </>
+              )}
+              headerAction={(
+                <>
                   {templateMsg && <span style={{ fontSize: 12, color: '#10B981', fontWeight: 600 }}>{templateMsg}</span>}
                   <button type="button" onClick={handleSaveTemplate} disabled={savingTemplate} className="btn btn-ghost btn-sm" style={{ cursor: savingTemplate ? 'not-allowed' : 'pointer' }}>
                     {savingTemplate ? 'Saving…' : 'Save as template'}
                   </button>
-                  <span className="badge badge-blue">Total stock: {totalStock}</span>
-                </div>
-              }>
-              <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 12px' }}>
-                "Redeem" chooses how the guest confirms their gift: <b>QR</b> links straight to it, <b>Code</b> emails an 8-character code to type in on the Rewards page, <b>Voucher</b> just tells the guest to see a staff member for their physical voucher, <b>Perso</b> sends this gift's own custom email (choose what it delivers below).
-              </p>
-              <div className="slots-grid">
-                {slots.map((s, i) => {
-                  const pct = totalStock ? ((Number(s.stock) || 0) / totalStock) * 100 : 0;
-                  return (
-                    <div key={i} style={{ display: 'contents' }}>
-                      <div className="slot-row">
-                        <div className="slot-index">Case {i + 1}</div>
-                        <input placeholder="Gift name" value={s.giftName} onChange={e => updateSlot(i, 'giftName', e.target.value)} />
-                        <input type="number" min="0" placeholder="Stock" value={s.stock || ''} onChange={e => updateSlot(i, 'stock', e.target.value)} />
-                        <select value={s.redeemMethod} title="How the guest confirms their gift" onChange={e => updateSlot(i, 'redeemMethod', e.target.value)}>
-                          <option value="qr">QR</option>
-                          <option value="code">Code</option>
-                          <option value="voucher">Voucher</option>
-                          <option value="perso">Perso</option>
-                        </select>
-                        <div className="slot-pct">{pct ? `${pct.toFixed(1)}%` : '—'}</div>
-                      </div>
-                      {s.redeemMethod === 'perso' && (
-                        <div style={{ gridColumn: '1 / -1', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 8, padding: 12, margin: '-2px 0 4px' }}>
-                          <div style={{ display: 'flex', gap: 10, marginBottom: 8, flexWrap: 'wrap' }}>
-                            <div className="field" style={{ margin: 0, flex: '0 0 180px' }}>
-                              <label style={{ fontSize: 11 }}>Delivers</label>
-                              <select value={s.persoDelivery} onChange={e => updateSlot(i, 'persoDelivery', e.target.value)}>
-                                <option value="code">A code</option>
-                                <option value="qr">A QR</option>
-                                <option value="text">Just text</option>
-                              </select>
-                            </div>
-                            <div className="field" style={{ margin: 0, flex: '1 1 260px' }}>
-                              <label style={{ fontSize: 11 }}>Subject</label>
-                              <input placeholder="e.g. You won a free coffee!" value={s.persoSubject} onChange={e => updateSlot(i, 'persoSubject', e.target.value)} />
-                            </div>
-                          </div>
-                          <div className="field" style={{ margin: 0 }}>
-                            <label style={{ fontSize: 11 }}>
-                              Message ({'{{firstName}}'} / {'{{giftName}}'}{s.persoDelivery === 'code' ? ' / {{code}}' : ''} available)
-                            </label>
-                            <textarea rows={2} placeholder="Custom message shown in the email…" value={s.persoBody} onChange={e => updateSlot(i, 'persoBody', e.target.value)} style={{ width: '100%', fontFamily: 'inherit' }} />
-                            {s.persoDelivery === 'code' && (
-                              <p style={{ fontSize: 11, color: '#94A3B8', margin: '4px 0 0' }}>
-                                The code, QR and redemption instructions are always added automatically below your message — no need to insert {'{{code}}'} yourself unless you also want to mention it in your own sentence.
-                              </p>
-                            )}
-                          </div>
-                          <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, cursor: 'pointer' }}>
-                            <input type="checkbox" checked={!!s.persoAutoDistribute} onChange={e => updateSlot(i, 'persoAutoDistribute', e.target.checked)} />
-                            <span style={{ fontSize: 12, color: '#334155' }}>
-                              Mark this gift as automatically distributed
-                              <span style={{ display: 'block', fontSize: 11, color: '#94A3B8' }}>Skips manual confirmation in Rewards — use only when there's nothing to hand over in person.</span>
-                            </span>
-                          </label>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </Card>
+                </>
+              )}
+            />
 
             <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
-              <Button type="button" onClick={() => goToStep(2)}>Next →</Button>
+              <Button type="button" onClick={() => goToStep(2)} disabled={placedCount < CASE_COUNT}>Next →</Button>
               <Button type="button" variant="secondary" onClick={() => navigate('/campaigns')}>Cancel</Button>
+              {placedCount < CASE_COUNT && (
+                <span style={{ alignSelf: 'center', fontSize: 12, color: '#64748B' }}>
+                  Place all {CASE_COUNT} gifts on the wheel to continue ({placedCount}/{CASE_COUNT}).
+                </span>
+              )}
             </div>
           </>
         )}
