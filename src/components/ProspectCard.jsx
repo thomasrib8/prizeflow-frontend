@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { api } from '../api/client';
 import { Button } from './ui';
 import DynamicFieldInput from './DynamicFieldInput';
+import EmailStatusBadge from './EmailStatusBadge';
 
 // Chrome/Edge only (webkitSpeechRecognition) — Safari/Firefox don't support
 // live transcription, so the record button simply doesn't render there
@@ -43,6 +44,7 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
   const [salesFields, setSalesFields] = useState([]);
   const [guestFields, setGuestFields] = useState([]);
   const [guestAnswers, setGuestAnswers] = useState({});
+  const [emailVerification, setEmailVerification] = useState(null);
   const [segmentCategories, setSegmentCategories] = useState([]);
 
   const [note, setNote] = useState('');
@@ -59,6 +61,7 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
         setSalesFields((campaign.fields || []).filter((f) => f.scope === 'sales'));
         setGuestFields((campaign.fields || []).filter((f) => f.scope === 'guest'));
         setGuestAnswers(guestNote.guestAnswers || {});
+        setEmailVerification(guestNote.emailVerification || null);
         setSegmentCategories(campaign.segmentCategories || []);
         setNote(guestNote.note || '');
         setLeadRating(guestNote.leadRating ?? null);
@@ -71,6 +74,23 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
   }
 
   useEffect(load, [campaignId, guest.email]);
+
+  // The email check runs in the background after the contact is saved, so a
+  // card opened right away can still say "Checking…" — quietly look again a
+  // few times until it settles.
+  const emailStatus = emailVerification?.status;
+  useEffect(() => {
+    if (emailStatus !== 'pending') return undefined;
+    let tries = 0;
+    const t = setInterval(() => {
+      tries += 1;
+      api.getGuestNote(campaignId, guest.email)
+        .then((n) => { if (n.emailVerification) setEmailVerification(n.emailVerification); })
+        .catch(() => {});
+      if (tries >= 10) clearInterval(t);
+    }, 3000);
+    return () => clearInterval(t);
+  }, [emailStatus, campaignId, guest.email]);
 
   function clearSilenceTimer() {
     if (silenceTimerRef.current) {
@@ -185,7 +205,8 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
                 </div>
                 <div>
                   <div style={{ fontSize: 17, fontWeight: 800 }}>{displayName}</div>
-                  <div style={{ fontSize: 13, color: '#64748B' }}>{guest.email}</div>
+                  <div style={{ fontSize: 13, color: '#64748B' }}>{guest.email}
+                    <EmailStatusBadge status={emailVerification?.status} isCatchAll={emailVerification?.isCatchAll} isDisposable={emailVerification?.isDisposable} isRoleAccount={emailVerification?.isRoleAccount} /></div>
                 </div>
               </div>
               <button
@@ -236,7 +257,8 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
         ) : (
           <>
             <h3 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 800 }}>{displayName}</h3>
-            <p style={{ margin: '0 0 16px', fontSize: 13, color: '#64748B' }}>{guest.email}</p>
+            <p style={{ margin: '0 0 16px', fontSize: 13, color: '#64748B' }}>{guest.email}
+              <EmailStatusBadge status={emailVerification?.status} isCatchAll={emailVerification?.isCatchAll} isDisposable={emailVerification?.isDisposable} isRoleAccount={emailVerification?.isRoleAccount} /></p>
 
             {error && <div className="error-banner">{error}</div>}
 

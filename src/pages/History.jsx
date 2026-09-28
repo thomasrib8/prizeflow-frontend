@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { Card, Button, Badge, EmptyState, GiftPill } from '../components/ui';
 import ProspectCard from '../components/ProspectCard';
+import EmailStatusBadge from '../components/EmailStatusBadge';
 
 // 'no_gift' (a guest who skipped or cancelled) and 'manual' (a prospect a
 // rep added by hand, never played) aren't real reward statuses — they're
@@ -247,7 +248,10 @@ export default function History() {
                         <span style={{ fontWeight: 500 }}>{r.first_name} {r.last_name}</span>
                       )}
                     </td>
-                    <td style={{ color: 'var(--text-muted)' }}>{r.email}</td>
+                    <td style={{ color: 'var(--text-muted)' }}>
+                      {r.email}
+                      <EmailStatusBadge compact status={r.email_status} isCatchAll={r.email_is_catch_all} isDisposable={r.email_is_disposable} isRoleAccount={r.email_is_role_account} />
+                    </td>
                     <td>{r.gift_name ? <GiftPill slotIndex={0} name={r.gift_name} /> : <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>No gift</span>}</td>
                     <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{r.campaign_name || '—'}</td>
                     <td><Badge tone={REWARD_TONE[r.status] || 'neutral'}>{STATUS_LABELS[r.status] || r.status}</Badge></td>
