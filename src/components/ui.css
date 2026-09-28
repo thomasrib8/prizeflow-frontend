@@ -439,3 +439,8 @@ table.data-table tr:hover td { background: #FAFBFC; }
   .gift-row > input:nth-of-type(2) { grid-area: stock; width: 100%; }
   .gift-row > select { grid-area: redeem; width: 100%; }
 }
+
+/* Launch's header carries up to four buttons (scan, new prospect, spin, status): on a phone they wrap under the title instead of pushing the page wider. */
+@media (max-width: 640px) {
+  .launch-header { flex-wrap: wrap; gap: 12px; }
+}

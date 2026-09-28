@@ -1,40 +1,109 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { api } from '../api/client';
 import { Button } from './ui';
 import DynamicFieldInput from './DynamicFieldInput';
+import { prepareScanImage } from '../utils/scanImage';
 
 const STARS = [1, 2, 3];
+const EMPTY_FORM = { firstName: '', lastName: '', email: '' };
 
-// Lets a sales rep add someone to the CRM by hand — a prospect who never
-// played (met at the booth, no phone, ...) — from the Launch page. One
-// popup with everything: what a guest would fill in themselves (the fixed
-// first name / last name / email + this campaign's own guest-form fields)
-// and what the rep fills in about them (segments, note, rating, tag and the
-// sales form's fields). Only the three fixed fields are actually required;
-// the campaign's other guest-form fields are shown without their "required"
-// marker because a rep entering a contact at speed shouldn't be blocked by
-// something that's only mandatory for a guest on their own phone.
-export default function NewProspectModal({ campaign, onClose, onCreated }) {
+// Lets a sales rep put someone in the CRM from the Launch page without that
+// person filling in anything — typed by hand, or pre-filled from a photo of
+// their badge / business card (or the vCard QR some badges carry).
+//
+// The photo only ever PRE-FILLS this form: the rep always sees what was read,
+// fields the reader wasn't sure about are highlighted, and nothing is saved
+// until they confirm. Badges often show no email, so email is optional — a
+// person without one still gets a CRM card and can still play; their gift is
+// held until a real address is added (see the prospect card).
+//
+// Only first and last name are required. The campaign's other guest-form
+// fields are shown without their "required" marker: a rep entering a contact
+// at speed shouldn't be blocked by something that's only mandatory for a guest
+// on their own phone. Since the person ticked nothing themselves, the rep
+// attests they agreed to be contacted and to get their gift by email.
+export default function NewProspectModal({ campaign, initialFile = null, scanEnabled = false, onClose, onCreated }) {
   const guestFields = (campaign.fields || []).filter((f) => f.scope === 'guest');
   const salesFields = (campaign.fields || []).filter((f) => f.scope === 'sales');
   const segmentCategories = campaign.segmentCategories || [];
+  const canQueue = campaign.status === 'active';
 
-  const [form, setForm] = useState({ firstName: '', lastName: '', email: '' });
+  const formRef = useRef(null);
+  const fileInputRef = useRef(null);
+  const startedRef = useRef(false);
+
+  const [form, setForm] = useState(EMPTY_FORM);
   const [guestAnswers, setGuestAnswers] = useState({});
   const [note, setNote] = useState('');
   const [leadRating, setLeadRating] = useState(null); // 1-3, null = not rated — never a default 1
   const [segments, setSegments] = useState({});
   const [tags, setTags] = useState('');
   const [customFields, setCustomFields] = useState({});
+  const [consent, setConsent] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [duplicate, setDuplicate] = useState(null); // { message, addToQueue }
+  // { state: 'idle' | 'reading' | 'done' | 'error', message, source: 'qr' | 'photo', confidence }
+  const [scan, setScan] = useState({ state: 'idle' });
 
-  async function handleSubmit(e) {
-    e.preventDefault();
+  function applyReading({ fields, customFields: fromCampaign = {}, confidence }, source) {
+    setForm({ firstName: fields.firstName || '', lastName: fields.lastName || '', email: fields.email || '' });
+
+    const answers = { ...fromCampaign };
+    // A phone number the campaign has a place for but the reader didn't route there.
+    const phoneField = guestFields.find((f) => f.fieldType === 'phone' && !answers[f.label]);
+    if (phoneField && fields.phone) answers[phoneField.label] = fields.phone;
+    setGuestAnswers(answers);
+
+    // Company / job title have no field of their own unless the campaign made
+    // one — keep them as the start of the note rather than throw them away.
+    const usedElsewhere = (v) => v && Object.values(answers).includes(v);
+    const context = [fields.company, fields.jobTitle].filter((v) => v && !usedElsewhere(v)).join(' · ');
+    setNote(context);
+
+    setScan({ state: 'done', source, confidence: confidence || {} });
+    setError('');
+    setDuplicate(null);
+  }
+
+  async function handleFile(file) {
+    if (!file) return;
+    setScan({ state: 'reading' });
+    setError('');
+    try {
+      const { blob, contact } = await prepareScanImage(file);
+      if (contact) {
+        // A vCard / MECARD QR is exact — no need to send the photo anywhere.
+        const high = { firstName: 'high', lastName: 'high', email: contact.email ? 'high' : 'none' };
+        applyReading({ fields: contact, confidence: high }, 'qr');
+        return;
+      }
+      const result = await api.scanProspectImage(campaign.id, blob);
+      if (result.documentType === 'unreadable' || (!result.fields.firstName && !result.fields.lastName && !result.fields.email)) {
+        setScan({ state: 'error', message: "Couldn't find any contact details on this photo. Try again with better light, or fill the form in by hand." });
+        return;
+      }
+      applyReading(result, 'photo');
+    } catch (err) {
+      setScan({ state: 'error', message: err.message });
+    }
+  }
+
+  // The header's "Scan badge" button hands over a photo it already took.
+  useEffect(() => {
+    if (initialFile && !startedRef.current) {
+      startedRef.current = true;
+      handleFile(initialFile);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function submit(addToQueue, confirmDuplicate = false) {
+    if (!formRef.current.reportValidity()) return;
     setSaving(true);
     setError('');
     try {
-      await api.createProspect({
+      const res = await api.createProspect({
         campaignId: campaign.id,
         ...form,
         guestAnswers,
@@ -43,22 +112,58 @@ export default function NewProspectModal({ campaign, onClose, onCreated }) {
         segments,
         tags,
         customFields,
+        consentAttested: consent,
+        addToQueue,
+        confirmDuplicate,
       });
-      onCreated?.(`${form.firstName.trim()} ${form.lastName.trim()}`.trim());
+      onCreated?.({ name: `${form.firstName.trim()} ${form.lastName.trim()}`.trim(), queued: res.queued, emailMissing: res.emailMissing });
       onClose();
     } catch (err) {
-      setError(err.message);
+      if (err.code === 'POSSIBLE_DUPLICATE') setDuplicate({ message: err.message, addToQueue });
+      else setError(err.message);
       setSaving(false);
     }
   }
 
+  // Fields the reader wasn't sure about get an amber outline.
+  const doubtful = (key) => scan.state === 'done' && ['low', 'medium'].includes(scan.confidence?.[key]);
+  const flagStyle = (key) => (doubtful(key) ? { borderColor: '#F59E0B', background: '#FFFBEB' } : undefined);
+  const doubtHint = (key) => doubtful(key) && <div style={{ fontSize: 11, color: '#B45309', marginTop: 3 }}>Please check this one — it was hard to read.</div>;
+  const noEmailOnBadge = scan.state === 'done' && !form.email;
+
   return (
     <div className="modal-overlay">
-      <form className="modal-card" style={{ '--modal-w': '560px' }} onSubmit={handleSubmit}>
+      <form ref={formRef} className="modal-card" style={{ '--modal-w': '560px' }} onSubmit={(e) => e.preventDefault()}>
         <h3 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 800 }}>New prospect</h3>
         <p style={{ margin: '0 0 16px', fontSize: 13, color: '#64748B' }}>
-          Add someone to the CRM of <strong>{campaign.name}</strong> without them playing.
+          Add someone to <strong>{campaign.name}</strong> without them filling in anything.
         </p>
+
+        {scanEnabled && (
+          <div style={{ background: '#F8FAFC', border: '1px dashed #CBD5E1', borderRadius: 12, padding: 14, marginBottom: 16 }}>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              hidden
+              onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; handleFile(f); }}
+            />
+            <Button type="button" variant="secondary" disabled={scan.state === 'reading' || saving} onClick={() => fileInputRef.current?.click()}>
+              {scan.state === 'reading' ? 'Reading the photo…' : scan.state === 'done' ? '📷 Scan another' : '📷 Scan a badge or business card'}
+            </Button>
+            {scan.state === 'idle' && (
+              <div style={{ fontSize: 12, color: '#64748B', marginTop: 8 }}>Take a photo and the details below are filled in for you.</div>
+            )}
+            {scan.state === 'done' && (
+              <div style={{ fontSize: 12, color: '#047857', marginTop: 8, fontWeight: 600 }}>
+                ✓ {scan.source === 'qr' ? 'Details read from the QR code.' : 'Details read from the photo.'}{' '}
+                <span style={{ color: '#64748B', fontWeight: 500 }}>Check them before saving.</span>
+              </div>
+            )}
+            {scan.state === 'error' && <div style={{ fontSize: 12, color: '#B91C1C', marginTop: 8 }}>{scan.message}</div>}
+          </div>
+        )}
 
         {error && <div className="error-banner">{error}</div>}
 
@@ -66,16 +171,24 @@ export default function NewProspectModal({ campaign, onClose, onCreated }) {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
           <div className="field" style={{ marginBottom: 0 }}>
             <label>First name *</label>
-            <input required autoFocus value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} />
+            <input required value={form.firstName} style={flagStyle('firstName')} onChange={(e) => setForm({ ...form, firstName: e.target.value })} />
+            {doubtHint('firstName')}
           </div>
           <div className="field" style={{ marginBottom: 0 }}>
             <label>Last name *</label>
-            <input required value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} />
+            <input required value={form.lastName} style={flagStyle('lastName')} onChange={(e) => setForm({ ...form, lastName: e.target.value })} />
+            {doubtHint('lastName')}
           </div>
         </div>
         <div className="field">
-          <label>Email address *</label>
-          <input type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+          <label>Email address</label>
+          <input type="email" value={form.email} style={flagStyle('email')} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+          {doubtHint('email')}
+          {!form.email && (
+            <div style={{ fontSize: 11, color: noEmailOnBadge ? '#B45309' : '#64748B', marginTop: 3 }}>
+              {noEmailOnBadge ? 'No email on this badge. ' : ''}You can add it later — if they win, their gift is held until you do.
+            </div>
+          )}
         </div>
         {guestFields.map((f) => (
           <DynamicFieldInput
@@ -141,10 +254,27 @@ export default function NewProspectModal({ campaign, onClose, onCreated }) {
           <input placeholder="A free label you can attach to this prospect" value={tags} onChange={(e) => setTags(e.target.value)} />
         </div>
 
-        <div style={{ display: 'flex', gap: 10, marginTop: 22 }}>
-          <Button type="submit" disabled={saving}>{saving ? 'Adding…' : 'Add prospect'}</Button>
+        <label style={{ display: 'flex', gap: 10, alignItems: 'flex-start', fontSize: 13, color: '#334155', cursor: 'pointer', margin: '16px 0 4px', lineHeight: 1.45 }}>
+          <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} style={{ marginTop: 2, flexShrink: 0, width: 18, height: 18 }} />
+          <span>This person agreed to be contacted and to receive their gift by email. <span style={{ color: '#94A3B8' }}>(Recorded with your name.)</span></span>
+        </label>
+
+        {duplicate && (
+          <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: 12, marginTop: 12, fontSize: 13, color: '#92400E' }}>
+            {duplicate.message}
+            <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+              <Button type="button" size="sm" disabled={saving} onClick={() => submit(duplicate.addToQueue, true)}>It's someone else — add anyway</Button>
+              <Button type="button" size="sm" variant="secondary" onClick={() => setDuplicate(null)}>Let me check</Button>
+            </div>
+          </div>
+        )}
+
+        <div style={{ display: 'flex', gap: 10, marginTop: 22, flexWrap: 'wrap' }}>
+          {canQueue && <Button type="button" disabled={saving || !consent} onClick={() => submit(true)}>{saving ? 'Adding…' : 'Save & add to queue'}</Button>}
+          <Button type="button" variant={canQueue ? 'secondary' : 'primary'} disabled={saving || !consent} onClick={() => submit(false)}>Save only</Button>
           <Button type="button" variant="secondary" onClick={onClose} disabled={saving}>Cancel</Button>
         </div>
+        {!consent && <div style={{ fontSize: 11, color: '#94A3B8', marginTop: 8 }}>Tick the box above to save.</div>}
       </form>
     </div>
   );

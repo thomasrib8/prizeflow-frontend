@@ -38,7 +38,9 @@ async function request(path, { method = 'GET', body, auth = true } = {}) {
     return new Promise(() => {}); // navigation is already underway
   }
   if (!res.ok) {
-    throw new Error((data && data.error) || `Request failed (${res.status})`);
+    const err = new Error((data && data.error) || `Request failed (${res.status})`);
+    if (data && data.code) err.code = data.code; // e.g. POSSIBLE_DUPLICATE — lets a screen offer a specific way forward
+    throw err;
   }
   return data;
 }
@@ -203,6 +205,24 @@ export const api = {
   skipActivePlayer: (campaignId) => request('/account/guest-queue/skip', { method: 'POST', body: { campaignId } }),
   // Note/lead-rating/segment popup on the Launch page — upserts by (campaignId, email).
   createProspect: (payload) => request('/account/prospects', { method: 'POST', body: payload }),
+  setProspectEmail: (payload) => request('/account/prospects/email', { method: 'PATCH', body: payload }),
+  getBadgeScanStatus: () => request('/account/badge-scan'),
+  // Multipart (a photo), so it can't go through request(), which always sends JSON.
+  scanProspectImage: async (campaignId, blob) => {
+    const form = new FormData();
+    form.append('campaignId', campaignId);
+    form.append('image', blob, 'scan.jpg');
+    const token = getToken();
+    const res = await fetch(`${API_BASE}/account/prospects/scan`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: form,
+    });
+    let data = null;
+    try { data = await res.json(); } catch { /* no body */ }
+    if (!res.ok) throw new Error((data && data.error) || `Request failed (${res.status})`);
+    return data;
+  },
   saveGuestNote: (payload) => request('/account/guest-notes', { method: 'PATCH', body: payload }),
   getGuestNote: (campaignId, email) => request(`/account/guest-notes?campaignId=${encodeURIComponent(campaignId)}&email=${encodeURIComponent(email)}`),
   getRecentPlayers: (campaignId) => request(`/account/recent-players?campaignId=${encodeURIComponent(campaignId)}`),

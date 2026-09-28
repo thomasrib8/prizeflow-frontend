@@ -81,6 +81,8 @@ export default function LaunchCampaign() {
   const [noteGuest, setNoteGuest] = useState(null); // { email, firstName, lastName, note?, leadRating?, segment? } | null
   const [queueActionBusy, setQueueActionBusy] = useState(false);
   const [showNewProspect, setShowNewProspect] = useState(false);
+  const [scanFile, setScanFile] = useState(null); // photo taken from the header's Scan button, handed to the popup
+  const [scanEnabled, setScanEnabled] = useState(false);
   const [prospectAdded, setProspectAdded] = useState('');
   const [playerSearch, setPlayerSearch] = useState('');
   const [playerFiltersOpen, setPlayerFiltersOpen] = useState(false);
@@ -123,6 +125,10 @@ export default function LaunchCampaign() {
       setPdfBusy(false);
     }
   }
+
+  useEffect(() => {
+    api.getBadgeScanStatus().then((r) => setScanEnabled(!!r.enabled)).catch(() => {});
+  }, []);
 
   useEffect(() => {
     api.listCampaigns()
@@ -194,14 +200,32 @@ export default function LaunchCampaign() {
 
   return (
     <div>
-      <div className="page-header">
+      <div className="page-header launch-header">
         <div>
           <h1 className="page-title">Launch Campaign</h1>
           <p className="page-subtitle">Guests scan the QR code below to play from their own phone</p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
           <Badge tone={agentConnected ? 'green' : 'red'}>{agentConnected ? 'Wheel ready' : 'Wheel offline'}</Badge>
-          <Button variant="secondary" onClick={() => setShowNewProspect(true)} disabled={!campaign}>+ New prospect</Button>
+          {scanEnabled && campaign && (
+            // A label around a hidden file input, so one tap opens the camera
+            // directly (the browser only allows that from a real tap).
+            <label className="btn btn-secondary" style={{ cursor: 'pointer' }}>
+              📷 Scan badge
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                hidden
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  e.target.value = '';
+                  if (f) { setScanFile(f); setShowNewProspect(true); }
+                }}
+              />
+            </label>
+          )}
+          <Button variant="secondary" onClick={() => { setScanFile(null); setShowNewProspect(true); }} disabled={!campaign}>+ New prospect</Button>
           <Button onClick={() => setShowKiosk(true)} disabled={!campaign}>SPIN THE WHEEL</Button>
         </div>
       </div>
@@ -212,7 +236,7 @@ export default function LaunchCampaign() {
 
       {prospectAdded && (
         <div style={{ background: '#ECFDF5', border: '1px solid #6EE7B7', color: '#047857', borderRadius: 10, padding: '10px 16px', fontSize: 13, fontWeight: 600, marginBottom: 16 }}>
-          ✓ {prospectAdded} was added to the CRM.
+          ✓ {prospectAdded}
         </div>
       )}
 
@@ -420,10 +444,15 @@ export default function LaunchCampaign() {
       {showNewProspect && campaign && (
         <NewProspectModal
           campaign={campaign}
-          onClose={() => setShowNewProspect(false)}
-          onCreated={(name) => {
-            setProspectAdded(name || 'The prospect');
-            setTimeout(() => setProspectAdded(''), 5000);
+          initialFile={scanFile}
+          scanEnabled={scanEnabled}
+          onClose={() => { setShowNewProspect(false); setScanFile(null); }}
+          onCreated={({ name, queued, emailMissing }) => {
+            setProspectAdded(
+              `${name || 'The prospect'} was added to the CRM${queued ? ' and put in the queue' : ''}.` +
+              (emailMissing ? ' No email yet — add it from their card (their gift is held until then).' : '')
+            );
+            setTimeout(() => setProspectAdded(''), 8000);
           }}
         />
       )}

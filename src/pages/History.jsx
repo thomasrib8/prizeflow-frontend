@@ -4,6 +4,7 @@ import { api } from '../api/client';
 import { Card, Button, Badge, EmptyState, GiftPill } from '../components/ui';
 import ProspectCard from '../components/ProspectCard';
 import EmailStatusBadge from '../components/EmailStatusBadge';
+import { isPlaceholderEmail } from '../utils/placeholderEmail';
 
 // 'no_gift' (a guest who skipped or cancelled) and 'manual' (a prospect a
 // rep added by hand, never played) aren't real reward statuses — they're
@@ -83,9 +84,13 @@ export default function History() {
   const [filterSegments, setFilterSegments] = useState([]);
   const [filterNotes, setFilterNotes] = useState([]);
 
+  function reloadRewards() {
+    api.rewards().then(setRewards).catch(e => setError(e.message));
+  }
+
   useEffect(() => {
     api.distributions().then(setDistributions).catch(e => setError(e.message));
-    api.rewards().then(setRewards).catch(e => setError(e.message));
+    reloadRewards();
   }, []);
 
   const campaignOptions = useMemo(() => distinctValues(rewards || [], 'campaign_name'), [rewards]);
@@ -249,7 +254,11 @@ export default function History() {
                       )}
                     </td>
                     <td style={{ color: 'var(--text-muted)' }}>
-                      {r.email}
+                      {isPlaceholderEmail(r.email) ? (
+                        <span style={{ fontSize: 11, fontWeight: 700, color: '#B45309', background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: '1px 8px' }}>
+                          No email{r.gift_on_hold ? ' · gift on hold' : ''}
+                        </span>
+                      ) : r.email}
                       <EmailStatusBadge compact status={r.email_status} isCatchAll={r.email_is_catch_all} isDisposable={r.email_is_disposable} isRoleAccount={r.email_is_role_account} />
                     </td>
                     <td>{r.gift_name ? <GiftPill slotIndex={0} name={r.gift_name} /> : <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>No gift</span>}</td>
@@ -370,6 +379,7 @@ export default function History() {
           guest={prospectGuest}
           initialMode="view"
           onClose={() => setProspectGuest(null)}
+          onSaved={reloadRewards}
         />
       )}
 

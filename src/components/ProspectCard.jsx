@@ -3,6 +3,7 @@ import { api } from '../api/client';
 import { Button } from './ui';
 import DynamicFieldInput from './DynamicFieldInput';
 import EmailStatusBadge from './EmailStatusBadge';
+import { isPlaceholderEmail } from '../utils/placeholderEmail';
 
 // Chrome/Edge only (webkitSpeechRecognition) — Safari/Firefox don't support
 // live transcription, so the record button simply doesn't render there
@@ -45,6 +46,11 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
   const [guestFields, setGuestFields] = useState([]);
   const [guestAnswers, setGuestAnswers] = useState({});
   const [emailVerification, setEmailVerification] = useState(null);
+  const [pendingGift, setPendingGift] = useState(null); // { giftName } — won, but no email to send it to yet
+  const [consentInfo, setConsentInfo] = useState(null); // { attestedAt, attestedBy } for rep-added contacts
+  const emailMissing = isPlaceholderEmail(guest.email);
+  const [newEmail, setNewEmail] = useState('');
+  const [addingEmail, setAddingEmail] = useState(false);
   const [segmentCategories, setSegmentCategories] = useState([]);
 
   const [note, setNote] = useState('');
@@ -62,6 +68,8 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
         setGuestFields((campaign.fields || []).filter((f) => f.scope === 'guest'));
         setGuestAnswers(guestNote.guestAnswers || {});
         setEmailVerification(guestNote.emailVerification || null);
+        setPendingGift(guestNote.pendingGift || null);
+        setConsentInfo(guestNote.consent || null);
         setSegmentCategories(campaign.segmentCategories || []);
         setNote(guestNote.note || '');
         setLeadRating(guestNote.leadRating ?? null);
@@ -175,6 +183,24 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
     }
   }
 
+  // Swaps the placeholder for a real address everywhere it's used and sends
+  // the gift email that was being held back, if they already won. The card
+  // closes afterwards: it was opened under the old key, and the lists behind
+  // it refresh from onSaved.
+  async function handleAddEmail() {
+    setAddingEmail(true);
+    setError('');
+    try {
+      const res = await api.setProspectEmail({ campaignId, oldEmail: guest.email, newEmail });
+      onSaved?.();
+      onClose();
+      return res;
+    } catch (err) {
+      setError(err.message);
+      setAddingEmail(false);
+    }
+  }
+
   function handleCancelEdit() {
     if (initialMode === 'view') {
       load(); // discard unsaved changes, restore what's actually saved
@@ -205,7 +231,7 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
                 </div>
                 <div>
                   <div style={{ fontSize: 17, fontWeight: 800 }}>{displayName}</div>
-                  <div style={{ fontSize: 13, color: '#64748B' }}>{guest.email}
+                  <div style={{ fontSize: 13, color: '#64748B' }}>{emailMissing ? <em>No email yet</em> : guest.email}
                     <EmailStatusBadge status={emailVerification?.status} isCatchAll={emailVerification?.isCatchAll} isDisposable={emailVerification?.isDisposable} isRoleAccount={emailVerification?.isRoleAccount} /></div>
                 </div>
               </div>
@@ -223,6 +249,27 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
 
             <div style={{ borderTop: '1px solid #F1F5F9' }} />
 
+            {emailMissing && (
+              <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: 12, marginBottom: 14 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#92400E' }}>No email yet</div>
+                <div style={{ fontSize: 12, color: '#B45309', margin: '2px 0 8px' }}>
+                  {pendingGift
+                    ? `🎁 Their gift (${pendingGift.giftName}) is on hold — it will be emailed as soon as you add their address.`
+                    : "If they play, their gift is held until you add their address."}
+                </div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <input
+                    type="email"
+                    placeholder="name@company.com"
+                    value={newEmail}
+                    onChange={(e) => setNewEmail(e.target.value)}
+                    style={{ flex: 1, minWidth: 0, padding: '8px 10px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 14 }}
+                  />
+                  <Button type="button" disabled={addingEmail || !newEmail.trim()} onClick={handleAddEmail}>{addingEmail ? 'Saving…' : 'Add email'}</Button>
+                </div>
+              </div>
+            )}
+
             <div style={{ padding: '14px 0' }}>
               {guestFields.map((f) => (
                 <InfoRow key={`guest-${f.label}`} label={f.label} value={formatFieldValue(f, guestAnswers[f.label])} />
@@ -239,6 +286,9 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
                 fallback="Non évalué"
               />
               <InfoRow label="Tag" value={tags} />
+              {consentInfo && (
+                <InfoRow label="Consent" value={`Confirmed by ${consentInfo.attestedBy || 'sales rep'} · ${String(consentInfo.attestedAt).slice(0, 10)}`} />
+              )}
             </div>
 
             {note && (
@@ -257,10 +307,31 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
         ) : (
           <>
             <h3 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 800 }}>{displayName}</h3>
-            <p style={{ margin: '0 0 16px', fontSize: 13, color: '#64748B' }}>{guest.email}
+            <p style={{ margin: '0 0 16px', fontSize: 13, color: '#64748B' }}>{emailMissing ? <em>No email yet</em> : guest.email}
               <EmailStatusBadge status={emailVerification?.status} isCatchAll={emailVerification?.isCatchAll} isDisposable={emailVerification?.isDisposable} isRoleAccount={emailVerification?.isRoleAccount} /></p>
 
             {error && <div className="error-banner">{error}</div>}
+
+            {emailMissing && (
+              <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: 12, marginBottom: 14 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#92400E' }}>No email yet</div>
+                <div style={{ fontSize: 12, color: '#B45309', margin: '2px 0 8px' }}>
+                  {pendingGift
+                    ? `🎁 Their gift (${pendingGift.giftName}) is on hold — it will be emailed as soon as you add their address.`
+                    : "If they play, their gift is held until you add their address."}
+                </div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <input
+                    type="email"
+                    placeholder="name@company.com"
+                    value={newEmail}
+                    onChange={(e) => setNewEmail(e.target.value)}
+                    style={{ flex: 1, minWidth: 0, padding: '8px 10px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 14 }}
+                  />
+                  <Button type="button" disabled={addingEmail || !newEmail.trim()} onClick={handleAddEmail}>{addingEmail ? 'Saving…' : 'Add email'}</Button>
+                </div>
+              </div>
+            )}
 
             <div className="field">
               <label>Note</label>
