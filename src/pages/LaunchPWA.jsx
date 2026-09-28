@@ -76,7 +76,10 @@ export default function LaunchPWA() {
     <div className="pwa-shell">
       <header className="pwa-topbar">
         <div className="pwa-topbar-row">
-          <span className="pwa-brand">SPARK</span>
+          <div className="pwa-brand">
+            <img src="/pwa-brand-mark.svg" alt="" className="pwa-brand-logo" />
+            <span>SPARK</span>
+          </div>
           <button type="button" className="pwa-signout" onClick={() => { logout(); navigate('/login'); }}>Sign out</button>
         </div>
         <div className="pwa-topbar-row">

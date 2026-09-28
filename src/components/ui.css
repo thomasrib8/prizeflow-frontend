@@ -452,12 +452,13 @@ table.data-table tr:hover td { background: #FAFBFC; }
 .pwa-shell { max-width: 480px; margin: 0 auto; min-height: 100vh; background: #F8FAFC; padding-bottom: 40px; }
 .pwa-topbar {
   position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
-  background: #03041A; color: white; padding: 12px 16px calc(12px + env(safe-area-inset-top, 0px));
+  background: var(--navy); color: white; padding: 12px 16px calc(12px + env(safe-area-inset-top, 0px));
   padding-top: calc(12px + env(safe-area-inset-top, 0px));
   display: flex; flex-direction: column; gap: 10px;
 }
 .pwa-topbar-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.pwa-brand { font-size: 15px; font-weight: 800; letter-spacing: 0.04em; }
+.pwa-brand { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 800; letter-spacing: 0.04em; }
+.pwa-brand-logo { width: 22px; height: 22px; object-fit: contain; flex-shrink: 0; }
 .pwa-signout { background: none; border: none; color: #94A3B8; font-size: 12px; font-family: inherit; cursor: pointer; padding: 6px; }
 .pwa-campaign-name { font-size: 14px; font-weight: 700; color: white; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pwa-toast { margin: 12px 14px 0; background: #ECFDF5; border: 1px solid #6EE7B7; color: #047857; border-radius: 10px; padding: 10px 14px; font-size: 13px; font-weight: 600; }
