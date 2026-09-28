@@ -11,6 +11,10 @@ const SpeechRecognitionCtor =
 
 const STARS = [1, 2, 3];
 
+// A voice note stops on its own after this long without any speech, so a
+// rep who forgets to tap stop doesn't leave the mic open indefinitely.
+const SILENCE_TIMEOUT_MS = 8000;
+
 function formatFieldValue(field, raw) {
   if (raw == null || raw === '') return null;
   if (field.fieldType === 'multi_choice') return Array.isArray(raw) ? raw.join(', ') : raw;
@@ -34,6 +38,7 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
   const [saving, setSaving] = useState(false);
   const [recording, setRecording] = useState(false);
   const recognitionRef = useRef(null);
+  const silenceTimerRef = useRef(null);
 
   const [salesFields, setSalesFields] = useState([]);
   const [segmentCategories, setSegmentCategories] = useState([]);
@@ -63,40 +68,63 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
 
   useEffect(load, [campaignId, guest.email]);
 
+  function clearSilenceTimer() {
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current);
+      silenceTimerRef.current = null;
+    }
+  }
+
+  // Any sign of speech (interim or final) pushes the auto-stop back; only
+  // true silence for SILENCE_TIMEOUT_MS ends the recording on its own.
+  function armSilenceTimer() {
+    clearSilenceTimer();
+    silenceTimerRef.current = setTimeout(() => {
+      try { recognitionRef.current?.stop(); } catch { /* already stopped */ }
+    }, SILENCE_TIMEOUT_MS);
+  }
+
   useEffect(() => {
     if (!SpeechRecognitionCtor) return undefined;
     const rec = new SpeechRecognitionCtor();
     rec.continuous = true;
-    rec.interimResults = false;
+    // Interim results are only used as a "still talking" signal for the
+    // silence timer — just the final ones are appended to the note.
+    rec.interimResults = true;
     rec.lang = 'fr-FR';
     rec.onresult = (e) => {
+      armSilenceTimer();
       let transcript = '';
       for (let i = e.resultIndex; i < e.results.length; i++) {
-        transcript += e.results[i][0].transcript;
+        if (e.results[i].isFinal) transcript += e.results[i][0].transcript;
       }
       if (transcript.trim()) {
         setNote((prev) => (prev ? `${prev} ${transcript.trim()}` : transcript.trim()));
       }
     };
-    rec.onerror = () => setRecording(false);
-    rec.onend = () => setRecording(false);
+    rec.onspeechstart = armSilenceTimer;
+    rec.onerror = () => { clearSilenceTimer(); setRecording(false); };
+    rec.onend = () => { clearSilenceTimer(); setRecording(false); };
     recognitionRef.current = rec;
-    return () => { try { rec.stop(); } catch { /* already stopped */ } };
+    return () => { clearSilenceTimer(); try { rec.stop(); } catch { /* already stopped */ } };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function toggleRecording() {
+  function startRecording() {
     if (!recognitionRef.current) return;
-    if (recording) {
-      recognitionRef.current.stop();
-      setRecording(false);
-    } else {
-      try {
-        recognitionRef.current.start();
-        setRecording(true);
-      } catch {
-        // start() throws if already started (rapid double-click) — ignore
-      }
+    try {
+      recognitionRef.current.start();
+      setRecording(true);
+      armSilenceTimer();
+    } catch {
+      // start() throws if already started (rapid double-click) — ignore
     }
+  }
+
+  function stopRecording() {
+    clearSilenceTimer();
+    try { recognitionRef.current?.stop(); } catch { /* already stopped */ }
+    setRecording(false);
   }
 
   async function handleSave() {
@@ -215,18 +243,38 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
                 style={{ width: '100%', fontFamily: 'inherit', resize: 'vertical' }}
               />
               {SpeechRecognitionCtor && (
-                <button
-                  type="button"
-                  onClick={toggleRecording}
-                  style={{
-                    marginTop: 8, display: 'inline-flex', alignItems: 'center', gap: 6,
-                    background: recording ? '#EF4444' : '#F1F5F9', color: recording ? 'white' : '#334155',
-                    border: 'none', borderRadius: 20, padding: '6px 14px', fontSize: 12, fontWeight: 600,
-                    cursor: 'pointer', fontFamily: 'inherit',
-                  }}
-                >
-                  {recording ? '⏺ Recording… tap to stop' : '🎙 Record voice note'}
-                </button>
+                <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                  {recording ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={stopRecording}
+                        style={{
+                          display: 'inline-flex', alignItems: 'center', gap: 6, minHeight: 36,
+                          background: '#EF4444', color: 'white', border: 'none', borderRadius: 20,
+                          padding: '6px 16px', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+                        }}
+                      >
+                        ⏹ Stop
+                      </button>
+                      <span style={{ fontSize: 12, color: '#EF4444', fontWeight: 600 }}>
+                        ⏺ Recording… <span style={{ color: '#94A3B8', fontWeight: 500 }}>(stops after 8s of silence)</span>
+                      </span>
+                    </>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={startRecording}
+                      style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 6, minHeight: 36,
+                        background: '#F1F5F9', color: '#334155', border: 'none', borderRadius: 20,
+                        padding: '6px 14px', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+                      }}
+                    >
+                      🎙 Record voice note
+                    </button>
+                  )}
+                </div>
               )}
             </div>
 
