@@ -16,11 +16,28 @@ const SOCIAL_PLATFORMS = [
   { key: 'x', label: 'X', icon: '✖️' },
 ];
 
-const fullScreenBase = {
-  position: 'fixed', inset: 0, background: 'linear-gradient(160deg, #0055F8 0%, #266FF9 100%)',
+const fullScreenLayout = {
+  position: 'fixed', inset: 0,
   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
   zIndex: 50, gap: 24, padding: '0 24px', textAlign: 'center',
 };
+
+const fullScreenBase = {
+  ...fullScreenLayout,
+  background: 'linear-gradient(160deg, #0055F8 0%, #266FF9 100%)',
+};
+
+// The live queue screen is deliberately a traffic light: red = you have to
+// wait, green = you can spin. Solid colors (not gradients) so the change
+// between them can be a smooth CSS transition — gradients can't be
+// transitioned — with a constant soft highlight layered on top for depth.
+const QUEUE_COLORS = { waiting: '#DC2626', active: '#16A34A' };
+const queueScreenStyle = (state) => ({
+  ...fullScreenLayout,
+  backgroundColor: QUEUE_COLORS[state],
+  backgroundImage: 'radial-gradient(circle at 50% 28%, rgba(255,255,255,0.20), rgba(255,255,255,0) 62%)',
+  transition: 'background-color 0.6s ease',
+});
 
 const SWIPE_CLOSE_THRESHOLD = 80; // px a 3-finger touch must travel downward to close
 
@@ -216,47 +233,79 @@ export default function GuestFlowScreen({
       );
     }
 
-    if (status.status === 'waiting') {
+    // Waiting (red) and active (green) share ONE wrapper element on
+    // purpose — same type, same position, same key — so React keeps the
+    // DOM node alive across the status change and the background color
+    // actually animates instead of the whole screen being swapped out.
+    if (status.status === 'waiting' || status.status === 'active') {
+      const isWaiting = status.status === 'waiting';
       return (
-        <div style={fullScreenBase} key="waiting">
+        <div style={queueScreenStyle(status.status)} key="queue-live">
           {cornerCloseZone}
-          <div style={{ color: 'white', fontSize: 20, fontWeight: 800, maxWidth: 420 }}>
-            You're #{status.position + 1} in line
-          </div>
-          <div style={{ color: '#90DCFE', fontSize: 14, fontWeight: 600 }}>
-            {status.activeFirstName
-              ? `${status.activeFirstName} is currently playing`
-              : 'You will be notified when it\'s your turn'}
-          </div>
-        </div>
-      );
-    }
+          <style>{`
+            @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+            @keyframes turnPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+            @keyframes queueFadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+          `}</style>
 
-    if (status.status === 'active') {
-      return (
-        <div style={fullScreenBase} key="active">
-          {cornerCloseZone}
-          {status.retryMessage && RETRY_MESSAGES[status.retryMessage] && (
-            <div style={{ fontSize: 13, color: '#FCA5A5', background: 'rgba(239,68,68,0.15)', padding: '8px 16px', borderRadius: 20, maxWidth: 420 }}>
-              {RETRY_MESSAGES[status.retryMessage]}
-            </div>
-          )}
-          {!status.launched ? (
-            <div style={{ color: 'white', fontSize: 22, fontWeight: 800, maxWidth: 420, lineHeight: 1.4 }}>
-              Spin the wheel to claim your prize!
+          {isWaiting ? (
+            <div key="waiting-content" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20, animation: 'queueFadeIn 0.4s ease' }}>
+              <img
+                src="/stop-hand.svg"
+                alt="Stop"
+                style={{ width: 'min(52vw, 220px)', height: 'auto', filter: 'drop-shadow(0 14px 28px rgba(0,0,0,0.30))' }}
+              />
+              <div style={{ color: 'white', fontSize: 'clamp(30px, 8vw, 46px)', fontWeight: 900, letterSpacing: '-0.02em', lineHeight: 1.1, maxWidth: 480 }}>
+                Wait for your turn!
+              </div>
+              <div style={{ color: 'white', fontSize: 'clamp(18px, 5vw, 24px)', fontWeight: 700, maxWidth: 420, lineHeight: 1.35, textWrap: 'balance' }}>
+                You are number <span style={{ background: 'rgba(0,0,0,0.25)', padding: '2px 12px', borderRadius: 10, whiteSpace: 'nowrap' }}>#{status.position + 1}</span> in the queue
+              </div>
+              <div style={{ color: 'rgba(255,255,255,0.85)', fontSize: 14, fontWeight: 500, maxWidth: 360, lineHeight: 1.5 }}>
+                {status.activeFirstName ? `${status.activeFirstName} is currently playing. ` : ''}
+                Keep this screen open — it will turn green when it's your turn.
+              </div>
             </div>
           ) : (
-            <>
-              <img src="/logo-menu.svg" alt="" style={{ width: 84, height: 84, animation: 'spin 1.2s linear infinite' }} />
-              <div style={{ color: '#90DCFE', fontSize: 15, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-                Please wait…
-              </div>
-              <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
-            </>
+            <div key="active-content" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20, animation: 'queueFadeIn 0.4s ease' }}>
+              {status.retryMessage && RETRY_MESSAGES[status.retryMessage] && (
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'white', background: 'rgba(0,0,0,0.28)', padding: '10px 18px', borderRadius: 20, maxWidth: 420, lineHeight: 1.4 }}>
+                  {RETRY_MESSAGES[status.retryMessage]}
+                </div>
+              )}
+              {!status.launched ? (
+                <>
+                  <div style={{ color: 'white', fontSize: 'clamp(22px, 6vw, 32px)', fontWeight: 800, letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+                    It's your turn!
+                  </div>
+                  <div style={{
+                    color: 'white', fontSize: 'clamp(48px, 15vw, 104px)', fontWeight: 900, letterSpacing: '-0.03em',
+                    lineHeight: 1.0, textTransform: 'uppercase', maxWidth: 720, textShadow: '0 6px 24px rgba(0,0,0,0.25)',
+                    animation: 'turnPulse 1.4s ease-in-out infinite',
+                  }}>
+                    Spin the wheel
+                  </div>
+                </>
+              ) : (
+                <>
+                  <img src="/logo-menu.svg" alt="" style={{ width: 84, height: 84, animation: 'spin 1.2s linear infinite' }} />
+                  <div style={{ color: 'white', fontSize: 16, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                    Please wait…
+                  </div>
+                </>
+              )}
+            </div>
           )}
         </div>
       );
     }
+  }
+
+  // Joined but the first status poll hasn't come back yet (or a resumed
+  // session is still being looked up) — without this the form below would
+  // flash for a moment right after submitting.
+  if (view === 'queue') {
+    return <div style={fullScreenBase}>{cornerCloseZone}<div style={{ color: 'white' }}>Loading…</div></div>;
   }
 
   // ── Form ────────────────────────────────────────────────────────────────
