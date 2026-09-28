@@ -7,6 +7,29 @@ const POLL_INTERVAL_MS = 1500;
 // like everything else beyond the three fixed firstName/lastName/email.
 const EMPTY_FORM = { firstName: '', lastName: '', email: '', consent: false, customFields: {} };
 
+// One random id per browser, reused across every campaign this browser ever
+// plays — hardens the backend's "already played" guard (guestQueue.js's
+// hasAlreadyPlayed) beyond email matching alone, which iOS's "Hide My Email"
+// autofill (a fresh random relay address per submission) or simple retyping
+// can both slip past. Deliberately global (not per-token/campaign) since the
+// backend already scopes its own check to one campaign at a time. Not
+// device-proof — Private Browsing or clearing site data resets it just like
+// it already resets the session-resume token below — but it closes the much
+// more common "same normal tab, different email" case.
+const DEVICE_ID_KEY = 'prizeflow_guest_device_id';
+function getOrCreateDeviceId() {
+  try {
+    let id = localStorage.getItem(DEVICE_ID_KEY);
+    if (!id) {
+      id = (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`);
+      localStorage.setItem(DEVICE_ID_KEY, id);
+    }
+    return id;
+  } catch (e) {
+    return null; // localStorage unavailable (Private Browsing in some browsers, storage disabled) — join still works, just without this extra guard
+  }
+}
+
 /// Shared logic behind the guest queue experience — used both by the public
 /// per-guest page (Guest.jsx, one phone = one session, persisted so a re-scan
 /// resumes) and the staff-triggered kiosk overlay (LaunchCampaign.jsx, one
@@ -111,7 +134,7 @@ export function useGuestFlow({ token, persistSession = false, autoReturnMs = nul
     setBusy(true);
     setError('');
     try {
-      const res = await api.joinGuestQueue(token, { ...form, source });
+      const res = await api.joinGuestQueue(token, { ...form, source, deviceId: getOrCreateDeviceId() });
       if (persistSession) localStorage.setItem(storageKey, res.sessionToken);
       sessionTokenRef.current = res.sessionToken;
       setStatus(null);
