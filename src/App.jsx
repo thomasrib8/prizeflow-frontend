@@ -13,6 +13,7 @@ import EditCampaign from './pages/EditCampaign';
 import EditCampaignSettings from './pages/EditCampaignSettings';
 import CampaignDetail from './pages/CampaignDetail';
 import LaunchCampaign from './pages/LaunchCampaign';
+import LaunchPWA from './pages/LaunchPWA';
 import Guest from './pages/Guest';
 import RedeemPage from './pages/RedeemPage';
 import Rewards from './pages/Rewards';
@@ -54,6 +55,12 @@ export default function App() {
               wrapped in PrivateRoute: it's its own full-screen page (not the
               app shell) that redirects to /login itself if not signed in. */}
           <Route path="/redeem/:code" element={<RedeemPage />} />
+          {/* The installable sales-rep shell (see LaunchPWA.jsx) — its own
+              full-screen page, not the sidebar app shell, and not wrapped in
+              PrivateRoute: it gates and redirects to /login itself (same
+              pattern as /redeem/:code above) so "Add to Home Screen" from
+              here opens straight into this page, never the sidebar. */}
+          <Route path="/pwa" element={<LaunchPWA />} />
           <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
           <Route path="/campaigns" element={<PrivateRoute><Campaigns /></PrivateRoute>} />
           <Route path="/campaigns/new" element={<PrivateRoute><NewCampaign /></PrivateRoute>} />

@@ -1,44 +1,14 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
 import { api } from '../api/client';
 import { Card, Badge, Button, EmptyState } from '../components/ui';
 import { useWheelSocket } from '../hooks/useWheelSocket';
 import { useGuestFlow } from '../hooks/useGuestFlow';
+import { useLaunchQueue, toggleValue } from '../hooks/useLaunchQueue';
 import GuestFlowScreen from '../components/GuestFlowScreen';
 import ProspectCard from '../components/ProspectCard';
 import NewProspectModal from '../components/NewProspectModal';
-
-const POLL_INTERVAL_MS = 2000;
-
-// Distinct, non-empty values for a field across the recent-players list,
-// used to populate the filter popup's checkboxes — same pattern as
-// History.jsx's CRM table, kept local since this list is a small, separate
-// widget rather than sharing state with the full CRM page.
-function distinctValues(rows, key) {
-  return [...new Set(rows.map((r) => r[key]).filter((v) => v != null && v !== ''))].sort();
-}
-
-function toggleValue(list, value) {
-  return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
-}
-
-// One checkbox group inside the filter popup — same pattern as History.jsx's.
-function FilterGroup({ title, options, selected, onToggle }) {
-  if (options.length === 0) return null;
-  return (
-    <div style={{ marginBottom: 18 }}>
-      <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', marginBottom: 8 }}>{title}</div>
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
-        {options.map((opt) => (
-          <label key={opt} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, cursor: 'pointer', minHeight: 40, padding: '4px 0' }}>
-            <input type="checkbox" checked={selected.includes(opt)} onChange={() => onToggle(opt)} style={{ width: 18, height: 18, flexShrink: 0 }} />
-            {opt}
-          </label>
-        ))}
-      </div>
-    </div>
-  );
-}
+import FilterGroup from '../components/FilterGroup';
 
 // A shared tablet cycles through walk-up guests one after another, so unlike
 // the personal-phone guest page: never persist the session, and auto-return
@@ -67,135 +37,48 @@ function KioskOverlay({ token, onClose }) {
 // active — each campaign has its own token (so guests from a past campaign
 // never collide with a new one) — plus a "Spin the wheel" button that opens
 // the same guest flow full-screen on this device, for walk-up guests without
-// a phone.
+// a phone. See LaunchPWA.jsx for the phone-only, QR-less equivalent meant to
+// be installed as its own home-screen app for a sales rep.
 export default function LaunchCampaign() {
   const { agentConnected } = useWheelSocket();
+  const q = useLaunchQueue();
   const [qrDataUrl, setQrDataUrl] = useState(null);
   const [guestUrl, setGuestUrl] = useState('');
-  const [campaign, setCampaign] = useState(undefined); // undefined while loading, null if none active
-  const [error, setError] = useState('');
-  const [queue, setQueue] = useState(null);
   const [showKiosk, setShowKiosk] = useState(false);
   const [pdfBusy, setPdfBusy] = useState(false);
-  const [recentPlayers, setRecentPlayers] = useState(null);
-  const [noteGuest, setNoteGuest] = useState(null); // { email, firstName, lastName, note?, leadRating?, segment? } | null
-  const [queueActionBusy, setQueueActionBusy] = useState(false);
+  const [noteGuest, setNoteGuest] = useState(null); // { email, firstName, lastName } | null
   const [showNewProspect, setShowNewProspect] = useState(false);
   const [scanFile, setScanFile] = useState(null); // photo taken from the header's Scan button, handed to the popup
-  const [scanEnabled, setScanEnabled] = useState(false);
   const [prospectAdded, setProspectAdded] = useState('');
-  const [playerSearch, setPlayerSearch] = useState('');
   const [playerFiltersOpen, setPlayerFiltersOpen] = useState(false);
-  const [playerFilterGifts, setPlayerFilterGifts] = useState([]);
-  const [playerFilterSegments, setPlayerFilterSegments] = useState([]);
 
-  const playerGiftOptions = useMemo(() => distinctValues(recentPlayers || [], 'gift_name'), [recentPlayers]);
-  const playerSegmentOptions = useMemo(() => distinctValues(recentPlayers || [], 'segment'), [recentPlayers]);
-  const playerActiveFilterCount = playerFilterGifts.length + playerFilterSegments.length;
-
-  const filteredRecentPlayers = useMemo(() => {
-    if (!recentPlayers) return recentPlayers;
-    const q = playerSearch.trim().toLowerCase();
-    return recentPlayers.filter((p) => {
-      if (playerFilterGifts.length && !playerFilterGifts.includes(p.gift_name)) return false;
-      if (playerFilterSegments.length && !playerFilterSegments.includes(p.segment)) return false;
-      if (!q) return true;
-      const haystack = [p.first_name, p.last_name, p.email, p.gift_name, p.segment, p.note].filter(Boolean).join(' ').toLowerCase();
-      return haystack.includes(q);
-    });
-  }, [recentPlayers, playerSearch, playerFilterGifts, playerFilterSegments]);
+  useEffect(() => {
+    if (!q.campaign) return;
+    const url = `${window.location.origin}/play/${q.campaign.public_token}`;
+    setGuestUrl(url);
+    QRCode.toDataURL(url, { width: 320, margin: 1 }).then(setQrDataUrl).catch((e) => q.setError(e.message));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [q.campaign?.id]);
 
   function handleDownloadPng() {
-    if (!qrDataUrl || !campaign) return;
+    if (!qrDataUrl || !q.campaign) return;
     const a = document.createElement('a');
     a.href = qrDataUrl;
-    a.download = `${campaign.id}-qr.png`;
+    a.download = `${q.campaign.id}-qr.png`;
     a.click();
   }
 
   async function handleDownloadPdf() {
-    if (!campaign) return;
+    if (!q.campaign) return;
     setPdfBusy(true);
-    setError('');
+    q.setError('');
     try {
-      await api.downloadCampaignQrPdf(campaign.id);
+      await api.downloadCampaignQrPdf(q.campaign.id);
     } catch (e) {
-      setError(e.message);
+      q.setError(e.message);
     } finally {
       setPdfBusy(false);
     }
-  }
-
-  useEffect(() => {
-    api.getBadgeScanStatus().then((r) => setScanEnabled(!!r.enabled)).catch(() => {});
-  }, []);
-
-  useEffect(() => {
-    api.listCampaigns()
-      .then((rows) => {
-        const active = rows.find((c) => c.status === 'active') || null;
-        if (!active) { setCampaign(null); return null; }
-        // The list endpoint doesn't include segments (see routes/campaigns.js)
-        // — fetch the full campaign once we know which one is active.
-        return api.getCampaign(active.id).then((full) => {
-          setCampaign(full);
-          const url = `${window.location.origin}/play/${full.public_token}`;
-          setGuestUrl(url);
-          return QRCode.toDataURL(url, { width: 320, margin: 1 });
-        });
-      })
-      .then((dataUrl) => { if (dataUrl) setQrDataUrl(dataUrl); })
-      .catch((e) => setError(e.message));
-  }, []);
-
-  function loadRecentPlayers(campaignId) {
-    api.getRecentPlayers(campaignId).then(setRecentPlayers).catch(() => {});
-  }
-
-  useEffect(() => {
-    if (!campaign) return undefined;
-    let cancelled = false;
-    async function poll() {
-      try {
-        const res = await api.getGuestQueueSnapshot(campaign.id);
-        if (!cancelled) setQueue(res);
-      } catch {
-        // transient network hiccup — just try again next tick
-      }
-      if (!cancelled) loadRecentPlayers(campaign.id);
-    }
-    poll();
-    const t = setInterval(poll, POLL_INTERVAL_MS);
-    return () => { cancelled = true; clearInterval(t); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [campaign?.id]);
-
-  async function handleCancelPlayer() {
-    if (!campaign || queueActionBusy) return;
-    setQueueActionBusy(true);
-    try {
-      await api.cancelActivePlayer(campaign.id);
-    } catch (e) {
-      setError(e.message);
-    } finally {
-      setQueueActionBusy(false);
-    }
-  }
-
-  async function handleSkipPlayer() {
-    if (!campaign || queueActionBusy) return;
-    setQueueActionBusy(true);
-    try {
-      await api.skipActivePlayer(campaign.id);
-    } catch (e) {
-      setError(e.message);
-    } finally {
-      setQueueActionBusy(false);
-    }
-  }
-
-  function handleNoteSaved() {
-    if (campaign) loadRecentPlayers(campaign.id);
   }
 
   return (
@@ -207,7 +90,7 @@ export default function LaunchCampaign() {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
           <Badge tone={agentConnected ? 'green' : 'red'}>{agentConnected ? 'Wheel ready' : 'Wheel offline'}</Badge>
-          {scanEnabled && campaign && (
+          {q.scanEnabled && q.campaign && (
             // A label around a hidden file input, so one tap opens the camera
             // directly (the browser only allows that from a real tap).
             <label className="btn btn-secondary" style={{ cursor: 'pointer' }}>
@@ -225,14 +108,14 @@ export default function LaunchCampaign() {
               />
             </label>
           )}
-          <Button variant="secondary" onClick={() => { setScanFile(null); setShowNewProspect(true); }} disabled={!campaign}>+ New prospect</Button>
-          <Button onClick={() => setShowKiosk(true)} disabled={!campaign}>SPIN THE WHEEL</Button>
+          <Button variant="secondary" onClick={() => { setScanFile(null); setShowNewProspect(true); }} disabled={!q.campaign}>+ New prospect</Button>
+          <Button onClick={() => setShowKiosk(true)} disabled={!q.campaign}>SPIN THE WHEEL</Button>
         </div>
       </div>
 
-      {showKiosk && campaign && <KioskOverlay token={campaign.public_token} onClose={() => setShowKiosk(false)} />}
+      {showKiosk && q.campaign && <KioskOverlay token={q.campaign.public_token} onClose={() => setShowKiosk(false)} />}
 
-      {error && <div className="error-banner">{error}</div>}
+      {q.error && <div className="error-banner">{q.error}</div>}
 
       {prospectAdded && (
         <div style={{ background: '#ECFDF5', border: '1px solid #6EE7B7', color: '#047857', borderRadius: 10, padding: '10px 16px', fontSize: 13, fontWeight: 600, marginBottom: 16 }}>
@@ -240,13 +123,13 @@ export default function LaunchCampaign() {
         </div>
       )}
 
-      {campaign === null && (
+      {q.campaign === null && (
         <Card className="mt-card">
           <EmptyState title="No campaign is currently active" description="Start one from the Campaigns page to get its QR code." />
         </Card>
       )}
 
-      {campaign !== null && (
+      {q.campaign !== null && (
       <div className="qr-layout">
         <Card title="Guest QR code">
           <div style={{ textAlign: 'center', padding: '12px 0' }}>
@@ -258,8 +141,8 @@ export default function LaunchCampaign() {
             {guestUrl && (
               <p style={{ fontSize: 12, color: '#94A3B8', marginTop: 12, wordBreak: 'break-all' }}>{guestUrl}</p>
             )}
-            {campaign && (
-              <p style={{ fontSize: 12, color: '#94A3B8', marginTop: 4 }}>Campaign: {campaign.name}</p>
+            {q.campaign && (
+              <p style={{ fontSize: 12, color: '#94A3B8', marginTop: 4 }}>Campaign: {q.campaign.name}</p>
             )}
             {qrDataUrl && (
               <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 16 }}>
@@ -273,57 +156,57 @@ export default function LaunchCampaign() {
         </Card>
 
         <Card title="Live queue">
-          {!queue && <p className="page-subtitle">Loading…</p>}
-          {queue && (
+          {!q.queue && <p className="page-subtitle">Loading…</p>}
+          {q.queue && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
               <div>
                 <div style={{ fontSize: 11, fontWeight: 700, color: '#64748B', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: 8 }}>
                   Currently playing
                 </div>
-                {queue.active ? (
+                {q.queue.active ? (
                   <div>
                     <div style={{ fontSize: 15, fontWeight: 600, color: '#03041A' }}>
                       <button
                         type="button"
-                        onClick={() => setNoteGuest({ email: queue.active.email, firstName: queue.active.firstName, lastName: queue.active.lastName })}
+                        onClick={() => setNoteGuest({ email: q.queue.active.email, firstName: q.queue.active.firstName, lastName: q.queue.active.lastName })}
                         style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', fontWeight: 600, color: '#002881', textDecoration: 'underline', cursor: 'pointer' }}
                       >
-                        {queue.active.firstName}
+                        {q.queue.active.firstName}
                       </button>
-                      {' '}— {queue.active.launched ? 'spinning…' : 'waiting to spin'}
-                      {queue.active.retryMessage && (
-                        <span style={{ marginLeft: 10, fontSize: 12, color: '#EF4444' }}>({queue.active.retryMessage})</span>
+                      {' '}— {q.queue.active.launched ? 'spinning…' : 'waiting to spin'}
+                      {q.queue.active.retryMessage && (
+                        <span style={{ marginLeft: 10, fontSize: 12, color: '#EF4444' }}>({q.queue.active.retryMessage})</span>
                       )}
                     </div>
                     {/* The gift order is predetermined (see sequence.js) — the
                         wheel only announces it, so staff can see it before the
                         spin happens. */}
-                    {queue.active.giftName && (
+                    {q.queue.active.giftName && (
                       <div style={{ fontSize: 13, color: '#64748B', marginTop: 2 }}>
-                        Will win: <strong style={{ color: '#0055F8' }}>{queue.active.giftName}</strong>
+                        Will win: <strong style={{ color: '#0055F8' }}>{q.queue.active.giftName}</strong>
                       </div>
                     )}
                     <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
                       <button
                         type="button"
-                        disabled={queueActionBusy}
-                        onClick={handleSkipPlayer}
+                        disabled={q.queueActionBusy}
+                        onClick={q.handleSkipPlayer}
                         style={{
                           background: '#F59E0B', color: 'white', border: 'none', borderRadius: 8,
-                          padding: '13px 16px', minHeight: 44, fontSize: 13, fontWeight: 700, cursor: queueActionBusy ? 'not-allowed' : 'pointer',
-                          fontFamily: 'inherit', opacity: queueActionBusy ? 0.6 : 1,
+                          padding: '13px 16px', minHeight: 44, fontSize: 13, fontWeight: 700, cursor: q.queueActionBusy ? 'not-allowed' : 'pointer',
+                          fontFamily: 'inherit', opacity: q.queueActionBusy ? 0.6 : 1,
                         }}
                       >
                         Passer le joueur
                       </button>
                       <button
                         type="button"
-                        disabled={queueActionBusy}
-                        onClick={handleCancelPlayer}
+                        disabled={q.queueActionBusy}
+                        onClick={q.handleCancelPlayer}
                         style={{
                           background: '#EF4444', color: 'white', border: 'none', borderRadius: 8,
-                          padding: '13px 16px', minHeight: 44, fontSize: 13, fontWeight: 700, cursor: queueActionBusy ? 'not-allowed' : 'pointer',
-                          fontFamily: 'inherit', opacity: queueActionBusy ? 0.6 : 1,
+                          padding: '13px 16px', minHeight: 44, fontSize: 13, fontWeight: 700, cursor: q.queueActionBusy ? 'not-allowed' : 'pointer',
+                          fontFamily: 'inherit', opacity: q.queueActionBusy ? 0.6 : 1,
                         }}
                       >
                         Annuler le joueur
@@ -337,13 +220,13 @@ export default function LaunchCampaign() {
 
               <div>
                 <div style={{ fontSize: 11, fontWeight: 700, color: '#64748B', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: 8 }}>
-                  Waiting ({queue.waiting.length})
+                  Waiting ({q.queue.waiting.length})
                 </div>
-                {queue.waiting.length === 0 ? (
+                {q.queue.waiting.length === 0 ? (
                   <p className="page-subtitle" style={{ margin: 0 }}>No one in line</p>
                 ) : (
                   <ol style={{ margin: 0, paddingLeft: 20, fontSize: 14, color: '#334155' }}>
-                    {queue.waiting.map((w, i) => <li key={i}>{w.firstName}</li>)}
+                    {q.queue.waiting.map((w, i) => <li key={i}>{w.firstName}</li>)}
                   </ol>
                 )}
               </div>
@@ -352,11 +235,11 @@ export default function LaunchCampaign() {
                 <div style={{ fontSize: 11, fontWeight: 700, color: '#64748B', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: 8 }}>
                   Recent results
                 </div>
-                {queue.recentCompleted.length === 0 ? (
+                {q.queue.recentCompleted.length === 0 ? (
                   <p className="page-subtitle" style={{ margin: 0 }}>No spins yet</p>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    {queue.recentCompleted.map((r, i) => (
+                    {q.queue.recentCompleted.map((r, i) => (
                       <div key={i} style={{ fontSize: 13, color: '#334155' }}>
                         <strong>{r.firstName}</strong> — {r.isTest ? r.giftName : 'reward sent by email'}
                       </div>
@@ -370,36 +253,36 @@ export default function LaunchCampaign() {
       </div>
       )}
 
-      {campaign !== null && (
+      {q.campaign !== null && (
         <Card title="Last 20 players" className="mt-card">
           <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 12px' }}>
             Click a name to add or edit a note, lead rating, or customer segment for them.
           </p>
-          {recentPlayers && recentPlayers.length > 0 && (
+          {q.recentPlayers && q.recentPlayers.length > 0 && (
             <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 14 }}>
               <input
                 placeholder="Search by name, email, gift, segment or note…"
-                value={playerSearch}
-                onChange={(e) => setPlayerSearch(e.target.value)}
+                value={q.playerSearch}
+                onChange={(e) => q.setPlayerSearch(e.target.value)}
                 style={{ flex: 1, padding: '9px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13 }}
               />
               <Button variant="secondary" onClick={() => setPlayerFiltersOpen(true)} style={{ flexShrink: 0, whiteSpace: 'nowrap' }}>
-                Filters{playerActiveFilterCount > 0 ? ` (${playerActiveFilterCount})` : ''}
+                Filters{q.playerActiveFilterCount > 0 ? ` (${q.playerActiveFilterCount})` : ''}
               </Button>
             </div>
           )}
-          {!recentPlayers && <p className="page-subtitle">Loading…</p>}
-          {recentPlayers && recentPlayers.length === 0 && <p className="page-subtitle">No players yet.</p>}
-          {recentPlayers && recentPlayers.length > 0 && filteredRecentPlayers.length === 0 && (
+          {!q.recentPlayers && <p className="page-subtitle">Loading…</p>}
+          {q.recentPlayers && q.recentPlayers.length === 0 && <p className="page-subtitle">No players yet.</p>}
+          {q.recentPlayers && q.recentPlayers.length > 0 && q.filteredRecentPlayers.length === 0 && (
             <p className="page-subtitle">No players match your search or filters.</p>
           )}
-          {recentPlayers && filteredRecentPlayers.length > 0 && (
+          {q.recentPlayers && q.filteredRecentPlayers.length > 0 && (
             <table className="data-table">
               <thead>
                 <tr><th>Name</th><th>Gift</th><th>Segment</th><th>Lead</th><th>Note</th></tr>
               </thead>
               <tbody>
-                {filteredRecentPlayers.map((p) => (
+                {q.filteredRecentPlayers.map((p) => (
                   <tr key={p.rewardId} style={{ cursor: 'pointer' }} onClick={() => setNoteGuest({
                     email: p.email, firstName: p.first_name, lastName: p.last_name,
                   })}>
@@ -429,29 +312,29 @@ export default function LaunchCampaign() {
           <div className="modal-card">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>Filters</h3>
-              {playerActiveFilterCount > 0 && (
+              {q.playerActiveFilterCount > 0 && (
                 <button
-                  onClick={() => { setPlayerFilterGifts([]); setPlayerFilterSegments([]); }}
+                  onClick={() => { q.setPlayerFilterGifts([]); q.setPlayerFilterSegments([]); }}
                   style={{ background: 'none', border: 'none', padding: 0, color: 'var(--link)', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
                 >Clear all</button>
               )}
             </div>
 
-            <FilterGroup title="Gift" options={playerGiftOptions} selected={playerFilterGifts}
-              onToggle={(v) => setPlayerFilterGifts(toggleValue(playerFilterGifts, v))} />
-            <FilterGroup title="Segment" options={playerSegmentOptions} selected={playerFilterSegments}
-              onToggle={(v) => setPlayerFilterSegments(toggleValue(playerFilterSegments, v))} />
+            <FilterGroup title="Gift" options={q.playerGiftOptions} selected={q.playerFilterGifts}
+              onToggle={(v) => q.setPlayerFilterGifts(toggleValue(q.playerFilterGifts, v))} />
+            <FilterGroup title="Segment" options={q.playerSegmentOptions} selected={q.playerFilterSegments}
+              onToggle={(v) => q.setPlayerFilterSegments(toggleValue(q.playerFilterSegments, v))} />
 
             <Button onClick={() => setPlayerFiltersOpen(false)} style={{ marginTop: 4 }}>Done</Button>
           </div>
         </div>
       )}
 
-      {showNewProspect && campaign && (
+      {showNewProspect && q.campaign && (
         <NewProspectModal
-          campaign={campaign}
+          campaign={q.campaign}
           initialFile={scanFile}
-          scanEnabled={scanEnabled}
+          scanEnabled={q.scanEnabled}
           onClose={() => { setShowNewProspect(false); setScanFile(null); }}
           onCreated={({ name, queued, emailMissing }) => {
             setProspectAdded(
@@ -463,13 +346,13 @@ export default function LaunchCampaign() {
         />
       )}
 
-      {noteGuest && campaign && (
+      {noteGuest && q.campaign && (
         <ProspectCard
-          campaignId={campaign.id}
+          campaignId={q.campaign.id}
           guest={noteGuest}
           initialMode="edit"
           onClose={() => setNoteGuest(null)}
-          onSaved={handleNoteSaved}
+          onSaved={q.handleNoteSaved}
         />
       )}
     </div>

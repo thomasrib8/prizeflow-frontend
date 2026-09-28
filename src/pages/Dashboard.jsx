@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/client';
-import { Badge, EmptyState, GiftPill, MiniBar } from '../components/ui';
+import { Badge, Button, EmptyState, GiftPill, MiniBar } from '../components/ui';
+import DownloadAppModal from '../components/DownloadAppModal';
 import { useAdmin } from '../hooks/useAdmin';
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis,
@@ -96,6 +97,7 @@ export default function Dashboard() {
   const [chartFilter, setChartFilter] = useState('7D');
   const [campaigns, setCampaigns] = useState([]);
   const [campaignId, setCampaignId] = useState('all');
+  const [showDownloadApp, setShowDownloadApp] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -137,7 +139,8 @@ export default function Dashboard() {
               : (campaign ? campaign.name : 'Campaign not found')}
           </p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          <Button variant="secondary" onClick={() => setShowDownloadApp(true)}>Télécharger l'app</Button>
           <select
             value={campaignId}
             onChange={(e) => setCampaignId(e.target.value)}
@@ -149,6 +152,8 @@ export default function Dashboard() {
           {campaign && <Badge tone={CAMPAIGN_STATUS_TONE[campaign.status] || 'neutral'}>{campaign.status}</Badge>}
         </div>
       </div>
+
+      {showDownloadApp && <DownloadAppModal onClose={() => setShowDownloadApp(false)} />}
 
       {/* Lead-gen KPIs — what SPARK is actually meant to measure: not just
           what was given away, but who was captured and how promising they are. */}
