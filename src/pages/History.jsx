@@ -4,7 +4,12 @@ import { api } from '../api/client';
 import { Card, Button, Badge, EmptyState, GiftPill } from '../components/ui';
 import ProspectCard from '../components/ProspectCard';
 
-const REWARD_TONE = { active: 'blue', redeemed: 'green', expired: 'orange', cancelled: 'red' };
+// 'no_gift' isn't a real reward status — it's a guest who skipped or
+// cancelled instead of finishing their turn, kept in the CRM as a lead
+// anyway (see routes/history.js's GET /rewards). Every other value here is
+// a genuine rewards.status.
+const REWARD_TONE = { active: 'blue', redeemed: 'green', expired: 'orange', cancelled: 'red', no_gift: 'neutral' };
+const STATUS_LABELS = { no_gift: 'No gift' };
 const NOTE_OPTIONS = [
   { value: 'with', label: 'With note' },
   { value: 'without', label: 'Without note' },
@@ -15,6 +20,10 @@ const NOTE_OPTIONS = [
 // occur in the data, never a stale hardcoded list.
 function distinctValues(rows, key) {
   return [...new Set(rows.map((r) => r[key]).filter((v) => v != null && v !== ''))].sort();
+}
+
+function distinctStatusOptions(rows) {
+  return distinctValues(rows, 'status').map((v) => ({ value: v, label: STATUS_LABELS[v] || v }));
 }
 
 function toggleValue(list, value) {
@@ -78,7 +87,7 @@ export default function History() {
 
   const campaignOptions = useMemo(() => distinctValues(rewards || [], 'campaign_name'), [rewards]);
   const giftOptions = useMemo(() => distinctValues(rewards || [], 'gift_name'), [rewards]);
-  const statusOptions = useMemo(() => distinctValues(rewards || [], 'status'), [rewards]);
+  const statusOptions = useMemo(() => distinctStatusOptions(rewards || []), [rewards]);
   const segmentOptions = useMemo(() => distinctValues(rewards || [], 'segment'), [rewards]);
 
   const activeFilterCount = filterCampaigns.length + filterGifts.length + filterStatuses.length + filterSegments.length + filterNotes.length;
@@ -237,9 +246,9 @@ export default function History() {
                       )}
                     </td>
                     <td style={{ color: 'var(--text-muted)' }}>{r.email}</td>
-                    <td><GiftPill slotIndex={0} name={r.gift_name} /></td>
+                    <td>{r.gift_name ? <GiftPill slotIndex={0} name={r.gift_name} /> : <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>No gift</span>}</td>
                     <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{r.campaign_name || '—'}</td>
-                    <td><Badge tone={REWARD_TONE[r.status] || 'neutral'}>{r.status}</Badge></td>
+                    <td><Badge tone={REWARD_TONE[r.status] || 'neutral'}>{STATUS_LABELS[r.status] || r.status}</Badge></td>
                     <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{r.segment || '—'}</td>
                     <td style={{ maxWidth: 180 }}>
                       {r.note ? (
@@ -254,11 +263,13 @@ export default function History() {
                       ) : <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>—</span>}
                     </td>
                     <td>
-                      <button
-                        className="btn btn-ghost btn-sm"
-                        disabled={lookupBusy}
-                        onClick={() => openRedeemPage(r.id)}
-                      >Open →</button>
+                      {r.status !== 'no_gift' && (
+                        <button
+                          className="btn btn-ghost btn-sm"
+                          disabled={lookupBusy}
+                          onClick={() => openRedeemPage(r.id)}
+                        >Open →</button>
+                      )}
                     </td>
                   </tr>
                 ))}
