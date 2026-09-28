@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import QRCode from 'qrcode';
 import { api } from '../api/client';
 import { Card, Badge, Button, EmptyState } from '../components/ui';
@@ -8,6 +8,36 @@ import GuestFlowScreen from '../components/GuestFlowScreen';
 import ProspectCard from '../components/ProspectCard';
 
 const POLL_INTERVAL_MS = 2000;
+
+// Distinct, non-empty values for a field across the recent-players list,
+// used to populate the filter popup's checkboxes — same pattern as
+// History.jsx's CRM table, kept local since this list is a small, separate
+// widget rather than sharing state with the full CRM page.
+function distinctValues(rows, key) {
+  return [...new Set(rows.map((r) => r[key]).filter((v) => v != null && v !== ''))].sort();
+}
+
+function toggleValue(list, value) {
+  return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
+}
+
+// One checkbox group inside the filter popup — same pattern as History.jsx's.
+function FilterGroup({ title, options, selected, onToggle }) {
+  if (options.length === 0) return null;
+  return (
+    <div style={{ marginBottom: 18 }}>
+      <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', marginBottom: 8 }}>{title}</div>
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
+        {options.map((opt) => (
+          <label key={opt} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, cursor: 'pointer', minHeight: 40, padding: '4px 0' }}>
+            <input type="checkbox" checked={selected.includes(opt)} onChange={() => onToggle(opt)} style={{ width: 18, height: 18, flexShrink: 0 }} />
+            {opt}
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 // A shared tablet cycles through walk-up guests one after another, so unlike
 // the personal-phone guest page: never persist the session, and auto-return
@@ -49,6 +79,26 @@ export default function LaunchCampaign() {
   const [recentPlayers, setRecentPlayers] = useState(null);
   const [noteGuest, setNoteGuest] = useState(null); // { email, firstName, lastName, note?, leadRating?, segment? } | null
   const [queueActionBusy, setQueueActionBusy] = useState(false);
+  const [playerSearch, setPlayerSearch] = useState('');
+  const [playerFiltersOpen, setPlayerFiltersOpen] = useState(false);
+  const [playerFilterGifts, setPlayerFilterGifts] = useState([]);
+  const [playerFilterSegments, setPlayerFilterSegments] = useState([]);
+
+  const playerGiftOptions = useMemo(() => distinctValues(recentPlayers || [], 'gift_name'), [recentPlayers]);
+  const playerSegmentOptions = useMemo(() => distinctValues(recentPlayers || [], 'segment'), [recentPlayers]);
+  const playerActiveFilterCount = playerFilterGifts.length + playerFilterSegments.length;
+
+  const filteredRecentPlayers = useMemo(() => {
+    if (!recentPlayers) return recentPlayers;
+    const q = playerSearch.trim().toLowerCase();
+    return recentPlayers.filter((p) => {
+      if (playerFilterGifts.length && !playerFilterGifts.includes(p.gift_name)) return false;
+      if (playerFilterSegments.length && !playerFilterSegments.includes(p.segment)) return false;
+      if (!q) return true;
+      const haystack = [p.first_name, p.last_name, p.email, p.gift_name, p.segment, p.note].filter(Boolean).join(' ').toLowerCase();
+      return haystack.includes(q);
+    });
+  }, [recentPlayers, playerSearch, playerFilterGifts, playerFilterSegments]);
 
   function handleDownloadPng() {
     if (!qrDataUrl || !campaign) return;
@@ -291,15 +341,31 @@ export default function LaunchCampaign() {
           <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 12px' }}>
             Click a name to add or edit a note, lead rating, or customer segment for them.
           </p>
+          {recentPlayers && recentPlayers.length > 0 && (
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 14 }}>
+              <input
+                placeholder="Search by name, email, gift, segment or note…"
+                value={playerSearch}
+                onChange={(e) => setPlayerSearch(e.target.value)}
+                style={{ flex: 1, padding: '9px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13 }}
+              />
+              <Button variant="secondary" onClick={() => setPlayerFiltersOpen(true)} style={{ flexShrink: 0, whiteSpace: 'nowrap' }}>
+                Filters{playerActiveFilterCount > 0 ? ` (${playerActiveFilterCount})` : ''}
+              </Button>
+            </div>
+          )}
           {!recentPlayers && <p className="page-subtitle">Loading…</p>}
           {recentPlayers && recentPlayers.length === 0 && <p className="page-subtitle">No players yet.</p>}
-          {recentPlayers && recentPlayers.length > 0 && (
+          {recentPlayers && recentPlayers.length > 0 && filteredRecentPlayers.length === 0 && (
+            <p className="page-subtitle">No players match your search or filters.</p>
+          )}
+          {recentPlayers && filteredRecentPlayers.length > 0 && (
             <table className="data-table">
               <thead>
                 <tr><th>Name</th><th>Gift</th><th>Segment</th><th>Lead</th><th>Note</th></tr>
               </thead>
               <tbody>
-                {recentPlayers.map((p) => (
+                {filteredRecentPlayers.map((p) => (
                   <tr key={p.rewardId} style={{ cursor: 'pointer' }} onClick={() => setNoteGuest({
                     email: p.email, firstName: p.first_name, lastName: p.last_name,
                   })}>
@@ -316,6 +382,29 @@ export default function LaunchCampaign() {
             </table>
           )}
         </Card>
+      )}
+
+      {playerFiltersOpen && (
+        <div className="modal-overlay">
+          <div className="modal-card">
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>Filters</h3>
+              {playerActiveFilterCount > 0 && (
+                <button
+                  onClick={() => { setPlayerFilterGifts([]); setPlayerFilterSegments([]); }}
+                  style={{ background: 'none', border: 'none', padding: 0, color: 'var(--link)', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
+                >Clear all</button>
+              )}
+            </div>
+
+            <FilterGroup title="Gift" options={playerGiftOptions} selected={playerFilterGifts}
+              onToggle={(v) => setPlayerFilterGifts(toggleValue(playerFilterGifts, v))} />
+            <FilterGroup title="Segment" options={playerSegmentOptions} selected={playerFilterSegments}
+              onToggle={(v) => setPlayerFilterSegments(toggleValue(playerFilterSegments, v))} />
+
+            <Button onClick={() => setPlayerFiltersOpen(false)} style={{ marginTop: 4 }}>Done</Button>
+          </div>
+        </div>
       )}
 
       {noteGuest && campaign && (
