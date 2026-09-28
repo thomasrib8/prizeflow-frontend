@@ -258,8 +258,9 @@ export default function History() {
                         <span style={{ fontSize: 11, fontWeight: 700, color: '#B45309', background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: '1px 8px' }}>
                           No email{r.gift_on_hold ? ' · gift on hold' : ''}
                         </span>
-                      ) : r.email}
-                      <EmailStatusBadge compact status={r.email_status} isCatchAll={r.email_is_catch_all} isDisposable={r.email_is_disposable} isRoleAccount={r.email_is_role_account} />
+                      ) : (
+                        <EmailStatusBadge email={r.email} status={r.email_status} isCatchAll={r.email_is_catch_all} isDisposable={r.email_is_disposable} isRoleAccount={r.email_is_role_account} />
+                      )}
                     </td>
                     <td>{r.gift_name ? <GiftPill slotIndex={0} name={r.gift_name} /> : <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>No gift</span>}</td>
                     <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{r.campaign_name || '—'}</td>

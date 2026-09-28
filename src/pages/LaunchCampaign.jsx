@@ -404,7 +404,13 @@ export default function LaunchCampaign() {
                     email: p.email, firstName: p.first_name, lastName: p.last_name,
                   })}>
                     <td style={{ color: '#002881', fontWeight: 600, textDecoration: 'underline' }}>{p.first_name} {p.last_name}</td>
-                    <td>{p.gift_name}</td>
+                    <td>
+                      {p.gift_name || (
+                        <span style={{ color: '#94A3B8', fontSize: 12 }}>
+                          No gift · {p.outcome === 'cancelled' ? 'cancelled' : 'skipped'}
+                        </span>
+                      )}
+                    </td>
                     <td style={{ color: '#64748B' }}>{p.segment || '—'}</td>
                     <td>{p.lead_rating ? '★'.repeat(p.lead_rating) + '☆'.repeat(3 - p.lead_rating) : '—'}</td>
                     <td style={{ color: '#64748B', maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>

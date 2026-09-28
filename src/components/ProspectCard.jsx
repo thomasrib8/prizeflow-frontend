@@ -231,8 +231,7 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
                 </div>
                 <div>
                   <div style={{ fontSize: 17, fontWeight: 800 }}>{displayName}</div>
-                  <div style={{ fontSize: 13, color: '#64748B' }}>{emailMissing ? <em>No email yet</em> : guest.email}
-                    <EmailStatusBadge status={emailVerification?.status} isCatchAll={emailVerification?.isCatchAll} isDisposable={emailVerification?.isDisposable} isRoleAccount={emailVerification?.isRoleAccount} /></div>
+                  <div style={{ fontSize: 13, color: '#64748B' }}>{emailMissing ? <em>No email yet</em> : <EmailStatusBadge variant="card" email={guest.email} status={emailVerification?.status} isCatchAll={emailVerification?.isCatchAll} isDisposable={emailVerification?.isDisposable} isRoleAccount={emailVerification?.isRoleAccount} />}</div>
                 </div>
               </div>
               <button
@@ -307,8 +306,7 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
         ) : (
           <>
             <h3 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 800 }}>{displayName}</h3>
-            <p style={{ margin: '0 0 16px', fontSize: 13, color: '#64748B' }}>{emailMissing ? <em>No email yet</em> : guest.email}
-              <EmailStatusBadge status={emailVerification?.status} isCatchAll={emailVerification?.isCatchAll} isDisposable={emailVerification?.isDisposable} isRoleAccount={emailVerification?.isRoleAccount} /></p>
+            <p style={{ margin: '0 0 16px', fontSize: 13, color: '#64748B' }}>{emailMissing ? <em>No email yet</em> : <EmailStatusBadge variant="card" email={guest.email} status={emailVerification?.status} isCatchAll={emailVerification?.isCatchAll} isDisposable={emailVerification?.isDisposable} isRoleAccount={emailVerification?.isRoleAccount} />}</p>
 
             {error && <div className="error-banner">{error}</div>}
 
