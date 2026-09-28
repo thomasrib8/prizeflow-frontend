@@ -18,6 +18,8 @@ export default function Guest() {
       onSubmit={flow.handleSubmit}
       onRestart={flow.restart}
       onOpenReview={flow.openReviewLink}
+      reviewPending={flow.reviewPending}
+      onDismissReview={flow.dismissReview}
     />
   );
 }

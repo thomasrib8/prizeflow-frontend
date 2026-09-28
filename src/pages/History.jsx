@@ -4,12 +4,14 @@ import { api } from '../api/client';
 import { Card, Button, Badge, EmptyState, GiftPill } from '../components/ui';
 import ProspectCard from '../components/ProspectCard';
 
-// 'no_gift' isn't a real reward status — it's a guest who skipped or
-// cancelled instead of finishing their turn, kept in the CRM as a lead
-// anyway (see routes/history.js's GET /rewards). Every other value here is
-// a genuine rewards.status.
-const REWARD_TONE = { active: 'blue', redeemed: 'green', expired: 'orange', cancelled: 'red', no_gift: 'neutral' };
-const STATUS_LABELS = { no_gift: 'No gift' };
+// 'no_gift' (a guest who skipped or cancelled) and 'manual' (a prospect a
+// rep added by hand, never played) aren't real reward statuses — they're
+// leads kept in the CRM anyway (see routes/history.js's GET /rewards).
+// Every other value here is a genuine rewards.status.
+const REWARD_TONE = { active: 'blue', redeemed: 'green', expired: 'orange', cancelled: 'red', no_gift: 'neutral', manual: 'neutral' };
+const STATUS_LABELS = { no_gift: 'No gift', manual: 'Added manually' };
+// Rows with no reward behind them: nothing to redeem/open.
+const NO_REWARD_STATUSES = ['no_gift', 'manual'];
 const NOTE_OPTIONS = [
   { value: 'with', label: 'With note' },
   { value: 'without', label: 'Without note' },
@@ -263,7 +265,7 @@ export default function History() {
                       ) : <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>—</span>}
                     </td>
                     <td>
-                      {r.status !== 'no_gift' && (
+                      {!NO_REWARD_STATUSES.includes(r.status) && (
                         <button
                           className="btn btn-ghost btn-sm"
                           disabled={lookupBusy}

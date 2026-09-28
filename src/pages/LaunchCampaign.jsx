@@ -6,6 +6,7 @@ import { useWheelSocket } from '../hooks/useWheelSocket';
 import { useGuestFlow } from '../hooks/useGuestFlow';
 import GuestFlowScreen from '../components/GuestFlowScreen';
 import ProspectCard from '../components/ProspectCard';
+import NewProspectModal from '../components/NewProspectModal';
 
 const POLL_INTERVAL_MS = 2000;
 
@@ -79,6 +80,8 @@ export default function LaunchCampaign() {
   const [recentPlayers, setRecentPlayers] = useState(null);
   const [noteGuest, setNoteGuest] = useState(null); // { email, firstName, lastName, note?, leadRating?, segment? } | null
   const [queueActionBusy, setQueueActionBusy] = useState(false);
+  const [showNewProspect, setShowNewProspect] = useState(false);
+  const [prospectAdded, setProspectAdded] = useState('');
   const [playerSearch, setPlayerSearch] = useState('');
   const [playerFiltersOpen, setPlayerFiltersOpen] = useState(false);
   const [playerFilterGifts, setPlayerFilterGifts] = useState([]);
@@ -198,6 +201,7 @@ export default function LaunchCampaign() {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <Badge tone={agentConnected ? 'green' : 'red'}>{agentConnected ? 'Wheel ready' : 'Wheel offline'}</Badge>
+          <Button variant="secondary" onClick={() => setShowNewProspect(true)} disabled={!campaign}>+ New prospect</Button>
           <Button onClick={() => setShowKiosk(true)} disabled={!campaign}>SPIN THE WHEEL</Button>
         </div>
       </div>
@@ -205,6 +209,12 @@ export default function LaunchCampaign() {
       {showKiosk && campaign && <KioskOverlay token={campaign.public_token} onClose={() => setShowKiosk(false)} />}
 
       {error && <div className="error-banner">{error}</div>}
+
+      {prospectAdded && (
+        <div style={{ background: '#ECFDF5', border: '1px solid #6EE7B7', color: '#047857', borderRadius: 10, padding: '10px 16px', fontSize: 13, fontWeight: 600, marginBottom: 16 }}>
+          ✓ {prospectAdded} was added to the CRM.
+        </div>
+      )}
 
       {campaign === null && (
         <Card className="mt-card">
@@ -405,6 +415,17 @@ export default function LaunchCampaign() {
             <Button onClick={() => setPlayerFiltersOpen(false)} style={{ marginTop: 4 }}>Done</Button>
           </div>
         </div>
+      )}
+
+      {showNewProspect && campaign && (
+        <NewProspectModal
+          campaign={campaign}
+          onClose={() => setShowNewProspect(false)}
+          onCreated={(name) => {
+            setProspectAdded(name || 'The prospect');
+            setTimeout(() => setProspectAdded(''), 5000);
+          }}
+        />
       )}
 
       {noteGuest && campaign && (

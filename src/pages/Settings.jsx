@@ -211,12 +211,15 @@ function GoogleReviewModule() {
     }
   }
 
-  async function handleToggleReview(campaign) {
+  // mode: 'off' | 'before' | 'after' — 'off' keeps the stored position so
+  // switching it back on remembers the last placement.
+  async function handleReviewMode(campaign, mode) {
     setTogglingId(campaign.id);
     try {
-      await api.setCampaignGoogleReview(campaign.id, !campaign.google_review_required);
+      const position = mode === 'off' ? campaign.google_review_position || 'after' : mode;
+      await api.setCampaignGoogleReview(campaign.id, mode !== 'off', position);
       setCampaigns((prev) =>
-        prev.map((c) => (c.id === campaign.id ? { ...c, google_review_required: c.google_review_required ? 0 : 1 } : c))
+        prev.map((c) => (c.id === campaign.id ? { ...c, google_review_required: mode === 'off' ? 0 : 1, google_review_position: position } : c))
       );
     } catch (err) {
       setError(err.message);
@@ -296,11 +299,17 @@ function GoogleReviewModule() {
         </div>
       )}
 
-      <Card title="Invite for a Google review after spinning" className="mt-card">
+      <Card title="Invite for a Google review" className="mt-card">
+        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 10px' }}>
+          Per campaign, choose when guests are invited to leave a Google review:
+        </p>
+        <ul style={{ fontSize: 13, color: '#64748B', margin: '0 0 12px', paddingLeft: 20, lineHeight: 1.6 }}>
+          <li><strong>Before the game</strong> — right after a guest submits the form, a "Leave us a Google review" screen opens the review page in a new tab. If they don't click it, the screen goes away by itself after 15 seconds and they continue to the game (the wheel or the waiting line).</li>
+          <li><strong>After the game</strong> — a "Leave a review" button is shown once their gift is won.</li>
+        </ul>
         <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 16px' }}>
-          Per campaign — when enabled, guests see an optional "Leave us a review" button once their gift is
-          already won. It's never a condition to play or to claim the reward — Google's policies prohibit
-          tying a game or reward to leaving a review, even as an unverified gate.
+          It's never a condition to play or to claim the reward — Google's policies prohibit tying a game or
+          reward to leaving a review, even as an unverified gate.
         </p>
         {!campaigns && <p className="page-subtitle">Loading…</p>}
         {campaigns && campaigns.length === 0 && <p className="page-subtitle">No campaigns yet.</p>}
@@ -315,15 +324,17 @@ function GoogleReviewModule() {
                   <span style={{ fontSize: 14, fontWeight: 600, color: '#03041A' }}>{c.name}</span>
                   <Badge tone={c.status === 'active' ? 'green' : 'neutral'}>{c.status}</Badge>
                 </div>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 13, color: '#64748B' }}>
-                  <input
-                    type="checkbox"
-                    checked={!!c.google_review_required}
-                    disabled={togglingId === c.id || !savedUrl}
-                    onChange={() => handleToggleReview(c)}
-                  />
-                  Invite for review
-                </label>
+                <select
+                  aria-label={`Google review invite for ${c.name}`}
+                  value={c.google_review_required ? (c.google_review_position === 'before' ? 'before' : 'after') : 'off'}
+                  disabled={togglingId === c.id || !savedUrl}
+                  onChange={(e) => handleReviewMode(c, e.target.value)}
+                  style={{ padding: '8px 10px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13, fontFamily: 'inherit', background: 'white' }}
+                >
+                  <option value="off">No review invite</option>
+                  <option value="before">Before the game</option>
+                  <option value="after">After the game</option>
+                </select>
               </div>
             ))}
           </div>

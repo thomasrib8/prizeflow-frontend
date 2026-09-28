@@ -41,6 +41,8 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
   const silenceTimerRef = useRef(null);
 
   const [salesFields, setSalesFields] = useState([]);
+  const [guestFields, setGuestFields] = useState([]);
+  const [guestAnswers, setGuestAnswers] = useState({});
   const [segmentCategories, setSegmentCategories] = useState([]);
 
   const [note, setNote] = useState('');
@@ -55,6 +57,8 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
     Promise.all([api.getCampaign(campaignId), api.getGuestNote(campaignId, guest.email)])
       .then(([campaign, guestNote]) => {
         setSalesFields((campaign.fields || []).filter((f) => f.scope === 'sales'));
+        setGuestFields((campaign.fields || []).filter((f) => f.scope === 'guest'));
+        setGuestAnswers(guestNote.guestAnswers || {});
         setSegmentCategories(campaign.segmentCategories || []);
         setNote(guestNote.note || '');
         setLeadRating(guestNote.leadRating ?? null);
@@ -199,6 +203,9 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
             <div style={{ borderTop: '1px solid #F1F5F9' }} />
 
             <div style={{ padding: '14px 0' }}>
+              {guestFields.map((f) => (
+                <InfoRow key={`guest-${f.label}`} label={f.label} value={formatFieldValue(f, guestAnswers[f.label])} />
+              ))}
               {activeSegments.map((s) => (
                 <InfoRow key={s.name} label={s.name} value={s.value} />
               ))}

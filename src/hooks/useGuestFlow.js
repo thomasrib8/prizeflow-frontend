@@ -49,6 +49,12 @@ export function useGuestFlow({ token, persistSession = false, autoReturnMs = nul
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState(null);
+  // True between submitting the form and the guest moving on from the
+  // optional "leave a Google review" screen, for campaigns that place that
+  // invite BEFORE the game (see GuestFlowScreen's ReviewGate). Purely a
+  // client-side interstitial — the guest is already in the queue server-side
+  // meanwhile. Never set for a resumed session or the staff kiosk.
+  const [reviewPending, setReviewPending] = useState(false);
   const sessionTokenRef = useRef(persistSession ? localStorage.getItem(storageKey) : null);
 
   function checkCampaign() {
@@ -138,6 +144,12 @@ export function useGuestFlow({ token, persistSession = false, autoReturnMs = nul
       if (persistSession) localStorage.setItem(storageKey, res.sessionToken);
       sessionTokenRef.current = res.sessionToken;
       setStatus(null);
+      setReviewPending(
+        source !== 'kiosk' &&
+        !!campaignInfo?.googleReviewRequired &&
+        campaignInfo?.googleReviewPosition === 'before' &&
+        !!campaignInfo?.googleReviewUrl
+      );
       setView('queue');
     } catch (err) {
       if (err.message === 'ALREADY_PLAYED') {
@@ -154,10 +166,15 @@ export function useGuestFlow({ token, persistSession = false, autoReturnMs = nul
     if (persistSession) localStorage.removeItem(storageKey);
     sessionTokenRef.current = null;
     setStatus(null);
+    setReviewPending(false);
     setForm(EMPTY_FORM);
     setError('');
     checkCampaign();
   }
 
-  return { view, campaignInfo, form, setForm, error, busy, status, handleSubmit, restart, openReviewLink };
+  function dismissReview() {
+    setReviewPending(false);
+  }
+
+  return { view, campaignInfo, form, setForm, error, busy, status, handleSubmit, restart, openReviewLink, reviewPending, dismissReview };
 }

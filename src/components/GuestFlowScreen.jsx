@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import WheelSVG from './WheelSVG';
 import DynamicFieldInput from './DynamicFieldInput';
 import { API_BASE } from '../api/client';
@@ -39,12 +39,92 @@ const queueScreenStyle = (state) => ({
   transition: 'background-color 0.6s ease',
 });
 
+// How long the optional "leave a Google review" screen stays up when it's
+// placed BEFORE the game, if the guest neither taps the review button nor
+// skips it. Google forbids conditioning a game or reward on leaving a
+// review, so this can never block anyone: it just times out into the game.
+const REVIEW_GATE_SECONDS = 15;
+const REVIEW_OPENED_SAFETY_SECONDS = 180;
+
 const SWIPE_CLOSE_THRESHOLD = 80; // px a 3-finger touch must travel downward to close
 
 function averageTouchY(touches) {
   let sum = 0;
   for (let i = 0; i < touches.length; i++) sum += touches[i].clientY;
   return sum / touches.length;
+}
+
+// The optional pre-game review invite. The review page always opens in a
+// NEW tab (a plain target=_blank link — the most reliable way to avoid
+// popup blockers) so this game tab, and the guest's place in line, stays
+// put. Not tapped: moves on by itself after REVIEW_GATE_SECONDS (with no
+// visible countdown). Tapped: the timer stops (nothing should change under
+// someone who's busy writing a review) and the guest continues as soon as
+// they come back to this tab.
+function ReviewGate({ url, onContinue }) {
+  const [opened, setOpened] = useState(false);
+  const continueRef = useRef(onContinue);
+  continueRef.current = onContinue;
+
+  useEffect(() => {
+    if (opened) return undefined;
+    const t = setTimeout(() => continueRef.current(), REVIEW_GATE_SECONDS * 1000);
+    return () => clearTimeout(t);
+  }, [opened]);
+
+  useEffect(() => {
+    if (!opened) return undefined;
+    function onVisibilityChange() {
+      if (document.visibilityState === 'visible') continueRef.current();
+    }
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    // No button to fall back on once the review page is open, so if a
+    // browser never reports the guest coming back, don't leave them stuck
+    // on this screen forever: the game screen is where they'd land on
+    // return anyway.
+    const safety = setTimeout(() => continueRef.current(), REVIEW_OPENED_SAFETY_SECONDS * 1000);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+      clearTimeout(safety);
+    };
+  }, [opened]);
+
+  return (
+    <div style={fullScreenBase} key="review-gate">
+      <style>{`@keyframes reviewFadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 18, maxWidth: 440, animation: 'reviewFadeIn 0.4s ease' }}>
+        <div style={{ fontSize: 44, letterSpacing: 4 }}>⭐⭐⭐⭐⭐</div>
+        <div style={{ color: 'white', fontSize: 'clamp(26px, 7vw, 36px)', fontWeight: 900, letterSpacing: '-0.02em', lineHeight: 1.15 }}>
+          Leave us a Google review!
+        </div>
+        <div style={{ color: 'rgba(255,255,255,0.9)', fontSize: 15, lineHeight: 1.5 }}>
+          It only takes a minute and helps us a lot. It's completely optional — you'll get to play either way.
+        </div>
+
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => setOpened(true)}
+          style={{
+            display: 'inline-block', background: 'white', color: '#002881', textDecoration: 'none', borderRadius: 12,
+            padding: '15px 30px', fontSize: 17, fontWeight: 800, fontFamily: 'inherit', boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+          }}
+        >{opened ? 'Leave us a Google review' : 'Leave a review'}</a>
+
+        {opened ? (
+          <div style={{ color: 'white', fontSize: 15, fontWeight: 600, lineHeight: 1.5 }}>
+            The review page opened in a new tab. Once you're done, come back to this tab — your game is waiting for you.
+          </div>
+        ) : (
+          <button onClick={onContinue} style={{
+            background: 'none', color: 'white', border: 'none', textDecoration: 'underline', fontSize: 14, fontWeight: 600,
+            cursor: 'pointer', fontFamily: 'inherit', padding: 8,
+          }}>No thanks, continue</button>
+        )}
+      </div>
+    </div>
+  );
 }
 
 /// Renders the guest queue experience for a given useGuestFlow() state.
@@ -56,7 +136,7 @@ function averageTouchY(touches) {
 /// down on touch devices.
 export default function GuestFlowScreen({
   view, campaignInfo, form, setForm, error, busy, status, onSubmit, onRestart, onClose,
-  onOpenReview,
+  onOpenReview, reviewPending = false, onDismissReview,
 }) {
   const [hoveringCorner, setHoveringCorner] = useState(false);
   const [reviewClicked, setReviewClicked] = useState(false);
@@ -151,10 +231,20 @@ export default function GuestFlowScreen({
     );
   }
 
+  // Pre-game Google review invite — sits on top of whatever the queue
+  // state is (the guest is already in line server-side), and only after the
+  // expired check above so a cancelled/skipped guest isn't held here.
+  if (view === 'queue' && reviewPending && campaignInfo?.googleReviewUrl && onDismissReview) {
+    return <ReviewGate url={campaignInfo.googleReviewUrl} onContinue={onDismissReview} />;
+  }
+
   if (view === 'queue' && status) {
     if (status.status === 'done') {
       const result = status.result || {};
-      const showReviewInvite = !!campaignInfo?.googleReviewRequired && !!campaignInfo?.googleReviewUrl;
+      // 'before' campaigns already showed the invite ahead of the game
+      // (ReviewGate) — only 'after' ones (the default) show it here.
+      const showReviewInvite = !!campaignInfo?.googleReviewRequired && !!campaignInfo?.googleReviewUrl
+        && campaignInfo?.googleReviewPosition !== 'before';
       const activeSocialLinks = SOCIAL_PLATFORMS.filter((p) => campaignInfo?.socialLinks?.[p.key]);
       const showSocialInvite = !!campaignInfo?.socialMediaRequired && activeSocialLinks.length > 0;
       return (
