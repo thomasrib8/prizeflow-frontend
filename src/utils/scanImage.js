@@ -1,8 +1,14 @@
 // Prepares a photo of a badge / business card for scanning, in the browser:
 //
-//   1. shrinks it (long edge <= 1600px, JPEG) — a phone photo is 3-8MB and a
-//      congress wifi is slow; the reader doesn't need more than this to read
-//      printed text, and the smaller upload is also faster to process;
+//   1. shrinks it (JPEG, capped at ~1.15 megapixels) — a phone photo is
+//      3-8MB and a congress wifi is slow, so a smaller upload is faster to
+//      send; the cap itself matters just as much: Anthropic resizes any
+//      image over ~1.15MP server-side before reading it, which only adds
+//      latency with zero quality gain (see platform.claude.com/docs/en/
+//      build-with-claude/vision#evaluate-image-size), so sending more than
+//      that just makes the scan slower for no benefit. Capping by area
+//      (rather than only the long edge) keeps wide/landscape photos under
+//      the limit too, not just square-ish ones;
 //   2. looks for a QR code on it. Some badges and cards carry a vCard / MECARD
 //      QR with the person's details already structured — when one is found we
 //      use it directly, which is exact and needs no AI at all.
@@ -12,7 +18,7 @@
 
 import jsQR from 'jsqr';
 
-const MAX_EDGE = 1600;
+const MAX_MEGAPIXELS = 1.15e6;
 const JPEG_QUALITY = 0.85;
 
 async function loadBitmap(file) {
@@ -95,7 +101,7 @@ export async function prepareScanImage(file) {
   const bitmap = await loadBitmap(file);
   const width = bitmap.width || bitmap.naturalWidth;
   const height = bitmap.height || bitmap.naturalHeight;
-  const scale = Math.min(1, MAX_EDGE / Math.max(width, height));
+  const scale = Math.min(1, Math.sqrt(MAX_MEGAPIXELS / (width * height)));
   const canvas = document.createElement('canvas');
   canvas.width = Math.round(width * scale);
   canvas.height = Math.round(height * scale);
