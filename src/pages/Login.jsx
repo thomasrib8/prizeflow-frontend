@@ -2,6 +2,21 @@ import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
+// returnTo comes straight from the URL, so it's attacker-controllable —
+// resolve it against our own origin and refuse anything that doesn't land
+// back on it (an absolute external URL, or a protocol-relative "//evil.com"
+// smuggled in). Never navigate anywhere the resolved origin doesn't match.
+function safeReturnTo(value) {
+  if (!value) return null;
+  try {
+    const url = new URL(value, window.location.origin);
+    if (url.origin !== window.location.origin) return null;
+    return url.pathname + url.search + url.hash;
+  } catch {
+    return null;
+  }
+}
+
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -20,8 +35,7 @@ export default function Login() {
       // Lets a reward link (e.g. /redeem/:code, reached by scanning a QR
       // while logged out) send the operator back to the same page instead
       // of always dropping them on the dashboard.
-      const returnTo = searchParams.get('returnTo');
-      navigate(returnTo || '/');
+      navigate(safeReturnTo(searchParams.get('returnTo')) || '/');
     } catch (err) {
       setError(err.message);
     } finally {

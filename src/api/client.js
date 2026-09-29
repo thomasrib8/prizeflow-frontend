@@ -16,6 +16,11 @@ async function request(path, { method = 'GET', body, auth = true } = {}) {
     headers,
     body: body ? JSON.stringify(body) : undefined,
   });
+  // Sliding session (see backend auth.js requireAuth): the server quietly
+  // hands back a fresh token once the current one is past half its life, so
+  // an operator actively using SPARK never hits the 12h wall mid-shift.
+  const refreshedToken = res.headers.get('X-Refreshed-Token');
+  if (refreshedToken) localStorage.setItem('prizeflow_token', refreshedToken);
   let data = null;
   try {
     data = await res.json();

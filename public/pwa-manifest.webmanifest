@@ -3,7 +3,7 @@
   "short_name": "Spark",
   "description": "Capture leads and run the live queue at the booth.",
   "start_url": "/pwa",
-  "scope": "/pwa",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#F8FAFC",

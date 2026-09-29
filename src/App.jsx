@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { useAdmin } from './hooks/useAdmin';
 import Layout from './components/Layout';
@@ -26,16 +26,27 @@ import AppHealth from './pages/AppHealth';
 import Magic from './pages/Magic';
 import SequenceBuilder from './pages/SequenceBuilder';
 
+// Sends a logged-out visitor to /login carrying where they were headed, so
+// signing in lands them back on that exact page instead of always on the
+// dashboard (Login.jsx reads this same returnTo param — see safeReturnTo
+// there for why it validates it before navigating).
+function loginRedirect(location) {
+  const returnTo = encodeURIComponent(location.pathname + location.search);
+  return `/login?returnTo=${returnTo}`;
+}
+
 function PrivateRoute({ children }) {
   const { user } = useAuth();
-  if (!user) return <Navigate to="/login" replace />;
+  const location = useLocation();
+  if (!user) return <Navigate to={loginRedirect(location)} replace />;
   return <Layout>{children}</Layout>;
 }
 
 function AdminRoute({ children }) {
   const { user } = useAuth();
   const { isAdmin } = useAdmin();
-  if (!user) return <Navigate to="/login" replace />;
+  const location = useLocation();
+  if (!user) return <Navigate to={loginRedirect(location)} replace />;
   if (!isAdmin) return <Navigate to="/" replace />;
   return <Layout>{children}</Layout>;
 }

@@ -66,7 +66,7 @@ export default function LaunchPWA() {
   const [playerFiltersOpen, setPlayerFiltersOpen] = useState(false);
 
   useEffect(() => {
-    if (!user) navigate(`/login?returnTo=${encodeURIComponent(location.pathname)}`, { replace: true });
+    if (!user) navigate(`/login?returnTo=${encodeURIComponent(location.pathname + location.search)}`, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
