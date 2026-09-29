@@ -211,6 +211,10 @@ export const api = {
   // Note/lead-rating/segment popup on the Launch page — upserts by (campaignId, email).
   createProspect: (payload) => request('/account/prospects', { method: 'POST', body: payload }),
   setProspectEmail: (payload) => request('/account/prospects/email', { method: 'PATCH', body: payload }),
+  // Polled by useProspectAddedToast right after a scan/manual entry with no
+  // email kicks off an automatic Hunter lookup (see POST /prospects's
+  // emailEnrichment flag) — { status: 'searching'|'found'|'not_found'|'error'|'none', email, score }.
+  getEmailEnrichmentStatus: (prospectId) => request(`/account/prospects/${prospectId}/email-enrichment`),
   getBadgeScanStatus: () => request('/account/badge-scan'),
   // Multipart (a photo), so it can't go through request(), which always sends JSON.
   scanProspectImage: async (campaignId, blob) => {

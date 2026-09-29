@@ -46,6 +46,7 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
   const [guestFields, setGuestFields] = useState([]);
   const [guestAnswers, setGuestAnswers] = useState({});
   const [emailVerification, setEmailVerification] = useState(null);
+  const [emailEnrichment, setEmailEnrichment] = useState(null); // { source: 'hunter', score } — email found automatically, not typed by anyone
   const [pendingGift, setPendingGift] = useState(null); // { giftName } — won, but no email to send it to yet
   const [consentInfo, setConsentInfo] = useState(null); // { attestedAt, attestedBy } for rep-added contacts
   const emailMissing = isPlaceholderEmail(guest.email);
@@ -68,6 +69,7 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
         setGuestFields((campaign.fields || []).filter((f) => f.scope === 'guest'));
         setGuestAnswers(guestNote.guestAnswers || {});
         setEmailVerification(guestNote.emailVerification || null);
+        setEmailEnrichment(guestNote.emailEnrichment || null);
         setPendingGift(guestNote.pendingGift || null);
         setConsentInfo(guestNote.consent || null);
         setSegmentCategories(campaign.segmentCategories || []);
@@ -232,6 +234,11 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
                 <div>
                   <div style={{ fontSize: 17, fontWeight: 800 }}>{displayName}</div>
                   <div style={{ fontSize: 13, color: '#64748B' }}>{emailMissing ? <em>No email yet</em> : <EmailStatusBadge variant="card" email={guest.email} status={emailVerification?.status} isCatchAll={emailVerification?.isCatchAll} isDisposable={emailVerification?.isDisposable} isRoleAccount={emailVerification?.isRoleAccount} />}</div>
+                  {emailEnrichment && (
+                    <div style={{ fontSize: 11, color: '#7C3AED', fontWeight: 600, marginTop: 2 }} title={emailEnrichment.score != null ? `Hunter confidence score: ${emailEnrichment.score}/100` : undefined}>
+                      🔎 Found automatically via Hunter
+                    </div>
+                  )}
                 </div>
               </div>
               <button

@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useWheelSocket } from '../hooks/useWheelSocket';
 import { useLaunchQueue, toggleValue } from '../hooks/useLaunchQueue';
+import { useProspectAddedToast } from '../hooks/useProspectAddedToast';
 import { Badge, Button, EmptyState } from '../components/ui';
 import ProspectCard from '../components/ProspectCard';
 import NewProspectModal from '../components/NewProspectModal';
@@ -62,7 +63,7 @@ export default function LaunchPWA() {
   const [noteGuest, setNoteGuest] = useState(null);
   const [showNewProspect, setShowNewProspect] = useState(false);
   const [scanFile, setScanFile] = useState(null);
-  const [prospectAdded, setProspectAdded] = useState('');
+  const { message: prospectAdded, notify: notifyProspectAdded } = useProspectAddedToast();
   const [playerFiltersOpen, setPlayerFiltersOpen] = useState(false);
 
   useEffect(() => {
@@ -266,13 +267,7 @@ export default function LaunchPWA() {
           initialFile={scanFile}
           scanEnabled={q.scanEnabled}
           onClose={() => { setShowNewProspect(false); setScanFile(null); }}
-          onCreated={({ name, queued, emailMissing }) => {
-            setProspectAdded(
-              `${name || 'The prospect'} added${queued ? ' & queued' : ''}.` +
-              (emailMissing ? ' No email yet — add it from their card.' : '')
-            );
-            setTimeout(() => setProspectAdded(''), 6000);
-          }}
+          onCreated={notifyProspectAdded}
         />
       )}
 

@@ -5,6 +5,7 @@ import { Card, Badge, Button, EmptyState } from '../components/ui';
 import { useWheelSocket } from '../hooks/useWheelSocket';
 import { useGuestFlow } from '../hooks/useGuestFlow';
 import { useLaunchQueue, toggleValue } from '../hooks/useLaunchQueue';
+import { useProspectAddedToast } from '../hooks/useProspectAddedToast';
 import GuestFlowScreen from '../components/GuestFlowScreen';
 import ProspectCard from '../components/ProspectCard';
 import NewProspectModal from '../components/NewProspectModal';
@@ -49,7 +50,7 @@ export default function LaunchCampaign() {
   const [noteGuest, setNoteGuest] = useState(null); // { email, firstName, lastName } | null
   const [showNewProspect, setShowNewProspect] = useState(false);
   const [scanFile, setScanFile] = useState(null); // photo taken from the header's Scan button, handed to the popup
-  const [prospectAdded, setProspectAdded] = useState('');
+  const { message: prospectAdded, notify: notifyProspectAdded } = useProspectAddedToast();
   const [playerFiltersOpen, setPlayerFiltersOpen] = useState(false);
 
   useEffect(() => {
@@ -336,13 +337,7 @@ export default function LaunchCampaign() {
           initialFile={scanFile}
           scanEnabled={q.scanEnabled}
           onClose={() => { setShowNewProspect(false); setScanFile(null); }}
-          onCreated={({ name, queued, emailMissing }) => {
-            setProspectAdded(
-              `${name || 'The prospect'} was added to the CRM${queued ? ' and put in the queue' : ''}.` +
-              (emailMissing ? ' No email yet — add it from their card (their gift is held until then).' : '')
-            );
-            setTimeout(() => setProspectAdded(''), 8000);
-          }}
+          onCreated={notifyProspectAdded}
         />
       )}
 

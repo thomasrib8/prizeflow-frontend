@@ -33,6 +33,7 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
   const startedRef = useRef(false);
 
   const [form, setForm] = useState(EMPTY_FORM);
+  const [company, setCompany] = useState('');
   const [guestAnswers, setGuestAnswers] = useState({});
   const [note, setNote] = useState('');
   const [leadRating, setLeadRating] = useState(null); // 1-3, null = not rated — never a default 1
@@ -51,6 +52,7 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
 
   function applyReading({ fields, customFields: fromCampaign = {}, confidence }, source) {
     setForm({ firstName: fields.firstName || '', lastName: fields.lastName || '', email: fields.email || '' });
+    setCompany(fields.company || '');
 
     const answers = { ...fromCampaign };
     // A phone number the campaign has a place for but the reader didn't route there.
@@ -58,11 +60,13 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
     if (phoneField && fields.phone) answers[phoneField.label] = fields.phone;
     setGuestAnswers(answers);
 
-    // Company / job title have no field of their own unless the campaign made
-    // one — keep them as the start of the note rather than throw them away.
+    // Job title has no field of its own unless the campaign made one — keep
+    // it as the start of the note rather than throw it away. Company now has
+    // its own field (see the Company input below — it also doubles as what
+    // Hunter searches on when there's no email), so it no longer needs to
+    // ride along in free text too.
     const usedElsewhere = (v) => v && Object.values(answers).includes(v);
-    const context = [fields.company, fields.jobTitle].filter((v) => v && !usedElsewhere(v)).join(' · ');
-    setNote(context);
+    setNote(fields.jobTitle && !usedElsewhere(fields.jobTitle) ? fields.jobTitle : '');
 
     setScan({ state: 'done', source, confidence: confidence || {} });
     setError('');
@@ -109,6 +113,7 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
       const res = await api.createProspect({
         campaignId: campaign.id,
         ...form,
+        company: company.trim(),
         guestAnswers,
         note,
         leadRating,
@@ -119,7 +124,13 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
         addToQueue,
         confirmDuplicate,
       });
-      onCreated?.({ name: `${form.firstName.trim()} ${form.lastName.trim()}`.trim(), queued: res.queued, emailMissing: res.emailMissing });
+      onCreated?.({
+        name: `${form.firstName.trim()} ${form.lastName.trim()}`.trim(),
+        queued: res.queued,
+        emailMissing: res.emailMissing,
+        prospectId: res.prospectId,
+        emailEnrichment: res.emailEnrichment,
+      });
       onClose();
     } catch (err) {
       if (err.code === 'POSSIBLE_DUPLICATE') setDuplicate({ message: err.message, addToQueue });
@@ -189,9 +200,17 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
           {doubtHint('email')}
           {!form.email && (
             <div style={{ fontSize: 11, color: noEmailOnBadge ? '#B45309' : '#64748B', marginTop: 3 }}>
-              {noEmailOnBadge ? 'No email on this badge. ' : ''}You can add it later — if they win, their gift is held until you do.
+              {noEmailOnBadge ? 'No email on this badge. ' : ''}
+              {company.trim()
+                ? "We'll try to find their email automatically from their company. If we can't, their gift is held until you add one."
+                : 'Add their company below and we’ll try to find their email automatically — or add it later; if they win, their gift is held until you do.'}
             </div>
           )}
+        </div>
+        <div className="field">
+          <label>Company</label>
+          <input value={company} style={flagStyle('company')} onChange={(e) => setCompany(e.target.value)} />
+          {doubtHint('company')}
         </div>
         {guestFields.map((f) => (
           <DynamicFieldInput
