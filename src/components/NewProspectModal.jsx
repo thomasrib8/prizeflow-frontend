@@ -39,7 +39,10 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
   const [segments, setSegments] = useState({});
   const [tags, setTags] = useState('');
   const [customFields, setCustomFields] = useState({});
-  const [consent, setConsent] = useState(false);
+  // Defaults to checked: the rep is the one filling this in (not the
+  // prospect), so ticking it is the expected case, not an opt-in they should
+  // have to remember every time — they can still untick it if genuinely needed.
+  const [consent, setConsent] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [duplicate, setDuplicate] = useState(null); // { message, addToQueue }
@@ -199,23 +202,36 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
           />
         ))}
 
-        <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', margin: '20px 0 8px' }}>Sales info</div>
-        {segmentCategories.map((cat) => (
-          <DynamicFieldInput
-            key={cat.id}
-            field={{ label: cat.name, fieldType: 'dropdown', options: cat.options.map((o) => o.label) }}
-            value={segments[cat.name] || ''}
-            onChange={(v) => setSegments((prev) => ({ ...prev, [cat.name]: v || undefined }))}
-          />
-        ))}
-        {salesFields.map((f) => (
-          <DynamicFieldInput
-            key={f.id}
-            field={f}
-            value={customFields[f.label]}
-            onChange={(v) => setCustomFields((prev) => ({ ...prev, [f.label]: v }))}
-          />
-        ))}
+        {(segmentCategories.length > 0 || salesFields.length > 0) && (
+          <details style={{ margin: '20px 0 4px' }}>
+            <summary
+              style={{
+                fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em',
+                color: 'var(--text-muted)', cursor: 'pointer', userSelect: 'none',
+              }}
+            >
+              Sales info
+            </summary>
+            <div style={{ marginTop: 12 }}>
+              {segmentCategories.map((cat) => (
+                <DynamicFieldInput
+                  key={cat.id}
+                  field={{ label: cat.name, fieldType: 'dropdown', options: cat.options.map((o) => o.label) }}
+                  value={segments[cat.name] || ''}
+                  onChange={(v) => setSegments((prev) => ({ ...prev, [cat.name]: v || undefined }))}
+                />
+              ))}
+              {salesFields.map((f) => (
+                <DynamicFieldInput
+                  key={f.id}
+                  field={f}
+                  value={customFields[f.label]}
+                  onChange={(v) => setCustomFields((prev) => ({ ...prev, [f.label]: v }))}
+                />
+              ))}
+            </div>
+          </details>
+        )}
 
         <div className="field">
           <label>Note</label>
