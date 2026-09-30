@@ -1,11 +1,22 @@
 import { useEffect, useState } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { useAdmin } from '../hooks/useAdmin';
 import { useWheelSocket } from '../hooks/useWheelSocket';
 import { api } from '../api/client';
 import ConnectionDiagnosticsModal from './ConnectionDiagnosticsModal';
 import './Layout.css';
+
+// Native-language labels, same as NewCampaign.jsx/EditCampaign.jsx's guest
+// LANGUAGE_OPTIONS — a language switcher always shows each option in its
+// own language, never translated into whichever one is currently active.
+const ADMIN_LANGUAGE_OPTIONS = [
+  { value: 'en', label: 'English' },
+  { value: 'fr', label: 'Français' },
+  { value: 'es', label: 'Español' },
+  { value: 'de', label: 'Deutsch' },
+];
 
 const NAV_ITEMS = [
   { to: '/', label: 'Dashboard', icon: IconGrid },
@@ -25,15 +36,27 @@ const ADMIN_NAV_ITEMS = [
 const PENDING_COUNT_POLL_MS = 30000;
 
 export default function Layout({ children }) {
-  const { user, logout } = useAuth();
+  const { user, logout, updateStoredUser } = useAuth();
   const { isAdmin } = useAdmin();
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation('admin');
   const { agentConnected, connectedSince, latencyMs } = useWheelSocket();
   const [pendingCount, setPendingCount] = useState(0);
   const [showDiagnostics, setShowDiagnostics] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [changingLanguage, setChangingLanguage] = useState(false);
   const initials = (user?.name || user?.email || '?').slice(0, 2).toUpperCase();
+
+  // AuthContext's own effect applies the change globally (i18n.changeLanguage)
+  // once updateStoredUser lands — this just persists the choice server-side.
+  function handleLanguageChange(language) {
+    setChangingLanguage(true);
+    api.updateAccountSettings({ language })
+      .then(() => updateStoredUser({ language }))
+      .catch(() => {})
+      .finally(() => setChangingLanguage(false));
+  }
 
   // Close the mobile drawer automatically whenever the route changes, so
   // tapping a nav link doesn't leave the menu open over the new page.
@@ -123,17 +146,25 @@ export default function Layout({ children }) {
             style={{ border: 'none', cursor: 'pointer', font: 'inherit' }}
           >
             <span className="dot" />
-            {agentConnected ? 'Wheel connected' : 'Wheel offline'}
+            {agentConnected ? t('pwa.wheelReady') : t('pwa.wheelOffline')}
           </button>
           <div className="user-row">
             <div className="user-avatar">{initials}</div>
             <div className="user-info">
               <div className="user-name">{user?.name || user?.email}</div>
               <button className="logout-link" onClick={() => { logout(); navigate('/login'); }}>
-                Sign out
+                {t('pwa.signOut')}
               </button>
             </div>
           </div>
+          <select
+            className="language-pill"
+            value={user?.language || 'en'}
+            disabled={changingLanguage}
+            onChange={(e) => handleLanguageChange(e.target.value)}
+          >
+            {ADMIN_LANGUAGE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
           <NavLink to="/settings" className={({ isActive }) => `nav-item settings-footer-link${isActive ? ' active' : ''}`}>
             <IconSettings />
             <span>Settings</span>

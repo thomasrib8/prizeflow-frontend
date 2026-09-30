@@ -1,5 +1,6 @@
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { api } from '../api/client';
+import i18n from '../i18n';
 
 const AuthContext = createContext(null);
 
@@ -8,6 +9,14 @@ export function AuthProvider({ children }) {
     const raw = localStorage.getItem('prizeflow_user');
     return raw ? JSON.parse(raw) : null;
   });
+
+  // The admin panel's own language (distinct from a campaign's guest-facing
+  // language — see i18n/index.js) is set globally, once per account, since
+  // there's never more than one admin UI open in a tab at a time. Covers
+  // both a fresh login and a page refresh restoring the stored user.
+  useEffect(() => {
+    if (user?.language) i18n.changeLanguage(user.language);
+  }, [user?.language]);
 
   const login = useCallback(async (email, password) => {
     const { user, token } = await api.login(email, password);

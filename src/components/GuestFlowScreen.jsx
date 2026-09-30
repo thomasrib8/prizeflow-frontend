@@ -1,14 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import WheelSVG from './WheelSVG';
 import DynamicFieldInput from './DynamicFieldInput';
 import { API_BASE } from '../api/client';
 
-const RETRY_MESSAGES = {
-  SPIN_ABNORMAL_STOP: '⚠ An unexpected stop was detected during the spin. Please spin the wheel again.',
-  SPIN_TOO_WEAK: "⚡ Please don't interact with the wheel — spin it again.",
-  SPIN_TOO_SHORT: "⏱ The wheel didn't reach the right slot in time. Please spin again.",
-};
-
+// Brand names — never translated, "Facebook" reads the same in every
+// language this app supports.
 const SOCIAL_PLATFORMS = [
   { key: 'facebook', label: 'Facebook', icon: '📘' },
   { key: 'instagram', label: 'Instagram', icon: '📷' },
@@ -61,7 +58,7 @@ function averageTouchY(touches) {
 // visible countdown). Tapped: the timer stops (nothing should change under
 // someone who's busy writing a review) and the guest continues as soon as
 // they come back to this tab.
-function ReviewGate({ url, onContinue }) {
+function ReviewGate({ url, onContinue, t }) {
   const [opened, setOpened] = useState(false);
   const continueRef = useRef(onContinue);
   continueRef.current = onContinue;
@@ -95,10 +92,10 @@ function ReviewGate({ url, onContinue }) {
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 18, maxWidth: 440, animation: 'reviewFadeIn 0.4s ease' }}>
         <div style={{ fontSize: 44, letterSpacing: 4 }}>⭐⭐⭐⭐⭐</div>
         <div style={{ color: 'white', fontSize: 'clamp(26px, 7vw, 36px)', fontWeight: 900, letterSpacing: '-0.02em', lineHeight: 1.15 }}>
-          Leave us a Google review!
+          {t('reviewGate.title')}
         </div>
         <div style={{ color: 'rgba(255,255,255,0.9)', fontSize: 15, lineHeight: 1.5 }}>
-          It only takes a minute and helps us a lot. It's completely optional — you'll get to play either way.
+          {t('reviewGate.body')}
         </div>
 
         <a
@@ -110,17 +107,17 @@ function ReviewGate({ url, onContinue }) {
             display: 'inline-block', background: 'white', color: '#002881', textDecoration: 'none', borderRadius: 12,
             padding: '15px 30px', fontSize: 17, fontWeight: 800, fontFamily: 'inherit', boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
           }}
-        >{opened ? 'Leave us a Google review' : 'Leave a review'}</a>
+        >{opened ? t('reviewGate.leaveReviewAgain') : t('reviewGate.leaveReview')}</a>
 
         {opened ? (
           <div style={{ color: 'white', fontSize: 15, fontWeight: 600, lineHeight: 1.5 }}>
-            The review page opened in a new tab. Once you're done, come back to this tab — your game is waiting for you.
+            {t('reviewGate.openedNote')}
           </div>
         ) : (
           <button onClick={onContinue} style={{
             background: 'none', color: 'white', border: 'none', textDecoration: 'underline', fontSize: 14, fontWeight: 600,
             cursor: 'pointer', fontFamily: 'inherit', padding: 8,
-          }}>No thanks, continue</button>
+          }}>{t('reviewGate.skip')}</button>
         )}
       </div>
     </div>
@@ -138,8 +135,22 @@ export default function GuestFlowScreen({
   view, campaignInfo, form, setForm, error, busy, status, onSubmit, onRestart, onClose,
   onOpenReview, reviewPending = false, onDismissReview,
 }) {
+  // Pinned to the CAMPAIGN's own language, not the global i18next language
+  // (see useGuestFlow.js for why — the admin panel's own UI language, set
+  // globally in Phase 2, must never bleed into a guest overlay for a
+  // different-language campaign, and vice versa).
+  const { t } = useTranslation('translation', { lng: campaignInfo?.language || 'en' });
   const [hoveringCorner, setHoveringCorner] = useState(false);
   const [reviewClicked, setReviewClicked] = useState(false);
+
+  // Built inside the component (not a module-level const) so the display
+  // text follows the campaign's language, keyed the same way as before by
+  // the backend's stable retryMessage code (see hub.js/guestQueue.js).
+  const RETRY_MESSAGES = {
+    SPIN_ABNORMAL_STOP: t('queue.retry.abnormalStop'),
+    SPIN_TOO_WEAK: t('queue.retry.tooWeak'),
+    SPIN_TOO_SHORT: t('queue.retry.tooShort'),
+  };
 
   // Reset the "thanks for reviewing" note once a new guest's form appears
   // (kiosk mode cycles through multiple guests in one overlay session).
@@ -196,7 +207,7 @@ export default function GuestFlowScreen({
   );
 
   if (view === 'loading') {
-    return <div style={fullScreenBase}>{cornerCloseZone}<div style={{ color: 'white' }}>Loading…</div></div>;
+    return <div style={fullScreenBase}>{cornerCloseZone}<div style={{ color: 'white' }}>{t('common.loading')}</div></div>;
   }
 
   if (view === 'no_campaign') {
@@ -204,7 +215,7 @@ export default function GuestFlowScreen({
       <div style={fullScreenBase}>
         {cornerCloseZone}
         <div style={{ color: 'white', fontSize: 20, fontWeight: 700, maxWidth: 420 }}>
-          No campaign is currently running. Please check back later.
+          {t('common.noCampaign')}
         </div>
       </div>
     );
@@ -213,10 +224,10 @@ export default function GuestFlowScreen({
   if (view === 'expired') {
     const expiredMessage =
       status?.status === 'skipped'
-        ? "You've been skipped — you can try again right away."
+        ? t('expired.skipped')
         : status?.status === 'cancelled'
-        ? 'Your turn was cancelled by our team.'
-        : 'Your turn has timed out.';
+        ? t('expired.cancelled')
+        : t('expired.timedOut');
     return (
       <div style={fullScreenBase}>
         {cornerCloseZone}
@@ -226,7 +237,7 @@ export default function GuestFlowScreen({
         <button onClick={onRestart} style={{
           background: 'white', color: '#002881', border: 'none', borderRadius: 10,
           padding: '13px 28px', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
-        }}>Try again</button>
+        }}>{t('expired.tryAgain')}</button>
       </div>
     );
   }
@@ -235,7 +246,7 @@ export default function GuestFlowScreen({
   // state is (the guest is already in line server-side), and only after the
   // expired check above so a cancelled/skipped guest isn't held here.
   if (view === 'queue' && reviewPending && campaignInfo?.googleReviewUrl && onDismissReview) {
-    return <ReviewGate url={campaignInfo.googleReviewUrl} onContinue={onDismissReview} />;
+    return <ReviewGate url={campaignInfo.googleReviewUrl} onContinue={onDismissReview} t={t} />;
   }
 
   if (view === 'queue' && status) {
@@ -257,10 +268,10 @@ export default function GuestFlowScreen({
           <div style={{ fontSize: 56, animation: 'confetti 0.6s ease-in-out infinite alternate' }}>🎉</div>
           <div style={{ color: 'white', maxWidth: 480, animation: 'fadeIn 0.4s ease' }}>
             <div style={{ fontSize: 13, fontWeight: 700, color: '#90DCFE', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 12 }}>
-              Thank you{status.firstName ? `, ${status.firstName}` : ''}!
+              {status.firstName ? t('result.thankYouWithName', { name: status.firstName }) : t('result.thankYou')}
             </div>
             <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.01em', lineHeight: 1.4 }}>
-              You will receive an email with your gift.
+              {t('result.emailNotice')}
             </div>
             {!!result.isTest && (
               <div style={{ marginTop: 20, fontSize: 32, fontWeight: 900, letterSpacing: '-0.02em', color: '#90DCFE' }}>
@@ -279,7 +290,7 @@ export default function GuestFlowScreen({
               background: 'rgba(255,255,255,0.08)', maxWidth: 420,
             }}>
               <div style={{ color: 'white', fontSize: 15, fontWeight: 600, marginBottom: 12 }}>
-                ❤️ Did you enjoy your experience? Leave us a review on Google!
+                {t('result.reviewInvite')}
               </div>
               <button
                 onClick={() => { onOpenReview(); setReviewClicked(true); }}
@@ -288,7 +299,7 @@ export default function GuestFlowScreen({
                   color: reviewClicked ? '#94A3B8' : '#002881', border: 'none', borderRadius: 10,
                   padding: '11px 22px', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
                 }}
-              >{reviewClicked ? 'Thanks! ✓' : 'Leave a review'}</button>
+              >{reviewClicked ? t('result.reviewThanks') : t('result.reviewLeave')}</button>
             </div>
           )}
 
@@ -301,7 +312,7 @@ export default function GuestFlowScreen({
               background: 'rgba(255,255,255,0.08)', maxWidth: 420,
             }}>
               <div style={{ color: 'white', fontSize: 15, fontWeight: 600, marginBottom: 12 }}>
-                👋 Follow us on social media!
+                {t('result.socialInvite')}
               </div>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
                 {activeSocialLinks.map((p) => (
@@ -346,14 +357,14 @@ export default function GuestFlowScreen({
                 style={{ width: 'min(52vw, 220px)', height: 'auto', filter: 'drop-shadow(0 14px 28px rgba(0,0,0,0.30))' }}
               />
               <div style={{ color: 'white', fontSize: 'clamp(30px, 8vw, 46px)', fontWeight: 900, letterSpacing: '-0.02em', lineHeight: 1.1, maxWidth: 480 }}>
-                Wait for your turn!
+                {t('queue.waitTitle')}
               </div>
               <div style={{ color: 'white', fontSize: 'clamp(18px, 5vw, 24px)', fontWeight: 700, maxWidth: 420, lineHeight: 1.35, textWrap: 'balance' }}>
-                You are number <span style={{ background: 'rgba(0,0,0,0.25)', padding: '2px 12px', borderRadius: 10, whiteSpace: 'nowrap' }}>#{status.position + 1}</span> in the queue
+                {t('queue.positionPrefix')} <span style={{ background: 'rgba(0,0,0,0.25)', padding: '2px 12px', borderRadius: 10, whiteSpace: 'nowrap' }}>#{status.position + 1}</span> {t('queue.positionSuffix')}
               </div>
               <div style={{ color: 'rgba(255,255,255,0.85)', fontSize: 14, fontWeight: 500, maxWidth: 360, lineHeight: 1.5 }}>
-                {status.activeFirstName ? `${status.activeFirstName} is currently playing. ` : ''}
-                Keep this screen open — it will turn green when it's your turn.
+                {status.activeFirstName ? t('queue.activePlaying', { name: status.activeFirstName }) : ''}
+                {t('queue.keepOpen')}
               </div>
             </div>
           ) : (
@@ -366,21 +377,21 @@ export default function GuestFlowScreen({
               {!status.launched ? (
                 <>
                   <div style={{ color: 'white', fontSize: 'clamp(22px, 6vw, 32px)', fontWeight: 800, letterSpacing: '0.02em', textTransform: 'uppercase' }}>
-                    It's your turn!
+                    {t('queue.yourTurn')}
                   </div>
                   <div style={{
                     color: 'white', fontSize: 'clamp(48px, 15vw, 104px)', fontWeight: 900, letterSpacing: '-0.03em',
                     lineHeight: 1.0, textTransform: 'uppercase', maxWidth: 720, textShadow: '0 6px 24px rgba(0,0,0,0.25)',
                     animation: 'turnPulse 1.4s ease-in-out infinite',
                   }}>
-                    Spin the wheel
+                    {t('queue.spinTheWheel')}
                   </div>
                 </>
               ) : (
                 <>
                   <img src="/logo-menu.svg" alt="" style={{ width: 84, height: 84, animation: 'spin 1.2s linear infinite' }} />
                   <div style={{ color: 'white', fontSize: 16, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                    Please wait…
+                    {t('queue.pleaseWait')}
                   </div>
                 </>
               )}
@@ -395,7 +406,7 @@ export default function GuestFlowScreen({
   // session is still being looked up) — without this the form below would
   // flash for a moment right after submitting.
   if (view === 'queue') {
-    return <div style={fullScreenBase}>{cornerCloseZone}<div style={{ color: 'white' }}>Loading…</div></div>;
+    return <div style={fullScreenBase}>{cornerCloseZone}<div style={{ color: 'white' }}>{t('common.loading')}</div></div>;
   }
 
   // ── Form ────────────────────────────────────────────────────────────────
@@ -415,8 +426,8 @@ export default function GuestFlowScreen({
             alt=""
             style={{ maxWidth: 220, maxHeight: 88, width: 'auto', height: 'auto', marginBottom: 16, objectFit: 'contain' }}
           />
-          <h1 style={{ fontSize: 22, fontWeight: 800, margin: '0 0 6px', color: '#0F172A' }}>Win your reward!</h1>
-          <p style={{ fontSize: 14, color: '#64748B', margin: 0 }}>Enter your details below to claim your gift.</p>
+          <h1 style={{ fontSize: 22, fontWeight: 800, margin: '0 0 6px', color: '#0F172A' }}>{t('form.title')}</h1>
+          <p style={{ fontSize: 14, color: '#64748B', margin: 0 }}>{t('form.subtitle')}</p>
         </div>
 
         {error && <div className="error-banner">{error}</div>}
@@ -424,34 +435,38 @@ export default function GuestFlowScreen({
         <form onSubmit={onSubmit}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
             <div className="field" style={{ marginBottom: 0 }}>
-              <label>First name</label>
+              <label>{t('form.firstName')}</label>
               <input required value={form.firstName} onChange={e => setForm({ ...form, firstName: e.target.value })} />
             </div>
             <div className="field" style={{ marginBottom: 0 }}>
-              <label>Last name</label>
+              <label>{t('form.lastName')}</label>
               <input required value={form.lastName} onChange={e => setForm({ ...form, lastName: e.target.value })} />
             </div>
           </div>
           <div className="field">
-            <label>Email address</label>
+            <label>{t('form.email')}</label>
             <input type="email" required value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
           </div>
 
           {/* Fully customizable per campaign (see routes/campaigns.js's
               campaign_fields, scope='guest') — firstName/lastName/email
-              above are the only fields that are always present and required. */}
+              above are the only fields that are always present and required.
+              selectPlaceholder is the one bit of fixed chrome this shared
+              component owns itself (its field label/options are the admin's
+              own text, never translated) — see DynamicFieldInput.jsx. */}
           {(campaignInfo?.guestFields || []).map((f) => (
             <DynamicFieldInput
               key={f.id}
               field={f}
               value={form.customFields[f.label]}
               onChange={(v) => setForm({ ...form, customFields: { ...form.customFields, [f.label]: v } })}
+              selectPlaceholder={t('form.selectPlaceholder')}
             />
           ))}
 
           <label style={{ display: 'flex', gap: 10, alignItems: 'flex-start', fontSize: 12, color: '#64748B', cursor: 'pointer', margin: '12px 0 20px', lineHeight: 1.5 }}>
             <input type="checkbox" checked={form.consent} onChange={e => setForm({ ...form, consent: e.target.checked })} style={{ marginTop: 2, flexShrink: 0 }} />
-            I agree to receive my reward by email and consent to the processing of my personal data.
+            {t('form.consent')}
           </label>
           <button type="submit" disabled={busy} style={{
             width: '100%', background: '#09B2FD', color: '#03041A', border: 'none',
@@ -459,7 +474,7 @@ export default function GuestFlowScreen({
             cursor: busy ? 'not-allowed' : 'pointer', opacity: busy ? 0.5 : 1,
             fontFamily: 'inherit', letterSpacing: '0.02em',
           }}>
-            {busy ? 'PLEASE WAIT…' : 'CHECK AND SPIN THE WHEEL'}
+            {busy ? t('form.submitBusy') : t('form.submitIdle')}
           </button>
         </form>
       </div>

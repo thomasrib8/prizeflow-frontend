@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { useWheelSocket } from '../hooks/useWheelSocket';
 import { useLaunchQueue, toggleValue } from '../hooks/useLaunchQueue';
@@ -56,6 +57,7 @@ export default function LaunchPWA() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation('admin');
   usePwaManifest();
 
   const { agentConnected } = useWheelSocket();
@@ -81,12 +83,12 @@ export default function LaunchPWA() {
             <img src="/pwa-brand-mark.svg" alt="" className="pwa-brand-logo" />
             <span>SPARK</span>
           </div>
-          <button type="button" className="pwa-signout" onClick={() => { logout(); navigate('/login'); }}>Sign out</button>
+          <button type="button" className="pwa-signout" onClick={() => { logout(); navigate('/login'); }}>{t('pwa.signOut')}</button>
         </div>
         <div className="pwa-topbar-row">
-          <Badge tone={agentConnected ? 'green' : 'red'}>{agentConnected ? 'Wheel ready' : 'Wheel offline'}</Badge>
+          <Badge tone={agentConnected ? 'green' : 'red'}>{agentConnected ? t('pwa.wheelReady') : t('pwa.wheelOffline')}</Badge>
           <span className="pwa-campaign-name">
-            {q.campaign === undefined ? 'Loading…' : q.campaign === null ? 'No active campaign' : q.campaign.name}
+            {q.campaign === undefined ? t('common.loading') : q.campaign === null ? t('pwa.noActiveCampaignLabel') : q.campaign.name}
           </span>
         </div>
       </header>
@@ -100,7 +102,7 @@ export default function LaunchPWA() {
       <div className="pwa-actions">
         {q.scanEnabled && q.campaign && (
           <label className="btn btn-secondary pwa-action-btn" style={{ cursor: 'pointer' }}>
-            📷 Scan the badge
+            {t('pwa.scanBadge')}
             <input
               type="file"
               accept="image/*"
@@ -121,26 +123,26 @@ export default function LaunchPWA() {
             style={{ width: '100%' }}
             onClick={() => { setScanFile(null); setShowNewProspect(true); }}
           >
-            + New prospect
+            {t('pwa.newProspect')}
           </Button>
         </div>
       </div>
 
       {q.campaign === null && (
         <div className="pwa-section">
-          <EmptyState title="No campaign is currently active" description="Ask an admin to start one from the Campaigns page." />
+          <EmptyState title={t('pwa.noCampaignTitle')} description={t('pwa.noCampaignDescription')} />
         </div>
       )}
 
       {q.campaign && (
         <section className="pwa-section">
-          <h2 className="pwa-section-title">Live queue</h2>
+          <h2 className="pwa-section-title">{t('pwa.liveQueueTitle')}</h2>
           {!q.queue ? (
-            <p className="page-subtitle">Loading…</p>
+            <p className="page-subtitle">{t('common.loading')}</p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
               <div>
-                <div className="pwa-subhead">Currently playing</div>
+                <div className="pwa-subhead">{t('pwa.currentlyPlaying')}</div>
                 {q.queue.active ? (
                   <div>
                     <div style={{ fontSize: 16, fontWeight: 700, color: '#03041A' }}>
@@ -151,34 +153,34 @@ export default function LaunchPWA() {
                       >
                         {q.queue.active.firstName}
                       </button>
-                      {' '}— {q.queue.active.launched ? 'spinning…' : 'waiting to spin'}
+                      {' '}— {q.queue.active.launched ? t('pwa.spinning') : t('pwa.waitingToSpin')}
                     </div>
                     {q.queue.active.retryMessage && (
                       <div style={{ marginTop: 4, fontSize: 12, color: '#EF4444' }}>{q.queue.active.retryMessage}</div>
                     )}
                     {q.queue.active.giftName && (
                       <div style={{ fontSize: 13, color: '#64748B', marginTop: 4 }}>
-                        Will win: <strong style={{ color: '#0055F8' }}>{q.queue.active.giftName}</strong>
+                        {t('pwa.willWin')} <strong style={{ color: '#0055F8' }}>{q.queue.active.giftName}</strong>
                       </div>
                     )}
                     <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
                       <button type="button" className="pwa-queue-btn pwa-queue-btn-skip" disabled={q.queueActionBusy} onClick={q.handleSkipPlayer}>
-                        Passer le joueur
+                        {t('pwa.skipPlayer')}
                       </button>
                       <button type="button" className="pwa-queue-btn pwa-queue-btn-cancel" disabled={q.queueActionBusy} onClick={q.handleCancelPlayer}>
-                        Annuler le joueur
+                        {t('pwa.cancelPlayer')}
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <p className="page-subtitle" style={{ margin: 0 }}>Nobody right now</p>
+                  <p className="page-subtitle" style={{ margin: 0 }}>{t('pwa.nobodyRightNow')}</p>
                 )}
               </div>
 
               <div>
-                <div className="pwa-subhead">Waiting ({q.queue.waiting.length})</div>
+                <div className="pwa-subhead">{t('pwa.waitingLabel', { count: q.queue.waiting.length })}</div>
                 {q.queue.waiting.length === 0 ? (
-                  <p className="page-subtitle" style={{ margin: 0 }}>No one in line</p>
+                  <p className="page-subtitle" style={{ margin: 0 }}>{t('pwa.noOneInLine')}</p>
                 ) : (
                   <ol style={{ margin: 0, paddingLeft: 20, fontSize: 14, color: '#334155' }}>
                     {q.queue.waiting.map((w, i) => <li key={i}>{w.firstName}</li>)}
@@ -192,27 +194,27 @@ export default function LaunchPWA() {
 
       {q.campaign && (
         <section className="pwa-section">
-          <h2 className="pwa-section-title">Last 20 players</h2>
-          <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 12px' }}>Tap a name to add a note, rating or segment.</p>
+          <h2 className="pwa-section-title">{t('pwa.last20PlayersTitle')}</h2>
+          <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 12px' }}>{t('pwa.tapNameHint')}</p>
 
           {q.recentPlayers && q.recentPlayers.length > 0 && (
             <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
               <input
-                placeholder="Search…"
+                placeholder={t('pwa.searchPlaceholder')}
                 value={q.playerSearch}
                 onChange={(e) => q.setPlayerSearch(e.target.value)}
                 style={{ flex: 1, minWidth: 0, padding: '10px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 14 }}
               />
               <Button variant="secondary" onClick={() => setPlayerFiltersOpen(true)} style={{ flexShrink: 0, whiteSpace: 'nowrap' }}>
-                Filters{q.playerActiveFilterCount > 0 ? ` (${q.playerActiveFilterCount})` : ''}
+                {t('pwa.filters')}{q.playerActiveFilterCount > 0 ? ` (${q.playerActiveFilterCount})` : ''}
               </Button>
             </div>
           )}
 
-          {!q.recentPlayers && <p className="page-subtitle">Loading…</p>}
-          {q.recentPlayers && q.recentPlayers.length === 0 && <p className="page-subtitle">No players yet.</p>}
+          {!q.recentPlayers && <p className="page-subtitle">{t('common.loading')}</p>}
+          {q.recentPlayers && q.recentPlayers.length === 0 && <p className="page-subtitle">{t('pwa.noPlayersYet')}</p>}
           {q.recentPlayers && q.recentPlayers.length > 0 && q.filteredRecentPlayers.length === 0 && (
-            <p className="page-subtitle">No players match your search or filters.</p>
+            <p className="page-subtitle">{t('pwa.noPlayersMatch')}</p>
           )}
 
           <div className="pwa-player-list">
@@ -229,7 +231,7 @@ export default function LaunchPWA() {
                     <span className="pwa-player-gift">{p.gift_name}</span>
                   ) : (
                     <span className="pwa-player-nogift">
-                      {p.outcome === 'manual' ? 'No gift' : `No gift · ${p.outcome === 'cancelled' ? 'cancelled' : 'skipped'}`}
+                      {p.outcome === 'manual' ? t('pwa.noGift') : p.outcome === 'cancelled' ? t('pwa.noGiftCancelled') : t('pwa.noGiftSkipped')}
                     </span>
                   )}
                   {p.segment && <span className="pwa-player-segment">{p.segment}</span>}
@@ -246,19 +248,19 @@ export default function LaunchPWA() {
         <div className="modal-overlay">
           <div className="modal-card">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>Filters</h3>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>{t('pwa.filters')}</h3>
               {q.playerActiveFilterCount > 0 && (
                 <button
                   onClick={() => { q.setPlayerFilterGifts([]); q.setPlayerFilterSegments([]); }}
                   style={{ background: 'none', border: 'none', padding: 0, color: 'var(--link)', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
-                >Clear all</button>
+                >{t('pwa.clearAll')}</button>
               )}
             </div>
-            <FilterGroup title="Gift" options={q.playerGiftOptions} selected={q.playerFilterGifts}
+            <FilterGroup title={t('common.gift')} options={q.playerGiftOptions} selected={q.playerFilterGifts}
               onToggle={(v) => q.setPlayerFilterGifts(toggleValue(q.playerFilterGifts, v))} />
-            <FilterGroup title="Segment" options={q.playerSegmentOptions} selected={q.playerFilterSegments}
+            <FilterGroup title={t('common.segment')} options={q.playerSegmentOptions} selected={q.playerFilterSegments}
               onToggle={(v) => q.setPlayerFilterSegments(toggleValue(q.playerFilterSegments, v))} />
-            <Button onClick={() => setPlayerFiltersOpen(false)} style={{ marginTop: 4 }}>Done</Button>
+            <Button onClick={() => setPlayerFiltersOpen(false)} style={{ marginTop: 4 }}>{t('common.done')}</Button>
           </div>
         </div>
       )}

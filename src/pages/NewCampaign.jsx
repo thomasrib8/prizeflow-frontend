@@ -16,6 +16,18 @@ import { SALES_FIELD_TYPES, GUEST_FIELD_TYPES } from '../components/fieldTypes';
 // (0-11, or null while it hasn't been placed yet) is the wheel case it ended
 // up on — that's what becomes the campaign slot's slotIndex on submit.
 const EMPTY_GIFTS = Array.from({ length: CASE_COUNT }, (_, i) => ({ id: i, caseIndex: null, giftName: '', stock: 0, redeemMethod: 'qr', persoDelivery: 'qr', persoSubject: '', persoBody: '', persoAutoDistribute: false }));
+// The language the *guest* sees throughout the play flow (form, queue,
+// wheel, result screen, reward email) — independent of the admin panel's own
+// language, which stays English for now (see the "Multilingue" plan's
+// Phase 2). Defaults to English, matching campaigns.language's DB default,
+// so a campaign an admin never touches this field for looks exactly like it
+// always has.
+const LANGUAGE_OPTIONS = [
+  { value: 'en', label: 'English' },
+  { value: 'fr', label: 'Français' },
+  { value: 'es', label: 'Español' },
+  { value: 'de', label: 'Deutsch' },
+];
 const STEPS = [
   { n: 1, label: 'Gifts' },
   { n: 2, label: 'Segmentation & sales form' },
@@ -38,6 +50,7 @@ export default function NewCampaign() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [eventName, setEventName] = useState('');
+  const [language, setLanguage] = useState('en');
   const [gifts, setGifts] = useState(EMPTY_GIFTS);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
@@ -186,7 +199,7 @@ export default function NewCampaign() {
     const active = gifts.filter((g) => g.caseIndex !== null);
     try {
       const created = await api.createCampaign({
-        name, description, eventName, isTest,
+        name, description, eventName, language, isTest,
         slots: active.map(g => ({
           slotIndex: g.caseIndex,
           giftName: g.giftName,
@@ -246,6 +259,15 @@ export default function NewCampaign() {
               <div className="field">
                 <label>Event name (optional)</label>
                 <input value={eventName} onChange={e => setEventName(e.target.value)} placeholder="e.g. Salon de l'Habitat Paris 2026" />
+              </div>
+              <div className="field">
+                <label>Guest language</label>
+                <select value={language} onChange={e => setLanguage(e.target.value)} style={{ width: '100%', padding: '10px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 14, fontFamily: 'inherit' }}>
+                  {LANGUAGE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+                <div style={{ fontSize: 12, color: '#94A3B8', marginTop: 4 }}>
+                  The language guests see in the form, queue and reward email — not the admin panel's own language.
+                </div>
               </div>
               {templates && templates.length > 0 && (
                 <div className="field">

@@ -3,6 +3,15 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../api/client';
 import { Card, Button } from '../components/ui';
 
+// The language guests see throughout the play flow — see NewCampaign.jsx's
+// LANGUAGE_OPTIONS for why this is separate from the admin panel's language.
+const LANGUAGE_OPTIONS = [
+  { value: 'en', label: 'English' },
+  { value: 'fr', label: 'Français' },
+  { value: 'es', label: 'Español' },
+  { value: 'de', label: 'Deutsch' },
+];
+
 // Edits an already-launched campaign's gifts in place — name, redeem method,
 // and (for 'perso') its delivery/subject/body/auto-distribute. Deliberately
 // excludes stock (shown read-only) and never adds/removes cases — only the
@@ -14,6 +23,7 @@ export default function EditCampaign() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [eventName, setEventName] = useState('');
+  const [language, setLanguage] = useState('en');
   const [slots, setSlots] = useState([]);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
@@ -23,6 +33,7 @@ export default function EditCampaign() {
       setName(source.name || '');
       setDescription(source.description || '');
       setEventName(source.event_name || '');
+      setLanguage(source.language || 'en');
       if (source.status === 'archived') {
         setError('Archived campaigns are read-only.');
         setCampaign(source);
@@ -59,7 +70,7 @@ export default function EditCampaign() {
     }
     setSaving(true);
     try {
-      await api.updateCampaignDetails(id, { name, description, eventName });
+      await api.updateCampaignDetails(id, { name, description, eventName, language });
       await api.updateCampaignSlots(id, {
         slots: slots.map((s) => ({
           slotIndex: s.slotIndex,
@@ -103,6 +114,15 @@ export default function EditCampaign() {
             <div className="field">
               <label>Event name (optional)</label>
               <input value={eventName} onChange={(e) => setEventName(e.target.value)} placeholder="e.g. Salon de l'Habitat Paris 2026" />
+            </div>
+            <div className="field">
+              <label>Guest language</label>
+              <select value={language} onChange={(e) => setLanguage(e.target.value)} style={{ width: '100%', padding: '10px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 14, fontFamily: 'inherit' }}>
+                {LANGUAGE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
+              <div style={{ fontSize: 12, color: '#94A3B8', marginTop: 4 }}>
+                The language guests see in the form, queue and reward email — not the admin panel's own language.
+              </div>
             </div>
           </Card>
 

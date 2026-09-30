@@ -18,6 +18,42 @@ const SERVICE_LABEL = { operational: 'Operational', degraded: 'Degraded', outage
 const QUOTA_TONE_ICON = { green: '🟢', orange: '🟠', red: '🔴' };
 const QUOTA_TONE_BADGE = { green: 'green', orange: 'orange', red: 'red' };
 
+// Generic "State" + custom rows table for a quota-checked provider (Hunter,
+// Bouncer) — same row-table look as EmailQuotaTable, but the two providers'
+// data shapes differ too much to share that component directly. `hasData`
+// tells apart "configured and the check succeeded" from "configured but the
+// quota check itself failed" (bad key, network) — both are distinct from
+// "not configured at all".
+function ProviderQuotaTable({ status, hasData, rows }) {
+  const connected = status?.configured && hasData(status);
+  const state = !status
+    ? { icon: '⚪', label: '—' }
+    : !status.configured
+    ? { icon: '⚪', label: 'Not configured' }
+    : connected
+    ? { icon: '🟢', label: 'Connected' }
+    : { icon: '🟠', label: "Couldn't check" };
+
+  return (
+    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+      <tbody>
+        <tr>
+          <td style={{ padding: '7px 0', color: 'var(--text-muted)', borderBottom: '1px solid var(--border-light)' }}>State</td>
+          <td style={{ padding: '7px 0', fontWeight: 500, textAlign: 'right', borderBottom: '1px solid var(--border-light)' }}>
+            {state.icon} {state.label}
+          </td>
+        </tr>
+        {connected && rows(status).map(([label, value], i) => (
+          <tr key={i}>
+            <td style={{ padding: '7px 0', color: 'var(--text-muted)', borderBottom: '1px solid var(--border-light)' }}>{label}</td>
+            <td style={{ padding: '7px 0', fontWeight: 500, textAlign: 'right', borderBottom: '1px solid var(--border-light)' }}>{value}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
 function ServiceBadge({ name, status }) {
   const tone = SERVICE_TONE[status?.tone] || 'neutral';
   const label = SERVICE_LABEL[status?.tone] || 'Unknown';
@@ -76,6 +112,32 @@ export default function AppHealth() {
 
           <Card title="Email quota" className="mt-card" action={<span style={{ fontSize: 11, color: '#94A3B8' }}>Brevo</span>}>
             <EmailQuotaTable status={health.emailStatus} />
+          </Card>
+
+          <Card title="Email finding quota" className="mt-card" action={<span style={{ fontSize: 11, color: '#94A3B8' }}>Hunter.io</span>}>
+            <ProviderQuotaTable
+              status={health.apiQuotaStatus?.hunter}
+              hasData={(s) => !!(s.searches || s.credits || s.planName)}
+              rows={(s) => [
+                ['Plan', s.planName || '—'],
+                s.searches
+                  ? ['Searches', `${s.searches.used.toLocaleString()} / ${s.searches.available.toLocaleString()} (${s.searches.remaining.toLocaleString()} left)`]
+                  : s.credits
+                  ? ['Credits', `${s.credits.used.toLocaleString()} / ${s.credits.available.toLocaleString()} (${s.credits.remaining.toLocaleString()} left)`]
+                  : ['Searches', '—'],
+                ['Resets', s.resetDate || '—'],
+              ]}
+            />
+          </Card>
+
+          <Card title="Verification quota" className="mt-card" action={<span style={{ fontSize: 11, color: '#94A3B8' }}>Bouncer</span>}>
+            <ProviderQuotaTable
+              status={health.apiQuotaStatus?.bouncer}
+              hasData={(s) => s.credits != null}
+              rows={(s) => [
+                ['Credits remaining', s.credits != null ? s.credits.toLocaleString() : '—'],
+              ]}
+            />
           </Card>
 
           {health.emailStatus?.quotaPercentUsed !== null && health.emailStatus?.quotaPercentUsed !== undefined && (

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { Button } from './ui';
 import DynamicFieldInput from './DynamicFieldInput';
@@ -23,6 +24,7 @@ const EMPTY_FORM = { firstName: '', lastName: '', email: '' };
 // on their own phone. Since the person ticked nothing themselves, the rep
 // attests they agreed to be contacted and to get their gift by email.
 export default function NewProspectModal({ campaign, initialFile = null, scanEnabled = false, onClose, onCreated }) {
+  const { t } = useTranslation('admin');
   const guestFields = (campaign.fields || []).filter((f) => f.scope === 'guest');
   const salesFields = (campaign.fields || []).filter((f) => f.scope === 'sales');
   const segmentCategories = campaign.segmentCategories || [];
@@ -102,7 +104,7 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
       }
       const result = await api.scanProspectImage(campaign.id, blob);
       if (result.documentType === 'unreadable' || (!result.fields.firstName && !result.fields.lastName && !result.fields.email)) {
-        setScan({ state: 'error', message: "Couldn't find any contact details on this photo. Try again with better light, or fill the form in by hand." });
+        setScan({ state: 'error', message: t('newProspectModal.scanUnreadable') });
         return;
       }
       applyReading(result, 'photo');
@@ -209,15 +211,15 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
   // Fields the reader wasn't sure about get an amber outline.
   const doubtful = (key) => scan.state === 'done' && ['low', 'medium'].includes(scan.confidence?.[key]);
   const flagStyle = (key) => (doubtful(key) ? { borderColor: '#F59E0B', background: '#FFFBEB' } : undefined);
-  const doubtHint = (key) => doubtful(key) && <div style={{ fontSize: 11, color: '#B45309', marginTop: 3 }}>Please check this one — it was hard to read.</div>;
+  const doubtHint = (key) => doubtful(key) && <div style={{ fontSize: 11, color: '#B45309', marginTop: 3 }}>{t('newProspectModal.checkFieldHint')}</div>;
   const noEmailOnBadge = scan.state === 'done' && !form.email;
 
   return (
     <div className="modal-overlay">
       <form ref={formRef} className="modal-card" style={{ '--modal-w': '560px' }} onSubmit={(e) => e.preventDefault()}>
-        <h3 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 800 }}>New prospect</h3>
+        <h3 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 800 }}>{t('newProspectModal.title')}</h3>
         <p style={{ margin: '0 0 16px', fontSize: 13, color: '#64748B' }}>
-          Add someone to <strong>{campaign.name}</strong> without them filling in anything.
+          {t('newProspectModal.subtitlePrefix')} <strong>{campaign.name}</strong> {t('newProspectModal.subtitleSuffix')}
         </p>
 
         {scanEnabled && (
@@ -231,15 +233,15 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
               onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; handleFile(f); }}
             />
             <Button type="button" variant="secondary" disabled={scan.state === 'reading' || saving} onClick={() => fileInputRef.current?.click()}>
-              {scan.state === 'reading' ? 'Reading the photo…' : scan.state === 'done' ? '📷 Scan another' : '📷 Scan a badge or business card'}
+              {scan.state === 'reading' ? t('newProspectModal.scanReading') : scan.state === 'done' ? t('newProspectModal.scanAnother') : t('newProspectModal.scanBadgeOrCard')}
             </Button>
             {scan.state === 'idle' && (
-              <div style={{ fontSize: 12, color: '#64748B', marginTop: 8 }}>Take a photo and the details below are filled in for you.</div>
+              <div style={{ fontSize: 12, color: '#64748B', marginTop: 8 }}>{t('newProspectModal.scanIdleHint')}</div>
             )}
             {scan.state === 'done' && (
               <div style={{ fontSize: 12, color: '#047857', marginTop: 8, fontWeight: 600 }}>
-                ✓ {scan.source === 'qr' ? 'Details read from the QR code.' : 'Details read from the photo.'}{' '}
-                <span style={{ color: '#64748B', fontWeight: 500 }}>Check them before saving.</span>
+                ✓ {scan.source === 'qr' ? t('newProspectModal.scanDoneQr') : t('newProspectModal.scanDonePhoto')}{' '}
+                <span style={{ color: '#64748B', fontWeight: 500 }}>{t('newProspectModal.scanDoneCheckHint')}</span>
               </div>
             )}
             {scan.state === 'error' && <div style={{ fontSize: 12, color: '#B91C1C', marginTop: 8 }}>{scan.message}</div>}
@@ -248,21 +250,21 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
 
         {error && <div className="error-banner">{error}</div>}
 
-        <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', marginBottom: 8 }}>Contact</div>
+        <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', marginBottom: 8 }}>{t('newProspectModal.contactSectionTitle')}</div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
           <div className="field" style={{ marginBottom: 0 }}>
-            <label>First name *</label>
+            <label>{t('newProspectModal.firstNameLabel')}</label>
             <input required value={form.firstName} style={flagStyle('firstName')} onChange={(e) => setForm({ ...form, firstName: e.target.value })} />
             {doubtHint('firstName')}
           </div>
           <div className="field" style={{ marginBottom: 0 }}>
-            <label>Last name *</label>
+            <label>{t('newProspectModal.lastNameLabel')}</label>
             <input required value={form.lastName} style={flagStyle('lastName')} onChange={(e) => setForm({ ...form, lastName: e.target.value })} />
             {doubtHint('lastName')}
           </div>
         </div>
         <div className="field">
-          <label>Email address</label>
+          <label>{t('newProspectModal.emailLabel')}</label>
           <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
             <input
               type="email"
@@ -275,45 +277,45 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
               variant="secondary"
               disabled={hunterSearch.state === 'searching' || !form.firstName.trim() || !form.lastName.trim() || !company.trim()}
               onClick={() => runHunterSearch(form.firstName.trim(), form.lastName.trim(), company.trim())}
-              title={!company.trim() ? 'Fill in their company first' : undefined}
+              title={!company.trim() ? t('newProspectModal.fillCompanyFirstTitle') : undefined}
               style={{ flexShrink: 0, whiteSpace: 'nowrap' }}
             >
-              {hunterSearch.state === 'searching' ? 'Searching…' : 'Find email'}
+              {hunterSearch.state === 'searching' ? t('newProspectModal.searchingBtn') : t('newProspectModal.findEmailBtn')}
             </Button>
           </div>
           {doubtHint('email')}
           {hunterSearch.state === 'searching' && (
             <>
-              <div style={{ fontSize: 11, color: '#7C3AED', marginTop: 5, fontWeight: 600 }}>🔍 Searching for their email via Hunter.io…</div>
+              <div style={{ fontSize: 11, color: '#7C3AED', marginTop: 5, fontWeight: 600 }}>{t('newProspectModal.searchingHunter')}</div>
               <div className="hunter-search-bar" />
             </>
           )}
           {hunterSearch.state === 'found' && (
             <div style={{ fontSize: 11, color: '#7C3AED', marginTop: 3, fontWeight: 600 }}>
-              ✓ Found automatically via Hunter.io{hunterSearch.score != null ? ` (confidence ${hunterSearch.score}/100)` : ''} — check it before saving.
+              {hunterSearch.score != null ? t('newProspectModal.hunterFoundWithScore', { score: hunterSearch.score }) : t('newProspectModal.hunterFound')}
             </div>
           )}
           {hunterSearch.state === 'not_found' && (
             <div style={{ fontSize: 11, color: '#B45309', marginTop: 3 }}>
-              Hunter.io couldn't find an email for them. You can add one by hand, or leave it blank — their gift is held until you do.
+              {t('newProspectModal.hunterNotFound')}
             </div>
           )}
           {hunterSearch.state === 'error' && (
             <div style={{ fontSize: 11, color: '#B45309', marginTop: 3 }}>
-              Couldn't reach Hunter.io just now. You can add their email by hand, or leave it blank — their gift is held until you do.
+              {t('newProspectModal.hunterError')}
             </div>
           )}
           {hunterSearch.state === 'idle' && !form.email && (
             <div style={{ fontSize: 11, color: noEmailOnBadge ? '#B45309' : '#64748B', marginTop: 3 }}>
-              {noEmailOnBadge ? 'No email on this badge. ' : ''}
+              {noEmailOnBadge ? t('newProspectModal.noEmailOnBadge') : ''}
               {company.trim()
-                ? "We'll try to find their email automatically from their company. If we can't, their gift is held until you add one."
-                : 'Add their company below and we’ll try to find their email automatically — or add it later; if they win, their gift is held until you do.'}
+                ? t('newProspectModal.willTryFindCompany')
+                : t('newProspectModal.addCompanyHint')}
             </div>
           )}
         </div>
         <div className="field">
-          <label>Company</label>
+          <label>{t('newProspectModal.companyLabel')}</label>
           <input value={company} style={flagStyle('company')} onChange={(e) => setCompany(e.target.value)} />
           {doubtHint('company')}
         </div>
@@ -334,7 +336,7 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
                 color: 'var(--text-muted)', cursor: 'pointer', userSelect: 'none',
               }}
             >
-              Sales info
+              {t('newProspectModal.salesInfoSummary')}
             </summary>
             <div style={{ marginTop: 12 }}>
               {segmentCategories.map((cat) => (
@@ -358,18 +360,18 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
         )}
 
         <div className="field">
-          <label>Note</label>
+          <label>{t('common.noteLabel')}</label>
           <textarea
             rows={3}
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="Add a note about this prospect…"
+            placeholder={t('newProspectModal.notePlaceholder')}
             style={{ width: '100%', fontFamily: 'inherit', resize: 'vertical' }}
           />
         </div>
 
         <div className="field">
-          <label>Potentiel du lead</label>
+          <label>{t('common.leadPotential')}</label>
           <div style={{ display: 'flex', gap: 6 }}>
             {STARS.map((n) => (
               <button
@@ -386,35 +388,35 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
               </button>
             ))}
           </div>
-          {leadRating == null && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>Not rated yet — this is different from a low rating.</div>}
+          {leadRating == null && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('common.notRatedHint')}</div>}
         </div>
 
         <div className="field">
-          <label>Tag</label>
-          <input placeholder="A free label you can attach to this prospect" value={tags} onChange={(e) => setTags(e.target.value)} />
+          <label>{t('common.tagLabel')}</label>
+          <input placeholder={t('newProspectModal.tagPlaceholder')} value={tags} onChange={(e) => setTags(e.target.value)} />
         </div>
 
         <label style={{ display: 'flex', gap: 10, alignItems: 'flex-start', fontSize: 13, color: '#334155', cursor: 'pointer', margin: '16px 0 4px', lineHeight: 1.45 }}>
           <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} style={{ marginTop: 2, flexShrink: 0, width: 18, height: 18 }} />
-          <span>This person agreed to be contacted and to receive their gift by email. <span style={{ color: '#94A3B8' }}>(Recorded with your name.)</span></span>
+          <span>{t('newProspectModal.consentText')} <span style={{ color: '#94A3B8' }}>{t('newProspectModal.consentRecordedNote')}</span></span>
         </label>
 
         {duplicate && (
           <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: 12, marginTop: 12, fontSize: 13, color: '#92400E' }}>
             {duplicate.message}
             <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
-              <Button type="button" size="sm" disabled={saving} onClick={() => submit(duplicate.addToQueue, true)}>It's someone else — add anyway</Button>
-              <Button type="button" size="sm" variant="secondary" onClick={() => setDuplicate(null)}>Let me check</Button>
+              <Button type="button" size="sm" disabled={saving} onClick={() => submit(duplicate.addToQueue, true)}>{t('newProspectModal.duplicateAddAnyway')}</Button>
+              <Button type="button" size="sm" variant="secondary" onClick={() => setDuplicate(null)}>{t('newProspectModal.duplicateLetMeCheck')}</Button>
             </div>
           </div>
         )}
 
         <div style={{ display: 'flex', gap: 10, marginTop: 22, flexWrap: 'wrap' }}>
-          {canQueue && <Button type="button" disabled={saving || !consent} onClick={() => submit(true)}>{saving ? 'Adding…' : 'Save & add to queue'}</Button>}
-          <Button type="button" variant={canQueue ? 'secondary' : 'primary'} disabled={saving || !consent} onClick={() => submit(false)}>Save only</Button>
-          <Button type="button" variant="secondary" onClick={onClose} disabled={saving}>Cancel</Button>
+          {canQueue && <Button type="button" disabled={saving || !consent} onClick={() => submit(true)}>{saving ? t('newProspectModal.addingBtn') : t('newProspectModal.saveAddToQueueBtn')}</Button>}
+          <Button type="button" variant={canQueue ? 'secondary' : 'primary'} disabled={saving || !consent} onClick={() => submit(false)}>{t('newProspectModal.saveOnlyBtn')}</Button>
+          <Button type="button" variant="secondary" onClick={onClose} disabled={saving}>{t('common.cancel')}</Button>
         </div>
-        {!consent && <div style={{ fontSize: 11, color: '#94A3B8', marginTop: 8 }}>Tick the box above to save.</div>}
+        {!consent && <div style={{ fontSize: 11, color: '#94A3B8', marginTop: 8 }}>{t('newProspectModal.tickToSaveHint')}</div>}
       </form>
     </div>
   );

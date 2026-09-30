@@ -111,6 +111,25 @@
   flex-shrink: 0;
 }
 
+.language-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(255,255,255,0.12);
+  color: white;
+  border: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  font-family: inherit;
+}
+.language-pill:focus { outline: 1px solid rgba(255,255,255,0.5); }
+.language-pill option { color: #03041A; }
+
 .user-row {
   display: flex;
   align-items: center;

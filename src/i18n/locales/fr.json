@@ -1,0 +1,61 @@
+{
+  "common": {
+    "loading": "Chargement…",
+    "noCampaign": "Aucune campagne n'est active pour le moment. Revenez plus tard."
+  },
+  "expired": {
+    "skipped": "Vous avez été passé — vous pouvez retenter votre chance tout de suite.",
+    "cancelled": "Votre tour a été annulé par notre équipe.",
+    "timedOut": "Votre tour a expiré.",
+    "tryAgain": "Réessayer"
+  },
+  "reviewGate": {
+    "title": "Laissez-nous un avis Google !",
+    "body": "Cela ne prend qu'une minute et nous aide beaucoup. C'est totalement facultatif — vous pourrez jouer dans tous les cas.",
+    "leaveReview": "Laisser un avis",
+    "leaveReviewAgain": "Laissez-nous un avis Google",
+    "openedNote": "La page d'avis s'est ouverte dans un nouvel onglet. Une fois terminé, revenez sur cet onglet — votre partie vous attend.",
+    "skip": "Non merci, continuer"
+  },
+  "queue": {
+    "waitTitle": "Attendez votre tour !",
+    "positionPrefix": "Vous êtes le numéro",
+    "positionSuffix": "dans la file",
+    "activePlaying": "{{name}} est en train de jouer. ",
+    "keepOpen": "Gardez cet écran ouvert — il passera au vert quand ce sera votre tour.",
+    "yourTurn": "C'est votre tour !",
+    "spinTheWheel": "Lancez la roue",
+    "pleaseWait": "Veuillez patienter…",
+    "retry": {
+      "abnormalStop": "⚠ Un arrêt inattendu a été détecté pendant le lancer. Merci de relancer la roue.",
+      "tooWeak": "⚡ Merci de ne pas toucher la roue — relancez-la.",
+      "tooShort": "⏱ La roue n'a pas atteint la bonne case à temps. Merci de relancer."
+    }
+  },
+  "result": {
+    "thankYou": "Merci !",
+    "thankYouWithName": "Merci, {{name}} !",
+    "emailNotice": "Vous allez recevoir un email avec votre cadeau.",
+    "reviewInvite": "❤️ Vous avez aimé votre expérience ? Laissez-nous un avis sur Google !",
+    "reviewLeave": "Laisser un avis",
+    "reviewThanks": "Merci ! ✓",
+    "socialInvite": "👋 Suivez-nous sur les réseaux sociaux !"
+  },
+  "form": {
+    "title": "Gagnez votre cadeau !",
+    "subtitle": "Renseignez vos informations ci-dessous pour tenter votre chance.",
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "email": "Adresse email",
+    "consent": "J'accepte de recevoir mon cadeau par email et je consens au traitement de mes données personnelles.",
+    "submitBusy": "VEUILLEZ PATIENTER…",
+    "submitIdle": "VALIDER ET LANCER LA ROUE",
+    "selectPlaceholder": "— Sélectionner —"
+  },
+  "errors": {
+    "consentRequired": "Le consentement est requis pour tenter votre chance.",
+    "fieldRequired": "« {{label}} » est requis",
+    "alreadyPlayed": "Cet email a déjà joué à cette campagne. Chaque participant ne peut jouer qu'une seule fois.",
+    "noActiveCampaign": "Cette campagne n'est pas active pour le moment."
+  }
+}

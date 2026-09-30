@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { Button } from './ui';
 import DynamicFieldInput from './DynamicFieldInput';
@@ -17,10 +18,10 @@ const STARS = [1, 2, 3];
 // rep who forgets to tap stop doesn't leave the mic open indefinitely.
 const SILENCE_TIMEOUT_MS = 8000;
 
-function formatFieldValue(field, raw) {
+function formatFieldValue(field, raw, t) {
   if (raw == null || raw === '') return null;
   if (field.fieldType === 'multi_choice') return Array.isArray(raw) ? raw.join(', ') : raw;
-  if (field.fieldType === 'checkbox') return raw ? 'Yes' : null;
+  if (field.fieldType === 'checkbox') return raw ? t('common.yes') : null;
   return String(raw);
 }
 
@@ -34,6 +35,7 @@ function formatFieldValue(field, raw) {
 // everything down, so both entry points always show the exact same
 // up-to-date info regardless of how stale the caller's own list was.
 export default function ProspectCard({ campaignId, guest, initialMode = 'edit', onClose, onSaved }) {
+  const { t } = useTranslation('admin');
   const [mode, setMode] = useState(initialMode);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -233,7 +235,7 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
     }
   }
 
-  const displayName = `${guest.firstName || ''} ${guest.lastName || ''}`.trim() || 'Guest';
+  const displayName = `${guest.firstName || ''} ${guest.lastName || ''}`.trim() || t('common.guestFallback');
   const activeSegments = segmentCategories
     .map((cat) => ({ name: cat.name, value: segments[cat.name] }))
     .filter((s) => s.value);
@@ -242,7 +244,7 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
     <div className="modal-overlay">
       <div className="modal-card">
         {loading ? (
-          <p className="page-subtitle">Loading…</p>
+          <p className="page-subtitle">{t('common.loading')}</p>
         ) : mode === 'view' ? (
           <>
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 18 }}>
@@ -254,10 +256,10 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
                 </div>
                 <div>
                   <div style={{ fontSize: 17, fontWeight: 800 }}>{displayName}</div>
-                  <div style={{ fontSize: 13, color: '#64748B' }}>{emailMissing ? <em>No email yet</em> : <EmailStatusBadge variant="card" email={guest.email} status={emailVerification?.status} isCatchAll={emailVerification?.isCatchAll} isDisposable={emailVerification?.isDisposable} isRoleAccount={emailVerification?.isRoleAccount} />}</div>
+                  <div style={{ fontSize: 13, color: '#64748B' }}>{emailMissing ? <em>{t('common.noEmailYet')}</em> : <EmailStatusBadge variant="card" email={guest.email} status={emailVerification?.status} isCatchAll={emailVerification?.isCatchAll} isDisposable={emailVerification?.isDisposable} isRoleAccount={emailVerification?.isRoleAccount} />}</div>
                   {emailEnrichment && (
-                    <div style={{ fontSize: 11, color: '#7C3AED', fontWeight: 600, marginTop: 2 }} title={emailEnrichment.score != null ? `Hunter confidence score: ${emailEnrichment.score}/100` : undefined}>
-                      🔎 Found automatically via Hunter
+                    <div style={{ fontSize: 11, color: '#7C3AED', fontWeight: 600, marginTop: 2 }} title={emailEnrichment.score != null ? t('prospectCard.hunterConfidenceTitle', { score: emailEnrichment.score }) : undefined}>
+                      {t('prospectCard.foundViaHunterAuto')}
                     </div>
                   )}
                 </div>
@@ -265,7 +267,7 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
               <button
                 type="button"
                 onClick={() => setMode('edit')}
-                title="Edit"
+                title={t('prospectCard.editTitle')}
                 style={{ background: '#F1F5F9', border: 'none', borderRadius: 8, width: 34, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="#334155" strokeWidth="1.8" width="16" height="16">
@@ -278,21 +280,21 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
 
             {emailMissing && (
               <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: 12, marginBottom: 14 }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: '#92400E' }}>No email yet</div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#92400E' }}>{t('common.noEmailYet')}</div>
                 <div style={{ fontSize: 12, color: '#B45309', margin: '2px 0 8px' }}>
                   {pendingGift
-                    ? `🎁 Played ${new Date(pendingGift.playedAt.replace(' ', 'T') + 'Z').toLocaleString()} — won ${pendingGift.giftName}, on hold until you add their address.`
-                    : "If they play, their gift is held until you add their address."}
+                    ? t('prospectCard.playedWonHold', { date: new Date(pendingGift.playedAt.replace(' ', 'T') + 'Z').toLocaleString(), gift: pendingGift.giftName })
+                    : t('prospectCard.ifTheyPlayHold')}
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
                   <input
                     type="email"
-                    placeholder="name@company.com"
+                    placeholder={t('common.emailPlaceholder')}
                     value={newEmail}
                     onChange={(e) => setNewEmail(e.target.value)}
                     style={{ flex: 1, minWidth: 0, padding: '8px 10px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 14 }}
                   />
-                  <Button type="button" disabled={addingEmail || !newEmail.trim()} onClick={handleAddEmail}>{addingEmail ? 'Saving…' : 'Add email'}</Button>
+                  <Button type="button" disabled={addingEmail || !newEmail.trim()} onClick={handleAddEmail}>{addingEmail ? t('common.saving') : t('common.addEmail')}</Button>
                 </div>
                 {pendingGift && !confirmVoid && (
                   <button
@@ -300,19 +302,19 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
                     onClick={() => setConfirmVoid(true)}
                     style={{ background: 'none', border: 'none', padding: 0, marginTop: 10, fontSize: 12, color: '#991B1B', textDecoration: 'underline', cursor: 'pointer', fontFamily: 'inherit' }}
                   >
-                    Invalider le joueur
+                    {t('prospectCard.invalidatePlayer')}
                   </button>
                 )}
                 {pendingGift && confirmVoid && (
                   <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid #FDE68A' }}>
                     <div style={{ fontSize: 12, color: '#991B1B', marginBottom: 8 }}>
-                      Ceci annule ce gain et remet « {pendingGift.giftName} » en stock. Le joueur reste dans le CRM, marqué « Cancelled — no email ».
+                      {t('prospectCard.voidConfirmText', { gift: pendingGift.giftName })}
                     </div>
                     <div style={{ display: 'flex', gap: 8 }}>
                       <Button type="button" size="sm" variant="secondary" disabled={voiding} onClick={handleVoidReward} style={{ color: '#991B1B' }}>
-                        {voiding ? 'Annulation…' : "Confirmer l'invalidation"}
+                        {voiding ? t('prospectCard.voiding') : t('prospectCard.confirmVoidBtn')}
                       </Button>
-                      <Button type="button" size="sm" variant="secondary" disabled={voiding} onClick={() => setConfirmVoid(false)}>Annuler</Button>
+                      <Button type="button" size="sm" variant="secondary" disabled={voiding} onClick={() => setConfirmVoid(false)}>{t('common.cancel')}</Button>
                     </div>
                   </div>
                 )}
@@ -321,62 +323,62 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
 
             <div style={{ padding: '14px 0' }}>
               {guestFields.map((f) => (
-                <InfoRow key={`guest-${f.label}`} label={f.label} value={formatFieldValue(f, guestAnswers[f.label])} />
+                <InfoRow key={`guest-${f.label}`} label={f.label} value={formatFieldValue(f, guestAnswers[f.label], t)} />
               ))}
               {activeSegments.map((s) => (
                 <InfoRow key={s.name} label={s.name} value={s.value} />
               ))}
               {salesFields.map((f) => (
-                <InfoRow key={f.label} label={f.label} value={formatFieldValue(f, customFields[f.label])} />
+                <InfoRow key={f.label} label={f.label} value={formatFieldValue(f, customFields[f.label], t)} />
               ))}
               <InfoRow
-                label="Potentiel commercial"
+                label={t('prospectCard.salesPotential')}
                 value={leadRating ? '★'.repeat(leadRating) + '☆'.repeat(3 - leadRating) : null}
-                fallback="Non évalué"
+                fallback={t('prospectCard.notRatedFallback')}
               />
-              <InfoRow label="Tag" value={tags} />
+              <InfoRow label={t('common.tagLabel')} value={tags} />
               {consentInfo && (
-                <InfoRow label="Consent" value={`Confirmed by ${consentInfo.attestedBy || 'sales rep'} · ${String(consentInfo.attestedAt).slice(0, 10)}`} />
+                <InfoRow label={t('prospectCard.consentLabel')} value={t('prospectCard.consentValue', { name: consentInfo.attestedBy || t('prospectCard.consentRepFallback'), date: String(consentInfo.attestedAt).slice(0, 10) })} />
               )}
             </div>
 
             {note && (
               <div style={{ marginTop: 4 }}>
                 <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', marginBottom: 6 }}>
-                  Dernière note commerciale
+                  {t('prospectCard.latestSalesNote')}
                 </div>
                 <p style={{ fontSize: 14, color: '#334155', fontStyle: 'italic', margin: 0, lineHeight: 1.5 }}>
-                  « {note} »
+                  {t('prospectCard.noteQuote', { note })}
                 </p>
               </div>
             )}
 
-            <Button variant="secondary" onClick={onClose} style={{ marginTop: 22 }}>Close</Button>
+            <Button variant="secondary" onClick={onClose} style={{ marginTop: 22 }}>{t('common.close')}</Button>
           </>
         ) : (
           <>
             <h3 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 800 }}>{displayName}</h3>
-            <p style={{ margin: '0 0 16px', fontSize: 13, color: '#64748B' }}>{emailMissing ? <em>No email yet</em> : <EmailStatusBadge variant="card" email={guest.email} status={emailVerification?.status} isCatchAll={emailVerification?.isCatchAll} isDisposable={emailVerification?.isDisposable} isRoleAccount={emailVerification?.isRoleAccount} />}</p>
+            <p style={{ margin: '0 0 16px', fontSize: 13, color: '#64748B' }}>{emailMissing ? <em>{t('common.noEmailYet')}</em> : <EmailStatusBadge variant="card" email={guest.email} status={emailVerification?.status} isCatchAll={emailVerification?.isCatchAll} isDisposable={emailVerification?.isDisposable} isRoleAccount={emailVerification?.isRoleAccount} />}</p>
 
             {error && <div className="error-banner">{error}</div>}
 
             {emailMissing && (
               <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: 12, marginBottom: 14 }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: '#92400E' }}>No email yet</div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#92400E' }}>{t('common.noEmailYet')}</div>
                 <div style={{ fontSize: 12, color: '#B45309', margin: '2px 0 8px' }}>
                   {pendingGift
-                    ? `🎁 Played ${new Date(pendingGift.playedAt.replace(' ', 'T') + 'Z').toLocaleString()} — won ${pendingGift.giftName}, on hold until you add their address.`
-                    : "If they play, their gift is held until you add their address."}
+                    ? t('prospectCard.playedWonHold', { date: new Date(pendingGift.playedAt.replace(' ', 'T') + 'Z').toLocaleString(), gift: pendingGift.giftName })
+                    : t('prospectCard.ifTheyPlayHold')}
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
                   <input
                     type="email"
-                    placeholder="name@company.com"
+                    placeholder={t('common.emailPlaceholder')}
                     value={newEmail}
                     onChange={(e) => setNewEmail(e.target.value)}
                     style={{ flex: 1, minWidth: 0, padding: '8px 10px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 14 }}
                   />
-                  <Button type="button" disabled={addingEmail || !newEmail.trim()} onClick={handleAddEmail}>{addingEmail ? 'Saving…' : 'Add email'}</Button>
+                  <Button type="button" disabled={addingEmail || !newEmail.trim()} onClick={handleAddEmail}>{addingEmail ? t('common.saving') : t('common.addEmail')}</Button>
                 </div>
                 {pendingGift && !confirmVoid && (
                   <button
@@ -384,19 +386,19 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
                     onClick={() => setConfirmVoid(true)}
                     style={{ background: 'none', border: 'none', padding: 0, marginTop: 10, fontSize: 12, color: '#991B1B', textDecoration: 'underline', cursor: 'pointer', fontFamily: 'inherit' }}
                   >
-                    Invalider le joueur
+                    {t('prospectCard.invalidatePlayer')}
                   </button>
                 )}
                 {pendingGift && confirmVoid && (
                   <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid #FDE68A' }}>
                     <div style={{ fontSize: 12, color: '#991B1B', marginBottom: 8 }}>
-                      Ceci annule ce gain et remet « {pendingGift.giftName} » en stock. Le joueur reste dans le CRM, marqué « Cancelled — no email ».
+                      {t('prospectCard.voidConfirmText', { gift: pendingGift.giftName })}
                     </div>
                     <div style={{ display: 'flex', gap: 8 }}>
                       <Button type="button" size="sm" variant="secondary" disabled={voiding} onClick={handleVoidReward} style={{ color: '#991B1B' }}>
-                        {voiding ? 'Annulation…' : "Confirmer l'invalidation"}
+                        {voiding ? t('prospectCard.voiding') : t('prospectCard.confirmVoidBtn')}
                       </Button>
-                      <Button type="button" size="sm" variant="secondary" disabled={voiding} onClick={() => setConfirmVoid(false)}>Annuler</Button>
+                      <Button type="button" size="sm" variant="secondary" disabled={voiding} onClick={() => setConfirmVoid(false)}>{t('common.cancel')}</Button>
                     </div>
                   </div>
                 )}
@@ -404,12 +406,12 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
             )}
 
             <div className="field">
-              <label>Note</label>
+              <label>{t('common.noteLabel')}</label>
               <textarea
                 rows={4}
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                placeholder="Add a note about this guest…"
+                placeholder={t('prospectCard.notePlaceholder')}
                 style={{ width: '100%', fontFamily: 'inherit', resize: 'vertical' }}
               />
               {SpeechRecognitionCtor && (
@@ -425,10 +427,10 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
                           padding: '6px 16px', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
                         }}
                       >
-                        ⏹ Stop
+                        {t('prospectCard.stopRecording')}
                       </button>
                       <span style={{ fontSize: 12, color: '#EF4444', fontWeight: 600 }}>
-                        ⏺ Recording… <span style={{ color: '#94A3B8', fontWeight: 500 }}>(stops after 8s of silence)</span>
+                        {t('prospectCard.recordingLabel')} <span style={{ color: '#94A3B8', fontWeight: 500 }}>{t('prospectCard.recordingSilenceHint')}</span>
                       </span>
                     </>
                   ) : (
@@ -441,7 +443,7 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
                         padding: '6px 14px', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
                       }}
                     >
-                      🎙 Record voice note
+                      {t('prospectCard.recordVoiceNote')}
                     </button>
                   )}
                 </div>
@@ -467,7 +469,7 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
             ))}
 
             <div className="field">
-              <label>Potentiel du lead</label>
+              <label>{t('common.leadPotential')}</label>
               <div style={{ display: 'flex', gap: 6 }}>
                 {STARS.map((n) => (
                   <button
@@ -484,21 +486,21 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
                   </button>
                 ))}
               </div>
-              {leadRating == null && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>Not rated yet — this is different from a low rating.</div>}
+              {leadRating == null && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('common.notRatedHint')}</div>}
             </div>
 
             <div className="field">
-              <label>Tag</label>
+              <label>{t('common.tagLabel')}</label>
               <input
-                placeholder="A free label you can attach to this guest"
+                placeholder={t('prospectCard.tagPlaceholder')}
                 value={tags}
                 onChange={(e) => setTags(e.target.value)}
               />
             </div>
 
             <div style={{ display: 'flex', gap: 10, marginTop: 22 }}>
-              <Button type="button" onClick={handleSave} disabled={saving}>{saving ? 'Saving…' : 'Valider'}</Button>
-              <Button type="button" variant="secondary" onClick={handleCancelEdit}>Cancel</Button>
+              <Button type="button" onClick={handleSave} disabled={saving}>{saving ? t('common.saving') : t('prospectCard.saveBtn')}</Button>
+              <Button type="button" variant="secondary" onClick={handleCancelEdit}>{t('common.cancel')}</Button>
             </div>
           </>
         )}

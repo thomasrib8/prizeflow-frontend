@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 
 const POLL_INTERVAL_MS = 1500;
@@ -45,6 +46,13 @@ export function useGuestFlow({ token, persistSession = false, autoReturnMs = nul
   const storageKey = `prizeflow_guest_session_${token}`;
   const [view, setView] = useState('loading'); // loading | no_campaign | form | queue | expired
   const [campaignInfo, setCampaignInfo] = useState(null);
+  // Pinned to the CAMPAIGN's own language (routes/campaigns.js), never the
+  // global i18next language — the admin panel (Phase 2) sets that globally
+  // for its own UI, and a staff kiosk (LaunchCampaign.jsx) can have an
+  // admin-language UI open around a different-language guest overlay at the
+  // same time. useTranslation's `lng` option gives this hook's `t` its own
+  // fixed language independent of that global state, so the two never fight.
+  const { t } = useTranslation('translation', { lng: campaignInfo?.language || 'en' });
   const [form, setForm] = useState(EMPTY_FORM);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -59,7 +67,10 @@ export function useGuestFlow({ token, persistSession = false, autoReturnMs = nul
 
   function checkCampaign() {
     return api.getGuestCampaign(token)
-      .then((res) => { setCampaignInfo(res); setView(res.active ? 'form' : 'no_campaign'); })
+      .then((res) => {
+        setCampaignInfo(res);
+        setView(res.active ? 'form' : 'no_campaign');
+      })
       .catch(() => setView('no_campaign'));
   }
 
@@ -122,7 +133,7 @@ export function useGuestFlow({ token, persistSession = false, autoReturnMs = nul
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!form.consent) { setError('Consent is required to claim your reward.'); return; }
+    if (!form.consent) { setError(t('errors.consentRequired')); return; }
     // Client-side check of this campaign's own required custom fields (see
     // GuestFlowScreen.jsx) — the backend re-validates the same thing against
     // its own current field list regardless, this is just faster feedback.
@@ -130,7 +141,9 @@ export function useGuestFlow({ token, persistSession = false, autoReturnMs = nul
       if (!f.required) continue;
       const v = form.customFields[f.label];
       const empty = f.fieldType === 'multi_choice' ? !(Array.isArray(v) && v.length) : f.fieldType === 'checkbox' ? !v : !String(v || '').trim();
-      if (empty) { setError(`"${f.label}" is required`); return; }
+      // f.label is the admin's own field name — never translated, only the
+      // surrounding sentence is (see errors.fieldRequired's {{label}}).
+      if (empty) { setError(t('errors.fieldRequired', { label: f.label })); return; }
     }
     setError('');
     await joinQueue();
@@ -152,8 +165,15 @@ export function useGuestFlow({ token, persistSession = false, autoReturnMs = nul
       );
       setView('queue');
     } catch (err) {
+      // The backend only ever sends back a stable code for these two
+      // (guestQueue.js's join()) — translate them here rather than show the
+      // raw code, which used to leak straight to the guest for
+      // NO_ACTIVE_CAMPAIGN specifically. Anything else (a validation message
+      // routes/guest.js already built server-side) is shown as-is.
       if (err.message === 'ALREADY_PLAYED') {
-        setError("This email has already played in this campaign. Each guest can only spin once.");
+        setError(t('errors.alreadyPlayed'));
+      } else if (err.message === 'NO_ACTIVE_CAMPAIGN') {
+        setError(t('errors.noActiveCampaign'));
       } else {
         setError(err.message);
       }

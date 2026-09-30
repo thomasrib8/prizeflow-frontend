@@ -1,0 +1,61 @@
+{
+  "common": {
+    "loading": "Cargando…",
+    "noCampaign": "No hay ninguna campaña activa en este momento. Vuelve más tarde."
+  },
+  "expired": {
+    "skipped": "Te hemos pasado de turno — puedes volver a intentarlo ahora mismo.",
+    "cancelled": "Tu turno fue cancelado por nuestro equipo.",
+    "timedOut": "Tu turno ha caducado.",
+    "tryAgain": "Reintentar"
+  },
+  "reviewGate": {
+    "title": "¡Déjanos una reseña en Google!",
+    "body": "Solo lleva un minuto y nos ayuda mucho. Es totalmente opcional — podrás jugar de todos modos.",
+    "leaveReview": "Dejar una reseña",
+    "leaveReviewAgain": "Déjanos una reseña en Google",
+    "openedNote": "La página de reseñas se abrió en una nueva pestaña. Cuando termines, vuelve a esta pestaña — tu juego te espera.",
+    "skip": "No, gracias, continuar"
+  },
+  "queue": {
+    "waitTitle": "¡Espera tu turno!",
+    "positionPrefix": "Eres el número",
+    "positionSuffix": "en la cola",
+    "activePlaying": "{{name}} está jugando ahora. ",
+    "keepOpen": "Mantén esta pantalla abierta — se pondrá verde cuando sea tu turno.",
+    "yourTurn": "¡Es tu turno!",
+    "spinTheWheel": "Gira la rueda",
+    "pleaseWait": "Espera un momento…",
+    "retry": {
+      "abnormalStop": "⚠ Se detectó una parada inesperada durante el giro. Por favor, gira la rueda de nuevo.",
+      "tooWeak": "⚡ Por favor, no toques la rueda — gírala de nuevo.",
+      "tooShort": "⏱ La rueda no llegó a la casilla correcta a tiempo. Por favor, gira de nuevo."
+    }
+  },
+  "result": {
+    "thankYou": "¡Gracias!",
+    "thankYouWithName": "¡Gracias, {{name}}!",
+    "emailNotice": "Recibirás un email con tu regalo.",
+    "reviewInvite": "❤️ ¿Disfrutaste tu experiencia? ¡Déjanos una reseña en Google!",
+    "reviewLeave": "Dejar una reseña",
+    "reviewThanks": "¡Gracias! ✓",
+    "socialInvite": "👋 ¡Síguenos en redes sociales!"
+  },
+  "form": {
+    "title": "¡Gana tu regalo!",
+    "subtitle": "Introduce tus datos a continuación para participar.",
+    "firstName": "Nombre",
+    "lastName": "Apellido",
+    "email": "Correo electrónico",
+    "consent": "Acepto recibir mi regalo por email y consiento el tratamiento de mis datos personales.",
+    "submitBusy": "ESPERA UN MOMENTO…",
+    "submitIdle": "COMPROBAR Y GIRAR LA RUEDA",
+    "selectPlaceholder": "— Seleccionar —"
+  },
+  "errors": {
+    "consentRequired": "Se requiere tu consentimiento para participar.",
+    "fieldRequired": "«{{label}}» es obligatorio",
+    "alreadyPlayed": "Este email ya ha jugado en esta campaña. Cada participante solo puede jugar una vez.",
+    "noActiveCampaign": "Esta campaña no está activa en este momento."
+  }
+}

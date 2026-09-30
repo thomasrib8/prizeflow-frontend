@@ -1,0 +1,61 @@
+{
+  "common": {
+    "loading": "Loading…",
+    "noCampaign": "No campaign is currently running. Please check back later."
+  },
+  "expired": {
+    "skipped": "You've been skipped — you can try again right away.",
+    "cancelled": "Your turn was cancelled by our team.",
+    "timedOut": "Your turn has timed out.",
+    "tryAgain": "Try again"
+  },
+  "reviewGate": {
+    "title": "Leave us a Google review!",
+    "body": "It only takes a minute and helps us a lot. It's completely optional — you'll get to play either way.",
+    "leaveReview": "Leave a review",
+    "leaveReviewAgain": "Leave us a Google review",
+    "openedNote": "The review page opened in a new tab. Once you're done, come back to this tab — your game is waiting for you.",
+    "skip": "No thanks, continue"
+  },
+  "queue": {
+    "waitTitle": "Wait for your turn!",
+    "positionPrefix": "You are number",
+    "positionSuffix": "in the queue",
+    "activePlaying": "{{name}} is currently playing. ",
+    "keepOpen": "Keep this screen open — it will turn green when it's your turn.",
+    "yourTurn": "It's your turn!",
+    "spinTheWheel": "Spin the wheel",
+    "pleaseWait": "Please wait…",
+    "retry": {
+      "abnormalStop": "⚠ An unexpected stop was detected during the spin. Please spin the wheel again.",
+      "tooWeak": "⚡ Please don't interact with the wheel — spin it again.",
+      "tooShort": "⏱ The wheel didn't reach the right slot in time. Please spin again."
+    }
+  },
+  "result": {
+    "thankYou": "Thank you!",
+    "thankYouWithName": "Thank you, {{name}}!",
+    "emailNotice": "You will receive an email with your gift.",
+    "reviewInvite": "❤️ Did you enjoy your experience? Leave us a review on Google!",
+    "reviewLeave": "Leave a review",
+    "reviewThanks": "Thanks! ✓",
+    "socialInvite": "👋 Follow us on social media!"
+  },
+  "form": {
+    "title": "Win your reward!",
+    "subtitle": "Enter your details below to claim your gift.",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "email": "Email address",
+    "consent": "I agree to receive my reward by email and consent to the processing of my personal data.",
+    "submitBusy": "PLEASE WAIT…",
+    "submitIdle": "CHECK AND SPIN THE WHEEL",
+    "selectPlaceholder": "— Select —"
+  },
+  "errors": {
+    "consentRequired": "Consent is required to claim your reward.",
+    "fieldRequired": "\"{{label}}\" is required",
+    "alreadyPlayed": "This email has already played in this campaign. Each guest can only spin once.",
+    "noActiveCampaign": "This campaign isn't running right now."
+  }
+}

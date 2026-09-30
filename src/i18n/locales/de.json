@@ -1,0 +1,61 @@
+{
+  "common": {
+    "loading": "Wird geladen…",
+    "noCampaign": "Derzeit läuft keine Kampagne. Bitte schau später noch einmal vorbei."
+  },
+  "expired": {
+    "skipped": "Du wurdest übersprungen — du kannst es sofort noch einmal versuchen.",
+    "cancelled": "Dein Zug wurde von unserem Team storniert.",
+    "timedOut": "Dein Zug ist abgelaufen.",
+    "tryAgain": "Erneut versuchen"
+  },
+  "reviewGate": {
+    "title": "Hinterlasse uns eine Google-Bewertung!",
+    "body": "Das dauert nur eine Minute und hilft uns sehr. Es ist völlig freiwillig — du kannst in jedem Fall mitspielen.",
+    "leaveReview": "Bewertung abgeben",
+    "leaveReviewAgain": "Google-Bewertung hinterlassen",
+    "openedNote": "Die Bewertungsseite wurde in einem neuen Tab geöffnet. Komm danach zu diesem Tab zurück — dein Spiel wartet auf dich.",
+    "skip": "Nein danke, weiter"
+  },
+  "queue": {
+    "waitTitle": "Warte, bis du dran bist!",
+    "positionPrefix": "Du bist Nummer",
+    "positionSuffix": "in der Warteschlange",
+    "activePlaying": "{{name}} spielt gerade. ",
+    "keepOpen": "Lass diesen Bildschirm geöffnet — er wird grün, wenn du dran bist.",
+    "yourTurn": "Du bist dran!",
+    "spinTheWheel": "Rad drehen",
+    "pleaseWait": "Bitte warten…",
+    "retry": {
+      "abnormalStop": "⚠ Beim Drehen wurde ein unerwarteter Stopp erkannt. Bitte dreh das Rad erneut.",
+      "tooWeak": "⚡ Bitte berühre das Rad nicht — dreh es erneut.",
+      "tooShort": "⏱ Das Rad hat das richtige Feld nicht rechtzeitig erreicht. Bitte dreh erneut."
+    }
+  },
+  "result": {
+    "thankYou": "Danke!",
+    "thankYouWithName": "Danke, {{name}}!",
+    "emailNotice": "Du erhältst eine E-Mail mit deinem Geschenk.",
+    "reviewInvite": "❤️ Hat dir dein Erlebnis gefallen? Hinterlasse uns eine Google-Bewertung!",
+    "reviewLeave": "Bewertung abgeben",
+    "reviewThanks": "Danke! ✓",
+    "socialInvite": "👋 Folge uns in den sozialen Medien!"
+  },
+  "form": {
+    "title": "Gewinne dein Geschenk!",
+    "subtitle": "Gib unten deine Daten ein, um teilzunehmen.",
+    "firstName": "Vorname",
+    "lastName": "Nachname",
+    "email": "E-Mail-Adresse",
+    "consent": "Ich stimme zu, mein Geschenk per E-Mail zu erhalten, und willige in die Verarbeitung meiner personenbezogenen Daten ein.",
+    "submitBusy": "BITTE WARTEN…",
+    "submitIdle": "PRÜFEN UND RAD DREHEN",
+    "selectPlaceholder": "— Auswählen —"
+  },
+  "errors": {
+    "consentRequired": "Eine Einwilligung ist erforderlich, um teilzunehmen.",
+    "fieldRequired": "„{{label}}“ ist erforderlich",
+    "alreadyPlayed": "Diese E-Mail-Adresse hat bereits an dieser Kampagne teilgenommen. Jeder Gast kann nur einmal spielen.",
+    "noActiveCampaign": "Diese Kampagne läuft derzeit nicht."
+  }
+}
