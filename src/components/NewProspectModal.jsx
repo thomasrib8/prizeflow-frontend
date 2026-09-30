@@ -147,15 +147,22 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
             // The rep already typed their own email while this was in
             // flight — don't override it or credit it to Hunter.
             setHunterSearch({ state: 'idle' });
+          } else if (res.error) {
+            // The lookup itself failed (timeout, quota, bad key) — distinct
+            // from Hunter genuinely finding nobody (see the route's comment).
+            setHunterSearch({ state: 'error' });
           } else {
             setHunterSearch({ state: 'not_found' });
           }
         })
         .catch(() => {
           if (requestId !== hunterRequestIdRef.current) return;
-          // Disabled (no HUNTER_API_KEY) or a genuine provider error — fail
-          // quiet, same as any other optional enrichment in this app.
-          setHunterSearch({ state: 'idle' });
+          // A genuine failure (network, timeout, disabled, quota) still
+          // never blocks the rep — but silently reverting to 'idle' here
+          // used to show NO feedback at all, indistinguishable from "search
+          // never ran", which made this impossible to debug from the UI.
+          // 'error' shows a message same as 'not_found' does.
+          setHunterSearch({ state: 'error' });
         });
     }, 800);
     return () => clearTimeout(timer);
@@ -277,6 +284,11 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
           {hunterSearch.state === 'not_found' && (
             <div style={{ fontSize: 11, color: '#B45309', marginTop: 3 }}>
               Hunter.io couldn't find an email for them. You can add one by hand, or leave it blank — their gift is held until you do.
+            </div>
+          )}
+          {hunterSearch.state === 'error' && (
+            <div style={{ fontSize: 11, color: '#B45309', marginTop: 3 }}>
+              Couldn't reach Hunter.io just now. You can add their email by hand, or leave it blank — their gift is held until you do.
             </div>
           )}
           {hunterSearch.state === 'idle' && !form.email && (
