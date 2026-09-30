@@ -52,6 +52,8 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
   const emailMissing = isPlaceholderEmail(guest.email);
   const [newEmail, setNewEmail] = useState('');
   const [addingEmail, setAddingEmail] = useState(false);
+  const [confirmVoid, setConfirmVoid] = useState(false);
+  const [voiding, setVoiding] = useState(false);
   const [segmentCategories, setSegmentCategories] = useState([]);
 
   const [note, setNote] = useState('');
@@ -203,6 +205,25 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
     }
   }
 
+  // No email ever came (Hunter tried and failed, or the rep never got one)
+  // for a gift this person already won — invalidates that win and restores
+  // its stock, since it was never actually going to be delivered. The
+  // reward stays in the CRM/History, marked "Cancelled — no email" (see
+  // History.jsx), rather than vanishing — a record of what happened during
+  // the event. The card closes afterwards: onSaved refreshes the list behind it.
+  async function handleVoidReward() {
+    setVoiding(true);
+    setError('');
+    try {
+      await api.voidPendingReward({ campaignId, email: guest.email });
+      onSaved?.();
+      onClose();
+    } catch (err) {
+      setError(err.message);
+      setVoiding(false);
+    }
+  }
+
   function handleCancelEdit() {
     if (initialMode === 'view') {
       load(); // discard unsaved changes, restore what's actually saved
@@ -260,7 +281,7 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
                 <div style={{ fontSize: 13, fontWeight: 700, color: '#92400E' }}>No email yet</div>
                 <div style={{ fontSize: 12, color: '#B45309', margin: '2px 0 8px' }}>
                   {pendingGift
-                    ? `🎁 Their gift (${pendingGift.giftName}) is on hold — it will be emailed as soon as you add their address.`
+                    ? `🎁 Played ${new Date(pendingGift.playedAt.replace(' ', 'T') + 'Z').toLocaleString()} — won ${pendingGift.giftName}, on hold until you add their address.`
                     : "If they play, their gift is held until you add their address."}
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
@@ -273,6 +294,28 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
                   />
                   <Button type="button" disabled={addingEmail || !newEmail.trim()} onClick={handleAddEmail}>{addingEmail ? 'Saving…' : 'Add email'}</Button>
                 </div>
+                {pendingGift && !confirmVoid && (
+                  <button
+                    type="button"
+                    onClick={() => setConfirmVoid(true)}
+                    style={{ background: 'none', border: 'none', padding: 0, marginTop: 10, fontSize: 12, color: '#991B1B', textDecoration: 'underline', cursor: 'pointer', fontFamily: 'inherit' }}
+                  >
+                    Invalider le joueur
+                  </button>
+                )}
+                {pendingGift && confirmVoid && (
+                  <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid #FDE68A' }}>
+                    <div style={{ fontSize: 12, color: '#991B1B', marginBottom: 8 }}>
+                      Ceci annule ce gain et remet « {pendingGift.giftName} » en stock. Le joueur reste dans le CRM, marqué « Cancelled — no email ».
+                    </div>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <Button type="button" size="sm" variant="secondary" disabled={voiding} onClick={handleVoidReward} style={{ color: '#991B1B' }}>
+                        {voiding ? 'Annulation…' : "Confirmer l'invalidation"}
+                      </Button>
+                      <Button type="button" size="sm" variant="secondary" disabled={voiding} onClick={() => setConfirmVoid(false)}>Annuler</Button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -322,7 +365,7 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
                 <div style={{ fontSize: 13, fontWeight: 700, color: '#92400E' }}>No email yet</div>
                 <div style={{ fontSize: 12, color: '#B45309', margin: '2px 0 8px' }}>
                   {pendingGift
-                    ? `🎁 Their gift (${pendingGift.giftName}) is on hold — it will be emailed as soon as you add their address.`
+                    ? `🎁 Played ${new Date(pendingGift.playedAt.replace(' ', 'T') + 'Z').toLocaleString()} — won ${pendingGift.giftName}, on hold until you add their address.`
                     : "If they play, their gift is held until you add their address."}
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
@@ -335,6 +378,28 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
                   />
                   <Button type="button" disabled={addingEmail || !newEmail.trim()} onClick={handleAddEmail}>{addingEmail ? 'Saving…' : 'Add email'}</Button>
                 </div>
+                {pendingGift && !confirmVoid && (
+                  <button
+                    type="button"
+                    onClick={() => setConfirmVoid(true)}
+                    style={{ background: 'none', border: 'none', padding: 0, marginTop: 10, fontSize: 12, color: '#991B1B', textDecoration: 'underline', cursor: 'pointer', fontFamily: 'inherit' }}
+                  >
+                    Invalider le joueur
+                  </button>
+                )}
+                {pendingGift && confirmVoid && (
+                  <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid #FDE68A' }}>
+                    <div style={{ fontSize: 12, color: '#991B1B', marginBottom: 8 }}>
+                      Ceci annule ce gain et remet « {pendingGift.giftName} » en stock. Le joueur reste dans le CRM, marqué « Cancelled — no email ».
+                    </div>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <Button type="button" size="sm" variant="secondary" disabled={voiding} onClick={handleVoidReward} style={{ color: '#991B1B' }}>
+                        {voiding ? 'Annulation…' : "Confirmer l'invalidation"}
+                      </Button>
+                      <Button type="button" size="sm" variant="secondary" disabled={voiding} onClick={() => setConfirmVoid(false)}>Annuler</Button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 

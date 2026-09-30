@@ -215,6 +215,11 @@ export const api = {
   // email kicks off an automatic Hunter lookup (see POST /prospects's
   // emailEnrichment flag) — { status: 'searching'|'found'|'not_found'|'error'|'none', email, score }.
   getEmailEnrichmentStatus: (prospectId) => request(`/account/prospects/${prospectId}/email-enrichment`),
+  // Live Hunter search from inside the New prospect modal itself — resolves
+  // right away (unlike the fire-and-forget path above) so the rep sees the
+  // result before saving. { found: true, email, score } | { found: false }.
+  findEmailViaHunter: (payload) => request('/account/prospects/find-email', { method: 'POST', body: payload }),
+  voidPendingReward: (payload) => request('/account/prospects/void-reward', { method: 'POST', body: payload }),
   getBadgeScanStatus: () => request('/account/badge-scan'),
   // Multipart (a photo), so it can't go through request(), which always sends JSON.
   scanProspectImage: async (campaignId, blob) => {

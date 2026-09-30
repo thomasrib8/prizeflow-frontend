@@ -49,24 +49,39 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
   const [duplicate, setDuplicate] = useState(null); // { message, addToQueue }
   // { state: 'idle' | 'reading' | 'done' | 'error', message, source: 'qr' | 'photo', confidence }
   const [scan, setScan] = useState({ state: 'idle' });
+  // { state: 'idle' | 'searching' | 'found' | 'not_found', email, score } —
+  // live Hunter.io lookup, so the rep sees a result (and can review/correct
+  // it) before saving, instead of only finding out afterwards via a toast.
+  const [hunterSearch, setHunterSearch] = useState({ state: 'idle' });
+  const hunterSignatureRef = useRef(''); // last "first|last|company" combo actually searched — never search the same one twice
+  const hunterRequestIdRef = useRef(0); // bumped per request so a late response from an older search is ignored
+  const emailRef = useRef(form.email); // always current, read inside the async .then() below where `form` itself would be stale
+  emailRef.current = form.email;
 
   function applyReading({ fields, customFields: fromCampaign = {}, confidence }, source) {
     setForm({ firstName: fields.firstName || '', lastName: fields.lastName || '', email: fields.email || '' });
     setCompany(fields.company || '');
 
     const answers = { ...fromCampaign };
-    // A phone number the campaign has a place for but the reader didn't route there.
+    // A phone number the campaign has a place for but the reader didn't route
+    // there goes straight into that field; with no such field, it still
+    // shouldn't be silently dropped — it rides along in the note instead,
+    // same as job title below.
     const phoneField = guestFields.find((f) => f.fieldType === 'phone' && !answers[f.label]);
-    if (phoneField && fields.phone) answers[phoneField.label] = fields.phone;
+    const phoneWentToField = !!(phoneField && fields.phone);
+    if (phoneWentToField) answers[phoneField.label] = fields.phone;
     setGuestAnswers(answers);
 
     // Job title has no field of its own unless the campaign made one — keep
-    // it as the start of the note rather than throw it away. Company now has
-    // its own field (see the Company input below — it also doubles as what
-    // Hunter searches on when there's no email), so it no longer needs to
-    // ride along in free text too.
+    // it in the note rather than throw it away. Company now has its own
+    // field (see the Company input below — it also doubles as what Hunter
+    // searches on when there's no email), so it no longer needs to ride
+    // along in free text too.
     const usedElsewhere = (v) => v && Object.values(answers).includes(v);
-    setNote(fields.jobTitle && !usedElsewhere(fields.jobTitle) ? fields.jobTitle : '');
+    const noteParts = [];
+    if (fields.jobTitle && !usedElsewhere(fields.jobTitle)) noteParts.push(fields.jobTitle);
+    if (fields.phone && !phoneWentToField) noteParts.push(`Tel: ${fields.phone}`);
+    setNote(noteParts.join(' · '));
 
     setScan({ state: 'done', source, confidence: confidence || {} });
     setError('');
@@ -105,11 +120,54 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Live Hunter.io search: once first name, last name and company are all
+  // known (typically right after a scan) and there's no email yet, look one
+  // up automatically — debounced, so typing a company by hand doesn't fire a
+  // request per keystroke, and never twice for the same combination.
+  useEffect(() => {
+    const first = form.firstName.trim();
+    const last = form.lastName.trim();
+    const comp = company.trim();
+    if (!first || !last || !comp) return undefined;
+    const signature = `${first.toLowerCase()}|${last.toLowerCase()}|${comp.toLowerCase()}`;
+    if (signature === hunterSignatureRef.current) return undefined;
+
+    const timer = setTimeout(() => {
+      hunterSignatureRef.current = signature;
+      const requestId = ++hunterRequestIdRef.current;
+      setHunterSearch({ state: 'searching' });
+      api
+        .findEmailViaHunter({ firstName: first, lastName: last, company: comp })
+        .then((res) => {
+          if (requestId !== hunterRequestIdRef.current) return; // a newer search superseded this one
+          if (res.found && !emailRef.current.trim()) {
+            setForm((f) => (f.email.trim() ? f : { ...f, email: res.email }));
+            setHunterSearch({ state: 'found', email: res.email, score: res.score });
+          } else if (res.found) {
+            // The rep already typed their own email while this was in
+            // flight — don't override it or credit it to Hunter.
+            setHunterSearch({ state: 'idle' });
+          } else {
+            setHunterSearch({ state: 'not_found' });
+          }
+        })
+        .catch(() => {
+          if (requestId !== hunterRequestIdRef.current) return;
+          // Disabled (no HUNTER_API_KEY) or a genuine provider error — fail
+          // quiet, same as any other optional enrichment in this app.
+          setHunterSearch({ state: 'idle' });
+        });
+    }, 800);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.firstName, form.lastName, company]);
+
   async function submit(addToQueue, confirmDuplicate = false) {
     if (!formRef.current.reportValidity()) return;
     setSaving(true);
     setError('');
     try {
+      const emailIsHunterFind = hunterSearch.state === 'found' && hunterSearch.email === form.email.trim().toLowerCase();
       const res = await api.createProspect({
         campaignId: campaign.id,
         ...form,
@@ -123,6 +181,8 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
         consentAttested: consent,
         addToQueue,
         confirmDuplicate,
+        emailFoundViaHunter: emailIsHunterFind,
+        hunterScore: emailIsHunterFind ? hunterSearch.score : undefined,
       });
       onCreated?.({
         name: `${form.firstName.trim()} ${form.lastName.trim()}`.trim(),
@@ -196,9 +256,30 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
         </div>
         <div className="field">
           <label>Email address</label>
-          <input type="email" value={form.email} style={flagStyle('email')} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+          <input
+            type="email"
+            value={form.email}
+            style={flagStyle('email')}
+            onChange={(e) => { setForm({ ...form, email: e.target.value }); setHunterSearch({ state: 'idle' }); }}
+          />
           {doubtHint('email')}
-          {!form.email && (
+          {hunterSearch.state === 'searching' && (
+            <>
+              <div style={{ fontSize: 11, color: '#7C3AED', marginTop: 5, fontWeight: 600 }}>🔍 Searching for their email via Hunter.io…</div>
+              <div className="hunter-search-bar" />
+            </>
+          )}
+          {hunterSearch.state === 'found' && (
+            <div style={{ fontSize: 11, color: '#7C3AED', marginTop: 3, fontWeight: 600 }}>
+              ✓ Found automatically via Hunter.io{hunterSearch.score != null ? ` (confidence ${hunterSearch.score}/100)` : ''} — check it before saving.
+            </div>
+          )}
+          {hunterSearch.state === 'not_found' && (
+            <div style={{ fontSize: 11, color: '#B45309', marginTop: 3 }}>
+              Hunter.io couldn't find an email for them. You can add one by hand, or leave it blank — their gift is held until you do.
+            </div>
+          )}
+          {hunterSearch.state === 'idle' && !form.email && (
             <div style={{ fontSize: 11, color: noEmailOnBadge ? '#B45309' : '#64748B', marginTop: 3 }}>
               {noEmailOnBadge ? 'No email on this badge. ' : ''}
               {company.trim()

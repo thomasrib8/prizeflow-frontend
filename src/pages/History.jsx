@@ -10,10 +10,13 @@ import { isPlaceholderEmail } from '../utils/placeholderEmail';
 // rep added by hand, never played) aren't real reward statuses — they're
 // leads kept in the CRM anyway (see routes/history.js's GET /rewards).
 // Every other value here is a genuine rewards.status.
-const REWARD_TONE = { active: 'blue', redeemed: 'green', expired: 'orange', cancelled: 'red', no_gift: 'neutral', manual: 'neutral' };
-const STATUS_LABELS = { no_gift: 'No gift', manual: 'Added manually' };
-// Rows with no reward behind them: nothing to redeem/open.
-const NO_REWARD_STATUSES = ['no_gift', 'manual'];
+const REWARD_TONE = { active: 'blue', redeemed: 'green', expired: 'orange', cancelled: 'red', voided: 'red', no_gift: 'neutral', manual: 'neutral' };
+// 'voided' = a won gift a rep invalidated because no email was ever found for
+// it (see ProspectCard's "Invalider le joueur") — distinct from 'cancelled',
+// which is reverting an already-redeemed voucher (routes/redeem.js).
+const STATUS_LABELS = { no_gift: 'No gift', manual: 'Added manually', voided: 'Cancelled — no email' };
+// Rows with no reward behind them, or a voided one: nothing to redeem/open.
+const NO_REWARD_STATUSES = ['no_gift', 'manual', 'voided'];
 const NOTE_OPTIONS = [
   { value: 'with', label: 'With note' },
   { value: 'without', label: 'Without note' },
