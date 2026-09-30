@@ -291,7 +291,7 @@ export default function LaunchCampaign() {
                     <td>
                       {p.gift_name || (
                         <span style={{ color: '#94A3B8', fontSize: 12 }}>
-                          No gift · {p.outcome === 'cancelled' ? 'cancelled' : 'skipped'}
+                          {p.outcome === 'manual' ? 'No gift' : `No gift · ${p.outcome === 'cancelled' ? 'cancelled' : 'skipped'}`}
                         </span>
                       )}
                     </td>

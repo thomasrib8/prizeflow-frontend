@@ -228,7 +228,9 @@ export default function LaunchPWA() {
                   {p.gift_name ? (
                     <span className="pwa-player-gift">{p.gift_name}</span>
                   ) : (
-                    <span className="pwa-player-nogift">No gift · {p.outcome === 'cancelled' ? 'cancelled' : 'skipped'}</span>
+                    <span className="pwa-player-nogift">
+                      {p.outcome === 'manual' ? 'No gift' : `No gift · ${p.outcome === 'cancelled' ? 'cancelled' : 'skipped'}`}
+                    </span>
                   )}
                   {p.segment && <span className="pwa-player-segment">{p.segment}</span>}
                   {p.lead_rating ? <span className="pwa-player-stars">{'★'.repeat(p.lead_rating)}{'☆'.repeat(3 - p.lead_rating)}</span> : null}
