@@ -120,6 +120,39 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Shared by the auto-search effect below and the manual "Find email"
+  // button next to the field — same request, two ways to trigger it. The
+  // button always re-runs even for a combination already searched (the rep
+  // clicking it is an explicit "try again", e.g. after a transient error).
+  function runHunterSearch(first, last, comp) {
+    hunterSignatureRef.current = `${first.toLowerCase()}|${last.toLowerCase()}|${comp.toLowerCase()}`;
+    const requestId = ++hunterRequestIdRef.current;
+    setHunterSearch({ state: 'searching' });
+    api
+      .findEmailViaHunter({ firstName: first, lastName: last, company: comp })
+      .then((res) => {
+        if (requestId !== hunterRequestIdRef.current) return; // a newer search superseded this one
+        if (res.found && !emailRef.current.trim()) {
+          setForm((f) => (f.email.trim() ? f : { ...f, email: res.email }));
+          setHunterSearch({ state: 'found', email: res.email, score: res.score });
+        } else if (res.found) {
+          // The rep already typed their own email while this was in
+          // flight — don't override it or credit it to Hunter.
+          setHunterSearch({ state: 'idle' });
+        } else if (res.error) {
+          // The lookup itself failed (timeout, quota, bad key) — distinct
+          // from Hunter genuinely finding nobody (see the route's comment).
+          setHunterSearch({ state: 'error' });
+        } else {
+          setHunterSearch({ state: 'not_found' });
+        }
+      })
+      .catch(() => {
+        if (requestId !== hunterRequestIdRef.current) return;
+        setHunterSearch({ state: 'error' });
+      });
+  }
+
   // Live Hunter.io search: once first name, last name and company are all
   // known (typically right after a scan) and there's no email yet, look one
   // up automatically — debounced, so typing a company by hand doesn't fire a
@@ -131,40 +164,7 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
     if (!first || !last || !comp) return undefined;
     const signature = `${first.toLowerCase()}|${last.toLowerCase()}|${comp.toLowerCase()}`;
     if (signature === hunterSignatureRef.current) return undefined;
-
-    const timer = setTimeout(() => {
-      hunterSignatureRef.current = signature;
-      const requestId = ++hunterRequestIdRef.current;
-      setHunterSearch({ state: 'searching' });
-      api
-        .findEmailViaHunter({ firstName: first, lastName: last, company: comp })
-        .then((res) => {
-          if (requestId !== hunterRequestIdRef.current) return; // a newer search superseded this one
-          if (res.found && !emailRef.current.trim()) {
-            setForm((f) => (f.email.trim() ? f : { ...f, email: res.email }));
-            setHunterSearch({ state: 'found', email: res.email, score: res.score });
-          } else if (res.found) {
-            // The rep already typed their own email while this was in
-            // flight — don't override it or credit it to Hunter.
-            setHunterSearch({ state: 'idle' });
-          } else if (res.error) {
-            // The lookup itself failed (timeout, quota, bad key) — distinct
-            // from Hunter genuinely finding nobody (see the route's comment).
-            setHunterSearch({ state: 'error' });
-          } else {
-            setHunterSearch({ state: 'not_found' });
-          }
-        })
-        .catch(() => {
-          if (requestId !== hunterRequestIdRef.current) return;
-          // A genuine failure (network, timeout, disabled, quota) still
-          // never blocks the rep — but silently reverting to 'idle' here
-          // used to show NO feedback at all, indistinguishable from "search
-          // never ran", which made this impossible to debug from the UI.
-          // 'error' shows a message same as 'not_found' does.
-          setHunterSearch({ state: 'error' });
-        });
-    }, 800);
+    const timer = setTimeout(() => runHunterSearch(first, last, comp), 800);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.firstName, form.lastName, company]);
@@ -263,12 +263,24 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
         </div>
         <div className="field">
           <label>Email address</label>
-          <input
-            type="email"
-            value={form.email}
-            style={flagStyle('email')}
-            onChange={(e) => { setForm({ ...form, email: e.target.value }); setHunterSearch({ state: 'idle' }); }}
-          />
+          <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+            <input
+              type="email"
+              value={form.email}
+              style={{ ...flagStyle('email'), flex: 1, minWidth: 0 }}
+              onChange={(e) => { setForm({ ...form, email: e.target.value }); setHunterSearch({ state: 'idle' }); }}
+            />
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={hunterSearch.state === 'searching' || !form.firstName.trim() || !form.lastName.trim() || !company.trim()}
+              onClick={() => runHunterSearch(form.firstName.trim(), form.lastName.trim(), company.trim())}
+              title={!company.trim() ? 'Fill in their company first' : undefined}
+              style={{ flexShrink: 0, whiteSpace: 'nowrap' }}
+            >
+              {hunterSearch.state === 'searching' ? 'Searching…' : 'Find email'}
+            </Button>
+          </div>
           {doubtHint('email')}
           {hunterSearch.state === 'searching' && (
             <>
