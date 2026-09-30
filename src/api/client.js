@@ -243,6 +243,14 @@ export const api = {
   getAccountSettings: () => request('/account/settings'),
   updateAccountSettings: (payload) => request('/account/settings', { method: 'PATCH', body: payload }),
 
+  // AI sales assistant (services/salesAssistant) — analyzes a saved note and
+  // proposes CRM updates for a rep to accept/dismiss; never applies anything
+  // by itself. See ProspectCard.jsx / AISuggestionsPanel.jsx.
+  getAiAssistantStatus: () => request('/account/ai-assistant'),
+  analyzeGuestNote: (payload) => request('/account/ai-assistant/analyze', { method: 'POST', body: payload }),
+  applyAiSuggestion: (payload) => request('/account/ai-assistant/suggestions', { method: 'PATCH', body: { ...payload, action: 'apply' } }),
+  dismissAiSuggestion: (payload) => request('/account/ai-assistant/suggestions', { method: 'PATCH', body: { ...payload, action: 'dismiss' } }),
+
   // Reward-win email customization (subject/body per redeem method + a
   // shared header logo). Uploading/deleting the logo isn't plain JSON, so
   // those two bypass the shared `request` helper.

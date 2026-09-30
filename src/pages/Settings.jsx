@@ -9,6 +9,7 @@ const MODULES = [
   { key: 'google-review', label: 'Google review' },
   { key: 'social-media', label: 'Social media' },
   { key: 'email-templates', label: 'Reward emails' },
+  { key: 'ai-assistant', label: 'AI Assistant' },
   { key: 'calibration', label: 'Calibration' },
 ];
 
@@ -792,6 +793,95 @@ function EmailTemplatesModule() {
   );
 }
 
+const AI_ASSISTANT_MODES = [
+  { value: 'supervised', label: 'Supervised — a rep reviews and accepts every proposal' },
+  { value: 'automatic', label: 'Automatic — coming soon (currently behaves the same as Supervised)' },
+];
+
+function AIAssistantModule() {
+  const { updateStoredUser } = useAuth();
+  const [enabled, setEnabled] = useState(false);
+  const [savedEnabled, setSavedEnabled] = useState(false);
+  const [mode, setMode] = useState('supervised');
+  const [savedMode, setSavedMode] = useState('supervised');
+  const [configured, setConfigured] = useState(null); // null = loading, then true/false
+  const [saving, setSaving] = useState(false);
+  const [saveMsg, setSaveMsg] = useState('');
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    api.getAccountSettings()
+      .then((res) => {
+        setEnabled(res.aiAssistantEnabled);
+        setSavedEnabled(res.aiAssistantEnabled);
+        setMode(res.aiAssistantMode);
+        setSavedMode(res.aiAssistantMode);
+      })
+      .catch((e) => setError(e.message));
+    api.getAiAssistantStatus().then((res) => setConfigured(res.configured)).catch(() => setConfigured(false));
+  }, []);
+
+  async function handleSave(e) {
+    e.preventDefault();
+    setSaving(true);
+    setSaveMsg('');
+    try {
+      await api.updateAccountSettings({ aiAssistantEnabled: enabled, aiAssistantMode: mode });
+      setSavedEnabled(enabled);
+      setSavedMode(mode);
+      updateStoredUser({ aiAssistantEnabled: enabled });
+      setSaveMsg('Saved');
+      setTimeout(() => setSaveMsg(''), 2000);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const dirty = enabled !== savedEnabled || mode !== savedMode;
+
+  return (
+    <>
+      {error && <div className="error-banner">{error}</div>}
+
+      <Card title="AI Assistant" className="mt-card">
+        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 16px', lineHeight: 1.6 }}>
+          Reads a prospect's saved note and proposes CRM updates — matching one of your campaign's own
+          segmentation categories, a sales field, a lead rating, or a suggested tag when nothing else fits —
+          plus missing-info and next-action suggestions. Nothing is ever applied to a prospect's record
+          without a rep clicking Accept, in either mode below.
+        </p>
+
+        {configured === false && (
+          <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: 12, marginBottom: 16, fontSize: 13, color: '#92400E' }}>
+            The AI assistant isn't configured on this deployment yet — turning it on here won't do anything until it is.
+          </div>
+        )}
+
+        <form onSubmit={handleSave}>
+          <label style={{ display: 'flex', gap: 10, alignItems: 'flex-start', cursor: 'pointer', marginBottom: 16 }}>
+            <input type="checkbox" checked={enabled} onChange={(e) => setEnabled(e.target.checked)} style={{ marginTop: 2, flexShrink: 0, width: 18, height: 18 }} />
+            <span style={{ fontSize: 14, fontWeight: 600 }}>Enable the AI assistant for this account</span>
+          </label>
+
+          <div className="field">
+            <label>Mode</label>
+            <select value={mode} onChange={(e) => setMode(e.target.value)} disabled={!enabled}>
+              {AI_ASSISTANT_MODES.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
+            </select>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <Button type="submit" disabled={saving || !dirty}>{saving ? 'Saving…' : 'Save'}</Button>
+            {saveMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{saveMsg}</span>}
+          </div>
+        </form>
+      </Card>
+    </>
+  );
+}
+
 export default function Settings() {
   const [module, setModule] = useState('information');
 
@@ -816,6 +906,7 @@ export default function Settings() {
       {module === 'google-review' && <GoogleReviewModule />}
       {module === 'social-media' && <SocialMediaModule />}
       {module === 'email-templates' && <EmailTemplatesModule />}
+      {module === 'ai-assistant' && <AIAssistantModule />}
       {module === 'calibration' && <Calibration onExit={() => setModule('information')} />}
     </div>
   );

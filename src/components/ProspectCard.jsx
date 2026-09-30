@@ -4,6 +4,8 @@ import { api } from '../api/client';
 import { Button } from './ui';
 import DynamicFieldInput from './DynamicFieldInput';
 import EmailStatusBadge from './EmailStatusBadge';
+import AISuggestionsPanel from './AISuggestionsPanel';
+import { useAuth } from '../context/AuthContext';
 import { isPlaceholderEmail } from '../utils/placeholderEmail';
 
 // Chrome/Edge only (webkitSpeechRecognition) — Safari/Firefox don't support
@@ -36,6 +38,7 @@ function formatFieldValue(field, raw, t) {
 // up-to-date info regardless of how stale the caller's own list was.
 export default function ProspectCard({ campaignId, guest, initialMode = 'edit', onClose, onSaved }) {
   const { t } = useTranslation('admin');
+  const { user } = useAuth();
   const [mode, setMode] = useState(initialMode);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -64,6 +67,14 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
   const [tags, setTags] = useState('');
   const [customFields, setCustomFields] = useState({}); // { fieldLabel: value }
 
+  // AI assistant (services/salesAssistant) — last analysis of this
+  // prospect's note, if any. aiAnalyzedNote is a snapshot of the exact note
+  // text that analysis came from, so AISuggestionsPanel can tell "still
+  // current" apart from "note changed since" without an extra request.
+  const [aiSuggestions, setAiSuggestions] = useState(null);
+  const [aiAnalyzedNote, setAiAnalyzedNote] = useState(null);
+  const [analyzing, setAnalyzing] = useState(false);
+
   function load() {
     setLoading(true);
     setError('');
@@ -82,6 +93,8 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
         setSegments(guestNote.segments || {});
         setTags(guestNote.tags || '');
         setCustomFields(guestNote.customFields || {});
+        setAiSuggestions(guestNote.aiSuggestions || null);
+        setAiAnalyzedNote(guestNote.aiAnalyzedNote ?? null);
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
@@ -169,23 +182,93 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
     setSaving(true);
     setError('');
     try {
+      const trimmedNote = note.trim();
       await api.saveGuestNote({
         campaignId,
         email: guest.email,
         firstName: guest.firstName,
         lastName: guest.lastName,
-        note: note.trim(),
+        note: trimmedNote,
         leadRating,
         segments,
         tags,
         customFields,
       });
+      // Fire-and-forget: the card is about to close (this popup's whole flow
+      // is a fast tap-through at a booth), so the analysis isn't awaited or
+      // shown here — it finishes in the background and is already waiting,
+      // stored on the note, the next time anyone opens this prospect's card.
+      if (user?.aiAssistantEnabled && trimmedNote && trimmedNote !== aiAnalyzedNote) {
+        api.analyzeGuestNote({ campaignId, email: guest.email }).catch(() => {});
+      }
       onSaved?.();
       onClose();
     } catch (err) {
       setError(err.message);
     } finally {
       setSaving(false);
+    }
+  }
+
+  // Manual trigger from AISuggestionsPanel — either the first analysis of a
+  // note that's never been run, or a rep-requested re-analysis after editing
+  // the note. Updates local state directly from the response rather than
+  // reloading the whole card.
+  async function handleAnalyze() {
+    setAnalyzing(true);
+    setError('');
+    try {
+      const result = await api.analyzeGuestNote({ campaignId, email: guest.email });
+      setAiSuggestions(result);
+      setAiAnalyzedNote(note.trim());
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setAnalyzing(false);
+    }
+  }
+
+  // Accepting a proposal both marks it applied (mirrors the backend, so it
+  // drops out of AISuggestionsPanel's pending list) and merges the accepted
+  // value into this card's own edit-mode state, so the rep sees it reflected
+  // immediately without reopening the card. Ignoring just marks it dismissed.
+  function markSuggestionStatus(suggestionId, status) {
+    setAiSuggestions((prev) => {
+      if (!prev) return prev;
+      const mapItem = (i) => (i.id === suggestionId ? { ...i, status } : i);
+      return {
+        ...prev,
+        fieldUpdates: prev.fieldUpdates.map(mapItem),
+        segmentUpdates: prev.segmentUpdates.map(mapItem),
+        leadRating: prev.leadRating?.id === suggestionId ? { ...prev.leadRating, status } : prev.leadRating,
+        suggestedTag: prev.suggestedTag?.id === suggestionId ? { ...prev.suggestedTag, status } : prev.suggestedTag,
+      };
+    });
+  }
+
+  async function handleApplySuggestion(suggestionId) {
+    const fieldItem = aiSuggestions.fieldUpdates.find((i) => i.id === suggestionId);
+    const segmentItem = aiSuggestions.segmentUpdates.find((i) => i.id === suggestionId);
+    const isRating = aiSuggestions.leadRating?.id === suggestionId;
+    const isTag = aiSuggestions.suggestedTag?.id === suggestionId;
+    try {
+      await api.applyAiSuggestion({ campaignId, email: guest.email, suggestionId });
+      markSuggestionStatus(suggestionId, 'applied');
+      if (fieldItem) setCustomFields((prev) => ({ ...prev, [fieldItem.fieldLabel]: fieldItem.value }));
+      else if (segmentItem) setSegments((prev) => ({ ...prev, [segmentItem.categoryName]: segmentItem.optionLabel }));
+      else if (isRating) setLeadRating(aiSuggestions.leadRating.value);
+      else if (isTag) setTags((prev) => (prev.trim() ? `${prev.trim()}, ${aiSuggestions.suggestedTag.tag}` : aiSuggestions.suggestedTag.tag));
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  async function handleDismissSuggestion(suggestionId) {
+    try {
+      await api.dismissAiSuggestion({ campaignId, email: guest.email, suggestionId });
+      markSuggestionStatus(suggestionId, 'dismissed');
+    } catch (err) {
+      setError(err.message);
     }
   }
 
@@ -353,6 +436,18 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
               </div>
             )}
 
+            {user?.aiAssistantEnabled && note && (
+              <AISuggestionsPanel
+                suggestions={aiSuggestions}
+                analyzedNote={aiAnalyzedNote}
+                currentNote={note}
+                analyzing={analyzing}
+                onAnalyze={handleAnalyze}
+                onApply={handleApplySuggestion}
+                onDismiss={handleDismissSuggestion}
+              />
+            )}
+
             <Button variant="secondary" onClick={onClose} style={{ marginTop: 22 }}>{t('common.close')}</Button>
           </>
         ) : (
@@ -449,6 +544,18 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
                 </div>
               )}
             </div>
+
+            {user?.aiAssistantEnabled && note && (
+              <AISuggestionsPanel
+                suggestions={aiSuggestions}
+                analyzedNote={aiAnalyzedNote}
+                currentNote={note}
+                analyzing={analyzing}
+                onAnalyze={handleAnalyze}
+                onApply={handleApplySuggestion}
+                onDismiss={handleDismissSuggestion}
+              />
+            )}
 
             {segmentCategories.map((cat) => (
               <DynamicFieldInput
