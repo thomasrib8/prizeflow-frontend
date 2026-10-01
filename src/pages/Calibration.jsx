@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { useWheelSocket } from '../hooks/useWheelSocket';
 import WheelSVG, { posToAngle } from '../components/WheelSVG';
@@ -59,6 +60,7 @@ function Btn({ children, onClick, variant = 'primary', disabled }) {
 
 // ─── Main Calibration component ───────────────────────────────────────────────
 export default function Calibration({ onExit }) {
+  const { t } = useTranslation('admin');
   const navigate = useNavigate();
   // Default (standalone /calibration route): navigate to the dashboard.
   // When embedded elsewhere (e.g. inside Settings.jsx's Calibration tab),
@@ -145,26 +147,20 @@ export default function Calibration({ onExit }) {
     setSpinPhase(3);
 
     if (droppedFrom === 'CalIndex0' || droppedFrom === 'CalIndex1') {
-      setInterruptedMessage(
-        'Cleat position not validated by the wheel at step 2: the measured gap between the step 1 and step 2 ' +
-        'positions is outside the accepted range. Reposition the cleat as precisely as possible on the pin ' +
-        '(always the same edge of the cleat at both steps) and restart the calibration.'
-      );
+      setInterruptedMessage(t('calibration.interruptedMsgIndexInvalid'));
     } else if (droppedFrom === 'CalRun') {
-      setInterruptedMessage(
-        'Communication with the motor was interrupted while recording the spins. ' +
-        'Please restart the calibration from the beginning.'
-      );
+      setInterruptedMessage(t('calibration.interruptedMsgCalRun'));
     } else {
-      setInterruptedMessage('The calibration was unexpectedly interrupted by the wheel. Please restart.');
+      setInterruptedMessage(t('calibration.interruptedMsgDefault'));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inCalibration, wheelState]);
 
   // "Spin recorded" flash
   useEffect(() => {
     if (calLaunch > lastCalLaunch && wheelState === 'CalRun') {
       setLastCalLaunch(calLaunch);
-      setSpinMsg('✓ Spin recorded!');
+      setSpinMsg(t('calibration.spinRecorded'));
       const t = setTimeout(() => setSpinMsg(''), 2000);
       return () => clearTimeout(t);
     }
@@ -224,25 +220,25 @@ export default function Calibration({ onExit }) {
     exit();
   }
 
-  const stepTitles = { 1: 'Step 1 of 4', 2: 'Step 2 of 4', 3: 'Step 3 of 4', 4: 'Step 4 of 4' };
+  const stepTitles = { 1: t('calibration.step1Of4'), 2: t('calibration.step2Of4'), 3: t('calibration.step3Of4'), 4: t('calibration.step4Of4') };
 
   return (
     <div>
       {/* Page base — always visible behind modals */}
       <div className="page-header">
         <div>
-          <h1 className="page-title">Calibration</h1>
-          <p className="page-subtitle">Guided wheel calibration procedure</p>
+          <h1 className="page-title">{t('calibration.pageTitle')}</h1>
+          <p className="page-subtitle">{t('calibration.pageSubtitle')}</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <span className={`badge badge-${agentConnected ? 'green' : 'red'}`}>
-            {agentConnected ? 'Wheel connected' : 'Wheel offline'}
+            {agentConnected ? t('pwa.wheelReady') : t('pwa.wheelOffline')}
           </span>
           {(step > 0 || step === -1) && step < 5 && (
             <button onClick={handleExitRequest} style={{
               background: 'none', border: '1px solid #E2E8F0', borderRadius: 8,
               padding: '7px 14px', fontSize: 13, color: '#64748B', cursor: 'pointer', fontFamily: 'inherit',
-            }}>Exit calibration</button>
+            }}>{t('calibration.exitBtn')}</button>
           )}
         </div>
       </div>
@@ -253,11 +249,11 @@ export default function Calibration({ onExit }) {
         <Modal>
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 36, marginBottom: 14 }}>⟳</div>
-            <h2 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 10px', color: '#03041A' }}>Calibration in progress</h2>
+            <h2 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 10px', color: '#03041A' }}>{t('calibration.transitioningTitle')}</h2>
             <p style={{ fontSize: 14, color: '#64748B', lineHeight: 1.6, margin: '0 0 6px' }}>
-              Waiting for the wheel to transition to the next step…
+              {t('calibration.transitioningDesc')}
             </p>
-            <p style={{ fontSize: 12, color: '#94A3B8' }}>Wheel state: {wheelState || '—'}</p>
+            <p style={{ fontSize: 12, color: '#94A3B8' }}>{t('calibration.wheelStateLabel', { state: wheelState || '—' })}</p>
           </div>
         </Modal>
       )}
@@ -271,14 +267,14 @@ export default function Calibration({ onExit }) {
                 <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#FEF2F2', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 18px' }}>
                   <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                 </div>
-                <h2 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 10px', color: '#03041A' }}>Calibration interrompue</h2>
+                <h2 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 10px', color: '#03041A' }}>{t('calibration.interruptedTitle')}</h2>
                 <p style={{ fontSize: 14, color: '#64748B', lineHeight: 1.6, margin: '0 0 28px' }}>
                   {interruptedMessage}
                 </p>
                 <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-                  <Btn variant="secondary" onClick={() => { setInterruptedMessage(''); exit(); }}>Cancel</Btn>
+                  <Btn variant="secondary" onClick={() => { setInterruptedMessage(''); exit(); }}>{t('common.cancel')}</Btn>
                   <Btn onClick={handleConfirmEntry} disabled={busy || !agentConnected}>
-                    {busy ? 'Restarting…' : 'Restart calibration'}
+                    {busy ? t('calibration.restartingBtn') : t('calibration.restartCalibrationBtn')}
                   </Btn>
                 </div>
               </>
@@ -287,14 +283,14 @@ export default function Calibration({ onExit }) {
                 <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 18px' }}>
                   <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#09B2FD" strokeWidth="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1" fill="#09B2FD"/></svg>
                 </div>
-                <h2 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 10px', color: '#03041A' }}>Wheel Calibration</h2>
+                <h2 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 10px', color: '#03041A' }}>{t('calibration.wheelCalibrationTitle')}</h2>
                 <p style={{ fontSize: 14, color: '#64748B', lineHeight: 1.6, margin: '0 0 28px' }}>
-                  You are about to start the calibration procedure. This operation takes approximately <strong>10 minutes</strong> and will recalibrate the wheel's section detection.
+                  {t('calibration.entryDescPrefix')} <strong>{t('calibration.entryDescBold')}</strong> {t('calibration.entryDescSuffix')}
                 </p>
                 <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-                  <Btn variant="secondary" onClick={() => exit()}>Cancel</Btn>
+                  <Btn variant="secondary" onClick={() => exit()}>{t('common.cancel')}</Btn>
                   <Btn onClick={handleConfirmEntry} disabled={busy || !agentConnected}>
-                    {busy ? 'Starting…' : 'Start calibration'}
+                    {busy ? t('calibration.startingBtn') : t('calibration.startCalibrationBtn')}
                   </Btn>
                 </div>
               </>
@@ -308,17 +304,17 @@ export default function Calibration({ onExit }) {
         <Modal wide>
           <div className="cal-step-grid">
             <div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: '#09B2FD', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>{stepTitles[1]} — Defining section 1</div>
-              <h2 style={{ fontSize: 20, fontWeight: 700, margin: '0 0 16px', color: '#03041A' }}>Position the cleat</h2>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#09B2FD', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>{stepTitles[1]} {t('calibration.definingSection1')}</div>
+              <h2 style={{ fontSize: 20, fontWeight: 700, margin: '0 0 16px', color: '#03041A' }}>{t('calibration.positionCleatTitle')}</h2>
               <p style={{ fontSize: 14, color: '#334155', lineHeight: 1.7, margin: '0 0 28px' }}>
-                Place the cleat in <strong>section n°1</strong> as close as possible to the pin joining <strong>section n°1 and n°12</strong>.
+                {t('calibration.positionCleatDescPrefix')} <strong>{t('calibration.section1Bold')}</strong> {t('calibration.positionCleatDescMiddle')} <strong>{t('calibration.section1And12Bold')}</strong>.
                 <br /><br />
-                The cleat must remain <strong>vertical</strong> and must not be stressed in any way.
+                {t('calibration.verticalWarningPrefix')} <strong>{t('calibration.verticalBold')}</strong> {t('calibration.verticalWarningSuffix')}
               </p>
               <div style={{ display: 'flex', gap: 12 }}>
-                <Btn variant="secondary" onClick={handleExitRequest}>Cancel</Btn>
+                <Btn variant="secondary" onClick={handleExitRequest}>{t('common.cancel')}</Btn>
                 <Btn onClick={handleStep1Confirm} disabled={busy}>
-                  {busy ? '…' : 'Confirm position'}
+                  {busy ? '…' : t('calibration.confirmPositionBtn')}
                 </Btn>
               </div>
             </div>
@@ -334,17 +330,17 @@ export default function Calibration({ onExit }) {
         <Modal wide>
           <div className="cal-step-grid">
             <div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: '#09B2FD', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>{stepTitles[2]} — Defining section 1</div>
-              <h2 style={{ fontSize: 20, fontWeight: 700, margin: '0 0 16px', color: '#03041A' }}>Reposition the cleat</h2>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#09B2FD', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>{stepTitles[2]} {t('calibration.definingSection1')}</div>
+              <h2 style={{ fontSize: 20, fontWeight: 700, margin: '0 0 16px', color: '#03041A' }}>{t('calibration.repositionCleatTitle')}</h2>
               <p style={{ fontSize: 14, color: '#334155', lineHeight: 1.7, margin: '0 0 28px' }}>
-                Place the cleat in <strong>section n°1</strong> as close as possible to the pin joining <strong>section n°1 and n°2</strong>.
+                {t('calibration.positionCleatDescPrefix')} <strong>{t('calibration.section1Bold')}</strong> {t('calibration.positionCleatDescMiddle')} <strong>{t('calibration.section1And2Bold')}</strong>.
                 <br /><br />
-                The cleat must remain <strong>vertical</strong> and must not be stressed in any way.
+                {t('calibration.verticalWarningPrefix')} <strong>{t('calibration.verticalBold')}</strong> {t('calibration.verticalWarningSuffix')}
               </p>
               <div style={{ display: 'flex', gap: 12 }}>
-                <Btn variant="secondary" onClick={handleExitRequest}>Cancel</Btn>
+                <Btn variant="secondary" onClick={handleExitRequest}>{t('common.cancel')}</Btn>
                 <Btn onClick={handleStep2Confirm} disabled={busy}>
-                  {busy ? '…' : 'Confirm position'}
+                  {busy ? '…' : t('calibration.confirmPositionBtn')}
                 </Btn>
               </div>
             </div>
@@ -361,7 +357,7 @@ export default function Calibration({ onExit }) {
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: '#09B2FD', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>{stepTitles[3]}</div>
             <h2 style={{ fontSize: 28, fontWeight: 900, margin: '0 0 4px', color: '#03041A', letterSpacing: '-0.01em' }}>1</h2>
-            <h3 style={{ fontSize: 16, fontWeight: 800, margin: '0 0 24px', color: '#03041A', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Spin the wheel clockwise direction</h3>
+            <h3 style={{ fontSize: 16, fontWeight: 800, margin: '0 0 24px', color: '#03041A', letterSpacing: '0.04em', textTransform: 'uppercase' }}>{t('calibration.spinClockwiseTitle')}</h3>
 
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
               <WheelSVG positionAngle={posAngle} />
@@ -369,7 +365,7 @@ export default function Calibration({ onExit }) {
 
             {isRecording && (
               <div style={{ fontSize: 13, fontWeight: 700, color: '#F59E0B', background: '#FFFBEB', padding: '8px 18px', borderRadius: 20, display: 'inline-block', marginBottom: 14 }}>
-                ⟳ Recording in progress — do not touch the wheel
+                {t('calibration.recordingInProgress')}
               </div>
             )}
             {spinMsg && !isRecording && (
@@ -379,12 +375,12 @@ export default function Calibration({ onExit }) {
             )}
             {!isRecording && !spinMsg && wheelState !== 'CalRun' && (
               <div style={{ fontSize: 12, color: '#EF4444', background: '#FEF2F2', padding: '6px 14px', borderRadius: 20, display: 'inline-block', marginBottom: 14 }}>
-                ⚠ Waiting for calibration mode… (wheel state: {wheelState || '—'})
+                {t('calibration.waitingForCalMode', { state: wheelState || '—' })}
               </div>
             )}
             {!isRecording && !spinMsg && wheelState === 'CalRun' && (
               <div style={{ fontSize: 12, color: '#94A3B8', marginBottom: 14 }}>
-                Spin the wheel hard in the clockwise direction
+                {t('calibration.spinHardClockwise')}
               </div>
             )}
 
@@ -397,12 +393,12 @@ export default function Calibration({ onExit }) {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <SpinDots total={SPINS_PER_PHASE} recorded={phase1Recorded} label="Phase 1" />
-              <SpinDots total={SPINS_PER_PHASE} recorded={0} label="Phase 2" />
+              <SpinDots total={SPINS_PER_PHASE} recorded={phase1Recorded} label={t('calibration.phase1Label')} />
+              <SpinDots total={SPINS_PER_PHASE} recorded={0} label={t('calibration.phase2Label')} />
             </div>
 
             <div style={{ marginTop: 24 }}>
-              <Btn variant="secondary" onClick={handleExitRequest}>Exit calibration</Btn>
+              <Btn variant="secondary" onClick={handleExitRequest}>{t('calibration.exitBtn')}</Btn>
             </div>
           </div>
         </Modal>
@@ -414,7 +410,7 @@ export default function Calibration({ onExit }) {
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: '#09B2FD', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>{stepTitles[4]}</div>
             <h2 style={{ fontSize: 28, fontWeight: 900, margin: '0 0 4px', color: '#03041A', letterSpacing: '-0.01em' }}>2</h2>
-            <h3 style={{ fontSize: 16, fontWeight: 800, margin: '0 0 24px', color: '#03041A', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Spin the wheel counter clockwise direction</h3>
+            <h3 style={{ fontSize: 16, fontWeight: 800, margin: '0 0 24px', color: '#03041A', letterSpacing: '0.04em', textTransform: 'uppercase' }}>{t('calibration.spinCounterClockwiseTitle')}</h3>
 
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
               <WheelSVG positionAngle={posAngle} />
@@ -422,7 +418,7 @@ export default function Calibration({ onExit }) {
 
             {isRecording && (
               <div style={{ fontSize: 13, fontWeight: 700, color: '#F59E0B', background: '#FFFBEB', padding: '8px 18px', borderRadius: 20, display: 'inline-block', marginBottom: 14 }}>
-                ⟳ Recording in progress — do not touch the wheel
+                {t('calibration.recordingInProgress')}
               </div>
             )}
             {spinMsg && !isRecording && (
@@ -432,7 +428,7 @@ export default function Calibration({ onExit }) {
             )}
             {!isRecording && !spinMsg && wheelState === 'CalRun' && (
               <div style={{ fontSize: 12, color: '#94A3B8', marginBottom: 14 }}>
-                Spin the wheel hard in the counter-clockwise direction
+                {t('calibration.spinHardCounterClockwise')}
               </div>
             )}
 
@@ -445,12 +441,12 @@ export default function Calibration({ onExit }) {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <SpinDots total={SPINS_PER_PHASE} recorded={SPINS_PER_PHASE} label="Phase 1 — Clockwise ✓" />
-              <SpinDots total={SPINS_PER_PHASE} recorded={phase2Recorded} label="Phase 2 — Counter-clockwise" />
+              <SpinDots total={SPINS_PER_PHASE} recorded={SPINS_PER_PHASE} label={t('calibration.phase1ClockwiseDoneLabel')} />
+              <SpinDots total={SPINS_PER_PHASE} recorded={phase2Recorded} label={t('calibration.phase2CounterClockwiseLabel')} />
             </div>
 
             <div style={{ marginTop: 24 }}>
-              <Btn variant="secondary" onClick={handleExitRequest}>Exit calibration</Btn>
+              <Btn variant="secondary" onClick={handleExitRequest}>{t('calibration.exitBtn')}</Btn>
             </div>
           </div>
         </Modal>
@@ -461,19 +457,17 @@ export default function Calibration({ onExit }) {
         <Modal>
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 48, marginBottom: 14 }}>✅</div>
-            <h2 style={{ fontSize: 20, fontWeight: 700, margin: '0 0 10px', color: '#03041A' }}>Calibration complete</h2>
+            <h2 style={{ fontSize: 20, fontWeight: 700, margin: '0 0 10px', color: '#03041A' }}>{t('calibration.calibrationCompleteTitle')}</h2>
             <p style={{ fontSize: 14, color: '#64748B', lineHeight: 1.6, margin: '0 0 20px' }}>
-              The wheel has calculated and saved the new calibration.
+              {t('calibration.calibrationCompleteDesc')}
             </p>
             <div style={{
               textAlign: 'left', background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10,
               padding: '14px 16px', marginBottom: 28, fontSize: 13, color: '#92400E', lineHeight: 1.6,
             }}>
-              ⚠ <strong>Restart required before launching a campaign.</strong> The wheel's control program will
-              silently refuse every spin until it is restarted. Unplug and replug the wheel's power (or power-cycle
-              the Raspberry Pi) now, then wait for it to reconnect before starting a campaign.
+              ⚠ <strong>{t('calibration.restartRequiredBold')}</strong> {t('calibration.restartRequiredText')}
             </div>
-            <Btn onClick={() => { send('Free'); setInCalibration(false); exit(); }}>Back to dashboard</Btn>
+            <Btn onClick={() => { send('Free'); setInCalibration(false); exit(); }}>{t('calibration.backToDashboardBtn')}</Btn>
           </div>
         </Modal>
       )}
@@ -487,15 +481,15 @@ export default function Calibration({ onExit }) {
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
               </div>
               <div>
-                <h3 style={{ fontSize: 16, fontWeight: 700, margin: '0 0 8px', color: '#03041A' }}>Cancel calibration?</h3>
+                <h3 style={{ fontSize: 16, fontWeight: 700, margin: '0 0 8px', color: '#03041A' }}>{t('calibration.cancelCalibrationTitle')}</h3>
                 <p style={{ fontSize: 14, color: '#64748B', margin: 0, lineHeight: 1.6 }}>
-                  Returning to the home page will cancel the calibration procedure. All progress will be lost.
+                  {t('calibration.cancelCalibrationDesc')}
                 </p>
               </div>
             </div>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-              <Btn variant="secondary" onClick={() => setShowCancelWarning(false)}>Continue calibration</Btn>
-              <Btn variant="danger" onClick={handleConfirmExit}>Cancel & exit</Btn>
+              <Btn variant="secondary" onClick={() => setShowCancelWarning(false)}>{t('calibration.continueCalibrationBtn')}</Btn>
+              <Btn variant="danger" onClick={handleConfirmExit}>{t('calibration.cancelExitBtn')}</Btn>
             </div>
           </div>
         </div>
@@ -504,7 +498,7 @@ export default function Calibration({ onExit }) {
       {/* Background content (visible when no modal) */}
       {step === 0 && (
         <div className="card" style={{ padding: 40, textAlign: 'center', marginTop: 120 }}>
-          <p style={{ color: '#64748B', fontSize: 14 }}>Confirm above to start the calibration procedure.</p>
+          <p style={{ color: '#64748B', fontSize: 14 }}>{t('calibration.confirmAboveHint')}</p>
         </div>
       )}
     </div>

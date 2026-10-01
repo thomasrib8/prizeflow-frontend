@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { Card, Button, Badge, EmptyState } from '../components/ui';
 import RewardCard from '../components/RewardCard';
 
 const STATUS_TONE = { active: 'orange', redeemed: 'green', expired: 'neutral', cancelled: 'red' };
-const STATUS_LABEL = { active: 'To distribute', redeemed: 'Distributed', expired: 'Expired', cancelled: 'Cancelled' };
+const STATUS_TKEY = { active: 'statusToDistribute', redeemed: 'statusDistributed', expired: 'rewardStatusExpired', cancelled: 'rewardStatusCancelled' };
+const STATUS_NS = { active: 'rewards', redeemed: 'rewards', expired: 'history', cancelled: 'history' };
 
 function formatDT(s) {
   if (!s) return '—';
@@ -19,6 +21,7 @@ function formatDT(s) {
 /// outside the app entirely), a lookup here stays inline on this page, with
 /// the sidebar still visible, since the operator is already navigating the app.
 export default function Rewards() {
+  const { t } = useTranslation('admin');
   const [code, setCode] = useState('');
   const [signedCode, setSignedCode] = useState(null);
   const [reward, setReward] = useState(null);
@@ -104,15 +107,15 @@ export default function Rewards() {
     <div>
       <div className="page-header">
         <div>
-          <h1 className="page-title">Redeem</h1>
-          <p className="page-subtitle">Enter a guest's 8-character code to open their reward</p>
+          <h1 className="page-title">{t('nav.redeem')}</h1>
+          <p className="page-subtitle">{t('rewards.pageSubtitle')}</p>
         </div>
       </div>
 
       <Card className="mt-card">
         <form onSubmit={handleSubmit} style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
           <input
-            placeholder="e.g. K8Q7F3N2"
+            placeholder={t('rewards.codePlaceholder')}
             value={code}
             onChange={(e) => setCode(e.target.value.toUpperCase())}
             autoFocus
@@ -123,7 +126,7 @@ export default function Rewards() {
             }}
           />
           <Button type="submit" disabled={busy || !code.trim()} style={{ flexShrink: 0 }}>
-            {busy ? 'Looking up…' : 'Open reward'}
+            {busy ? t('rewards.lookingUpBtn') : t('rewards.openRewardBtn')}
           </Button>
         </form>
         {error && <div className="error-banner" style={{ marginTop: 12 }}>{error}</div>}
@@ -136,7 +139,7 @@ export default function Rewards() {
       )}
 
       <Card
-        title="Rewards history"
+        title={t('rewards.historyTitle')}
         className="mt-card"
         action={
           <button
@@ -144,21 +147,21 @@ export default function Rewards() {
             onClick={() => setHistoryOpen((v) => !v)}
             style={{ background: 'none', border: 'none', padding: 0, color: '#002881', cursor: 'pointer', fontSize: 12, fontWeight: 600, fontFamily: 'inherit' }}
           >
-            {historyOpen ? 'Collapse ▲' : 'Expand ▼'}
+            {historyOpen ? t('rewards.collapseBtn') : t('rewards.expandBtn')}
           </button>
         }
       >
-        {!historyOpen ? null : !rewards ? <p className="page-subtitle">Loading…</p> : rewards.length === 0 ? (
-          <EmptyState title="No rewards yet" />
+        {!historyOpen ? null : !rewards ? <p className="page-subtitle">{t('common.loading')}</p> : rewards.length === 0 ? (
+          <EmptyState title={t('history.noRewardsYet')} />
         ) : (
           <table className="data-table">
-            <thead><tr><th>Name</th><th>Gift</th><th>Status</th><th>Date</th></tr></thead>
+            <thead><tr><th>{t('history.tableName')}</th><th>{t('common.gift')}</th><th>{t('history.tableStatus')}</th><th>{t('history.tableDate')}</th></tr></thead>
             <tbody>
               {rewards.map((r) => (
                 <tr key={r.id} onClick={() => handleRowClick(r.id)} style={{ cursor: 'pointer' }}>
                   <td style={{ fontWeight: 500 }}>{r.first_name} {r.last_name}</td>
                   <td>{r.gift_name}</td>
-                  <td><Badge tone={STATUS_TONE[r.status] || 'neutral'}>{STATUS_LABEL[r.status] || r.status}</Badge></td>
+                  <td><Badge tone={STATUS_TONE[r.status] || 'neutral'}>{STATUS_TKEY[r.status] ? t(`${STATUS_NS[r.status]}.${STATUS_TKEY[r.status]}`) : r.status}</Badge></td>
                   <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{formatDT(r.created_at)}</td>
                 </tr>
               ))}

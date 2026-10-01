@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../api/client';
 import { Card, Button, Badge, EmptyState } from '../components/ui';
 
 const STATUS_TONE = { pending: 'orange', approved: 'green', deactivated: 'red' };
+const STATUS_TKEY = { pending: 'userStatusPending', approved: 'userStatusApproved', deactivated: 'userStatusDeactivated' };
 
 function formatDT(s) {
   if (!s) return '—';
@@ -12,6 +14,7 @@ function formatDT(s) {
 }
 
 export default function Users() {
+  const { t } = useTranslation('admin');
   const { user: me } = useAuth();
   const navigate = useNavigate();
   const [users, setUsers] = useState(null);
@@ -59,18 +62,18 @@ export default function Users() {
     <div>
       <div className="page-header">
         <div>
-          <h1 className="page-title">Users</h1>
-          <p className="page-subtitle">Approve new accounts, manage roles, and deactivate access</p>
+          <h1 className="page-title">{t('nav.users')}</h1>
+          <p className="page-subtitle">{t('users.pageSubtitle')}</p>
         </div>
       </div>
       {error && <div className="error-banner">{error}</div>}
 
-      {!users && <p className="page-subtitle">Loading…</p>}
+      {!users && <p className="page-subtitle">{t('common.loading')}</p>}
 
       {users && pending.length > 0 && (
-        <Card title="Pending approval" className="mt-card">
+        <Card title={t('users.pendingApprovalTitle')} className="mt-card">
           <table className="data-table">
-            <thead><tr><th>Name</th><th>Email</th><th>Requested</th><th></th></tr></thead>
+            <thead><tr><th>{t('history.tableName')}</th><th>{t('history.tableEmail')}</th><th>{t('users.tableRequested')}</th><th></th></tr></thead>
             <tbody>
               {pending.map((u) => (
                 <tr key={u.id}>
@@ -80,8 +83,8 @@ export default function Users() {
                   <td style={{ color: 'var(--text-muted)' }}>{u.email}</td>
                   <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{u.created_at}</td>
                   <td style={{ display: 'flex', gap: 8 }}>
-                    <Button size="sm" disabled={busyId === u.id} onClick={() => setStatus(u.id, 'approved')}>Approve</Button>
-                    <Button size="sm" variant="ghost" disabled={busyId === u.id} onClick={() => setStatus(u.id, 'deactivated')}>Reject</Button>
+                    <Button size="sm" disabled={busyId === u.id} onClick={() => setStatus(u.id, 'approved')}>{t('users.approveBtn')}</Button>
+                    <Button size="sm" variant="ghost" disabled={busyId === u.id} onClick={() => setStatus(u.id, 'deactivated')}>{t('users.rejectBtn')}</Button>
                   </td>
                 </tr>
               ))}
@@ -91,10 +94,10 @@ export default function Users() {
       )}
 
       {users && (
-        <Card title="All accounts" className="mt-card">
-          {others.length === 0 ? <EmptyState title="No accounts yet" /> : (
+        <Card title={t('users.allAccountsTitle')} className="mt-card">
+          {others.length === 0 ? <EmptyState title={t('users.noAccountsYet')} /> : (
             <table className="data-table">
-              <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th></th></tr></thead>
+              <thead><tr><th>{t('history.tableName')}</th><th>{t('history.tableEmail')}</th><th>{t('users.tableRole')}</th><th>{t('history.tableStatus')}</th><th></th></tr></thead>
               <tbody>
                 {others.map((u) => {
                   const isSelf = u.id === me?.id;
@@ -102,7 +105,7 @@ export default function Users() {
                     <tr key={u.id}>
                       <td style={{ fontWeight: 500 }}>
                         <button className="link-button" onClick={() => navigate(`/users/${u.id}`)}>{u.name || '—'}</button>
-                        {isSelf ? ' (you)' : ''}
+                        {isSelf ? t('users.youSuffix') : ''}
                       </td>
                       <td style={{ color: 'var(--text-muted)' }}>{u.email}</td>
                       <td>
@@ -112,17 +115,17 @@ export default function Users() {
                           onChange={(e) => setRole(u.id, e.target.value)}
                           style={{ padding: '5px 8px', border: '1px solid #E2E8F0', borderRadius: 6, fontSize: 13 }}
                         >
-                          <option value="operator">Operator</option>
-                          <option value="admin">Admin</option>
+                          <option value="operator">{t('users.roleOperator')}</option>
+                          <option value="admin">{t('users.roleAdmin')}</option>
                         </select>
                       </td>
-                      <td><Badge tone={STATUS_TONE[u.status]}>{u.status}</Badge></td>
+                      <td><Badge tone={STATUS_TONE[u.status]}>{t(`users.${STATUS_TKEY[u.status]}`)}</Badge></td>
                       <td>
                         {!isSelf && (
                           u.status === 'deactivated' ? (
-                            <Button size="sm" disabled={busyId === u.id} onClick={() => setStatus(u.id, 'approved')}>Reactivate</Button>
+                            <Button size="sm" disabled={busyId === u.id} onClick={() => setStatus(u.id, 'approved')}>{t('rewardCard.reactivateBtn')}</Button>
                           ) : (
-                            <Button size="sm" variant="ghost" disabled={busyId === u.id} onClick={() => setStatus(u.id, 'deactivated')}>Deactivate</Button>
+                            <Button size="sm" variant="ghost" disabled={busyId === u.id} onClick={() => setStatus(u.id, 'deactivated')}>{t('users.deactivateBtn')}</Button>
                           )
                         )}
                       </td>
@@ -136,10 +139,10 @@ export default function Users() {
       )}
 
       {wheels && (
-        <Card title="Wheels in service" className="mt-card">
-          {wheels.length === 0 ? <EmptyState title="No wheels in service yet" /> : (
+        <Card title={t('users.wheelsInServiceTitle')} className="mt-card">
+          {wheels.length === 0 ? <EmptyState title={t('users.noWheelsYet')} /> : (
             <table className="data-table">
-              <thead><tr><th>Name</th><th>Model Number</th><th>Serial Number</th><th>Security Key</th><th>Put into service</th></tr></thead>
+              <thead><tr><th>{t('history.tableName')}</th><th>{t('users.tableModelNumber')}</th><th>{t('users.tableSerialNumber')}</th><th>{t('users.tableSecurityKey')}</th><th>{t('users.tablePutIntoService')}</th></tr></thead>
               <tbody>
                 {wheels.map((w) => (
                   <tr key={w.id}>

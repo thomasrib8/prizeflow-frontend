@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { Badge, Button, EmptyState, GiftPill, MiniBar } from '../components/ui';
 import DownloadAppModal from '../components/DownloadAppModal';
@@ -9,6 +10,7 @@ import {
 } from 'recharts';
 
 function EmailHistoryCard() {
+  const { t } = useTranslation('admin');
   const [log, setLog] = useState(null);
 
   useEffect(() => {
@@ -22,12 +24,12 @@ function EmailHistoryCard() {
   return (
     <div className="card mt-card">
       <div className="card-head">
-        <h3 className="card-title">Email history</h3>
+        <h3 className="card-title">{t('dashboard.emailHistoryTitle')}</h3>
       </div>
       {!log ? (
-        <p className="page-subtitle">Loading…</p>
+        <p className="page-subtitle">{t('common.loading')}</p>
       ) : log.length === 0 ? (
-        <EmptyState title="No emails sent" />
+        <EmptyState title={t('dashboard.noEmailsSent')} />
       ) : (
         <div className="activity-list">
           {log.map((e) => (
@@ -55,6 +57,7 @@ function EmailHistoryCard() {
 const SLOT_COLORS = ['#09B2FD','#10B981','#F59E0B','#9333EA','#E11D48','#15803D','#D97706','#4F46E5','#BE185D','#0D9488','#A16207','#7C3AED'];
 const CHART_FILTERS = ['7D', '30D', '90D', 'All'];
 const CAMPAIGN_STATUS_TONE = { draft: 'neutral', active: 'green', paused: 'orange', completed: 'blue', archived: 'neutral' };
+const STATUS_TKEY = { draft: 'statusDraft', active: 'statusActive', paused: 'statusPaused', completed: 'statusCompleted', archived: 'statusArchived' };
 
 function StatCard({ label, value, sub, accent, pct }) {
   const bar = pct !== undefined;
@@ -90,6 +93,7 @@ function CustomTooltip({ active, payload, label }) {
 }
 
 export default function Dashboard() {
+  const { t } = useTranslation('admin');
   const { isAdmin } = useAdmin();
   const [data, setData] = useState(null);
   const [chart, setChart] = useState([]);
@@ -120,36 +124,37 @@ export default function Dashboard() {
   }, [chartFilter, campaignId]);
 
   if (error) return <div className="error-banner">{error}</div>;
-  if (!data) return <p className="page-subtitle">Loading…</p>;
+  if (!data) return <p className="page-subtitle">{t('common.loading')}</p>;
 
   const { kpi, rewards, leads, recentActivity } = data;
   const campaign = kpi?.campaign;
   const qualifiedPct = leads?.captured ? Math.round((leads.qualified / leads.captured) * 100) : 0;
   const segmentedPct = leads?.captured ? Math.round((leads.segmented / leads.captured) * 100) : 0;
+  const statusLabel = (s) => t(`common.${STATUS_TKEY[s] || 'statusDraft'}`);
 
   return (
     <div>
       {/* Header */}
       <div className="page-header">
         <div>
-          <h1 className="page-title">Dashboard</h1>
+          <h1 className="page-title">{t('dashboard.pageTitle')}</h1>
           <p className="page-subtitle">
             {campaignId === 'all'
-              ? (campaign ? `Welcome back · ${campaign.name}` : 'No active campaign')
-              : (campaign ? campaign.name : 'Campaign not found')}
+              ? (campaign ? t('dashboard.welcomeBack', { name: campaign.name }) : t('dashboard.noActiveCampaign'))
+              : (campaign ? campaign.name : t('dashboard.campaignNotFound'))}
           </p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-          <Button variant="secondary" onClick={() => setShowDownloadApp(true)}>Télécharger l'app</Button>
+          <Button variant="secondary" onClick={() => setShowDownloadApp(true)}>{t('dashboard.downloadAppBtn')}</Button>
           <select
             value={campaignId}
             onChange={(e) => setCampaignId(e.target.value)}
             style={{ padding: '8px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13, fontFamily: 'inherit', color: 'var(--text)' }}
           >
-            <option value="all">All campaigns</option>
+            <option value="all">{t('dashboard.allCampaignsOption')}</option>
             {campaigns.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
-          {campaign && <Badge tone={CAMPAIGN_STATUS_TONE[campaign.status] || 'neutral'}>{campaign.status}</Badge>}
+          {campaign && <Badge tone={CAMPAIGN_STATUS_TONE[campaign.status] || 'neutral'}>{statusLabel(campaign.status)}</Badge>}
         </div>
       </div>
 
@@ -158,27 +163,27 @@ export default function Dashboard() {
       {/* Lead-gen KPIs — what SPARK is actually meant to measure: not just
           what was given away, but who was captured and how promising they are. */}
       <div className="grid-stats-3">
-        <StatCard label="Leads captured" value={leads ? leads.captured.toLocaleString() : '—'}
-          sub="Guests identified via the wheel" accent="blue" />
-        <StatCard label="Qualified leads" value={leads ? leads.qualified.toLocaleString() : '—'}
-          sub={leads ? `${qualifiedPct}% of captured (★★★)` : undefined}
+        <StatCard label={t('dashboard.leadsCapturedLabel')} value={leads ? leads.captured.toLocaleString() : '—'}
+          sub={t('dashboard.leadsCapturedSub')} accent="blue" />
+        <StatCard label={t('dashboard.qualifiedLeadsLabel')} value={leads ? leads.qualified.toLocaleString() : '—'}
+          sub={leads ? t('dashboard.qualifiedLeadsSub', { pct: qualifiedPct }) : undefined}
           accent="green" pct={qualifiedPct} />
-        <StatCard label="Segmented leads" value={leads ? leads.segmented.toLocaleString() : '—'}
-          sub={leads ? `${segmentedPct}% of captured` : undefined}
+        <StatCard label={t('dashboard.segmentedLeadsLabel')} value={leads ? leads.segmented.toLocaleString() : '—'}
+          sub={leads ? t('dashboard.segmentedLeadsSub', { pct: segmentedPct }) : undefined}
           accent="orange" pct={segmentedPct} />
       </div>
 
       {/* Stock / operational KPIs — still useful on the floor, but secondary
           to the lead metrics above. */}
       <div className="grid-stats-3">
-        <StatCard label="Remaining gifts" value={kpi ? kpi.remaining.toLocaleString() : '—'}
-          sub={kpi ? `${Math.round((kpi.remaining/kpi.planned)*100)}% of total` : undefined}
+        <StatCard label={t('dashboard.remainingGiftsLabel')} value={kpi ? kpi.remaining.toLocaleString() : '—'}
+          sub={kpi ? t('dashboard.remainingGiftsSub', { pct: Math.round((kpi.remaining/kpi.planned)*100) }) : undefined}
           accent="orange" pct={kpi ? Math.round((kpi.remaining/kpi.planned)*100) : 0} />
-        <StatCard label="Gifts distributed" value={kpi ? kpi.distributed.toLocaleString() : '—'}
-          sub={kpi ? `${kpi.progressPct}% of total` : undefined}
+        <StatCard label={t('dashboard.giftsDistributedLabel')} value={kpi ? kpi.distributed.toLocaleString() : '—'}
+          sub={kpi ? t('dashboard.giftsDistributedSub', { pct: kpi.progressPct }) : undefined}
           accent="blue" pct={kpi?.progressPct} />
-        <StatCard label="Campaign progress" value={kpi ? `${kpi.progressPct}%` : '—'}
-          sub={kpi ? `${kpi.distributed} / ${kpi.planned} spins` : undefined}
+        <StatCard label={t('dashboard.campaignProgressLabel')} value={kpi ? `${kpi.progressPct}%` : '—'}
+          sub={kpi ? t('dashboard.campaignProgressSub', { distributed: kpi.distributed, planned: kpi.planned }) : undefined}
           pct={kpi?.progressPct} />
       </div>
 
@@ -188,7 +193,7 @@ export default function Dashboard() {
         {/* Distribution overview chart */}
         <div className="card">
           <div className="card-head">
-            <h3 className="card-title">Distribution overview</h3>
+            <h3 className="card-title">{t('dashboard.distributionOverviewTitle')}</h3>
             <div style={{ display: 'flex', gap: 4 }}>
               {CHART_FILTERS.map(f => (
                 <button key={f} onClick={() => setChartFilter(f)} style={{
@@ -203,7 +208,7 @@ export default function Dashboard() {
 
           {chart.length === 0 ? (
             <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
-              No data yet — distributions will appear here after your first spins.
+              {t('dashboard.noChartData')}
             </div>
           ) : (
             <ResponsiveContainer width="100%" height={200}>
@@ -214,11 +219,11 @@ export default function Dashboard() {
                 <YAxis tick={{ fontSize: 10, fill: '#94A3B8' }} tickLine={false} axisLine={false} />
                 <Tooltip content={<CustomTooltip />} />
                 <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
-                <Line type="monotone" dataKey="planned" name="Planned" stroke="#CBD5E1"
+                <Line type="monotone" dataKey="planned" name={t('dashboard.chartPlannedLegend')} stroke="#CBD5E1"
                   strokeWidth={1.5} strokeDasharray="4 3" dot={false} />
-                <Line type="monotone" dataKey="distributed" name="Distributed" stroke="#09B2FD"
+                <Line type="monotone" dataKey="distributed" name={t('dashboard.chartDistributedLegend')} stroke="#09B2FD"
                   strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
-                <Line type="monotone" dataKey="remaining" name="Remaining" stroke="#CBD5E1"
+                <Line type="monotone" dataKey="remaining" name={t('dashboard.chartRemainingLegend')} stroke="#CBD5E1"
                   strokeWidth={1.5} strokeDasharray="4 3" dot={false} />
               </LineChart>
             </ResponsiveContainer>
@@ -228,21 +233,21 @@ export default function Dashboard() {
         {/* Campaign Summary */}
         <div className="card">
           <div className="card-head">
-            <h3 className="card-title">Campaign summary</h3>
+            <h3 className="card-title">{t('dashboard.campaignSummaryTitle')}</h3>
           </div>
           {!campaign ? (
-            <EmptyState title="No active campaign" />
+            <EmptyState title={t('dashboard.noActiveCampaign')} />
           ) : (
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
               <tbody>
                 {[
-                  ['Campaign', campaign.name],
-                  ['Status', <Badge tone={CAMPAIGN_STATUS_TONE[campaign.status] || 'neutral'}>{campaign.status}</Badge>],
-                  ['Total spins', campaign.total_stock.toLocaleString()],
-                  ['Spins completed', campaign.total_distributed.toLocaleString()],
-                  ['Remaining spins', (campaign.total_stock - campaign.total_distributed).toLocaleString()],
-                  ['Rewards sent', rewards.sent || 0],
-                  ['Redeemed', rewards.used || 0],
+                  [t('dashboard.summaryFieldCampaign'), campaign.name],
+                  [t('dashboard.summaryFieldStatus'), <Badge tone={CAMPAIGN_STATUS_TONE[campaign.status] || 'neutral'}>{statusLabel(campaign.status)}</Badge>],
+                  [t('dashboard.summaryFieldTotalSpins'), campaign.total_stock.toLocaleString()],
+                  [t('dashboard.summaryFieldSpinsCompleted'), campaign.total_distributed.toLocaleString()],
+                  [t('dashboard.summaryFieldRemainingSpins'), (campaign.total_stock - campaign.total_distributed).toLocaleString()],
+                  [t('dashboard.summaryFieldRewardsSent'), rewards.sent || 0],
+                  [t('dashboard.summaryFieldRedeemed'), rewards.used || 0],
                 ].map(([label, value], i) => (
                   <tr key={i}>
                     <td style={{ padding: '7px 0', color: 'var(--text-muted)', borderBottom: '1px solid var(--border-light)' }}>{label}</td>
@@ -255,7 +260,7 @@ export default function Dashboard() {
           {campaign && (
             <div style={{ marginTop: 14, textAlign: 'center' }}>
               <a href="/history" style={{ fontSize: 12, color: 'var(--link)', fontWeight: 600, textDecoration: 'none' }}>
-                ↗ View full report
+                {t('dashboard.viewFullReportLink')}
               </a>
             </div>
           )}
@@ -267,10 +272,10 @@ export default function Dashboard() {
       {leads && leads.segmentBreakdown.length > 0 && (
         <div className="card mt-card" style={{ marginBottom: 12 }}>
           <div className="card-head">
-            <h3 className="card-title">Leads by segment</h3>
+            <h3 className="card-title">{t('dashboard.leadsBySegmentTitle')}</h3>
           </div>
           <table className="data-table">
-            <thead><tr><th>Segment</th><th style={{ textAlign: 'right' }}>Leads</th><th>Share</th></tr></thead>
+            <thead><tr><th>{t('dashboard.segmentColHeader')}</th><th style={{ textAlign: 'right' }}>{t('dashboard.leadsColHeader')}</th><th>{t('dashboard.shareColHeader')}</th></tr></thead>
             <tbody>
               {leads.segmentBreakdown.map((s, i) => {
                 const pct = leads.segmented ? Math.round((s.count / leads.segmented) * 100) : 0;
@@ -298,20 +303,20 @@ export default function Dashboard() {
         {/* Top Rewards */}
         <div className="card">
           <div className="card-head">
-            <h3 className="card-title">Top rewards</h3>
-            <a href="/campaigns" style={{ fontSize: 12, color: 'var(--link)', fontWeight: 600, textDecoration: 'none' }}>View all rewards →</a>
+            <h3 className="card-title">{t('dashboard.topRewardsTitle')}</h3>
+            <a href="/campaigns" style={{ fontSize: 12, color: 'var(--link)', fontWeight: 600, textDecoration: 'none' }}>{t('dashboard.viewAllRewardsLink')}</a>
           </div>
           {topRewards.length === 0 ? (
-            <EmptyState title="No rewards yet" />
+            <EmptyState title={t('dashboard.noRewardsYet')} />
           ) : (
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>Reward</th>
-                  <th style={{ textAlign: 'right' }}>Planned</th>
-                  <th style={{ textAlign: 'right' }}>Distributed</th>
-                  <th style={{ textAlign: 'right' }}>Remaining</th>
-                  <th>Progress</th>
+                  <th>{t('dashboard.rewardColHeader')}</th>
+                  <th style={{ textAlign: 'right' }}>{t('dashboard.plannedColHeader')}</th>
+                  <th style={{ textAlign: 'right' }}>{t('dashboard.distributedColHeader')}</th>
+                  <th style={{ textAlign: 'right' }}>{t('dashboard.remainingColHeader')}</th>
+                  <th>{t('dashboard.progressColHeader')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -337,11 +342,11 @@ export default function Dashboard() {
         {/* Recent Activity */}
         <div className="card">
           <div className="card-head">
-            <h3 className="card-title">Recent activity</h3>
-            <a href="/history" style={{ fontSize: 12, color: 'var(--link)', fontWeight: 600, textDecoration: 'none' }}>View all</a>
+            <h3 className="card-title">{t('dashboard.recentActivityTitle')}</h3>
+            <a href="/history" style={{ fontSize: 12, color: 'var(--link)', fontWeight: 600, textDecoration: 'none' }}>{t('dashboard.viewAllLink')}</a>
           </div>
           {recentActivity.length === 0 ? (
-            <EmptyState title="No activity yet" />
+            <EmptyState title={t('dashboard.noActivityYet')} />
           ) : (
             <div className="activity-list">
               {recentActivity.slice(0, 6).map((row, i) => (
@@ -354,10 +359,10 @@ export default function Dashboard() {
                   </div>
                   <div className="act-info">
                     <div className="act-title">
-                      Gift distributed: {row.gift_name || `Case ${row.slot_index + 1}`}
+                      {t('dashboard.giftDistributedActivity', { name: row.gift_name || t('dashboard.caseLabel', { n: row.slot_index + 1 }) })}
                     </div>
                     <div className="act-time">
-                      {formatTime(row.created_at)}{row.room_number ? ` · Room ${row.room_number}` : ''}
+                      {formatTime(row.created_at)}{row.room_number ? t('dashboard.roomLabel', { room: row.room_number }) : ''}
                     </div>
                   </div>
                 </div>

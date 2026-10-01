@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { useAdmin } from '../hooks/useAdmin';
 import { Card, Button, Badge, GiftPill, MiniBar } from '../components/ui';
 import { SLOT_COLORS } from '../components/slotColors';
 
 const STATUS_TONE = { draft: 'neutral', active: 'green', paused: 'orange', completed: 'blue', archived: 'neutral' };
+const STATUS_TKEY = { draft: 'statusDraft', active: 'statusActive', paused: 'statusPaused', completed: 'statusCompleted', archived: 'statusArchived' };
 
 export default function CampaignDetail() {
+  const { t } = useTranslation('admin');
   const { id } = useParams();
   const navigate = useNavigate();
   const { isAdmin } = useAdmin();
@@ -89,7 +92,8 @@ export default function CampaignDetail() {
     }
   }, [showSeq]);
 
-  if (!campaign) return <p className="page-subtitle">{error || 'Loading…'}</p>;
+  if (!campaign) return <p className="page-subtitle">{error || t('common.loading')}</p>;
+  const statusLabel = (s) => t(`common.${STATUS_TKEY[s] || 'statusDraft'}`);
   const total = campaign.total_stock || 1;
 
   const filteredSeq = sequence?.sequence?.filter(s => {
@@ -110,38 +114,38 @@ export default function CampaignDetail() {
           </h1>
           <p className="page-subtitle" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11 }}>{campaign.id}</span>
-            <Badge tone={STATUS_TONE[campaign.status] || 'neutral'}>{campaign.status}</Badge>
+            <Badge tone={STATUS_TONE[campaign.status] || 'neutral'}>{statusLabel(campaign.status)}</Badge>
             {campaign.event_name && <span>· {campaign.event_name}</span>}
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          {campaign.status === 'draft' && <Button disabled={busy} onClick={() => runAction(() => api.startCampaign(campaign.id))}>Start campaign</Button>}
+          {campaign.status === 'draft' && <Button disabled={busy} onClick={() => runAction(() => api.startCampaign(campaign.id))}>{t('campaignDetail.startCampaignBtn')}</Button>}
           {campaign.status === 'active' && <>
-            <Button variant="secondary" disabled={busy} onClick={() => runAction(() => api.pauseCampaign(campaign.id))}>Pause</Button>
-            <Button variant="danger" disabled={busy} onClick={() => runAction(() => api.endCampaign(campaign.id))}>End campaign</Button>
-            <Button onClick={() => navigate('/launch')}>Go to Launch →</Button>
+            <Button variant="secondary" disabled={busy} onClick={() => runAction(() => api.pauseCampaign(campaign.id))}>{t('campaignDetail.pauseBtn')}</Button>
+            <Button variant="danger" disabled={busy} onClick={() => runAction(() => api.endCampaign(campaign.id))}>{t('campaignDetail.endCampaignBtn')}</Button>
+            <Button onClick={() => navigate('/launch')}>{t('campaignDetail.goToLaunchBtn')}</Button>
           </>}
-          {campaign.status === 'paused' && <Button disabled={busy} onClick={() => runAction(() => api.startCampaign(campaign.id))}>Resume</Button>}
-          {campaign.status === 'completed' && <Button variant="secondary" disabled={busy} onClick={() => runAction(() => api.archiveCampaign(campaign.id))}>Archive</Button>}
+          {campaign.status === 'paused' && <Button disabled={busy} onClick={() => runAction(() => api.startCampaign(campaign.id))}>{t('campaignDetail.resumeBtn')}</Button>}
+          {campaign.status === 'completed' && <Button variant="secondary" disabled={busy} onClick={() => runAction(() => api.archiveCampaign(campaign.id))}>{t('campaignDetail.archiveBtn')}</Button>}
           {campaign.status !== 'archived' && (
-            <Button variant="secondary" onClick={() => navigate(`/campaigns/${campaign.id}/edit`)}>Edit gifts</Button>
+            <Button variant="secondary" onClick={() => navigate(`/campaigns/${campaign.id}/edit`)}>{t('campaignDetail.editGiftsBtn')}</Button>
           )}
           {campaign.status !== 'archived' && (
-            <Button variant="secondary" onClick={() => navigate(`/campaigns/${campaign.id}/edit-settings`)}>Edit segmentation & form</Button>
+            <Button variant="secondary" onClick={() => navigate(`/campaigns/${campaign.id}/edit-settings`)}>{t('campaignDetail.editSegmentationBtn')}</Button>
           )}
           {campaign.status !== 'archived' && (
-            <Button variant="secondary" onClick={() => navigate(`/campaigns/new?from=${campaign.id}`)}>Duplicate</Button>
+            <Button variant="secondary" onClick={() => navigate(`/campaigns/new?from=${campaign.id}`)}>{t('campaignDetail.duplicateBtn')}</Button>
           )}
           {isAdmin && !!campaign.is_test && (
             <Button variant="secondary" onClick={showSeq ? () => setShowSeq(false) : loadSequence} disabled={seqLoading}>
-              {seqLoading ? 'Loading…' : showSeq ? 'Hide sequence' : '🔧 View sequence'}
+              {seqLoading ? t('common.loading') : showSeq ? t('campaignDetail.hideSequenceBtn') : t('campaignDetail.viewSequenceBtn')}
             </Button>
           )}
           <Button variant="secondary" disabled={exportBusy} onClick={handleExportGiftDistribution}>
-            {exportBusy ? 'Exporting…' : 'Export gift distribution (CSV)'}
+            {exportBusy ? t('campaignDetail.exportingBtn') : t('campaignDetail.exportGiftDistBtn')}
           </Button>
           <Button variant="secondary" disabled={reportBusy} onClick={handleDownloadReport}>
-            {reportBusy ? 'Generating…' : 'Download PDF report'}
+            {reportBusy ? t('launchCampaign.generatingBtn') : t('campaignDetail.downloadPdfReportBtn')}
           </Button>
           {campaign.status !== 'active' && (
             <button
@@ -152,7 +156,7 @@ export default function CampaignDetail() {
                 cursor: 'pointer', fontFamily: 'inherit',
               }}
             >
-              Delete campaign
+              {t('campaignDetail.deleteCampaignBtn')}
             </button>
           )}
         </div>
@@ -163,15 +167,15 @@ export default function CampaignDetail() {
           background: '#F1F5F9', border: '1px solid #E2E8F0', borderRadius: 10, padding: '10px 16px',
           fontSize: 13, color: '#64748B', marginBottom: 16,
         }}>
-          📦 This campaign is archived and read-only. Its distribution history remains available below.
+          {t('campaignDetail.archivedNotice')}
         </div>
       )}
 
       {/* Gift distribution */}
-      <Card title="Gift distribution">
+      <Card title={t('campaignDetail.giftDistributionTitle')}>
         <table className="data-table">
           <thead>
-            <tr><th>Case</th><th>Gift</th><th>Stock</th><th>%</th><th>Remaining</th><th>Redeem</th><th>Progress</th></tr>
+            <tr><th>{t('campaignDetail.tableCase')}</th><th>{t('common.gift')}</th><th>{t('campaignDetail.tableStock')}</th><th>{t('campaignDetail.tablePct')}</th><th>{t('campaignDetail.tableRemaining')}</th><th>{t('campaignDetail.tableRedeem')}</th><th>{t('campaignDetail.tableProgress')}</th></tr>
           </thead>
           <tbody>
             {campaign.slots.map(s => {
@@ -183,7 +187,7 @@ export default function CampaignDetail() {
                   <td style={{ color: 'var(--text-muted)' }}>{s.stock_initial}</td>
                   <td style={{ color: 'var(--text-muted)' }}>{((s.stock_initial / total) * 100).toFixed(1)}%</td>
                   <td style={{ fontWeight: 600 }}>{s.stock_remaining}</td>
-                  <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{s.redeem_method === 'code' ? 'Code' : s.redeem_method === 'voucher' ? 'Voucher' : s.redeem_method === 'perso' ? 'Perso' : 'QR'}</td>
+                  <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{s.redeem_method === 'code' ? t('campaignDetail.redeemCode') : s.redeem_method === 'voucher' ? t('campaignDetail.redeemVoucher') : s.redeem_method === 'perso' ? t('campaignDetail.redeemPerso') : t('campaignDetail.redeemQr')}</td>
                   <td><MiniBar pct={pct} color={SLOT_COLORS[s.slot_index % SLOT_COLORS.length]} /></td>
                 </tr>
               );
@@ -197,20 +201,24 @@ export default function CampaignDetail() {
         <div className="card mt-card" style={{ marginTop: 12 }}>
           <div className="card-head">
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <h3 className="card-title">🔧 Full sequence</h3>
+              <h3 className="card-title">{t('campaignDetail.fullSequenceTitle')}</h3>
               <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                {sequence.sequence.filter(s => s.consumed).length} / {sequence.sequence.length} consumed
-                {sequence.nextPosition !== null ? ` · next: position #${sequence.nextPosition}` : ''}
+                {t('campaignDetail.consumedCountLabel', { consumed: sequence.sequence.filter(s => s.consumed).length, total: sequence.sequence.length })}
+                {sequence.nextPosition !== null ? t('campaignDetail.nextPositionSuffix', { pos: sequence.nextPosition }) : ''}
               </span>
             </div>
             <div style={{ display: 'flex', gap: 6 }}>
-              {['all', 'remaining', 'consumed'].map(f => (
-                <button key={f} onClick={() => setSeqFilter(f)} style={{
+              {[
+                { key: 'all', tKey: 'seqFilterAll' },
+                { key: 'remaining', tKey: 'seqFilterRemaining' },
+                { key: 'consumed', tKey: 'seqFilterConsumed' },
+              ].map(f => (
+                <button key={f.key} onClick={() => setSeqFilter(f.key)} style={{
                   padding: '4px 10px', borderRadius: 6, border: 'none', fontSize: 11, fontWeight: 600,
                   cursor: 'pointer', fontFamily: 'inherit',
-                  background: seqFilter === f ? '#09B2FD' : '#F1F5F9',
-                  color: seqFilter === f ? '#03041A' : '#64748B',
-                }}>{f.charAt(0).toUpperCase() + f.slice(1)}</button>
+                  background: seqFilter === f.key ? '#09B2FD' : '#F1F5F9',
+                  color: seqFilter === f.key ? '#03041A' : '#64748B',
+                }}>{t(`campaignDetail.${f.tKey}`)}</button>
               ))}
             </div>
           </div>
@@ -219,10 +227,10 @@ export default function CampaignDetail() {
             <table className="data-table" style={{ fontSize: 12 }}>
               <thead style={{ position: 'sticky', top: 0, background: 'white', zIndex: 1 }}>
                 <tr>
-                  <th>#</th>
-                  <th>Case</th>
-                  <th>Gift</th>
-                  <th>Status</th>
+                  <th>{t('campaignDetail.seqTableNum')}</th>
+                  <th>{t('campaignDetail.tableCase')}</th>
+                  <th>{t('common.gift')}</th>
+                  <th>{t('campaignDetail.seqTableStatus')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -235,7 +243,7 @@ export default function CampaignDetail() {
                       {s.isNext ? '👉 ' : ''}{s.position}
                     </td>
                     <td style={{ color: s.consumed ? '#CBD5E1' : undefined }}>
-                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11 }}>Case {s.slotIndex + 1}</span>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11 }}>{t('dashboard.caseLabel', { n: s.slotIndex + 1 })}</span>
                     </td>
                     <td>
                       {s.consumed
@@ -245,10 +253,10 @@ export default function CampaignDetail() {
                     </td>
                     <td>
                       {s.isNext
-                        ? <span style={{ fontSize: 11, fontWeight: 700, color: '#09B2FD' }}>→ Next</span>
+                        ? <span style={{ fontSize: 11, fontWeight: 700, color: '#09B2FD' }}>{t('campaignDetail.nextLabel')}</span>
                         : s.consumed
-                          ? <span style={{ fontSize: 11, color: '#10B981' }}>✓ Done</span>
-                          : <span style={{ fontSize: 11, color: '#94A3B8' }}>Pending</span>
+                          ? <span style={{ fontSize: 11, color: '#10B981' }}>{t('campaignDetail.doneLabel')}</span>
+                          : <span style={{ fontSize: 11, color: '#94A3B8' }}>{t('campaignDetail.pendingLabel')}</span>
                       }
                     </td>
                   </tr>
@@ -257,7 +265,7 @@ export default function CampaignDetail() {
             </table>
           </div>
           <p style={{ fontSize: 11, color: '#94A3B8', marginTop: 8 }}>
-            Auto-refresh every 3s · Admin only · Not visible in production
+            {t('campaignDetail.autoRefreshNote')}
           </p>
         </div>
       )}
@@ -265,13 +273,12 @@ export default function CampaignDetail() {
       {deleteOpen && (
         <div className="modal-overlay">
           <div className="modal-card" style={{ '--modal-w': '480px' }}>
-            <h3 style={{ margin: '0 0 8px', fontSize: 17, fontWeight: 700, color: '#DC2626' }}>Delete campaign</h3>
+            <h3 style={{ margin: '0 0 8px', fontSize: 17, fontWeight: 700, color: '#DC2626' }}>{t('campaignDetail.deleteCampaignTitle')}</h3>
             <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.5 }}>
-              This will permanently delete <strong>{campaign.name}</strong> and all associated data: gifts, distribution
-              history, and every lead / CRM record captured for this campaign. This cannot be undone.
+              {t('campaignDetail.deleteWarningPrefix')} <strong>{campaign.name}</strong> {t('campaignDetail.deleteWarningSuffix')}
             </p>
             <p style={{ fontSize: 12.5, fontWeight: 600, marginBottom: 6 }}>
-              Type the campaign name to confirm:
+              {t('campaignDetail.typeToConfirm')}
             </p>
             <input
               type="text"
@@ -284,13 +291,13 @@ export default function CampaignDetail() {
               }}
             />
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
-              <Button variant="secondary" disabled={deleting} onClick={() => setDeleteOpen(false)}>Cancel</Button>
+              <Button variant="secondary" disabled={deleting} onClick={() => setDeleteOpen(false)}>{t('common.cancel')}</Button>
               <Button
                 variant="danger"
                 disabled={deleting || deleteConfirmText !== campaign.name}
                 onClick={handleDelete}
               >
-                {deleting ? 'Deleting…' : 'Delete permanently'}
+                {deleting ? t('campaignDetail.deletingBtn') : t('campaignDetail.deletePermanentlyBtn')}
               </Button>
             </div>
           </div>

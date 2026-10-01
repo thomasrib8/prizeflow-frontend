@@ -19,18 +19,18 @@ const ADMIN_LANGUAGE_OPTIONS = [
 ];
 
 const NAV_ITEMS = [
-  { to: '/', label: 'Dashboard', icon: IconGrid },
-  { to: '/campaigns', label: 'Campaigns', icon: IconBox },
-  { to: '/launch', label: 'Launch', icon: IconWheel },
-  { to: '/rewards', label: 'Redeem', icon: IconGift },
-  { to: '/history', label: 'CRM', icon: IconPeople },
+  { to: '/', tKey: 'dashboard', icon: IconGrid },
+  { to: '/campaigns', tKey: 'campaigns', icon: IconBox },
+  { to: '/launch', tKey: 'launch', icon: IconWheel },
+  { to: '/rewards', tKey: 'redeem', icon: IconGift },
+  { to: '/history', tKey: 'crm', icon: IconPeople },
 ];
 
 const ADMIN_NAV_ITEMS = [
-  { to: '/users', label: 'Users', icon: IconUsers, badgeKey: 'pendingCount' },
-  { to: '/health', label: 'Health', icon: IconHeart },
-  { to: '/magic', label: 'Magic', icon: IconMagic },
-  { to: '/sequence', label: 'Sequence', icon: IconSequence },
+  { to: '/users', tKey: 'users', icon: IconUsers, badgeKey: 'pendingCount' },
+  { to: '/health', tKey: 'health', icon: IconHeart },
+  { to: '/magic', tKey: 'magic', icon: IconMagic },
+  { to: '/sequence', tKey: 'sequence', icon: IconSequence },
 ];
 
 const PENDING_COUNT_POLL_MS = 30000;
@@ -80,7 +80,7 @@ export default function Layout({ children }) {
       <div className="mobile-topbar">
         <button
           className="mobile-menu-btn"
-          aria-label="Open menu"
+          aria-label={t('nav.openMenuAriaLabel')}
           onClick={() => setMobileMenuOpen(true)}
         >
           <IconMenu />
@@ -103,7 +103,7 @@ export default function Layout({ children }) {
         </div>
 
         <nav className="nav">
-          {NAV_ITEMS.map(({ to, label, icon: Icon, badgeKey }) => (
+          {NAV_ITEMS.map(({ to, tKey, icon: Icon, badgeKey }) => (
             <NavLink
               key={to}
               to={to}
@@ -111,7 +111,7 @@ export default function Layout({ children }) {
               className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
             >
               <Icon />
-              <span>{label}</span>
+              <span>{t(`nav.${tKey}`)}</span>
               {badgeKey === 'pendingCount' && pendingCount > 0 && (
                 <span className="nav-badge">{pendingCount}</span>
               )}
@@ -121,15 +121,15 @@ export default function Layout({ children }) {
           {isAdmin && (
             <>
               <div className="nav-separator" />
-              <div className="nav-section-title">Admin</div>
-              {ADMIN_NAV_ITEMS.map(({ to, label, icon: Icon, badgeKey }) => (
+              <div className="nav-section-title">{t('nav.adminSectionTitle')}</div>
+              {ADMIN_NAV_ITEMS.map(({ to, tKey, icon: Icon, badgeKey }) => (
                 <NavLink
                   key={to}
                   to={to}
                   className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
                 >
                   <Icon />
-                  <span>{label}</span>
+                  <span>{t(`nav.${tKey}`)}</span>
                   {badgeKey === 'pendingCount' && pendingCount > 0 && (
                     <span className="nav-badge">{pendingCount}</span>
                   )}
@@ -167,7 +167,7 @@ export default function Layout({ children }) {
           </select>
           <NavLink to="/settings" className={({ isActive }) => `nav-item settings-footer-link${isActive ? ' active' : ''}`}>
             <IconSettings />
-            <span>Settings</span>
+            <span>{t('nav.settings')}</span>
           </NavLink>
         </div>
       </aside>

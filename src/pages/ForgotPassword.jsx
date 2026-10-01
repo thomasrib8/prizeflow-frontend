@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 
 export default function ForgotPassword() {
+  const { t } = useTranslation('admin');
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -27,10 +29,10 @@ export default function ForgotPassword() {
       <div className="auth-screen">
         <div className="auth-card" style={{ textAlign: 'center' }}>
           <div style={{ fontSize: 40, marginBottom: 14 }}>📩</div>
-          <h1 className="auth-title">Check your email</h1>
-          <p className="auth-subtitle">If that address is registered, a reset link is on its way. It's valid for 1 hour.</p>
+          <h1 className="auth-title">{t('auth.forgotPassword.checkEmailTitle')}</h1>
+          <p className="auth-subtitle">{t('auth.forgotPassword.checkEmailDesc')}</p>
           <Link to="/login" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', marginTop: 16 }}>
-            Back to sign in
+            {t('auth.backToSignIn')}
           </Link>
         </div>
       </div>
@@ -44,24 +46,24 @@ export default function ForgotPassword() {
           <img src="/logo2.svg" alt="SPARK" style={{ width: 100, height: 100, objectFit: 'contain' }} />
         </div>
 
-        <h1 className="auth-title" style={{ textAlign: 'center' }}>Forgot your password?</h1>
-        <p className="auth-subtitle" style={{ textAlign: 'center' }}>Enter your email and we'll send you a reset link</p>
+        <h1 className="auth-title" style={{ textAlign: 'center' }}>{t('auth.forgotPassword.title')}</h1>
+        <p className="auth-subtitle" style={{ textAlign: 'center' }}>{t('auth.forgotPassword.subtitle')}</p>
 
         {error && <div className="error-banner" style={{ textAlign: 'left' }}>{error}</div>}
 
         <div className="field" style={{ textAlign: 'left' }}>
-          <label>Email address</label>
+          <label>{t('auth.emailLabel')}</label>
           <input type="email" value={email} onChange={e => setEmail(e.target.value)}
-            placeholder="operator@yourvenue.com" required autoFocus />
+            placeholder={t('auth.emailPlaceholder')} required autoFocus />
         </div>
 
         <button className="btn btn-primary" type="submit" disabled={loading}
           style={{ width: '100%', justifyContent: 'center', marginTop: 6 }}>
-          {loading ? 'Sending…' : 'Send reset link'}
+          {loading ? t('auth.forgotPassword.sendingBtn') : t('auth.forgotPassword.sendResetLinkBtn')}
         </button>
 
         <p style={{ fontSize: 13, color: '#64748B', marginTop: 16 }}>
-          <Link to="/login">Back to sign in</Link>
+          <Link to="/login">{t('auth.backToSignIn')}</Link>
         </p>
       </form>
     </div>

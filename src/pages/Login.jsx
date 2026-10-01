@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 
 // returnTo comes straight from the URL, so it's attacker-controllable —
@@ -18,6 +19,7 @@ function safeReturnTo(value) {
 }
 
 export default function Login() {
+  const { t } = useTranslation('admin');
   const { login } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -52,32 +54,32 @@ export default function Login() {
           <img src="/logo2.svg" alt="SPARK" style={{ width: 100, height: 100, objectFit: 'contain' }} />
         </div>
 
-        <h1 className="auth-title" style={{ textAlign: 'center' }}>Welcome back</h1>
-        <p className="auth-subtitle" style={{ textAlign: 'center' }}>Sign in to operate your campaigns</p>
+        <h1 className="auth-title" style={{ textAlign: 'center' }}>{t('auth.login.welcomeBackTitle')}</h1>
+        <p className="auth-subtitle" style={{ textAlign: 'center' }}>{t('auth.login.signInSubtitle')}</p>
 
         {error && <div className="error-banner" style={{ textAlign: 'left' }}>{error}</div>}
 
         <div className="field" style={{ textAlign: 'left' }}>
-          <label>Email address</label>
+          <label>{t('auth.emailLabel')}</label>
           <input type="email" value={email} onChange={e => setEmail(e.target.value)}
-            placeholder="operator@yourvenue.com" required autoFocus />
+            placeholder={t('auth.emailPlaceholder')} required autoFocus />
         </div>
         <div className="field" style={{ textAlign: 'left' }}>
-          <label>Password</label>
+          <label>{t('auth.login.passwordLabel')}</label>
           <input type="password" value={password} onChange={e => setPassword(e.target.value)}
             placeholder="••••••••" required />
         </div>
 
         <button className="btn btn-primary" type="submit" disabled={loading}
           style={{ width: '100%', justifyContent: 'center', marginTop: 6 }}>
-          {loading ? 'Signing in…' : 'Sign in'}
+          {loading ? t('auth.login.signingInBtn') : t('auth.login.signInBtn')}
         </button>
 
         <p style={{ fontSize: 13, color: '#64748B', marginTop: 16 }}>
-          <Link to="/forgot-password">Forgot your password?</Link>
+          <Link to="/forgot-password">{t('auth.login.forgotPasswordLink')}</Link>
         </p>
         <p style={{ fontSize: 13, color: '#64748B', marginTop: 6 }}>
-          No account yet? <Link to="/register">Create one</Link>
+          {t('auth.login.noAccountYetText')} <Link to="/register">{t('auth.login.createOneLink')}</Link>
         </p>
       </form>
     </div>

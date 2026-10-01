@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { CHOICE_FIELD_TYPES } from './fieldTypes';
 import OptionsEditor from './OptionsEditor';
 
@@ -13,6 +14,7 @@ const selectStyle = {
 // { label, fieldType, options: string[], required }; options only shown for
 // choice-type fields.
 export default function CampaignFieldsBuilder({ fields, onChange, fieldTypes, showRequired = false }) {
+  const { t } = useTranslation('admin');
   function updateField(i, patch) {
     onChange(fields.map((f, idx) => (idx === i ? { ...f, ...patch } : f)));
   }
@@ -30,7 +32,7 @@ export default function CampaignFieldsBuilder({ fields, onChange, fieldTypes, sh
           <div key={i} style={{ background: 'var(--surface-alt, #F8FAFC)', border: '1px solid var(--border, #E2E8F0)', borderRadius: 12, padding: 16 }}>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginBottom: CHOICE_FIELD_TYPES.has(f.fieldType) ? 14 : 0 }}>
               <input
-                placeholder="Field label — e.g. Budget max"
+                placeholder={t('builders.fieldLabelPlaceholder')}
                 value={f.label}
                 onChange={(e) => updateField(i, { label: e.target.value })}
                 style={{
@@ -43,12 +45,12 @@ export default function CampaignFieldsBuilder({ fields, onChange, fieldTypes, sh
                 onChange={(e) => updateField(i, { fieldType: e.target.value, options: CHOICE_FIELD_TYPES.has(e.target.value) ? (f.options?.length ? f.options : ['']) : [] })}
                 style={selectStyle}
               >
-                {fieldTypes.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+                {fieldTypes.map((ft) => <option key={ft.value} value={ft.value}>{t(`builders.fieldTypes.${ft.tKey}`)}</option>)}
               </select>
               <button
                 type="button"
                 onClick={() => removeField(i)}
-                title="Remove field"
+                title={t('builders.removeFieldTitle')}
                 style={{
                   width: 32, height: 32, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
                   background: 'white', border: '1px solid var(--border, #E2E8F0)', borderRadius: 8, color: '#EF4444', cursor: 'pointer',
@@ -63,7 +65,7 @@ export default function CampaignFieldsBuilder({ fields, onChange, fieldTypes, sh
             {CHOICE_FIELD_TYPES.has(f.fieldType) && (
               <>
                 <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-light, #94A3B8)', marginBottom: 8 }}>
-                  Options
+                  {t('builders.optionsLabel')}
                 </div>
                 <OptionsEditor options={f.options || []} onChange={(options) => updateField(i, { options })} />
               </>
@@ -72,12 +74,12 @@ export default function CampaignFieldsBuilder({ fields, onChange, fieldTypes, sh
             {showRequired && (
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 14, fontSize: 12, color: '#334155', cursor: 'pointer' }}>
                 <input type="checkbox" checked={!!f.required} onChange={(e) => updateField(i, { required: e.target.checked })} />
-                Required on the guest form
+                {t('builders.requiredOnGuestForm')}
               </label>
             )}
           </div>
         ))}
-        {fields.length === 0 && <p className="page-subtitle" style={{ margin: 0 }}>No fields configured yet.</p>}
+        {fields.length === 0 && <p className="page-subtitle" style={{ margin: 0 }}>{t('builders.noFieldsYet')}</p>}
       </div>
       <button
         type="button"
@@ -87,7 +89,7 @@ export default function CampaignFieldsBuilder({ fields, onChange, fieldTypes, sh
           border: '1.5px dashed var(--border, #E2E8F0)', borderRadius: 10, color: 'var(--link, #002881)',
           fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
         }}
-      >+ Add field</button>
+      >{t('builders.addFieldBtn')}</button>
     </div>
   );
 }

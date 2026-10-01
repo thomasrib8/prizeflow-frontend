@@ -12,39 +12,43 @@
 // the address, since a phone has no hover.
 // Flags may arrive as 0/1/null (list rows) or booleans (prospect card).
 
-const META = {
-  verified: { label: 'Verified', color: '#065F46', bg: '#D1FAE5' },
-  risky: { label: 'Uncertain', color: '#92400E', bg: '#FEF3C7' },
-  invalid: { label: 'Invalid', color: '#991B1B', bg: '#FEE2E2' },
-  unknown: { label: 'Unverifiable', color: '#475569', bg: '#E2E8F0' },
+import { useTranslation } from 'react-i18next';
+
+const META_TKEY = {
+  verified: { tKey: 'labelVerified', color: '#065F46', bg: '#D1FAE5' },
+  risky: { tKey: 'labelUncertain', color: '#92400E', bg: '#FEF3C7' },
+  invalid: { tKey: 'labelInvalid', color: '#991B1B', bg: '#FEE2E2' },
+  unknown: { tKey: 'labelUnverifiable', color: '#475569', bg: '#E2E8F0' },
 };
 
-function explain(status, { isCatchAll, isDisposable, isRoleAccount }) {
+function explain(status, { isCatchAll, isDisposable, isRoleAccount }, t) {
   let text;
   if (status === 'verified') {
-    text = 'This address looks able to receive emails. This is a deliverability check, not a guarantee that the mailbox exists.';
-    if (isCatchAll) text += " Its domain accepts any address, so the exact mailbox can't be independently confirmed.";
+    text = t('emailStatusBadge.explainVerified');
+    if (isCatchAll) text += t('emailStatusBadge.explainVerifiedCatchAllSuffix');
   } else if (status === 'risky') {
     text = isCatchAll
-      ? "The domain may accept any email address. The exact existence of this mailbox can't be confirmed."
-      : 'This address may be valid but carries a delivery risk.';
+      ? t('emailStatusBadge.explainRiskyCatchAll')
+      : t('emailStatusBadge.explainRisky');
   } else if (status === 'invalid') {
-    text = 'This address seems unable to receive emails.';
+    text = t('emailStatusBadge.explainInvalid');
   } else if (status === 'pending') {
-    text = 'Checking this address…';
+    text = t('emailStatusBadge.explainPending');
   } else {
-    text = 'Verification not available right now.';
+    text = t('emailStatusBadge.explainDefault');
   }
-  if (isDisposable) text += ' It looks like a temporary (disposable) address.';
-  if (isRoleAccount) text += ' It looks like a shared mailbox (e.g. info@, sales@).';
+  if (isDisposable) text += t('emailStatusBadge.explainDisposableSuffix');
+  if (isRoleAccount) text += t('emailStatusBadge.explainRoleAccountSuffix');
   return text;
 }
 
 export default function EmailStatusBadge({ email, status, isCatchAll, isDisposable, isRoleAccount, variant = 'inline' }) {
-  const meta = META[status];
+  const { t } = useTranslation('admin');
+  const metaTkey = META_TKEY[status];
+  const meta = metaTkey ? { ...metaTkey, label: t(`emailStatusBadge.${metaTkey.tKey}`) } : null;
   if (!status) return <>{email}</>; // never checked: plain address
-  const text = explain(status, { isCatchAll: !!isCatchAll, isDisposable: !!isDisposable, isRoleAccount: !!isRoleAccount });
-  const label = meta ? meta.label : 'Checking…';
+  const text = explain(status, { isCatchAll: !!isCatchAll, isDisposable: !!isDisposable, isRoleAccount: !!isRoleAccount }, t);
+  const label = meta ? meta.label : t('emailStatusBadge.labelChecking');
 
   return (
     <>
@@ -66,10 +70,10 @@ export default function EmailStatusBadge({ email, status, isCatchAll, isDisposab
       </span>
       {!!isDisposable && (
         <span
-          title="Temporary / disposable email address"
+          title={t('emailStatusBadge.disposableTitle')}
           style={{ marginLeft: 6, fontSize: 10, fontWeight: 700, color: '#64748B', background: '#F1F5F9', borderRadius: 10, padding: '1px 7px', whiteSpace: 'nowrap' }}
         >
-          Disposable
+          {t('emailStatusBadge.disposableBadge')}
         </span>
       )}
       {variant === 'card' && (

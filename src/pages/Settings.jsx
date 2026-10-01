@@ -1,18 +1,12 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { Card, Button, Badge } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
 import Calibration from './Calibration';
 
-const MODULES = [
-  { key: 'information', label: 'Information' },
-  { key: 'google-review', label: 'Google review' },
-  { key: 'social-media', label: 'Social media' },
-  { key: 'email-templates', label: 'Reward emails' },
-  { key: 'ai-assistant', label: 'AI Assistant' },
-  { key: 'calibration', label: 'Calibration' },
-];
-
+// Social platform names are proper nouns (Facebook/Instagram/LinkedIn/X) —
+// never translated. Profile field keys map to settings.information.field*.
 const SOCIAL_PLATFORMS = [
   { key: 'facebookUrl', label: 'Facebook', icon: '📘', placeholder: 'https://facebook.com/yourpage' },
   { key: 'instagramUrl', label: 'Instagram', icon: '📷', placeholder: 'https://instagram.com/yourpage' },
@@ -20,23 +14,18 @@ const SOCIAL_PLATFORMS = [
   { key: 'xUrl', label: 'X', icon: '✖️', placeholder: 'https://x.com/yourpage' },
 ];
 
-const REDEEM_METHOD_TABS = [
-  { key: 'qr', label: 'QR code' },
-  { key: 'code', label: 'Code' },
-  { key: 'voucher', label: 'Voucher' },
-];
-
-const PROFILE_FIELDS = [
-  { key: 'lastName', label: 'Last name' },
-  { key: 'firstName', label: 'First name' },
-  { key: 'company', label: 'Company' },
-  { key: 'industrySector', label: 'Industry sector' },
-  { key: 'address', label: 'Address' },
-  { key: 'email', label: 'Email', type: 'email' },
-  { key: 'phone', label: 'Phone', type: 'tel' },
+const PROFILE_FIELD_KEYS = [
+  { key: 'lastName', tKey: 'fieldLastName' },
+  { key: 'firstName', tKey: 'fieldFirstName' },
+  { key: 'company', tKey: 'fieldCompany' },
+  { key: 'industrySector', tKey: 'fieldIndustrySector' },
+  { key: 'address', tKey: 'fieldAddress' },
+  { key: 'email', tKey: 'fieldEmail', type: 'email' },
+  { key: 'phone', tKey: 'fieldPhone', type: 'tel' },
 ];
 
 function InformationModule() {
+  const { t } = useTranslation('admin');
   const { updateStoredUser } = useAuth();
   const [profile, setProfile] = useState(null);
   const [form, setForm] = useState({});
@@ -72,7 +61,7 @@ function InformationModule() {
       const { user: updated } = await api.updateProfile(form);
       setProfile(updated);
       updateStoredUser({ name: updated.name });
-      setSaveMsg('Saved');
+      setSaveMsg(t('common.saved'));
       setTimeout(() => setSaveMsg(''), 2000);
     } catch (err) {
       setError(err.message);
@@ -90,7 +79,7 @@ function InformationModule() {
       await api.updateProfile({ currentPassword, newPassword });
       setCurrentPassword('');
       setNewPassword('');
-      setPwMsg('Password updated');
+      setPwMsg(t('settings.information.passwordUpdated'));
       setTimeout(() => setPwMsg(''), 2000);
     } catch (err) {
       setPwError(err.message);
@@ -100,7 +89,7 @@ function InformationModule() {
   }
 
   async function handleRequestDeletion() {
-    if (!confirm("Request that an admin delete your account? They'll be notified and can act on it — this doesn't delete it immediately.")) return;
+    if (!confirm(t('settings.information.deletionRequestConfirm'))) return;
     setDeletionBusy(true);
     setError('');
     try {
@@ -113,18 +102,18 @@ function InformationModule() {
     }
   }
 
-  if (!profile) return <Card className="mt-card"><p className="page-subtitle">Loading…</p></Card>;
+  if (!profile) return <Card className="mt-card"><p className="page-subtitle">{t('common.loading')}</p></Card>;
 
   return (
     <>
       {error && <div className="error-banner">{error}</div>}
 
-      <Card title="Your information" className="mt-card">
+      <Card title={t('settings.information.yourInformationTitle')} className="mt-card">
         <form onSubmit={handleSaveProfile}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-            {PROFILE_FIELDS.map((f) => (
+            {PROFILE_FIELD_KEYS.map((f) => (
               <div className="field" key={f.key} style={{ margin: 0 }}>
-                <label>{f.label}</label>
+                <label>{t(`settings.information.${f.tKey}`)}</label>
                 <input
                   type={f.type || 'text'}
                   value={form[f.key] || ''}
@@ -134,42 +123,41 @@ function InformationModule() {
             ))}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 16 }}>
-            <Button type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save'}</Button>
+            <Button type="submit" disabled={saving}>{saving ? t('common.saving') : t('common.save')}</Button>
             {saveMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{saveMsg}</span>}
           </div>
         </form>
       </Card>
 
-      <Card title="Password" className="mt-card">
+      <Card title={t('settings.information.passwordTitle')} className="mt-card">
         <form onSubmit={handleChangePassword}>
           {pwError && <div className="error-banner">{pwError}</div>}
           <div className="password-row">
             <div className="field" style={{ flex: 1, margin: 0 }}>
-              <label>Current password</label>
+              <label>{t('settings.information.currentPasswordLabel')}</label>
               <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
             </div>
             <div className="field" style={{ flex: 1, margin: 0 }}>
-              <label>New password</label>
-              <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} minLength={8} placeholder="At least 8 characters" />
+              <label>{t('settings.information.newPasswordLabel')}</label>
+              <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} minLength={8} placeholder={t('settings.information.newPasswordPlaceholder')} />
             </div>
             <Button type="submit" disabled={pwSaving || !currentPassword || !newPassword}>
-              {pwSaving ? 'Saving…' : 'Change password'}
+              {pwSaving ? t('common.saving') : t('settings.information.changePasswordBtn')}
             </Button>
           </div>
           {pwMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{pwMsg}</span>}
         </form>
       </Card>
 
-      <Card title="Delete account" className="mt-card">
+      <Card title={t('settings.information.deleteAccountTitle')} className="mt-card">
         <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px' }}>
-          You can't delete your own account directly — this sends a request to an admin, who can review and
-          delete it (GDPR-compliant anonymization) from the Users page.
+          {t('settings.information.deleteAccountDescription')}
         </p>
         {deletionRequested ? (
-          <p style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>Request sent — an admin has been notified.</p>
+          <p style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{t('settings.information.deletionRequestSent')}</p>
         ) : (
           <Button variant="ghost" disabled={deletionBusy} onClick={handleRequestDeletion} style={{ color: '#EF4444' }}>
-            {deletionBusy ? 'Sending…' : 'Request account deletion'}
+            {deletionBusy ? t('settings.information.sendingBtn') : t('settings.information.requestAccountDeletionBtn')}
           </Button>
         )}
       </Card>
@@ -178,6 +166,7 @@ function InformationModule() {
 }
 
 function GoogleReviewModule() {
+  const { t } = useTranslation('admin');
   const [googleReviewUrl, setGoogleReviewUrl] = useState('');
   const [savedUrl, setSavedUrl] = useState('');
   const [saving, setSaving] = useState(false);
@@ -203,7 +192,7 @@ function GoogleReviewModule() {
     try {
       await api.updateAccountSettings({ googleReviewUrl });
       setSavedUrl(googleReviewUrl);
-      setSaveMsg('Saved');
+      setSaveMsg(t('common.saved'));
       setTimeout(() => setSaveMsg(''), 2000);
     } catch (err) {
       setError(err.message);
@@ -235,15 +224,12 @@ function GoogleReviewModule() {
     <>
       {error && <div className="error-banner">{error}</div>}
 
-      <Card title="Google review link" className="mt-card">
+      <Card title={t('settings.googleReview.googleReviewLinkTitle')} className="mt-card">
         <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 10px', lineHeight: 1.6 }}>
-          Guests who won a gift are optionally invited to open this link afterwards. Paste the link to
-          your Google page where people can leave a review.
+          {t('settings.googleReview.googleReviewLinkDesc1')}
         </p>
         <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 16px', lineHeight: 1.7 }}>
-          <strong>How to get it:</strong> search your business name on Google Search or Maps → open your
-          business profile → click <strong>"Ask for reviews"</strong> (or the share icon next to your rating)
-          → copy the link it gives you. It looks like <code>https://g.page/r/.../review</code>. Paste it below.
+          <strong>{t('settings.googleReview.howToGetItLabel')}</strong> {t('settings.googleReview.howToGetItText1')} <strong>{t('settings.googleReview.askForReviewsLabel')}</strong> {t('settings.googleReview.howToGetItText2')} <code>https://g.page/r/.../review</code>. {t('settings.googleReview.howToGetItText3')}
         </p>
         <form onSubmit={handleSaveUrl} style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
           <input
@@ -253,7 +239,7 @@ function GoogleReviewModule() {
             onChange={(e) => setGoogleReviewUrl(e.target.value)}
             style={{ flex: 1, padding: '10px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 14 }}
           />
-          <Button type="submit" disabled={saving || !urlDirty}>{saving ? 'Saving…' : 'Save'}</Button>
+          <Button type="submit" disabled={saving || !urlDirty}>{saving ? t('common.saving') : t('common.save')}</Button>
           {saveMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{saveMsg}</span>}
         </form>
         <button
@@ -263,7 +249,7 @@ function GoogleReviewModule() {
             marginTop: 8, cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'underline',
           }}
         >
-          Not sure where to find it? Watch this quick video →
+          {t('settings.googleReview.watchVideoLink')}
         </button>
       </Card>
 
@@ -285,7 +271,7 @@ function GoogleReviewModule() {
                   background: 'none', border: '1px solid #E2E8F0', borderRadius: 8, padding: '5px 12px',
                   fontSize: 13, color: '#64748B', cursor: 'pointer', fontFamily: 'inherit',
                 }}
-              >Close</button>
+              >{t('common.close')}</button>
             </div>
             <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0 }}>
               <iframe
@@ -300,20 +286,19 @@ function GoogleReviewModule() {
         </div>
       )}
 
-      <Card title="Invite for a Google review" className="mt-card">
+      <Card title={t('settings.googleReview.inviteForReviewTitle')} className="mt-card">
         <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 10px' }}>
-          Per campaign, choose when guests are invited to leave a Google review:
+          {t('settings.googleReview.inviteForReviewDesc')}
         </p>
         <ul style={{ fontSize: 13, color: '#64748B', margin: '0 0 12px', paddingLeft: 20, lineHeight: 1.6 }}>
-          <li><strong>Before the game</strong> — right after a guest submits the form, a "Leave us a Google review" screen opens the review page in a new tab. If they don't click it, the screen goes away by itself after 15 seconds and they continue to the game (the wheel or the waiting line).</li>
-          <li><strong>After the game</strong> — a "Leave a review" button is shown once their gift is won.</li>
+          <li><strong>{t('settings.googleReview.beforeGameLabel')}</strong> {t('settings.googleReview.beforeGameDesc')}</li>
+          <li><strong>{t('settings.googleReview.afterGameLabel')}</strong> {t('settings.googleReview.afterGameDesc')}</li>
         </ul>
         <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 16px' }}>
-          It's never a condition to play or to claim the reward — Google's policies prohibit tying a game or
-          reward to leaving a review, even as an unverified gate.
+          {t('settings.googleReview.neverConditionNote')}
         </p>
-        {!campaigns && <p className="page-subtitle">Loading…</p>}
-        {campaigns && campaigns.length === 0 && <p className="page-subtitle">No campaigns yet.</p>}
+        {!campaigns && <p className="page-subtitle">{t('common.loading')}</p>}
+        {campaigns && campaigns.length === 0 && <p className="page-subtitle">{t('common.noCampaignsYet')}</p>}
         {campaigns && campaigns.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {campaigns.map((c) => (
@@ -326,15 +311,15 @@ function GoogleReviewModule() {
                   <Badge tone={c.status === 'active' ? 'green' : 'neutral'}>{c.status}</Badge>
                 </div>
                 <select
-                  aria-label={`Google review invite for ${c.name}`}
+                  aria-label={t('settings.googleReview.reviewSelectAriaLabel', { name: c.name })}
                   value={c.google_review_required ? (c.google_review_position === 'before' ? 'before' : 'after') : 'off'}
                   disabled={togglingId === c.id || !savedUrl}
                   onChange={(e) => handleReviewMode(c, e.target.value)}
                   style={{ padding: '8px 10px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13, fontFamily: 'inherit', background: 'white' }}
                 >
-                  <option value="off">No review invite</option>
-                  <option value="before">Before the game</option>
-                  <option value="after">After the game</option>
+                  <option value="off">{t('settings.googleReview.reviewOptionOff')}</option>
+                  <option value="before">{t('settings.googleReview.beforeGameLabel')}</option>
+                  <option value="after">{t('settings.googleReview.afterGameLabel')}</option>
                 </select>
               </div>
             ))}
@@ -342,7 +327,7 @@ function GoogleReviewModule() {
         )}
         {!savedUrl && (
           <p style={{ fontSize: 12, color: '#EF4444', marginTop: 12 }}>
-            Set a Google review link above before enabling this on a campaign.
+            {t('settings.googleReview.setLinkFirstWarning')}
           </p>
         )}
       </Card>
@@ -351,6 +336,7 @@ function GoogleReviewModule() {
 }
 
 function SocialMediaModule() {
+  const { t } = useTranslation('admin');
   const [urls, setUrls] = useState({ facebookUrl: '', instagramUrl: '', linkedinUrl: '', xUrl: '' });
   const [savedUrls, setSavedUrls] = useState({ facebookUrl: '', instagramUrl: '', linkedinUrl: '', xUrl: '' });
   const [saving, setSaving] = useState(false);
@@ -377,7 +363,7 @@ function SocialMediaModule() {
     try {
       await api.updateAccountSettings(urls);
       setSavedUrls(urls);
-      setSaveMsg('Saved');
+      setSaveMsg(t('common.saved'));
       setTimeout(() => setSaveMsg(''), 2000);
     } catch (err) {
       setError(err.message);
@@ -407,10 +393,9 @@ function SocialMediaModule() {
     <>
       {error && <div className="error-banner">{error}</div>}
 
-      <Card title="Social media links" className="mt-card">
+      <Card title={t('settings.socialMedia.socialLinksTitle')} className="mt-card">
         <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 16px', lineHeight: 1.6 }}>
-          Guests who won a gift are optionally invited to follow you afterwards. Only platforms with a link
-          filled in below will ever show a button — leave one blank to skip it entirely.
+          {t('settings.socialMedia.socialLinksDesc')}
         </p>
         <form onSubmit={handleSave}>
           {SOCIAL_PLATFORMS.map((p) => (
@@ -425,19 +410,18 @@ function SocialMediaModule() {
             </div>
           ))}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <Button type="submit" disabled={saving || !dirty}>{saving ? 'Saving…' : 'Save'}</Button>
+            <Button type="submit" disabled={saving || !dirty}>{saving ? t('common.saving') : t('common.save')}</Button>
             {saveMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{saveMsg}</span>}
           </div>
         </form>
       </Card>
 
-      <Card title="Invite to follow after spinning" className="mt-card">
+      <Card title={t('settings.socialMedia.inviteToFollowTitle')} className="mt-card">
         <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 16px' }}>
-          Per campaign — when enabled, guests see optional "Follow us" buttons once their gift is already
-          won, alongside the Google review invite if that's also enabled. Never a condition to play.
+          {t('settings.socialMedia.inviteToFollowDesc')}
         </p>
-        {!campaigns && <p className="page-subtitle">Loading…</p>}
-        {campaigns && campaigns.length === 0 && <p className="page-subtitle">No campaigns yet.</p>}
+        {!campaigns && <p className="page-subtitle">{t('common.loading')}</p>}
+        {campaigns && campaigns.length === 0 && <p className="page-subtitle">{t('common.noCampaignsYet')}</p>}
         {campaigns && campaigns.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {campaigns.map((c) => (
@@ -456,7 +440,7 @@ function SocialMediaModule() {
                     disabled={togglingId === c.id || !hasAnyLink}
                     onChange={() => handleToggle(c)}
                   />
-                  Invite to follow
+                  {t('settings.socialMedia.inviteToFollowCheckboxLabel')}
                 </label>
               </div>
             ))}
@@ -464,7 +448,7 @@ function SocialMediaModule() {
         )}
         {!hasAnyLink && (
           <p style={{ fontSize: 12, color: '#EF4444', marginTop: 12 }}>
-            Set at least one social media link above before enabling this on a campaign.
+            {t('settings.socialMedia.setLinkFirstWarningSocial')}
           </p>
         )}
       </Card>
@@ -472,7 +456,14 @@ function SocialMediaModule() {
   );
 }
 
+const REDEEM_METHOD_TAB_KEYS = [
+  { key: 'qr', tKey: 'redeemTabQr' },
+  { key: 'code', tKey: 'redeemTabCode' },
+  { key: 'voucher', tKey: 'redeemTabVoucher' },
+];
+
 function EmailTemplatesModule() {
+  const { t } = useTranslation('admin');
   const [templates, setTemplates] = useState(null);
   const [defaults, setDefaults] = useState({ subject: '', bodyText: '' });
   const [method, setMethod] = useState('qr');
@@ -537,7 +528,7 @@ function EmailTemplatesModule() {
     setSaveMsg('');
     try {
       await api.updateEmailTemplates({ templates });
-      setSaveMsg('Saved');
+      setSaveMsg(t('common.saved'));
       setTimeout(() => setSaveMsg(''), 2000);
     } catch (err) {
       setError(err.message);
@@ -552,7 +543,7 @@ function EmailTemplatesModule() {
     setBrandingSaveMsg('');
     try {
       await api.updateEmailTemplates({ templates: {}, headerColor, footerText, logoSize });
-      setBrandingSaveMsg('Saved');
+      setBrandingSaveMsg(t('common.saved'));
       setTimeout(() => setBrandingSaveMsg(''), 2000);
     } catch (err) {
       setError(err.message);
@@ -612,7 +603,7 @@ function EmailTemplatesModule() {
     }
   }
 
-  if (!templates) return <Card className="mt-card"><p className="page-subtitle">Loading…</p></Card>;
+  if (!templates) return <Card className="mt-card"><p className="page-subtitle">{t('common.loading')}</p></Card>;
 
   const current = templates[method];
   const isCustomized = !!(current.subject || current.bodyText);
@@ -621,10 +612,9 @@ function EmailTemplatesModule() {
     <>
       {error && <div className="error-banner">{error}</div>}
 
-      <Card title="Header logo" className="mt-card">
+      <Card title={t('settings.emailTemplates.headerLogoTitle')} className="mt-card">
         <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px', lineHeight: 1.6 }}>
-          Shown at the top of every reward-win email, all three types (QR / Code / Voucher) share the same one.
-          PNG, JPEG, or WebP, up to 1MB. Leave unset to keep PrizeFlow's default logo.
+          {t('settings.emailTemplates.headerLogoDesc')}
         </p>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <div style={{
@@ -634,19 +624,19 @@ function EmailTemplatesModule() {
             {hasCustomLogo && logoPreviewUrl ? (
               <img src={logoPreviewUrl} alt="Custom logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
             ) : (
-              <span style={{ fontSize: 11, color: '#94A3B8' }}>Default</span>
+              <span style={{ fontSize: 11, color: '#94A3B8' }}>{t('settings.emailTemplates.defaultLabel')}</span>
             )}
           </div>
           <label style={{
             display: 'inline-flex', alignItems: 'center', gap: 8, padding: '9px 16px', border: '1px solid #CBD5E1',
             borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: logoBusy ? 'not-allowed' : 'pointer', color: '#0F1C3F',
           }}>
-            {logoBusy ? 'Uploading…' : hasCustomLogo ? 'Replace logo' : 'Upload logo'}
+            {logoBusy ? t('settings.emailTemplates.uploadingBtn') : hasCustomLogo ? t('settings.emailTemplates.replaceLogoBtn') : t('settings.emailTemplates.uploadLogoBtn')}
             <input type="file" accept="image/png,image/jpeg,image/webp" onChange={handleLogoUpload} disabled={logoBusy} style={{ display: 'none' }} />
           </label>
           {hasCustomLogo && (
             <Button variant="ghost" disabled={logoBusy} onClick={handleLogoRemove} style={{ color: '#EF4444' }}>
-              Remove
+              {t('settings.emailTemplates.removeBtn')}
             </Button>
           )}
         </div>
@@ -658,23 +648,22 @@ function EmailTemplatesModule() {
               onChange={(e) => handleToggleGuestFormLogo(e.target.checked)}
             />
             <span style={{ fontSize: 13, color: '#334155' }}>
-              Use in pre-spin form
+              {t('settings.emailTemplates.useInPreSpinFormLabel')}
               <span style={{ display: 'block', fontSize: 11, color: '#94A3B8' }}>
-                Shows this logo instead of PrizeFlow's on the guest form before they spin the wheel.
+                {t('settings.emailTemplates.useInPreSpinFormDesc')}
               </span>
             </span>
           </label>
         )}
       </Card>
 
-      <Card title="Branding" className="mt-card">
+      <Card title={t('settings.emailTemplates.brandingTitle')} className="mt-card">
         <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 16px', lineHeight: 1.6 }}>
-          The header banner color, logo size, and footer line shown on every reward-win email. Leave blank
-          to keep PrizeFlow's defaults.
+          {t('settings.emailTemplates.brandingDesc')}
         </p>
         <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', marginBottom: 14 }}>
           <div className="field" style={{ margin: 0 }}>
-            <label>Header color</label>
+            <label>{t('settings.emailTemplates.headerColorLabel')}</label>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <input
                 type="color"
@@ -692,7 +681,7 @@ function EmailTemplatesModule() {
             </div>
           </div>
           <div className="field" style={{ margin: 0, flex: 1, minWidth: 220 }}>
-            <label>Footer text</label>
+            <label>{t('settings.emailTemplates.footerTextLabel')}</label>
             <input
               type="text"
               value={footerText}
@@ -703,7 +692,7 @@ function EmailTemplatesModule() {
           </div>
         </div>
         <div className="field" style={{ margin: '0 0 14px' }}>
-          <label>Logo size in the email — {logoSize || brandingDefaults.logoSize}px</label>
+          <label>{t('settings.emailTemplates.logoSizeLabel', { size: logoSize || brandingDefaults.logoSize })}</label>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
             <input
               type="range"
@@ -731,36 +720,33 @@ function EmailTemplatesModule() {
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <Button onClick={handleSaveBranding} disabled={brandingSaving}>{brandingSaving ? 'Saving…' : 'Save'}</Button>
+          <Button onClick={handleSaveBranding} disabled={brandingSaving}>{brandingSaving ? t('common.saving') : t('common.save')}</Button>
           {(headerColor || footerText || logoSize) && (
-            <Button variant="ghost" onClick={resetBrandingToDefault} disabled={brandingSaving}>Reset to default</Button>
+            <Button variant="ghost" onClick={resetBrandingToDefault} disabled={brandingSaving}>{t('settings.emailTemplates.resetToDefaultBtn')}</Button>
           )}
           {brandingSaveMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{brandingSaveMsg}</span>}
         </div>
       </Card>
 
-      <Card title="Message text" className="mt-card">
+      <Card title={t('settings.emailTemplates.messageTextTitle')} className="mt-card">
         <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 16px', lineHeight: 1.6 }}>
-          Customize the subject and congratulations message for each reward type. The redemption instructions
-          (QR code, code box, voucher notice) always stay as-is below your message, so a gift can never fail to
-          be redeemable because of a wording change. Leave a type blank to keep PrizeFlow's default email for it.
-          Available placeholders: <code>{'{{firstName}}'}</code>, <code>{'{{giftName}}'}</code>
+          {t('settings.emailTemplates.messageTextDesc')} <code>{'{{firstName}}'}</code>, <code>{'{{giftName}}'}</code>
           {method === 'code' && <> , <code>{'{{code}}'}</code></>}.
         </p>
 
         <div className="tabs" style={{ marginBottom: 16 }}>
-          {REDEEM_METHOD_TABS.map((t) => (
-            <button key={t.key} className={`tab${method === t.key ? ' active' : ''}`} onClick={() => setMethod(t.key)}>
-              {t.label}
-              {(templates[t.key].subject || templates[t.key].bodyText) && (
-                <span style={{ marginLeft: 6 }}><Badge tone="green">Custom</Badge></span>
+          {REDEEM_METHOD_TAB_KEYS.map((tab) => (
+            <button key={tab.key} className={`tab${method === tab.key ? ' active' : ''}`} onClick={() => setMethod(tab.key)}>
+              {t(`settings.emailTemplates.${tab.tKey}`)}
+              {(templates[tab.key].subject || templates[tab.key].bodyText) && (
+                <span style={{ marginLeft: 6 }}><Badge tone="green">{t('settings.emailTemplates.customBadge')}</Badge></span>
               )}
             </button>
           ))}
         </div>
 
         <div className="field" style={{ margin: '0 0 14px' }}>
-          <label>Subject</label>
+          <label>{t('settings.emailTemplates.subjectLabel')}</label>
           <input
             type="text"
             value={current.subject}
@@ -771,7 +757,7 @@ function EmailTemplatesModule() {
         </div>
 
         <div className="field" style={{ margin: '0 0 14px' }}>
-          <label>Message</label>
+          <label>{t('settings.emailTemplates.messageLabel')}</label>
           <textarea
             value={current.bodyText}
             placeholder={defaults.bodyText}
@@ -782,9 +768,9 @@ function EmailTemplatesModule() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <Button onClick={handleSave} disabled={saving}>{saving ? 'Saving…' : 'Save'}</Button>
+          <Button onClick={handleSave} disabled={saving}>{saving ? t('common.saving') : t('common.save')}</Button>
           {isCustomized && (
-            <Button variant="ghost" onClick={resetToDefault} disabled={saving}>Reset to default</Button>
+            <Button variant="ghost" onClick={resetToDefault} disabled={saving}>{t('settings.emailTemplates.resetToDefaultBtn')}</Button>
           )}
           {saveMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{saveMsg}</span>}
         </div>
@@ -793,12 +779,8 @@ function EmailTemplatesModule() {
   );
 }
 
-const AI_ASSISTANT_MODES = [
-  { value: 'supervised', label: 'Supervised — a rep reviews and accepts every proposal' },
-  { value: 'automatic', label: 'Automatic — coming soon (currently behaves the same as Supervised)' },
-];
-
 function AIAssistantModule() {
+  const { t } = useTranslation('admin');
   const { updateStoredUser } = useAuth();
   const [enabled, setEnabled] = useState(false);
   const [savedEnabled, setSavedEnabled] = useState(false);
@@ -830,7 +812,7 @@ function AIAssistantModule() {
       setSavedEnabled(enabled);
       setSavedMode(mode);
       updateStoredUser({ aiAssistantEnabled: enabled });
-      setSaveMsg('Saved');
+      setSaveMsg(t('common.saved'));
       setTimeout(() => setSaveMsg(''), 2000);
     } catch (err) {
       setError(err.message);
@@ -845,35 +827,33 @@ function AIAssistantModule() {
     <>
       {error && <div className="error-banner">{error}</div>}
 
-      <Card title="AI Assistant" className="mt-card">
+      <Card title={t('settings.aiAssistant.title')} className="mt-card">
         <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 16px', lineHeight: 1.6 }}>
-          Reads a prospect's saved note and proposes CRM updates — matching one of your campaign's own
-          segmentation categories, a sales field, a lead rating, or a suggested tag when nothing else fits —
-          plus missing-info and next-action suggestions. Nothing is ever applied to a prospect's record
-          without a rep clicking Accept, in either mode below.
+          {t('settings.aiAssistant.description')}
         </p>
 
         {configured === false && (
           <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: 12, marginBottom: 16, fontSize: 13, color: '#92400E' }}>
-            The AI assistant isn't configured on this deployment yet — turning it on here won't do anything until it is.
+            {t('settings.aiAssistant.notConfiguredWarning')}
           </div>
         )}
 
         <form onSubmit={handleSave}>
           <label style={{ display: 'flex', gap: 10, alignItems: 'flex-start', cursor: 'pointer', marginBottom: 16 }}>
             <input type="checkbox" checked={enabled} onChange={(e) => setEnabled(e.target.checked)} style={{ marginTop: 2, flexShrink: 0, width: 18, height: 18 }} />
-            <span style={{ fontSize: 14, fontWeight: 600 }}>Enable the AI assistant for this account</span>
+            <span style={{ fontSize: 14, fontWeight: 600 }}>{t('settings.aiAssistant.enableCheckboxLabel')}</span>
           </label>
 
           <div className="field">
-            <label>Mode</label>
+            <label>{t('settings.aiAssistant.modeLabel')}</label>
             <select value={mode} onChange={(e) => setMode(e.target.value)} disabled={!enabled}>
-              {AI_ASSISTANT_MODES.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
+              <option value="supervised">{t('settings.aiAssistant.modeSupervised')}</option>
+              <option value="automatic">{t('settings.aiAssistant.modeAutomatic')}</option>
             </select>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <Button type="submit" disabled={saving || !dirty}>{saving ? 'Saving…' : 'Save'}</Button>
+            <Button type="submit" disabled={saving || !dirty}>{saving ? t('common.saving') : t('common.save')}</Button>
             {saveMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{saveMsg}</span>}
           </div>
         </form>
@@ -882,22 +862,32 @@ function AIAssistantModule() {
   );
 }
 
+const MODULE_KEYS = [
+  { key: 'information', tKey: 'tabInformation' },
+  { key: 'google-review', tKey: 'tabGoogleReview' },
+  { key: 'social-media', tKey: 'tabSocialMedia' },
+  { key: 'email-templates', tKey: 'tabEmailTemplates' },
+  { key: 'ai-assistant', tKey: 'tabAiAssistant' },
+  { key: 'calibration', tKey: 'tabCalibration' },
+];
+
 export default function Settings() {
+  const { t } = useTranslation('admin');
   const [module, setModule] = useState('information');
 
   return (
     <div>
       <div className="page-header">
         <div>
-          <h1 className="page-title">Settings</h1>
-          <p className="page-subtitle">Manage your profile, the Google review invitation, reward emails, and wheel calibration</p>
+          <h1 className="page-title">{t('settings.pageTitle')}</h1>
+          <p className="page-subtitle">{t('settings.pageSubtitle')}</p>
         </div>
       </div>
 
       <div className="tabs">
-        {MODULES.map((m) => (
+        {MODULE_KEYS.map((m) => (
           <button key={m.key} className={`tab${module === m.key ? ' active' : ''}`} onClick={() => setModule(m.key)}>
-            {m.label}
+            {t(`settings.${m.tKey}`)}
           </button>
         ))}
       </div>

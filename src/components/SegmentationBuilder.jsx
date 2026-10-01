@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import OptionsEditor from './OptionsEditor';
 
 // Multi-category customer segmentation builder — an operator defines as
@@ -5,6 +6,7 @@ import OptionsEditor from './OptionsEditor';
 // set of options (e.g. "Homme"/"Femme"). `categories` is
 // { name, options: string[] }[].
 export default function SegmentationBuilder({ categories, onChange }) {
+  const { t } = useTranslation('admin');
   function updateCategory(i, patch) {
     onChange(categories.map((c, idx) => (idx === i ? { ...c, ...patch } : c)));
   }
@@ -22,7 +24,7 @@ export default function SegmentationBuilder({ categories, onChange }) {
           <div key={i} style={{ background: 'var(--surface-alt, #F8FAFC)', border: '1px solid var(--border, #E2E8F0)', borderRadius: 12, padding: 16 }}>
             <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 14 }}>
               <input
-                placeholder="Category name — e.g. Budget"
+                placeholder={t('builders.categoryNamePlaceholder')}
                 value={c.name}
                 onChange={(e) => updateCategory(i, { name: e.target.value })}
                 style={{
@@ -33,7 +35,7 @@ export default function SegmentationBuilder({ categories, onChange }) {
               <button
                 type="button"
                 onClick={() => removeCategory(i)}
-                title="Remove category"
+                title={t('builders.removeCategoryTitle')}
                 style={{
                   width: 32, height: 32, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
                   background: 'white', border: '1px solid var(--border, #E2E8F0)', borderRadius: 8, color: '#EF4444', cursor: 'pointer',
@@ -45,12 +47,12 @@ export default function SegmentationBuilder({ categories, onChange }) {
               </button>
             </div>
             <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-light, #94A3B8)', marginBottom: 8 }}>
-              Options
+              {t('builders.optionsLabel')}
             </div>
             <OptionsEditor options={c.options || []} onChange={(options) => updateCategory(i, { options })} />
           </div>
         ))}
-        {categories.length === 0 && <p className="page-subtitle" style={{ margin: 0 }}>No categories configured yet.</p>}
+        {categories.length === 0 && <p className="page-subtitle" style={{ margin: 0 }}>{t('builders.noCategoriesYet')}</p>}
       </div>
       <button
         type="button"
@@ -60,7 +62,7 @@ export default function SegmentationBuilder({ categories, onChange }) {
           border: '1.5px dashed var(--border, #E2E8F0)', borderRadius: 10, color: 'var(--link, #002881)',
           fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
         }}
-      >+ Add category</button>
+      >{t('builders.addCategoryBtn')}</button>
     </div>
   );
 }

@@ -1,9 +1,12 @@
+import { useTranslation } from 'react-i18next';
+
 // One option per row, each with its own remove button, plus a "+ Add
 // option" button — replaces the old comma-separated single input (fiddly to
 // edit, easy to mis-type a separator). Shared by SegmentationBuilder (a
 // category's options) and CampaignFieldsBuilder (a choice-type field's
 // options).
 export default function OptionsEditor({ options, onChange }) {
+  const { t } = useTranslation('admin');
   function updateOption(i, value) {
     onChange(options.map((o, idx) => (idx === i ? value : o)));
   }
@@ -23,13 +26,13 @@ export default function OptionsEditor({ options, onChange }) {
             <input
               value={o}
               onChange={(e) => updateOption(i, e.target.value)}
-              placeholder={`Option ${i + 1}`}
+              placeholder={t('builders.optionPlaceholder', { n: i + 1 })}
               style={{ flex: 1, padding: '8px 12px', border: '1px solid var(--border, #E2E8F0)', borderRadius: 8, fontSize: 13, fontFamily: 'inherit' }}
             />
             <button
               type="button"
               onClick={() => removeOption(i)}
-              aria-label="Remove option"
+              aria-label={t('builders.removeOptionAriaLabel')}
               style={{
                 width: 28, height: 28, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
                 background: 'none', border: 'none', borderRadius: 6, color: '#94A3B8', cursor: 'pointer', fontSize: 16, lineHeight: 1,
@@ -46,7 +49,7 @@ export default function OptionsEditor({ options, onChange }) {
           background: 'none', border: 'none', padding: '4px 0', color: 'var(--link, #002881)',
           fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
         }}
-      >+ Add option</button>
+      >{t('builders.addOptionBtn')}</button>
     </div>
   );
 }

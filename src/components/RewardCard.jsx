@@ -1,9 +1,7 @@
-const STATUS_INFO = {
-  active: { color: '#10B981', label: 'Valid — ready to distribute' },
-  redeemed: { color: '#F59E0B', label: 'Already distributed' },
-  expired: { color: '#EF4444', label: 'Expired' },
-  cancelled: { color: '#EF4444', label: 'Cancelled' },
-};
+import { useTranslation } from 'react-i18next';
+
+const STATUS_COLOR = { active: '#10B981', redeemed: '#F59E0B', expired: '#EF4444', cancelled: '#EF4444' };
+const STATUS_TKEY = { active: 'statusActive', redeemed: 'statusRedeemed', expired: 'statusExpired', cancelled: 'statusCancelled' };
 
 function formatDT(s) {
   if (!s) return null;
@@ -16,21 +14,22 @@ function formatDT(s) {
 /// This component only renders the card's *content* — callers own the
 /// surrounding layout (fixed overlay vs inline card).
 export default function RewardCard({ reward, error, busy, onDistribute, onCancel, onUndo }) {
+  const { t } = useTranslation('admin');
   return (
     <div style={{ textAlign: 'center' }}>
       <div style={{
         display: 'inline-block', padding: '5px 14px', borderRadius: 20, fontSize: 12, fontWeight: 700,
-        color: 'white', background: STATUS_INFO[reward.status]?.color || '#64748B', marginBottom: 18,
+        color: 'white', background: STATUS_COLOR[reward.status] || '#64748B', marginBottom: 18,
       }}>
-        {STATUS_INFO[reward.status]?.label || reward.status}
+        {STATUS_TKEY[reward.status] ? t(`rewardCard.${STATUS_TKEY[reward.status]}`) : reward.status}
       </div>
       <h1 style={{ fontSize: 22, fontWeight: 800, margin: '0 0 6px', color: '#03041A' }}>{reward.giftName}</h1>
       <p style={{ fontSize: 14, color: '#64748B', margin: '0 0 4px' }}>
-        For {reward.firstName} {reward.lastName}
+        {t('rewardCard.forLabel', { firstName: reward.firstName, lastName: reward.lastName })}
       </p>
       {reward.launchedAt && (
         <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 24px' }}>
-          Wheel launched {formatDT(reward.launchedAt)}
+          {t('rewardCard.wheelLaunchedLabel', { date: formatDT(reward.launchedAt) })}
         </p>
       )}
 
@@ -38,7 +37,7 @@ export default function RewardCard({ reward, error, busy, onDistribute, onCancel
 
       {reward.status === 'redeemed' && reward.distributedBy && (
         <p style={{ fontSize: 12, color: '#94A3B8', marginBottom: 8 }}>
-          Distributed by {reward.distributedBy}{reward.distributedAt ? ` · ${formatDT(reward.distributedAt)}` : ''}
+          {t('rewardCard.distributedByLabel', { name: reward.distributedBy })}{reward.distributedAt ? ` · ${formatDT(reward.distributedAt)}` : ''}
         </p>
       )}
 
@@ -49,14 +48,14 @@ export default function RewardCard({ reward, error, busy, onDistribute, onCancel
             borderRadius: 10, padding: '13px', fontSize: 14, fontWeight: 700,
             cursor: busy ? 'not-allowed' : 'pointer', opacity: busy ? 0.6 : 1, fontFamily: 'inherit',
           }}>
-            {busy ? 'Confirming…' : 'Distribute'}
+            {busy ? t('rewardCard.confirmingBtn') : t('rewardCard.distributeBtn')}
           </button>
           <button type="button" onClick={onCancel} disabled={busy} style={{
             flex: 1, background: 'white', color: '#EF4444', border: '1px solid #FCA5A5',
             borderRadius: 10, padding: '13px', fontSize: 14, fontWeight: 700,
             cursor: busy ? 'not-allowed' : 'pointer', opacity: busy ? 0.6 : 1, fontFamily: 'inherit',
           }}>
-            {busy ? 'Cancelling…' : 'Cancel'}
+            {busy ? t('rewardCard.cancellingBtn') : t('common.cancel')}
           </button>
         </div>
       )}
@@ -67,7 +66,7 @@ export default function RewardCard({ reward, error, busy, onDistribute, onCancel
           borderRadius: 10, padding: '13px', fontSize: 14, fontWeight: 700,
           cursor: busy ? 'not-allowed' : 'pointer', opacity: busy ? 0.6 : 1, fontFamily: 'inherit',
         }}>
-          {busy ? 'Cancelling…' : 'Cancel distribution'}
+          {busy ? t('rewardCard.cancellingBtn') : t('rewardCard.cancelDistributionBtn')}
         </button>
       )}
 
@@ -77,7 +76,7 @@ export default function RewardCard({ reward, error, busy, onDistribute, onCancel
           borderRadius: 10, padding: '13px', fontSize: 14, fontWeight: 700,
           cursor: busy ? 'not-allowed' : 'pointer', opacity: busy ? 0.6 : 1, fontFamily: 'inherit',
         }}>
-          {busy ? 'Reactivating…' : 'Reactivate'}
+          {busy ? t('rewardCard.reactivatingBtn') : t('rewardCard.reactivateBtn')}
         </button>
       )}
     </div>

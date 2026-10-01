@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
+import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { Card, Badge, Button, EmptyState } from '../components/ui';
 import { useWheelSocket } from '../hooks/useWheelSocket';
@@ -41,6 +42,7 @@ function KioskOverlay({ token, onClose }) {
 // a phone. See LaunchPWA.jsx for the phone-only, QR-less equivalent meant to
 // be installed as its own home-screen app for a sales rep.
 export default function LaunchCampaign() {
+  const { t } = useTranslation('admin');
   const { agentConnected } = useWheelSocket();
   const q = useLaunchQueue();
   const [qrDataUrl, setQrDataUrl] = useState(null);
@@ -86,16 +88,16 @@ export default function LaunchCampaign() {
     <div>
       <div className="page-header launch-header">
         <div>
-          <h1 className="page-title">Launch Campaign</h1>
-          <p className="page-subtitle">Guests scan the QR code below to play from their own phone</p>
+          <h1 className="page-title">{t('launchCampaign.pageTitle')}</h1>
+          <p className="page-subtitle">{t('launchCampaign.pageSubtitle')}</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-          <Badge tone={agentConnected ? 'green' : 'red'}>{agentConnected ? 'Wheel ready' : 'Wheel offline'}</Badge>
+          <Badge tone={agentConnected ? 'green' : 'red'}>{agentConnected ? t('pwa.wheelReady') : t('pwa.wheelOffline')}</Badge>
           {q.scanEnabled && q.campaign && (
             // A label around a hidden file input, so one tap opens the camera
             // directly (the browser only allows that from a real tap).
             <label className="btn btn-secondary" style={{ cursor: 'pointer' }}>
-              📷 Scan badge
+              {t('launchCampaign.scanBadgeBtn')}
               <input
                 type="file"
                 accept="image/*"
@@ -109,8 +111,8 @@ export default function LaunchCampaign() {
               />
             </label>
           )}
-          <Button variant="secondary" onClick={() => { setScanFile(null); setShowNewProspect(true); }} disabled={!q.campaign}>+ New prospect</Button>
-          <Button onClick={() => setShowKiosk(true)} disabled={!q.campaign}>SPIN THE WHEEL</Button>
+          <Button variant="secondary" onClick={() => { setScanFile(null); setShowNewProspect(true); }} disabled={!q.campaign}>{t('pwa.newProspect')}</Button>
+          <Button onClick={() => setShowKiosk(true)} disabled={!q.campaign}>{t('launchCampaign.spinWheelBtn')}</Button>
         </div>
       </div>
 
@@ -126,43 +128,43 @@ export default function LaunchCampaign() {
 
       {q.campaign === null && (
         <Card className="mt-card">
-          <EmptyState title="No campaign is currently active" description="Start one from the Campaigns page to get its QR code." />
+          <EmptyState title={t('pwa.noCampaignTitle')} description={t('launchCampaign.noCampaignDesc')} />
         </Card>
       )}
 
       {q.campaign !== null && (
       <div className="qr-layout">
-        <Card title="Guest QR code">
+        <Card title={t('launchCampaign.guestQrCodeTitle')}>
           <div style={{ textAlign: 'center', padding: '12px 0' }}>
             {qrDataUrl ? (
               <img src={qrDataUrl} alt="Guest QR code" style={{ width: 240, height: 240 }} />
             ) : (
-              <p className="page-subtitle">Loading…</p>
+              <p className="page-subtitle">{t('common.loading')}</p>
             )}
             {guestUrl && (
               <p style={{ fontSize: 12, color: '#94A3B8', marginTop: 12, wordBreak: 'break-all' }}>{guestUrl}</p>
             )}
             {q.campaign && (
-              <p style={{ fontSize: 12, color: '#94A3B8', marginTop: 4 }}>Campaign: {q.campaign.name}</p>
+              <p style={{ fontSize: 12, color: '#94A3B8', marginTop: 4 }}>{t('launchCampaign.campaignLabel', { name: q.campaign.name })}</p>
             )}
             {qrDataUrl && (
               <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 16 }}>
-                <Button size="sm" variant="secondary" onClick={handleDownloadPng}>Download PNG</Button>
+                <Button size="sm" variant="secondary" onClick={handleDownloadPng}>{t('launchCampaign.downloadPngBtn')}</Button>
                 <Button size="sm" variant="secondary" disabled={pdfBusy} onClick={handleDownloadPdf}>
-                  {pdfBusy ? 'Generating…' : 'Download PDF'}
+                  {pdfBusy ? t('launchCampaign.generatingBtn') : t('launchCampaign.downloadPdfBtn')}
                 </Button>
               </div>
             )}
           </div>
         </Card>
 
-        <Card title="Live queue">
-          {!q.queue && <p className="page-subtitle">Loading…</p>}
+        <Card title={t('pwa.liveQueueTitle')}>
+          {!q.queue && <p className="page-subtitle">{t('common.loading')}</p>}
           {q.queue && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
               <div>
                 <div style={{ fontSize: 11, fontWeight: 700, color: '#64748B', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: 8 }}>
-                  Currently playing
+                  {t('pwa.currentlyPlaying')}
                 </div>
                 {q.queue.active ? (
                   <div>
@@ -174,7 +176,7 @@ export default function LaunchCampaign() {
                       >
                         {q.queue.active.firstName}
                       </button>
-                      {' '}— {q.queue.active.launched ? 'spinning…' : 'waiting to spin'}
+                      {' '}— {q.queue.active.launched ? t('pwa.spinning') : t('pwa.waitingToSpin')}
                       {q.queue.active.retryMessage && (
                         <span style={{ marginLeft: 10, fontSize: 12, color: '#EF4444' }}>({q.queue.active.retryMessage})</span>
                       )}
@@ -184,7 +186,7 @@ export default function LaunchCampaign() {
                         spin happens. */}
                     {q.queue.active.giftName && (
                       <div style={{ fontSize: 13, color: '#64748B', marginTop: 2 }}>
-                        Will win: <strong style={{ color: '#0055F8' }}>{q.queue.active.giftName}</strong>
+                        {t('pwa.willWin')} <strong style={{ color: '#0055F8' }}>{q.queue.active.giftName}</strong>
                       </div>
                     )}
                     <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
@@ -198,7 +200,7 @@ export default function LaunchCampaign() {
                           fontFamily: 'inherit', opacity: q.queueActionBusy ? 0.6 : 1,
                         }}
                       >
-                        Passer le joueur
+                        {t('pwa.skipPlayer')}
                       </button>
                       <button
                         type="button"
@@ -210,21 +212,21 @@ export default function LaunchCampaign() {
                           fontFamily: 'inherit', opacity: q.queueActionBusy ? 0.6 : 1,
                         }}
                       >
-                        Annuler le joueur
+                        {t('pwa.cancelPlayer')}
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <p className="page-subtitle" style={{ margin: 0 }}>Nobody right now</p>
+                  <p className="page-subtitle" style={{ margin: 0 }}>{t('pwa.nobodyRightNow')}</p>
                 )}
               </div>
 
               <div>
                 <div style={{ fontSize: 11, fontWeight: 700, color: '#64748B', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: 8 }}>
-                  Waiting ({q.queue.waiting.length})
+                  {t('pwa.waitingLabel', { count: q.queue.waiting.length })}
                 </div>
                 {q.queue.waiting.length === 0 ? (
-                  <p className="page-subtitle" style={{ margin: 0 }}>No one in line</p>
+                  <p className="page-subtitle" style={{ margin: 0 }}>{t('pwa.noOneInLine')}</p>
                 ) : (
                   <ol style={{ margin: 0, paddingLeft: 20, fontSize: 14, color: '#334155' }}>
                     {q.queue.waiting.map((w, i) => <li key={i}>{w.firstName}</li>)}
@@ -234,15 +236,15 @@ export default function LaunchCampaign() {
 
               <div>
                 <div style={{ fontSize: 11, fontWeight: 700, color: '#64748B', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: 8 }}>
-                  Recent results
+                  {t('launchCampaign.recentResultsTitle')}
                 </div>
                 {q.queue.recentCompleted.length === 0 ? (
-                  <p className="page-subtitle" style={{ margin: 0 }}>No spins yet</p>
+                  <p className="page-subtitle" style={{ margin: 0 }}>{t('launchCampaign.noSpinsYet')}</p>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                     {q.queue.recentCompleted.map((r, i) => (
                       <div key={i} style={{ fontSize: 13, color: '#334155' }}>
-                        <strong>{r.firstName}</strong> — {r.isTest ? r.giftName : 'reward sent by email'}
+                        <strong>{r.firstName}</strong> — {r.isTest ? r.giftName : t('launchCampaign.rewardSentByEmail')}
                       </div>
                     ))}
                   </div>
@@ -255,32 +257,32 @@ export default function LaunchCampaign() {
       )}
 
       {q.campaign !== null && (
-        <Card title="Last 20 players" className="mt-card">
+        <Card title={t('pwa.last20PlayersTitle')} className="mt-card">
           <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 12px' }}>
-            Click a name to add or edit a note, lead rating, or customer segment for them.
+            {t('launchCampaign.clickNameHint')}
           </p>
           {q.recentPlayers && q.recentPlayers.length > 0 && (
             <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 14 }}>
               <input
-                placeholder="Search by name, email, gift, segment or note…"
+                placeholder={t('launchCampaign.searchPlaceholder')}
                 value={q.playerSearch}
                 onChange={(e) => q.setPlayerSearch(e.target.value)}
                 style={{ flex: 1, padding: '9px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13 }}
               />
               <Button variant="secondary" onClick={() => setPlayerFiltersOpen(true)} style={{ flexShrink: 0, whiteSpace: 'nowrap' }}>
-                Filters{q.playerActiveFilterCount > 0 ? ` (${q.playerActiveFilterCount})` : ''}
+                {t('pwa.filters')}{q.playerActiveFilterCount > 0 ? ` (${q.playerActiveFilterCount})` : ''}
               </Button>
             </div>
           )}
-          {!q.recentPlayers && <p className="page-subtitle">Loading…</p>}
-          {q.recentPlayers && q.recentPlayers.length === 0 && <p className="page-subtitle">No players yet.</p>}
+          {!q.recentPlayers && <p className="page-subtitle">{t('common.loading')}</p>}
+          {q.recentPlayers && q.recentPlayers.length === 0 && <p className="page-subtitle">{t('pwa.noPlayersYet')}</p>}
           {q.recentPlayers && q.recentPlayers.length > 0 && q.filteredRecentPlayers.length === 0 && (
-            <p className="page-subtitle">No players match your search or filters.</p>
+            <p className="page-subtitle">{t('pwa.noPlayersMatch')}</p>
           )}
           {q.recentPlayers && q.filteredRecentPlayers.length > 0 && (
             <table className="data-table">
               <thead>
-                <tr><th>Name</th><th>Gift</th><th>Segment</th><th>Lead</th><th>Note</th></tr>
+                <tr><th>{t('launchCampaign.tableNameHeader')}</th><th>{t('common.gift')}</th><th>{t('common.segment')}</th><th>{t('launchCampaign.tableLeadHeader')}</th><th>{t('common.noteLabel')}</th></tr>
               </thead>
               <tbody>
                 {q.filteredRecentPlayers.map((p) => (
@@ -291,7 +293,7 @@ export default function LaunchCampaign() {
                     <td>
                       {p.gift_name || (
                         <span style={{ color: '#94A3B8', fontSize: 12 }}>
-                          {p.outcome === 'manual' ? 'No gift' : `No gift · ${p.outcome === 'cancelled' ? 'cancelled' : 'skipped'}`}
+                          {p.outcome === 'manual' ? t('pwa.noGift') : p.outcome === 'cancelled' ? t('pwa.noGiftCancelled') : t('pwa.noGiftSkipped')}
                         </span>
                       )}
                     </td>
@@ -312,21 +314,21 @@ export default function LaunchCampaign() {
         <div className="modal-overlay">
           <div className="modal-card">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>Filters</h3>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>{t('pwa.filters')}</h3>
               {q.playerActiveFilterCount > 0 && (
                 <button
                   onClick={() => { q.setPlayerFilterGifts([]); q.setPlayerFilterSegments([]); }}
                   style={{ background: 'none', border: 'none', padding: 0, color: 'var(--link)', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
-                >Clear all</button>
+                >{t('pwa.clearAll')}</button>
               )}
             </div>
 
-            <FilterGroup title="Gift" options={q.playerGiftOptions} selected={q.playerFilterGifts}
+            <FilterGroup title={t('common.gift')} options={q.playerGiftOptions} selected={q.playerFilterGifts}
               onToggle={(v) => q.setPlayerFilterGifts(toggleValue(q.playerFilterGifts, v))} />
-            <FilterGroup title="Segment" options={q.playerSegmentOptions} selected={q.playerFilterSegments}
+            <FilterGroup title={t('common.segment')} options={q.playerSegmentOptions} selected={q.playerFilterSegments}
               onToggle={(v) => q.setPlayerFilterSegments(toggleValue(q.playerFilterSegments, v))} />
 
-            <Button onClick={() => setPlayerFiltersOpen(false)} style={{ marginTop: 4 }}>Done</Button>
+            <Button onClick={() => setPlayerFiltersOpen(false)} style={{ marginTop: 4 }}>{t('common.done')}</Button>
           </div>
         </div>
       )}

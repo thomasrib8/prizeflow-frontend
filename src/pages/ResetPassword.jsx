@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 
 export default function ResetPassword() {
+  const { t } = useTranslation('admin');
   const { token } = useParams();
   const navigate = useNavigate();
   const [password, setPassword] = useState('');
@@ -14,7 +16,7 @@ export default function ResetPassword() {
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
-    if (password !== confirm) { setError("Passwords don't match."); return; }
+    if (password !== confirm) { setError(t('auth.resetPassword.passwordsDontMatchError')); return; }
     setLoading(true);
     try {
       await api.resetPassword(token, password);
@@ -32,8 +34,8 @@ export default function ResetPassword() {
       <div className="auth-screen">
         <div className="auth-card" style={{ textAlign: 'center' }}>
           <div style={{ fontSize: 40, marginBottom: 14 }}>✅</div>
-          <h1 className="auth-title">Password updated</h1>
-          <p className="auth-subtitle">Redirecting you to sign in…</p>
+          <h1 className="auth-title">{t('settings.information.passwordUpdated')}</h1>
+          <p className="auth-subtitle">{t('auth.resetPassword.redirectingDesc')}</p>
         </div>
       </div>
     );
@@ -46,28 +48,28 @@ export default function ResetPassword() {
           <img src="/logo2.svg" alt="SPARK" style={{ width: 100, height: 100, objectFit: 'contain' }} />
         </div>
 
-        <h1 className="auth-title" style={{ textAlign: 'center' }}>Choose a new password</h1>
+        <h1 className="auth-title" style={{ textAlign: 'center' }}>{t('auth.resetPassword.chooseNewPasswordTitle')}</h1>
 
         {error && <div className="error-banner" style={{ textAlign: 'left' }}>{error}</div>}
 
         <div className="field" style={{ textAlign: 'left' }}>
-          <label>New password</label>
+          <label>{t('settings.information.newPasswordLabel')}</label>
           <input type="password" value={password} onChange={e => setPassword(e.target.value)}
-            placeholder="At least 8 characters" minLength={8} required autoFocus />
+            placeholder={t('settings.information.newPasswordPlaceholder')} minLength={8} required autoFocus />
         </div>
         <div className="field" style={{ textAlign: 'left' }}>
-          <label>Confirm password</label>
+          <label>{t('auth.resetPassword.confirmPasswordLabel')}</label>
           <input type="password" value={confirm} onChange={e => setConfirm(e.target.value)}
-            placeholder="Retype your new password" minLength={8} required />
+            placeholder={t('auth.resetPassword.confirmPasswordPlaceholder')} minLength={8} required />
         </div>
 
         <button className="btn btn-primary" type="submit" disabled={loading}
           style={{ width: '100%', justifyContent: 'center', marginTop: 6 }}>
-          {loading ? 'Saving…' : 'Save new password'}
+          {loading ? t('common.saving') : t('auth.resetPassword.saveNewPasswordBtn')}
         </button>
 
         <p style={{ fontSize: 13, color: '#64748B', marginTop: 16 }}>
-          <Link to="/login">Back to sign in</Link>
+          <Link to="/login">{t('auth.backToSignIn')}</Link>
         </p>
       </form>
     </div>

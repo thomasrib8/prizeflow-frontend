@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
+import { useTranslation } from 'react-i18next';
 import { Button } from './ui';
 
 // Shown from the Dashboard's "Download the app" button. Scanning the QR
 // (or opening the link) takes a sales rep straight to the installable
 // booth shell (LaunchPWA.jsx) at sparkapp360.com/pwa — not the main site.
 export default function DownloadAppModal({ onClose }) {
+  const { t } = useTranslation('admin');
   const [qrDataUrl, setQrDataUrl] = useState(null);
   const pwaUrl = `${window.location.origin}/pwa`;
 
@@ -17,9 +19,9 @@ export default function DownloadAppModal({ onClose }) {
   return (
     <div className="modal-overlay">
       <div className="modal-card" style={{ '--modal-w': '480px', textAlign: 'center' }}>
-        <h3 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 800 }}>Download the app</h3>
+        <h3 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 800 }}>{t('downloadAppModal.title')}</h3>
         <p style={{ margin: '0 0 18px', fontSize: 13, color: '#64748B' }}>
-          Scan this code on your phone to open the sales app, then add it to your home screen.
+          {t('downloadAppModal.subtitle')}
         </p>
 
         {qrDataUrl ? (
@@ -32,30 +34,30 @@ export default function DownloadAppModal({ onClose }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18, textAlign: 'left' }}>
           <div>
             <div style={{ fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#0055F8', marginBottom: 8 }}>
-              iPhone (Safari)
+              {t('downloadAppModal.iphoneTitle')}
             </div>
             <ol style={{ margin: 0, paddingLeft: 20, fontSize: 13, color: '#334155', lineHeight: 1.7 }}>
-              <li>Open the link above in Safari.</li>
-              <li>Tap the Share button <span style={{ fontWeight: 700 }}>⬆︎</span> at the bottom of the screen.</li>
-              <li>Scroll down and tap <span style={{ fontWeight: 700 }}>"Add to Home Screen"</span>.</li>
-              <li>Tap <span style={{ fontWeight: 700 }}>"Add"</span> — the Spark icon appears on your home screen.</li>
+              <li>{t('downloadAppModal.iphoneStep1')}</li>
+              <li>{t('downloadAppModal.iphoneStep2')}</li>
+              <li>{t('downloadAppModal.iphoneStep3Prefix')} <span style={{ fontWeight: 700 }}>{t('downloadAppModal.iphoneStep3Bold')}</span>.</li>
+              <li>{t('downloadAppModal.iphoneStep4Prefix')} <span style={{ fontWeight: 700 }}>{t('downloadAppModal.iphoneStep4Bold')}</span> {t('downloadAppModal.iphoneStep4Suffix')}</li>
             </ol>
           </div>
 
           <div>
             <div style={{ fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#0055F8', marginBottom: 8 }}>
-              Android (Chrome)
+              {t('downloadAppModal.androidTitle')}
             </div>
             <ol style={{ margin: 0, paddingLeft: 20, fontSize: 13, color: '#334155', lineHeight: 1.7 }}>
-              <li>Open the link above in Chrome.</li>
-              <li>Tap the menu <span style={{ fontWeight: 700 }}>⋮</span> in the top-right corner.</li>
-              <li>Tap <span style={{ fontWeight: 700 }}>"Install app"</span> (or "Add to Home screen").</li>
-              <li>Confirm — the Spark icon appears on your home screen.</li>
+              <li>{t('downloadAppModal.androidStep1')}</li>
+              <li>{t('downloadAppModal.androidStep2')}</li>
+              <li>{t('downloadAppModal.androidStep3Prefix')} <span style={{ fontWeight: 700 }}>{t('downloadAppModal.androidStep3Bold')}</span> {t('downloadAppModal.androidStep3Suffix')}</li>
+              <li>{t('downloadAppModal.androidStep4')}</li>
             </ol>
           </div>
         </div>
 
-        <Button variant="secondary" onClick={onClose} style={{ marginTop: 24 }}>Close</Button>
+        <Button variant="secondary" onClick={onClose} style={{ marginTop: 24 }}>{t('common.close')}</Button>
       </div>
     </div>
   );

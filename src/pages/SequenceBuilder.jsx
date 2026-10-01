@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { Card, Button, Badge, EmptyState } from '../components/ui';
 import { useWheelSocket } from '../hooks/useWheelSocket';
@@ -42,6 +43,7 @@ function StepBubbles({ steps, position, active }) {
 }
 
 function SequenceRunModal({ sequence, wheelStatus, agentConnected, status, busyId, onStop, onClose }) {
+  const { t } = useTranslation('admin');
   const posAngle = posToAngle(wheelStatus?.currentPos ?? 0);
   const isRunningThis = !!status?.active && status.sequenceId === sequence.id;
   const steps = isRunningThis ? status.steps : sequence.steps;
@@ -53,8 +55,8 @@ function SequenceRunModal({ sequence, wheelStatus, agentConnected, status, busyI
   // sees the final checked-off bubble before landing back on the library.
   useEffect(() => {
     if (isRunningThis) return undefined;
-    const t = setTimeout(onClose, 900);
-    return () => clearTimeout(t);
+    const timer = setTimeout(onClose, 900);
+    return () => clearTimeout(timer);
   }, [isRunningThis]);
 
   return (
@@ -62,14 +64,14 @@ function SequenceRunModal({ sequence, wheelStatus, agentConnected, status, busyI
       <div className="modal-card" style={{ '--modal-w': '480px', textAlign: 'center' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
           <div style={{ textAlign: 'left' }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#09B2FD', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Sequence</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#09B2FD', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{t('sequenceBuilder.sequenceLabel')}</div>
             <h2 style={{ fontSize: 18, fontWeight: 700, margin: '2px 0 0', color: '#03041A' }}>{sequence.name}</h2>
           </div>
           <button type="button" onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 22, color: '#94A3B8', cursor: 'pointer', lineHeight: 1, padding: 0 }}>×</button>
         </div>
 
         {!agentConnected && (
-          <div className="error-banner" style={{ margin: '10px 0' }}>Wheel agent is not connected.</div>
+          <div className="error-banner" style={{ margin: '10px 0' }}>{t('magic.wheelAgentNotConnected')}</div>
         )}
 
         <div style={{ display: 'flex', justifyContent: 'center', margin: '18px 0' }}>
@@ -78,11 +80,11 @@ function SequenceRunModal({ sequence, wheelStatus, agentConnected, status, busyI
 
         {isRunningThis ? (
           <div style={{ fontSize: 13, fontWeight: 700, color: '#F59E0B', background: '#FFFBEB', padding: '8px 18px', borderRadius: 20, display: 'inline-block', marginBottom: 18 }}>
-            ⟳ Forcing Case {targetIndex + 1} — spin the wheel now ({position + 1}/{steps.length})
+            {t('sequenceBuilder.forcingCaseLabel', { n: targetIndex + 1, position: position + 1, total: steps.length })}
           </div>
         ) : (
           <div style={{ fontSize: 13, fontWeight: 700, color: '#10B981', background: '#ECFDF5', padding: '8px 18px', borderRadius: 20, display: 'inline-block', marginBottom: 18 }}>
-            ✓ Sequence complete — wheel is free
+            {t('sequenceBuilder.sequenceCompleteLabel')}
           </div>
         )}
 
@@ -90,7 +92,7 @@ function SequenceRunModal({ sequence, wheelStatus, agentConnected, status, busyI
 
         <div style={{ marginTop: 26 }}>
           <Button variant="ghost" disabled={!isRunningThis || busyId === 'stop'} onClick={onStop} style={{ color: '#EF4444' }}>
-            {busyId === 'stop' ? 'Stopping…' : 'Stop sequence'}
+            {busyId === 'stop' ? t('sequenceBuilder.stoppingLabel') : t('sequenceBuilder.stopSequenceBtn')}
           </Button>
         </div>
       </div>
@@ -99,9 +101,10 @@ function SequenceRunModal({ sequence, wheelStatus, agentConnected, status, busyI
 }
 
 function LibraryModule({ sequences, status, agentConnected, busyId, onActivate, onStop, onView }) {
-  if (!sequences) return <p className="page-subtitle">Loading…</p>;
+  const { t } = useTranslation('admin');
+  if (!sequences) return <p className="page-subtitle">{t('common.loading')}</p>;
   if (sequences.length === 0) {
-    return <EmptyState title="No sequences yet" description="Build one in the Settings tab first." />;
+    return <EmptyState title={t('sequenceBuilder.noSequencesTitle')} description={t('sequenceBuilder.noSequencesDesc')} />;
   }
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 16, marginTop: 20 }}>
@@ -112,8 +115,8 @@ function LibraryModule({ sequences, status, agentConnected, busyId, onActivate, 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10, marginBottom: seq.description ? 6 : 12 }}>
               <h3 style={{ fontSize: 15, fontWeight: 700, margin: 0, color: '#03041A' }}>{seq.name}</h3>
               {isActive
-                ? <Badge tone="orange">Running ({status.position}/{status.steps.length})</Badge>
-                : <Badge tone="neutral">Ready</Badge>}
+                ? <Badge tone="orange">{t('sequenceBuilder.runningLabel', { position: status.position, total: status.steps.length })}</Badge>
+                : <Badge tone="neutral">{t('sequenceBuilder.readyLabel')}</Badge>}
             </div>
             {seq.description && (
               <p style={{ fontSize: 12, color: '#64748B', margin: '0 0 12px', lineHeight: 1.5 }}>{seq.description}</p>
@@ -132,9 +135,9 @@ function LibraryModule({ sequences, status, agentConnected, busyId, onActivate, 
             <div style={{ display: 'flex', gap: 8 }}>
               {isActive ? (
                 <>
-                  <Button size="sm" variant="ghost" onClick={() => onView(seq)}>View</Button>
+                  <Button size="sm" variant="ghost" onClick={() => onView(seq)}>{t('sequenceBuilder.viewBtn')}</Button>
                   <Button size="sm" variant="ghost" disabled={busyId === 'stop'} onClick={onStop} style={{ color: '#EF4444' }}>
-                    {busyId === 'stop' ? 'Stopping…' : 'Stop'}
+                    {busyId === 'stop' ? t('sequenceBuilder.stoppingLabel') : t('sequenceBuilder.stopBtn')}
                   </Button>
                 </>
               ) : (
@@ -144,7 +147,7 @@ function LibraryModule({ sequences, status, agentConnected, busyId, onActivate, 
                   disabled={busyId === seq.id || !agentConnected || status?.active}
                   onClick={() => onActivate(seq)}
                 >
-                  {busyId === seq.id ? 'Activating…' : 'Activate'}
+                  {busyId === seq.id ? t('sequenceBuilder.activatingLabel') : t('sequenceBuilder.activateBtn')}
                 </Button>
               )}
             </div>
@@ -156,6 +159,7 @@ function LibraryModule({ sequences, status, agentConnected, busyId, onActivate, 
 }
 
 function SettingsModule({ wheelStatus, agentConnected, sequences, busyId, saving, isSeqActive, onSave, onDelete }) {
+  const { t } = useTranslation('admin');
   const [steps, setSteps] = useState([]);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -181,25 +185,25 @@ function SettingsModule({ wheelStatus, agentConnected, sequences, busyId, saving
 
   return (
     <>
-      <Card title="Build a new sequence" className="mt-card">
+      <Card title={t('sequenceBuilder.buildNewTitle')} className="mt-card">
         <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'center' }}>
           <WheelSVG positionAngle={posAngle} size={200} />
           <div style={{ flex: 1, minWidth: 220 }}>
             <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 10px' }}>
-              Spin the wheel by hand, then click Add to append whichever case the cleat lands on.
+              {t('sequenceBuilder.spinInstructions')}
             </p>
             <Button variant="success" onClick={handleAddStep} disabled={!agentConnected}>
-              Add Case {currentCase + 1}
+              {t('sequenceBuilder.addCaseBtn', { n: currentCase + 1 })}
             </Button>
           </div>
         </div>
 
         <div style={{ marginTop: 18 }}>
           <div style={{ fontSize: 12, fontWeight: 600, color: '#64748B', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-            Steps ({steps.length})
+            {t('sequenceBuilder.stepsCountLabel', { count: steps.length })}
           </div>
           {steps.length === 0 ? (
-            <p className="page-subtitle" style={{ margin: 0 }}>No steps added yet.</p>
+            <p className="page-subtitle" style={{ margin: 0 }}>{t('sequenceBuilder.noStepsYet')}</p>
           ) : (
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {steps.map((s, i) => (
@@ -223,13 +227,13 @@ function SettingsModule({ wheelStatus, agentConnected, sequences, busyId, saving
 
         <div style={{ marginTop: 18 }}>
           <input
-            placeholder="Sequence name"
+            placeholder={t('sequenceBuilder.sequenceNamePlaceholder')}
             value={name}
             onChange={(e) => setName(e.target.value)}
             style={{ width: '100%', padding: '10px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 14, marginBottom: 10, boxSizing: 'border-box' }}
           />
           <textarea
-            placeholder="Description (optional)"
+            placeholder={t('sequenceBuilder.descriptionPlaceholder')}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={2}
@@ -239,19 +243,19 @@ function SettingsModule({ wheelStatus, agentConnected, sequences, busyId, saving
 
         <div style={{ marginTop: 12 }}>
           <Button onClick={handleSave} disabled={saving || !name.trim() || steps.length === 0}>
-            {saving ? 'Saving…' : 'Save sequence'}
+            {saving ? t('common.saving') : t('sequenceBuilder.saveSequenceBtn')}
           </Button>
         </div>
       </Card>
 
-      <Card title="Manage sequences" className="mt-card">
+      <Card title={t('sequenceBuilder.manageSequencesTitle')} className="mt-card">
         {!sequences ? (
-          <p className="page-subtitle">Loading…</p>
+          <p className="page-subtitle">{t('common.loading')}</p>
         ) : sequences.length === 0 ? (
-          <EmptyState title="No sequences saved yet" />
+          <EmptyState title={t('sequenceBuilder.noSequencesSavedTitle')} />
         ) : (
           <table className="data-table">
-            <thead><tr><th>Name</th><th>Steps</th><th></th></tr></thead>
+            <thead><tr><th>{t('history.tableName')}</th><th>{t('sequenceBuilder.tableSteps')}</th><th></th></tr></thead>
             <tbody>
               {sequences.map((seq) => (
                 <tr key={seq.id}>
@@ -270,7 +274,7 @@ function SettingsModule({ wheelStatus, agentConnected, sequences, busyId, saving
                       onClick={() => onDelete(seq.id)}
                       style={{ color: '#EF4444' }}
                     >
-                      {busyId === seq.id ? 'Deleting…' : 'Delete'}
+                      {busyId === seq.id ? t('sequenceBuilder.deletingLabel') : t('sequenceBuilder.deleteBtn')}
                     </Button>
                   </td>
                 </tr>
@@ -284,6 +288,7 @@ function SettingsModule({ wheelStatus, agentConnected, sequences, busyId, saving
 }
 
 export default function SequenceBuilder() {
+  const { t } = useTranslation('admin');
   const { wheelStatus, agentConnected } = useWheelSocket();
   const [module, setModule] = useState('library');
   const [sequences, setSequences] = useState(null);
@@ -377,20 +382,20 @@ export default function SequenceBuilder() {
     <div>
       <div className="page-header">
         <div>
-          <h1 className="page-title">Sequence</h1>
-          <p className="page-subtitle">Build a custom run order by hand, then activate it on the wheel</p>
+          <h1 className="page-title">{t('nav.sequence')}</h1>
+          <p className="page-subtitle">{t('sequenceBuilder.pageSubtitle')}</p>
         </div>
-        <Badge tone={isForced ? 'orange' : 'green'}>{isForced ? 'FORCE' : 'FREE'}</Badge>
+        <Badge tone={isForced ? 'orange' : 'green'}>{isForced ? t('magic.forceLabel') : t('magic.freeLabel')}</Badge>
       </div>
 
       {!agentConnected && (
-        <div className="error-banner" style={{ marginBottom: 12 }}>Wheel agent is not connected.</div>
+        <div className="error-banner" style={{ marginBottom: 12 }}>{t('magic.wheelAgentNotConnected')}</div>
       )}
       {error && <div className="error-banner" style={{ marginBottom: 12 }}>{error}</div>}
 
       <div className="tabs">
-        <button className={`tab${module === 'library' ? ' active' : ''}`} onClick={() => setModule('library')}>Library</button>
-        <button className={`tab${module === 'settings' ? ' active' : ''}`} onClick={() => setModule('settings')}>Settings</button>
+        <button className={`tab${module === 'library' ? ' active' : ''}`} onClick={() => setModule('library')}>{t('sequenceBuilder.libraryTab')}</button>
+        <button className={`tab${module === 'settings' ? ' active' : ''}`} onClick={() => setModule('settings')}>{t('sequenceBuilder.settingsTab')}</button>
       </div>
 
       {module === 'library' && (

@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 const DOT_COLORS = { green: '#10B981', orange: '#F59E0B', red: '#EF4444', gray: '#94A3B8' };
 
 function Dot({ color }) {
@@ -19,15 +21,15 @@ function Row({ tone, title, children }) {
   );
 }
 
-function since(iso) {
+function since(iso, t) {
   if (!iso) return null;
   const ms = Date.now() - new Date(iso).getTime();
   const s = Math.floor(ms / 1000);
-  if (s < 60) return `${s}s`;
+  if (s < 60) return t('wheelDiagnostics.secondsUnit', { n: s });
   const m = Math.floor(s / 60);
-  if (m < 60) return `${m} min`;
+  if (m < 60) return t('wheelDiagnostics.minutesUnit', { n: m });
   const h = Math.floor(m / 60);
-  return `${h} h ${m % 60} min`;
+  return t('wheelDiagnostics.hoursMinutesUnit', { h, m: m % 60 });
 }
 
 function wifiTone(pct) {
@@ -45,19 +47,20 @@ function wifiTone(pct) {
 /// and the admin's read-only UserDetail fiche (which only ever has a polled
 /// snapshot of the same shared wheel, via GET /users/:id/overview).
 export default function WheelDiagnosticsRows({ diagnostics }) {
+  const { t } = useTranslation('admin');
   const wheelLocal = diagnostics?.wheelLocal;
   const wifi = diagnostics?.wifiSignal;
   const identity = diagnostics?.wheelIdentity;
 
   return (
     <>
-      <Row tone={wheelLocal?.connected === true ? 'green' : wheelLocal?.connected === false ? 'red' : 'gray'} title="Agent ↔ Wheel (local on the Pi)">
-        {wheelLocal?.connected === true && 'Connected'}
-        {wheelLocal?.connected === false && 'Disconnected'}
-        {(wheelLocal?.connected === null || wheelLocal?.connected === undefined) && 'No information received yet'}
+      <Row tone={wheelLocal?.connected === true ? 'green' : wheelLocal?.connected === false ? 'red' : 'gray'} title={t('wheelDiagnostics.agentWheelTitle')}>
+        {wheelLocal?.connected === true && t('appHealth.connectedState')}
+        {wheelLocal?.connected === false && t('emailQuotaTable.disconnectedState')}
+        {(wheelLocal?.connected === null || wheelLocal?.connected === undefined) && t('wheelDiagnostics.noInfoYet')}
       </Row>
 
-      <Row tone={wifiTone(wifi?.percent)} title="Pi wifi signal">
+      <Row tone={wifiTone(wifi?.percent)} title={t('wheelDiagnostics.piWifiSignalTitle')}>
         {wifi?.percent !== null && wifi?.percent !== undefined ? (
           <span>
             {wifi.percent}%
@@ -71,16 +74,16 @@ export default function WheelDiagnosticsRows({ diagnostics }) {
               ))}
             </span>
           </span>
-        ) : 'No information received yet'}
+        ) : t('wheelDiagnostics.noInfoYet')}
       </Row>
 
       {identity && (identity.modelNumber || identity.serialNumber || identity.securityKey) && (
         <div style={{ padding: '12px 0', borderTop: '1px solid #F1F5F9', marginTop: 4 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: '#03041A', marginBottom: 6 }}>Wheel identity</div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: '#03041A', marginBottom: 6 }}>{t('wheelDiagnostics.wheelIdentityTitle')}</div>
           <div style={{ fontSize: 12, color: '#64748B', lineHeight: 1.8 }}>
-            {identity.modelNumber && <div>Model Number: <strong style={{ color: '#03041A' }}>{identity.modelNumber}</strong></div>}
-            {identity.serialNumber && <div>Serial Number: <strong style={{ color: '#03041A' }}>{identity.serialNumber}</strong></div>}
-            {identity.securityKey && <div>Security Key: <strong style={{ color: '#03041A' }}>{identity.securityKey}</strong></div>}
+            {identity.modelNumber && <div>{t('wheelDiagnostics.modelNumberLabel')}: <strong style={{ color: '#03041A' }}>{identity.modelNumber}</strong></div>}
+            {identity.serialNumber && <div>{t('wheelDiagnostics.serialNumberLabel')}: <strong style={{ color: '#03041A' }}>{identity.serialNumber}</strong></div>}
+            {identity.securityKey && <div>{t('wheelDiagnostics.securityKeyLabel')}: <strong style={{ color: '#03041A' }}>{identity.securityKey}</strong></div>}
           </div>
         </div>
       )}

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from './ui';
 
 // Renders the last AI analysis of a prospect's note (services/salesAssistant)
@@ -9,6 +10,7 @@ import { Button } from './ui';
 // backend and updates its own field/segment/tag/rating state once a
 // proposal is accepted.
 export default function AISuggestionsPanel({ suggestions, analyzedNote, currentNote, analyzing, onAnalyze, onApply, onDismiss }) {
+  const { t } = useTranslation('admin');
   const [busyId, setBusyId] = useState(null);
 
   const stale = !!suggestions && analyzedNote != null && currentNote.trim() !== (analyzedNote || '').trim();
@@ -45,28 +47,28 @@ export default function AISuggestionsPanel({ suggestions, analyzedNote, currentN
   return (
     <div style={{ marginTop: 16, padding: 14, borderRadius: 12, background: '#F5F3FF', border: '1px solid #DDD6FE' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, gap: 10 }}>
-        <div style={{ fontSize: 13, fontWeight: 800, color: '#5B21B6' }}>✨ AI analysis</div>
+        <div style={{ fontSize: 13, fontWeight: 800, color: '#5B21B6' }}>{t('aiSuggestionsPanel.title')}</div>
         {!analyzing && (
           <button
             type="button"
             onClick={onAnalyze}
             style={{ background: 'none', border: 'none', padding: 0, fontSize: 12, color: '#5B21B6', textDecoration: 'underline', cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 }}
           >
-            {neverAnalyzed ? 'Analyze with AI' : 'Re-analyze'}
+            {neverAnalyzed ? t('aiSuggestionsPanel.analyzeLink') : t('aiSuggestionsPanel.reanalyzeLink')}
           </button>
         )}
       </div>
 
-      {analyzing && <div style={{ fontSize: 13, color: '#5B21B6' }}>Analyzing…</div>}
+      {analyzing && <div style={{ fontSize: 13, color: '#5B21B6' }}>{t('aiSuggestionsPanel.analyzing')}</div>}
 
       {!analyzing && stale && (
         <div style={{ fontSize: 12, color: '#B45309', marginBottom: 10 }}>
-          The note has changed since this analysis — click Re-analyze above for an up-to-date result.
+          {t('aiSuggestionsPanel.staleWarning')}
         </div>
       )}
 
       {!analyzing && neverAnalyzed && (
-        <div style={{ fontSize: 12, color: '#64748B' }}>No analysis yet — click "Analyze with AI" above.</div>
+        <div style={{ fontSize: 12, color: '#64748B' }}>{t('aiSuggestionsPanel.neverAnalyzed')}</div>
       )}
 
       {!analyzing && suggestions && (
@@ -79,20 +81,21 @@ export default function AISuggestionsPanel({ suggestions, analyzedNote, currentN
                 <SuggestionItem
                   key={item.id}
                   item={item}
+                  t={t}
                   busy={busyId === item.id}
                   onApply={() => handle(onApply, item.id)}
                   onDismiss={() => handle(onDismiss, item.id)}
                 />
               ))}
               {pendingItems.length > 1 && (
-                <Button type="button" size="sm" onClick={applyAll}>Apply all</Button>
+                <Button type="button" size="sm" onClick={applyAll}>{t('aiSuggestionsPanel.applyAllBtn')}</Button>
               )}
             </div>
           )}
 
           {suggestions.missingInfo?.length > 0 && (
             <div>
-              <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#5B21B6', marginBottom: 4 }}>Worth asking</div>
+              <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#5B21B6', marginBottom: 4 }}>{t('aiSuggestionsPanel.worthAskingTitle')}</div>
               <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: '#334155', lineHeight: 1.6 }}>
                 {suggestions.missingInfo.map((q, i) => <li key={i}>{q}</li>)}
               </ul>
@@ -101,7 +104,7 @@ export default function AISuggestionsPanel({ suggestions, analyzedNote, currentN
 
           {suggestions.nextActions?.length > 0 && (
             <div>
-              <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#5B21B6', marginBottom: 4 }}>Suggested next steps</div>
+              <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#5B21B6', marginBottom: 4 }}>{t('aiSuggestionsPanel.nextStepsTitle')}</div>
               {suggestions.nextActions.map((a, i) => (
                 <div key={i} style={{ fontSize: 12, color: '#334155', marginBottom: 2, lineHeight: 1.5 }}>
                   <strong>{a.title}</strong>{a.description ? ` — ${a.description}` : ''}
@@ -115,22 +118,22 @@ export default function AISuggestionsPanel({ suggestions, analyzedNote, currentN
   );
 }
 
-function itemLabel(item) {
+function itemLabel(item, t) {
   if (item.kind === 'field') return `${item.fieldLabel}: ${item.value}`;
   if (item.kind === 'segment') return `${item.categoryName}: ${item.optionLabel}`;
-  if (item.kind === 'rating') return `Lead rating: ${'★'.repeat(item.value)}${'☆'.repeat(3 - item.value)}`;
-  if (item.kind === 'tag') return `New tag: ${item.tag}`;
+  if (item.kind === 'rating') return t('aiSuggestionsPanel.leadRatingLabel', { stars: '★'.repeat(item.value) + '☆'.repeat(3 - item.value) });
+  if (item.kind === 'tag') return t('aiSuggestionsPanel.newTagLabel', { tag: item.tag });
   return '';
 }
 
-function SuggestionItem({ item, busy, onApply, onDismiss }) {
+function SuggestionItem({ item, t, busy, onApply, onDismiss }) {
   return (
     <div style={{ background: 'white', borderRadius: 8, padding: 10, border: '1px solid #EDE9FE' }}>
-      <div style={{ fontSize: 13, fontWeight: 700, color: '#03041A' }}>{itemLabel(item)}</div>
+      <div style={{ fontSize: 13, fontWeight: 700, color: '#03041A' }}>{itemLabel(item, t)}</div>
       {item.reasoning && <div style={{ fontSize: 12, color: '#64748B', marginTop: 2, lineHeight: 1.4 }}>{item.reasoning}</div>}
       <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-        <Button type="button" size="sm" disabled={busy} onClick={onApply}>{busy ? '…' : 'Accept'}</Button>
-        <Button type="button" size="sm" variant="secondary" disabled={busy} onClick={onDismiss}>Ignore</Button>
+        <Button type="button" size="sm" disabled={busy} onClick={onApply}>{busy ? '…' : t('aiSuggestionsPanel.acceptBtn')}</Button>
+        <Button type="button" size="sm" variant="secondary" disabled={busy} onClick={onDismiss}>{t('aiSuggestionsPanel.ignoreBtn')}</Button>
       </div>
     </div>
   );

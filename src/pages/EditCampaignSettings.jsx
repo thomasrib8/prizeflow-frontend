@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { Card, Button } from '../components/ui';
 import SegmentationBuilder from '../components/SegmentationBuilder';
@@ -14,6 +15,7 @@ import { SALES_FIELD_TYPES, GUEST_FIELD_TYPES } from '../components/fieldTypes';
 // name/label snapshot (see db/index.js), so changes here never rewrite or
 // orphan anything already recorded.
 export default function EditCampaignSettings() {
+  const { t } = useTranslation('admin');
   const { id } = useParams();
   const navigate = useNavigate();
   const [campaign, setCampaign] = useState(null);
@@ -45,7 +47,7 @@ export default function EditCampaignSettings() {
     try {
       await api.updateCampaignSegmentCategories(id, cleanCategories);
       await api.updateCampaignFields(id, cleanFields);
-      setSavedMsg('Saved');
+      setSavedMsg(t('common.saved'));
       setTimeout(() => setSavedMsg(''), 2000);
     } catch (e) {
       setError(e.message);
@@ -54,48 +56,47 @@ export default function EditCampaignSettings() {
     }
   }
 
-  if (!campaign) return <p className="page-subtitle">{error || 'Loading…'}</p>;
+  if (!campaign) return <p className="page-subtitle">{error || t('common.loading')}</p>;
 
   return (
     <div>
       <div className="page-header">
         <div>
-          <h1 className="page-title">Segmentation & forms — {campaign.name}</h1>
-          <p className="page-subtitle">Customer segmentation, sales fields, and the guest-facing form's custom fields.</p>
+          <h1 className="page-title">{t('editCampaignSettings.pageTitle', { name: campaign.name })}</h1>
+          <p className="page-subtitle">{t('editCampaignSettings.pageSubtitle')}</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           {savedMsg && <span style={{ fontSize: 12, color: '#10B981', fontWeight: 600 }}>{savedMsg}</span>}
-          <Button disabled={saving} onClick={handleSave}>{saving ? 'Saving…' : 'Save changes'}</Button>
-          <Button variant="secondary" onClick={() => navigate(`/campaigns/${id}`)}>Back</Button>
+          <Button disabled={saving} onClick={handleSave}>{saving ? t('common.saving') : t('editCampaignSettings.saveChangesBtn')}</Button>
+          <Button variant="secondary" onClick={() => navigate(`/campaigns/${id}`)}>{t('editCampaignSettings.backBtn')}</Button>
         </div>
       </div>
       {error && <div className="error-banner">{error}</div>}
 
-      <Card title="Segmentation client" className="mt-card">
+      <Card title={t('campaignForm.segmentationTitle')} className="mt-card">
         <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px' }}>
-          Define as many categories as you need, each with its own set of options. Existing notes keep whatever
-          category/option names they were tagged with even after a rename here.
+          {t('editCampaignSettings.segmentationDesc')}
         </p>
         <SegmentationBuilder categories={segmentCategories} onChange={setSegmentCategories} />
       </Card>
 
-      <Card title="Autres informations" className="mt-card">
+      <Card title={t('campaignForm.salesFieldsTitle')} className="mt-card">
         <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px' }}>
-          Extra fields your sales team can fill in on a guest's form (Launch page / CRM tab) — never required.
+          {t('editCampaignSettings.salesFieldsDesc')}
         </p>
         <CampaignFieldsBuilder fields={salesFields} onChange={setSalesFields} fieldTypes={SALES_FIELD_TYPES} />
       </Card>
 
-      <Card title="Formulaire prospect" className="mt-card">
+      <Card title={t('campaignForm.guestFormTitle')} className="mt-card">
         <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px' }}>
-          What the guest fills in before spinning, beyond the always-required first name / last name / email.
+          {t('editCampaignSettings.guestFormDesc')}
         </p>
         <CampaignFieldsBuilder fields={guestFields} onChange={setGuestFields} fieldTypes={GUEST_FIELD_TYPES} showRequired />
       </Card>
 
       <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
-        <Button disabled={saving} onClick={handleSave}>{saving ? 'Saving…' : 'Save changes'}</Button>
-        <Button variant="secondary" onClick={() => navigate(`/campaigns/${id}`)}>Back</Button>
+        <Button disabled={saving} onClick={handleSave}>{saving ? t('common.saving') : t('editCampaignSettings.saveChangesBtn')}</Button>
+        <Button variant="secondary" onClick={() => navigate(`/campaigns/${id}`)}>{t('editCampaignSettings.backBtn')}</Button>
       </div>
     </div>
   );

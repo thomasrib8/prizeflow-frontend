@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, MiniBar } from './ui';
 import WheelSVG from './WheelSVG';
 import { SLOT_COLORS } from './slotColors';
@@ -15,6 +16,7 @@ import { CASE_COUNT, isGiftReady } from './giftPlanning';
 // unplaced, ready gift also has a "Place in case" select as a non-drag way
 // to do the same thing.
 export default function WheelGiftPlanner({ gifts, setGifts, wheelProps, wheelCaption, headerAction }) {
+  const { t } = useTranslation('admin');
   const giftsRef = useRef(gifts);
   giftsRef.current = gifts;
   const [drag, setDrag] = useState(null); // { id, name, x, y, over }
@@ -26,8 +28,8 @@ export default function WheelGiftPlanner({ gifts, setGifts, wheelProps, wheelCap
 
   const sectionStyles = giftByCase.map((g, c) => (
     g
-      ? { fill: SLOT_COLORS[c], title: `Case ${c + 1} — ${g.giftName} (stock ${Number(g.stock) || 0})` }
-      : { title: `Case ${c + 1} — empty` }
+      ? { fill: SLOT_COLORS[c], title: t('wheelGiftPlanner.caseGiftTitle', { n: c + 1, name: g.giftName, stock: Number(g.stock) || 0 }) }
+      : { title: t('wheelGiftPlanner.emptyCaseTitle', { n: c + 1 }) }
   ));
 
   function updateGift(id, field, value) {
@@ -85,7 +87,7 @@ export default function WheelGiftPlanner({ gifts, setGifts, wheelProps, wheelCap
   return (
     <div className="planner-layout">
       <div className="planner-wheel">
-        <Card title="Your wheel">
+        <Card title={t('wheelGiftPlanner.yourWheelTitle')}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
             <WheelSVG
               size={300}
@@ -95,7 +97,7 @@ export default function WheelGiftPlanner({ gifts, setGifts, wheelProps, wheelCap
             />
             <div style={{ width: '100%' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, fontWeight: 700, color: placedCount === CASE_COUNT ? '#059669' : '#334155', marginBottom: 6 }}>
-                <span>{placedCount === CASE_COUNT ? '✓ Wheel complete' : 'Cases filled'}</span>
+                <span>{placedCount === CASE_COUNT ? t('wheelGiftPlanner.wheelCompleteLabel') : t('wheelGiftPlanner.casesFilledLabel')}</span>
                 <span>{placedCount} / {CASE_COUNT}</span>
               </div>
               <MiniBar pct={(placedCount / CASE_COUNT) * 100} color={placedCount === CASE_COUNT ? '#10B981' : '#09B2FD'} />
@@ -105,10 +107,9 @@ export default function WheelGiftPlanner({ gifts, setGifts, wheelProps, wheelCap
         </Card>
       </div>
 
-      <Card title="Gifts" action={<div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>{headerAction}<span className="badge badge-blue">Total stock: {totalStock}</span></div>}>
+      <Card title={t('editCampaign.giftsTitle')} action={<div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>{headerAction}<span className="badge badge-blue">{t('wheelGiftPlanner.totalStockLabel', { n: totalStock })}</span></div>}>
         <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 12px' }}>
-          Define your 12 gifts, then <b>drag each one onto a case of the wheel</b>. A gift turns green once placed and can't be placed twice.
-          "Redeem" chooses how the guest confirms their gift: <b>QR</b> links straight to it, <b>Code</b> emails an 8-character code to type in on the Rewards page, <b>Voucher</b> just tells the guest to see a staff member for their physical voucher, <b>Perso</b> sends this gift's own custom email (choose what it delivers below).
+          {t('wheelGiftPlanner.instructionsIntro')} <b>{t('wheelGiftPlanner.instructionsDragBold')}</b>{t('wheelGiftPlanner.instructionsRedeemIntro')} <b>QR</b> {t('wheelGiftPlanner.instructionsQrDesc')} <b>Code</b> {t('wheelGiftPlanner.instructionsCodeDesc')} <b>Voucher</b> {t('wheelGiftPlanner.instructionsVoucherDesc')} <b>Perso</b> {t('wheelGiftPlanner.instructionsPersoDesc')}
         </p>
         <div className="gift-list">
           {gifts.map((g) => {
@@ -124,14 +125,14 @@ export default function WheelGiftPlanner({ gifts, setGifts, wheelProps, wheelCap
                     onPointerDown={(e) => startDrag(e, g)}
                     role="button"
                     aria-disabled={!draggable}
-                    title={placed ? `Placed on case ${g.caseIndex + 1}` : ready ? 'Drag me onto a case of the wheel' : 'Add a name and a stock to place this gift'}
+                    title={placed ? t('wheelGiftPlanner.placedOnCaseTitle', { n: g.caseIndex + 1 }) : ready ? t('wheelGiftPlanner.dragMeHint') : t('wheelGiftPlanner.addNameStockHint')}
                     style={placed ? { background: SLOT_COLORS[g.caseIndex], color: 'white' } : undefined}
                   >
-                    {placed ? `✓ Case ${g.caseIndex + 1}` : draggable ? '⠿ Drag' : `Gift ${g.id + 1}`}
+                    {placed ? t('wheelGiftPlanner.placedCaseBadge', { n: g.caseIndex + 1 }) : draggable ? t('wheelGiftPlanner.dragBadge') : t('wheelGiftPlanner.giftNumberBadge', { n: g.id + 1 })}
                   </div>
-                  <input placeholder="Gift name" value={g.giftName} onChange={(e) => updateGift(g.id, 'giftName', e.target.value)} />
-                  <input type="number" min="0" placeholder="Stock" value={g.stock || ''} onChange={(e) => updateGift(g.id, 'stock', e.target.value)} />
-                  <select value={g.redeemMethod} title="How the guest confirms their gift" onChange={(e) => updateGift(g.id, 'redeemMethod', e.target.value)}>
+                  <input placeholder={t('editCampaign.giftNamePlaceholder')} value={g.giftName} onChange={(e) => updateGift(g.id, 'giftName', e.target.value)} />
+                  <input type="number" min="0" placeholder={t('wheelGiftPlanner.stockPlaceholder')} value={g.stock || ''} onChange={(e) => updateGift(g.id, 'stock', e.target.value)} />
+                  <select value={g.redeemMethod} title={t('editCampaign.redeemMethodTitle')} onChange={(e) => updateGift(g.id, 'redeemMethod', e.target.value)}>
                     <option value="qr">QR</option>
                     <option value="code">Code</option>
                     <option value="voucher">Voucher</option>
@@ -143,24 +144,24 @@ export default function WheelGiftPlanner({ gifts, setGifts, wheelProps, wheelCap
                 <div className="gift-place-row">
                   {placed ? (
                     <>
-                      <span style={{ fontSize: 12, color: '#047857', fontWeight: 600 }}>Placed on case {g.caseIndex + 1}</span>
-                      <button type="button" className="gift-link-btn" onClick={() => unplace(g.id)}>Remove from wheel</button>
+                      <span style={{ fontSize: 12, color: '#047857', fontWeight: 600 }}>{t('wheelGiftPlanner.placedOnCaseLabel', { n: g.caseIndex + 1 })}</span>
+                      <button type="button" className="gift-link-btn" onClick={() => unplace(g.id)}>{t('wheelGiftPlanner.removeFromWheelBtn')}</button>
                     </>
                   ) : ready ? (
                     <>
-                      <span style={{ fontSize: 12, color: '#64748B' }}>Drag it onto the wheel, or</span>
+                      <span style={{ fontSize: 12, color: '#64748B' }}>{t('wheelGiftPlanner.dragOrLabel')}</span>
                       <select
-                        aria-label={`Place gift ${g.id + 1} in a case`}
+                        aria-label={t('wheelGiftPlanner.placeInCaseAriaLabel', { n: g.id + 1 })}
                         value=""
                         onChange={(e) => { if (e.target.value !== '') place(g.id, Number(e.target.value)); }}
                         style={{ padding: '4px 8px', border: '1px solid #E2E8F0', borderRadius: 6, fontSize: 12, fontFamily: 'inherit' }}
                       >
-                        <option value="">place in case…</option>
-                        {freeCases.map((c) => <option key={c} value={c}>Case {c + 1}</option>)}
+                        <option value="">{t('wheelGiftPlanner.placeInCasePlaceholder')}</option>
+                        {freeCases.map((c) => <option key={c} value={c}>{t('dashboard.caseLabel', { n: c + 1 })}</option>)}
                       </select>
                     </>
                   ) : (
-                    <span style={{ fontSize: 12, color: '#94A3B8' }}>Add a name and a stock to be able to place this gift.</span>
+                    <span style={{ fontSize: 12, color: '#94A3B8' }}>{t('wheelGiftPlanner.addNameStockFullHint')}</span>
                   )}
                 </div>
 
@@ -168,34 +169,34 @@ export default function WheelGiftPlanner({ gifts, setGifts, wheelProps, wheelCap
                   <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 8, padding: 12, marginTop: 10 }}>
                     <div style={{ display: 'flex', gap: 10, marginBottom: 8, flexWrap: 'wrap' }}>
                       <div className="field" style={{ margin: 0, flex: '0 0 180px' }}>
-                        <label style={{ fontSize: 11 }}>Delivers</label>
+                        <label style={{ fontSize: 11 }}>{t('editCampaign.deliversLabel')}</label>
                         <select value={g.persoDelivery} onChange={(e) => updateGift(g.id, 'persoDelivery', e.target.value)}>
-                          <option value="code">A code</option>
-                          <option value="qr">A QR</option>
-                          <option value="text">Just text</option>
+                          <option value="code">{t('editCampaign.deliversCode')}</option>
+                          <option value="qr">{t('editCampaign.deliversQr')}</option>
+                          <option value="text">{t('editCampaign.deliversText')}</option>
                         </select>
                       </div>
                       <div className="field" style={{ margin: 0, flex: '1 1 260px' }}>
-                        <label style={{ fontSize: 11 }}>Subject</label>
-                        <input placeholder="e.g. You won a free coffee!" value={g.persoSubject} onChange={(e) => updateGift(g.id, 'persoSubject', e.target.value)} />
+                        <label style={{ fontSize: 11 }}>{t('settings.emailTemplates.subjectLabel')}</label>
+                        <input placeholder={t('editCampaign.subjectPlaceholder')} value={g.persoSubject} onChange={(e) => updateGift(g.id, 'persoSubject', e.target.value)} />
                       </div>
                     </div>
                     <div className="field" style={{ margin: 0 }}>
                       <label style={{ fontSize: 11 }}>
-                        Message ({'{{firstName}}'} / {'{{giftName}}'}{g.persoDelivery === 'code' ? ' / {{code}}' : ''} available)
+                        {t('editCampaign.messageLabel', { vars: `{{firstName}} / {{giftName}}${g.persoDelivery === 'code' ? ' / {{code}}' : ''}` })}
                       </label>
-                      <textarea rows={2} placeholder="Custom message shown in the email…" value={g.persoBody} onChange={(e) => updateGift(g.id, 'persoBody', e.target.value)} style={{ width: '100%', fontFamily: 'inherit' }} />
+                      <textarea rows={2} placeholder={t('editCampaign.messagePlaceholder')} value={g.persoBody} onChange={(e) => updateGift(g.id, 'persoBody', e.target.value)} style={{ width: '100%', fontFamily: 'inherit' }} />
                       {g.persoDelivery === 'code' && (
                         <p style={{ fontSize: 11, color: '#94A3B8', margin: '4px 0 0' }}>
-                          The code, QR and redemption instructions are always added automatically below your message — no need to insert {'{{code}}'} yourself unless you also want to mention it in your own sentence.
+                          {t('editCampaign.codeAutoAddedNote', { code: '{{code}}' })}
                         </p>
                       )}
                     </div>
                     <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, cursor: 'pointer' }}>
                       <input type="checkbox" checked={!!g.persoAutoDistribute} onChange={(e) => updateGift(g.id, 'persoAutoDistribute', e.target.checked)} />
                       <span style={{ fontSize: 12, color: '#334155' }}>
-                        Mark this gift as automatically distributed
-                        <span style={{ display: 'block', fontSize: 11, color: '#94A3B8' }}>Skips manual confirmation in Rewards — use only when there's nothing to hand over in person.</span>
+                        {t('editCampaign.autoDistributeLabel')}
+                        <span style={{ display: 'block', fontSize: 11, color: '#94A3B8' }}>{t('editCampaign.autoDistributeDesc')}</span>
                       </span>
                     </label>
                   </div>

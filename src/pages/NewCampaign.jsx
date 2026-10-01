@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { Card, Button } from '../components/ui';
 import { useAdmin } from '../hooks/useAdmin';
@@ -18,21 +19,16 @@ import { SALES_FIELD_TYPES, GUEST_FIELD_TYPES } from '../components/fieldTypes';
 const EMPTY_GIFTS = Array.from({ length: CASE_COUNT }, (_, i) => ({ id: i, caseIndex: null, giftName: '', stock: 0, redeemMethod: 'qr', persoDelivery: 'qr', persoSubject: '', persoBody: '', persoAutoDistribute: false }));
 // The language the *guest* sees throughout the play flow (form, queue,
 // wheel, result screen, reward email) — independent of the admin panel's own
-// language, which stays English for now (see the "Multilingue" plan's
-// Phase 2). Defaults to English, matching campaigns.language's DB default,
-// so a campaign an admin never touches this field for looks exactly like it
-// always has.
+// per-account language (users.language). Defaults to English, matching
+// campaigns.language's DB default, so a campaign an admin never touches this
+// field for looks exactly like it always has.
 const LANGUAGE_OPTIONS = [
   { value: 'en', label: 'English' },
   { value: 'fr', label: 'Français' },
   { value: 'es', label: 'Español' },
   { value: 'de', label: 'Deutsch' },
 ];
-const STEPS = [
-  { n: 1, label: 'Gifts' },
-  { n: 2, label: 'Segmentation & sales form' },
-  { n: 3, label: 'Guest form' },
-];
+const STEP_TKEYS = { 1: 'step1Label', 2: 'step2Label', 3: 'step3Label' };
 
 // Three-step campaign creation wizard: (1) gifts + basic details, same as
 // before, (2) customer segmentation categories + the sales rep's own
@@ -41,6 +37,8 @@ const STEPS = [
 // (GuestFlowScreen.jsx). Nothing is created until step 3's final submit —
 // all three steps' state lives here and is sent together in one POST.
 export default function NewCampaign() {
+  const { t } = useTranslation('admin');
+  const STEPS = [1, 2, 3].map((n) => ({ n, label: t(`newCampaign.${STEP_TKEYS[n]}`) }));
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const fromCampaignId = searchParams.get('from');
@@ -91,7 +89,7 @@ export default function NewCampaign() {
   useEffect(() => {
     if (!fromCampaignId) return;
     api.getCampaign(fromCampaignId).then((source) => {
-      setName(`Copy of ${source.name}`);
+      setName(t('newCampaign.copyOfPrefix', { name: source.name }));
       applySlotConfig(source.slots.map((s) => ({
         slotIndex: s.slot_index,
         giftName: s.gift_name,
@@ -145,14 +143,14 @@ export default function NewCampaign() {
 
   async function handleSaveTemplate() {
     const configured = gifts.filter((g) => g.giftName.trim() && g.caseIndex !== null);
-    if (configured.length === 0) { setError('Place at least one named gift on the wheel before saving a template.'); return; }
-    const templateName = window.prompt('Name this template:');
+    if (configured.length === 0) { setError(t('newCampaign.placeGiftBeforeTemplateError')); return; }
+    const templateName = window.prompt(t('newCampaign.nameTemplatePrompt'));
     if (!templateName) return;
     setSavingTemplate(true);
     try {
       await api.saveCampaignTemplate(templateName, configured.map((g) => ({ slotIndex: g.caseIndex, giftName: g.giftName })));
       setTemplates(await api.listCampaignTemplates());
-      setTemplateMsg('Template saved');
+      setTemplateMsg(t('newCampaign.templateSavedMsg'));
       setTimeout(() => setTemplateMsg(''), 2000);
     } catch (err) {
       setError(err.message);
@@ -162,13 +160,13 @@ export default function NewCampaign() {
   }
 
   function validateStep1() {
-    if (!name.trim()) return 'Campaign name is required';
+    if (!name.trim()) return t('newCampaign.campaignNameRequiredError');
     const placed = gifts.filter((g) => g.caseIndex !== null);
-    if (placed.length < CASE_COUNT) return `Place all ${CASE_COUNT} gifts on the wheel to continue (${placed.length}/${CASE_COUNT} so far).`;
+    if (placed.length < CASE_COUNT) return t('newCampaign.placeAllGiftsError', { count: CASE_COUNT, placed: placed.length });
     for (const g of placed) {
-      if (!isGiftReady(g)) return `Case ${g.caseIndex + 1}: the gift needs a name and a stock above 0`;
+      if (!isGiftReady(g)) return t('newCampaign.giftNeedsNameStockError', { n: g.caseIndex + 1 });
       if (g.redeemMethod === 'perso' && (!g.persoSubject.trim() || !g.persoBody.trim())) {
-        return `Case ${g.caseIndex + 1}: a Perso gift needs both a subject and a message`;
+        return t('newCampaign.persoNeedsSubjectBodyError', { n: g.caseIndex + 1 });
       }
     }
     return '';
@@ -188,11 +186,11 @@ export default function NewCampaign() {
     const step1Error = validateStep1();
     if (step1Error) { setError(step1Error); setStep(1); return; }
     for (const cat of segmentCategories) {
-      if (!cat.name.trim()) { setError('Every segmentation category needs a name'); setStep(2); return; }
-      if ((cat.options || []).length === 0) { setError(`Category "${cat.name}" needs at least one option`); setStep(2); return; }
+      if (!cat.name.trim()) { setError(t('newCampaign.categoryNeedsNameError')); setStep(2); return; }
+      if ((cat.options || []).length === 0) { setError(t('newCampaign.categoryNeedsOptionError', { name: cat.name })); setStep(2); return; }
     }
     for (const f of [...salesFields, ...guestFields]) {
-      if (!f.label.trim()) { setError('Every custom field needs a label'); return; }
+      if (!f.label.trim()) { setError(t('newCampaign.fieldNeedsLabelError')); return; }
     }
     setError('');
     setSaving(true);
@@ -225,8 +223,8 @@ export default function NewCampaign() {
     <div>
       <div className="page-header">
         <div>
-          <h1 className="page-title">New campaign</h1>
-          <p className="page-subtitle">Step {step} of 3 — {STEPS[step - 1].label}</p>
+          <h1 className="page-title">{t('newCampaign.pageTitle')}</h1>
+          <p className="page-subtitle">{t('newCampaign.stepOf', { step, label: STEPS[step - 1].label })}</p>
         </div>
       </div>
 
@@ -247,34 +245,34 @@ export default function NewCampaign() {
       <form onSubmit={handleSubmit}>
         {step === 1 && (
           <>
-            <Card title="Campaign details" className="mt-card">
+            <Card title={t('newCampaign.campaignDetailsTitle')} className="mt-card">
               <div className="field">
-                <label>Name</label>
-                <input value={name} onChange={e => setName(e.target.value)} placeholder="Summer 2026" required />
+                <label>{t('newCampaign.nameLabel')}</label>
+                <input value={name} onChange={e => setName(e.target.value)} placeholder={t('newCampaign.namePlaceholder')} required />
               </div>
               <div className="field">
-                <label>Description (optional)</label>
-                <textarea value={description} onChange={e => setDescription(e.target.value)} rows={2} placeholder="Short note…" />
+                <label>{t('newCampaign.descriptionLabel')}</label>
+                <textarea value={description} onChange={e => setDescription(e.target.value)} rows={2} placeholder={t('newCampaign.descriptionPlaceholder')} />
               </div>
               <div className="field">
-                <label>Event name (optional)</label>
-                <input value={eventName} onChange={e => setEventName(e.target.value)} placeholder="e.g. Salon de l'Habitat Paris 2026" />
+                <label>{t('newCampaign.eventNameLabel')}</label>
+                <input value={eventName} onChange={e => setEventName(e.target.value)} placeholder={t('newCampaign.eventNamePlaceholder')} />
               </div>
               <div className="field">
-                <label>Guest language</label>
+                <label>{t('newCampaign.guestLanguageLabel')}</label>
                 <select value={language} onChange={e => setLanguage(e.target.value)} style={{ width: '100%', padding: '10px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 14, fontFamily: 'inherit' }}>
                   {LANGUAGE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select>
                 <div style={{ fontSize: 12, color: '#94A3B8', marginTop: 4 }}>
-                  The language guests see in the form, queue and reward email — not the admin panel's own language.
+                  {t('newCampaign.guestLanguageHint')}
                 </div>
               </div>
               {templates && templates.length > 0 && (
                 <div className="field">
-                  <label>Start from a saved template (optional)</label>
+                  <label>{t('newCampaign.startFromTemplateLabel')}</label>
                   <select defaultValue="" onChange={handleUseTemplate} style={{ width: '100%', padding: '10px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 14, fontFamily: 'inherit' }}>
-                    <option value="">— Select a template —</option>
-                    {templates.map(t => <option key={t.id} value={t.id}>{t.name} ({t.slotCount} slots)</option>)}
+                    <option value="">{t('newCampaign.selectTemplatePlaceholder')}</option>
+                    {templates.map(tpl => <option key={tpl.id} value={tpl.id}>{tpl.name} {t('newCampaign.templateSlotsSuffix', { count: tpl.slotCount })}</option>)}
                   </select>
                 </div>
               )}
@@ -282,8 +280,8 @@ export default function NewCampaign() {
                 <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', marginTop: 4, padding: '10px 14px', background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 8 }}>
                   <input type="checkbox" checked={isTest} onChange={e => setIsTest(e.target.checked)} />
                   <div>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: '#92400E' }}>🔧 Test campaign (admin only)</div>
-                    <div style={{ fontSize: 12, color: '#B45309', marginTop: 2 }}>Full sequence visible · Excluded from global stats · Remove before production.</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#92400E' }}>{t('newCampaign.testCampaignLabel')}</div>
+                    <div style={{ fontSize: 12, color: '#B45309', marginTop: 2 }}>{t('newCampaign.testCampaignDesc')}</div>
                   </div>
                 </label>
               )}
@@ -296,16 +294,16 @@ export default function NewCampaign() {
               wheelCaption={(
                 <>
                   {agentConnected && !manualOverride
-                    ? 'Tracking the physical wheel live — the red cleat moves together with the real one.'
-                    : 'Lost track of which physical case is which? Drag the red cleat to match what you see on the real wheel.'}
-                  <div style={{ marginTop: 4 }}>Red cleat is pointing at <strong>Case {previewCase}</strong></div>
+                    ? t('newCampaign.wheelCaptionTracking')
+                    : t('newCampaign.wheelCaptionLost')}
+                  <div style={{ marginTop: 4 }}>{t('newCampaign.redCleatPointing')} <strong>{t('dashboard.caseLabel', { n: previewCase })}</strong></div>
                   {agentConnected && manualOverride && (
                     <button
                       type="button"
                       onClick={() => setManualOverride(false)}
                       style={{ background: 'none', border: 'none', padding: 0, marginTop: 6, color: '#002881', textDecoration: 'underline', cursor: 'pointer', fontSize: 12, fontFamily: 'inherit' }}
                     >
-                      Resync with live wheel
+                      {t('newCampaign.resyncBtn')}
                     </button>
                   )}
                 </>
@@ -314,18 +312,18 @@ export default function NewCampaign() {
                 <>
                   {templateMsg && <span style={{ fontSize: 12, color: '#10B981', fontWeight: 600 }}>{templateMsg}</span>}
                   <button type="button" onClick={handleSaveTemplate} disabled={savingTemplate} className="btn btn-ghost btn-sm" style={{ cursor: savingTemplate ? 'not-allowed' : 'pointer' }}>
-                    {savingTemplate ? 'Saving…' : 'Save as template'}
+                    {savingTemplate ? t('common.saving') : t('newCampaign.saveAsTemplateBtn')}
                   </button>
                 </>
               )}
             />
 
             <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
-              <Button type="button" onClick={() => goToStep(2)} disabled={placedCount < CASE_COUNT}>Next →</Button>
-              <Button type="button" variant="secondary" onClick={() => navigate('/campaigns')}>Cancel</Button>
+              <Button type="button" onClick={() => goToStep(2)} disabled={placedCount < CASE_COUNT}>{t('newCampaign.nextBtn')}</Button>
+              <Button type="button" variant="secondary" onClick={() => navigate('/campaigns')}>{t('common.cancel')}</Button>
               {placedCount < CASE_COUNT && (
                 <span style={{ alignSelf: 'center', fontSize: 12, color: '#64748B' }}>
-                  Place all {CASE_COUNT} gifts on the wheel to continue ({placedCount}/{CASE_COUNT}).
+                  {t('newCampaign.placeAllGiftsHint', { count: CASE_COUNT, placed: placedCount })}
                 </span>
               )}
             </div>
@@ -334,42 +332,37 @@ export default function NewCampaign() {
 
         {step === 2 && (
           <>
-            <Card title="Segmentation client" className="mt-card">
+            <Card title={t('campaignForm.segmentationTitle')} className="mt-card">
               <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px' }}>
-                Define as many categories as you need (e.g. "Genre", "Budget"), each with its own set of options.
-                Your team picks one option per category when they fill in a guest's sales form from the Launch page.
-                Optional — leave empty to skip segmentation for this campaign.
+                {t('campaignForm.segmentationDesc')}
               </p>
               <SegmentationBuilder categories={segmentCategories} onChange={setSegmentCategories} />
             </Card>
 
-            <Card title="Autres informations" className="mt-card">
+            <Card title={t('campaignForm.salesFieldsTitle')} className="mt-card">
               <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px' }}>
-                Extra fields your sales team can fill in on a guest's form (Launch page / CRM tab) — never required,
-                filled in whenever there's time. Add as many as you need.
+                {t('campaignForm.salesFieldsDesc')}
               </p>
               <CampaignFieldsBuilder fields={salesFields} onChange={setSalesFields} fieldTypes={SALES_FIELD_TYPES} />
             </Card>
 
             <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
-              <Button type="button" onClick={() => goToStep(3)}>Next →</Button>
-              <Button type="button" variant="secondary" onClick={() => setStep(1)}>← Back</Button>
+              <Button type="button" onClick={() => goToStep(3)}>{t('newCampaign.nextBtn')}</Button>
+              <Button type="button" variant="secondary" onClick={() => setStep(1)}>{t('newCampaign.backBtn')}</Button>
             </div>
           </>
         )}
 
         {step === 3 && (
           <>
-            <Card title="Formulaire prospect" className="mt-card">
+            <Card title={t('campaignForm.guestFormTitle')} className="mt-card">
               <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px' }}>
-                What the guest fills in on their own phone before spinning. First name, last name and email are
-                always required and can't be removed. Add any other fields you need — text, email, phone, dropdown,
-                single/multiple choice, checkbox, date, or number — and choose whether each one is required.
+                {t('campaignForm.guestFormDesc')}
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }}>
-                {['First name', 'Last name', 'Email address'].map((label) => (
+                {[t('campaignForm.firstNameLabel'), t('campaignForm.lastNameLabel'), t('campaignForm.emailAddressLabel')].map((label) => (
                   <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 12px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13, color: '#334155' }}>
-                    {label} <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 700, color: '#94A3B8' }}>ALWAYS REQUIRED</span>
+                    {label} <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 700, color: '#94A3B8' }}>{t('campaignForm.alwaysRequiredBadge')}</span>
                   </div>
                 ))}
               </div>
@@ -377,8 +370,8 @@ export default function NewCampaign() {
             </Card>
 
             <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
-              <Button type="submit" disabled={saving}>{saving ? 'Creating…' : 'Create campaign'}</Button>
-              <Button type="button" variant="secondary" onClick={() => setStep(2)}>← Back</Button>
+              <Button type="submit" disabled={saving}>{saving ? t('newCampaign.creatingBtn') : t('newCampaign.createCampaignBtn')}</Button>
+              <Button type="button" variant="secondary" onClick={() => setStep(2)}>{t('newCampaign.backBtn')}</Button>
             </div>
           </>
         )}

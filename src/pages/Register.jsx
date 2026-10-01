@@ -1,19 +1,20 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 
-const FIELDS = [
-  { key: 'lastName', label: 'Last name', placeholder: 'Smith' },
-  { key: 'firstName', label: 'First name', placeholder: 'John' },
-  { key: 'company', label: 'Company', placeholder: 'Belle Vue Hotel' },
-  { key: 'industrySector', label: 'Industry sector', placeholder: 'Hospitality' },
-  { key: 'address', label: 'Address', placeholder: '12 Main Street, City', fullWidth: true },
-  { key: 'email', label: 'Email', placeholder: 'contact@yourcompany.com', type: 'email' },
-  { key: 'phone', label: 'Phone', placeholder: '06 12 34 56 78', type: 'tel' },
-  { key: 'password', label: 'Password', placeholder: 'At least 8 characters', type: 'password', fullWidth: true },
-];
-
 export default function Register() {
+  const { t } = useTranslation('admin');
+  const FIELDS = [
+    { key: 'lastName', label: t('settings.information.fieldLastName'), placeholder: t('auth.register.lastNamePlaceholder') },
+    { key: 'firstName', label: t('settings.information.fieldFirstName'), placeholder: t('auth.register.firstNamePlaceholder') },
+    { key: 'company', label: t('settings.information.fieldCompany'), placeholder: t('auth.register.companyPlaceholder') },
+    { key: 'industrySector', label: t('settings.information.fieldIndustrySector'), placeholder: t('auth.register.industryPlaceholder') },
+    { key: 'address', label: t('settings.information.fieldAddress'), placeholder: t('auth.register.addressPlaceholder'), fullWidth: true },
+    { key: 'email', label: t('auth.register.fieldEmail'), placeholder: t('auth.register.emailPlaceholder'), type: 'email' },
+    { key: 'phone', label: t('settings.information.fieldPhone'), placeholder: t('auth.register.phonePlaceholder'), type: 'tel' },
+    { key: 'password', label: t('auth.register.fieldPassword'), placeholder: t('settings.information.newPasswordPlaceholder'), type: 'password', fullWidth: true },
+  ];
   const { register } = useAuth();
   const [values, setValues] = useState({});
   const [error, setError] = useState('');
@@ -29,7 +30,7 @@ export default function Register() {
     setError('');
     const missing = FIELDS.filter((f) => !String(values[f.key] || '').trim());
     if (missing.length) {
-      setError(`Please fill in: ${missing.map((f) => f.label).join(', ')}.`);
+      setError(t('auth.register.pleaseFillInError', { fields: missing.map((f) => f.label).join(', ') }));
       return;
     }
     setLoading(true);
@@ -48,13 +49,12 @@ export default function Register() {
       <div className="auth-screen">
         <div className="auth-card" style={{ textAlign: 'center' }}>
           <div style={{ fontSize: 40, marginBottom: 14 }}>✅</div>
-          <h1 className="auth-title">Request sent</h1>
+          <h1 className="auth-title">{t('auth.register.requestSentTitle')}</h1>
           <p className="auth-subtitle">
-            Your account has been created and is awaiting approval by an administrator. You'll be able to sign in
-            once it's approved.
+            {t('auth.register.requestSentDesc')}
           </p>
           <Link to="/login" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', marginTop: 16 }}>
-            Back to sign in
+            {t('auth.backToSignIn')}
           </Link>
         </div>
       </div>
@@ -68,8 +68,8 @@ export default function Register() {
           <img src="/logo2.svg" alt="SPARK" style={{ width: 100, height: 100, objectFit: 'contain' }} />
         </div>
 
-        <h1 className="auth-title" style={{ textAlign: 'center' }}>Create an account</h1>
-        <p className="auth-subtitle" style={{ textAlign: 'center' }}>An administrator will need to approve it before you can sign in</p>
+        <h1 className="auth-title" style={{ textAlign: 'center' }}>{t('auth.register.createAccountTitle')}</h1>
+        <p className="auth-subtitle" style={{ textAlign: 'center' }}>{t('auth.register.createAccountSubtitle')}</p>
 
         {error && <div className="error-banner" style={{ textAlign: 'left' }}>{error}</div>}
 
@@ -92,12 +92,12 @@ export default function Register() {
 
         <button className="btn btn-primary" type="submit" disabled={loading}
           style={{ width: '100%', justifyContent: 'center', marginTop: 10 }}>
-          {loading ? 'Creating…' : 'Create account'}
+          {loading ? t('auth.register.creatingBtn') : t('auth.register.createAccountBtn')}
         </button>
 
         <Link to="/login" className="btn btn-secondary"
           style={{ width: '100%', justifyContent: 'center', marginTop: 10 }}>
-          Sign in
+          {t('auth.login.signInBtn')}
         </Link>
       </form>
     </div>

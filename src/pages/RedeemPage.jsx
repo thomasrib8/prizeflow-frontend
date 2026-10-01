@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import RewardCard from '../components/RewardCard';
@@ -16,6 +17,7 @@ import RewardCard from '../components/RewardCard';
 /// page (Rewards.jsx) is the in-app equivalent for code lookups done while
 /// already navigating the app, and keeps the sidebar visible.
 export default function RedeemPage() {
+  const { t } = useTranslation('admin');
   const { code } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -85,13 +87,13 @@ export default function RedeemPage() {
         background: 'white', borderRadius: 20, padding: '40px 36px', width: 440, maxWidth: '94vw',
         boxShadow: '0 30px 80px rgba(0,0,0,0.15)',
       }}>
-        {state === 'loading' && <p style={{ color: '#64748B', textAlign: 'center' }}>Loading…</p>}
+        {state === 'loading' && <p style={{ color: '#64748B', textAlign: 'center' }}>{t('common.loading')}</p>}
 
         {state === 'invalid' && (
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 40, marginBottom: 14 }}>⚠️</div>
-            <h1 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 8px', color: '#03041A' }}>Invalid code</h1>
-            <p style={{ fontSize: 14, color: '#64748B' }}>{error || 'This redemption link is not valid.'}</p>
+            <h1 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 8px', color: '#03041A' }}>{t('redeemPage.invalidCodeTitle')}</h1>
+            <p style={{ fontSize: 14, color: '#64748B' }}>{error || t('redeemPage.invalidCodeDefault')}</p>
           </div>
         )}
 

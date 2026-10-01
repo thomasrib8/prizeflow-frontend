@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { Card, Button, Badge, EmptyState, GiftPill } from '../components/ui';
 import ProspectCard from '../components/ProspectCard';
 import EmailStatusBadge from '../components/EmailStatusBadge';
+import FilterGroup from '../components/FilterGroup';
 import { isPlaceholderEmail } from '../utils/placeholderEmail';
 
 // 'no_gift' (a guest who skipped or cancelled) and 'manual' (a prospect a
@@ -14,13 +16,9 @@ const REWARD_TONE = { active: 'blue', redeemed: 'green', expired: 'orange', canc
 // 'voided' = a won gift a rep invalidated because no email was ever found for
 // it (see ProspectCard's "Invalider le joueur") — distinct from 'cancelled',
 // which is reverting an already-redeemed voucher (routes/redeem.js).
-const STATUS_LABELS = { no_gift: 'No gift', manual: 'Added manually', voided: 'Cancelled — no email' };
+const STATUS_TKEY = { no_gift: 'rewardStatusNoGift', manual: 'rewardStatusManual', voided: 'rewardStatusVoided', active: 'rewardStatusActive', redeemed: 'rewardStatusRedeemed', expired: 'rewardStatusExpired', cancelled: 'rewardStatusCancelled' };
 // Rows with no reward behind them, or a voided one: nothing to redeem/open.
 const NO_REWARD_STATUSES = ['no_gift', 'manual', 'voided'];
-const NOTE_OPTIONS = [
-  { value: 'with', label: 'With note' },
-  { value: 'without', label: 'Without note' },
-];
 
 // Distinct, non-empty values for a field across the CRM list, used to
 // populate each filter's checkboxes — only ever shows values that actually
@@ -29,35 +27,8 @@ function distinctValues(rows, key) {
   return [...new Set(rows.map((r) => r[key]).filter((v) => v != null && v !== ''))].sort();
 }
 
-function distinctStatusOptions(rows) {
-  return distinctValues(rows, 'status').map((v) => ({ value: v, label: STATUS_LABELS[v] || v }));
-}
-
 function toggleValue(list, value) {
   return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
-}
-
-// One checkbox group inside the filter popup — a plain label wrapping an
-// <input type="checkbox"> so the whole row is clickable, not just the box.
-function FilterGroup({ title, options, selected, onToggle }) {
-  if (options.length === 0) return null;
-  return (
-    <div style={{ marginBottom: 18 }}>
-      <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', marginBottom: 8 }}>{title}</div>
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
-        {options.map((opt) => {
-          const value = typeof opt === 'string' ? opt : opt.value;
-          const label = typeof opt === 'string' ? opt : opt.label;
-          return (
-            <label key={value} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, cursor: 'pointer', minHeight: 40, padding: '4px 0' }}>
-              <input type="checkbox" checked={selected.includes(value)} onChange={() => onToggle(value)} style={{ width: 18, height: 18, flexShrink: 0 }} />
-              {label}
-            </label>
-          );
-        })}
-      </div>
-    </div>
-  );
 }
 
 function formatDT(s) {
@@ -66,6 +37,7 @@ function formatDT(s) {
 }
 
 export default function History() {
+  const { t } = useTranslation('admin');
   const navigate = useNavigate();
   const [tab, setTab] = useState('rewards');
   const [distributions, setDistributions] = useState(null);
@@ -98,8 +70,15 @@ export default function History() {
 
   const campaignOptions = useMemo(() => distinctValues(rewards || [], 'campaign_name'), [rewards]);
   const giftOptions = useMemo(() => distinctValues(rewards || [], 'gift_name'), [rewards]);
-  const statusOptions = useMemo(() => distinctStatusOptions(rewards || []), [rewards]);
+  const statusOptions = useMemo(
+    () => distinctValues(rewards || [], 'status').map((v) => ({ value: v, label: STATUS_TKEY[v] ? t(`history.${STATUS_TKEY[v]}`) : v })),
+    [rewards, t]
+  );
   const segmentOptions = useMemo(() => distinctValues(rewards || [], 'segment'), [rewards]);
+  const noteOptions = useMemo(() => [
+    { value: 'with', label: t('history.noteWithOption') },
+    { value: 'without', label: t('history.noteWithoutOption') },
+  ], [t]);
 
   const activeFilterCount = filterCampaigns.length + filterGifts.length + filterStatuses.length + filterSegments.length + filterNotes.length;
 
@@ -183,50 +162,50 @@ export default function History() {
     <div>
       <div className="page-header">
         <div>
-          <h1 className="page-title">CRM</h1>
-          <p className="page-subtitle">Leads captured through SPARK, and the full distribution ledger</p>
+          <h1 className="page-title">{t('history.pageTitle')}</h1>
+          <p className="page-subtitle">{t('history.pageSubtitle')}</p>
         </div>
       </div>
       {error && <div className="error-banner">{error}</div>}
 
       <div className="tabs">
-        <button className={`tab${tab === 'rewards' ? ' active' : ''}`} onClick={() => setTab('rewards')}>CRM</button>
-        <button className={`tab${tab === 'distributions' ? ' active' : ''}`} onClick={() => setTab('distributions')}>Distributions</button>
+        <button className={`tab${tab === 'rewards' ? ' active' : ''}`} onClick={() => setTab('rewards')}>{t('history.tabCrm')}</button>
+        <button className={`tab${tab === 'distributions' ? ' active' : ''}`} onClick={() => setTab('distributions')}>{t('history.tabDistributions')}</button>
       </div>
 
       <Card className="mt-card">
-        <Button variant="secondary" onClick={() => setExportOpen(true)}>Export</Button>
+        <Button variant="secondary" onClick={() => setExportOpen(true)}>{t('history.exportBtn')}</Button>
       </Card>
 
       {tab === 'rewards' && (
         <Card className="mt-card">
           <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
             <input
-              placeholder="Search by name, email, reward ID, gift, campaign, segment or note…"
+              placeholder={t('history.searchPlaceholder')}
               value={search}
               onChange={e => setSearch(e.target.value)}
               style={{ flex: 1, padding: '9px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13 }}
             />
             <Button variant="secondary" onClick={() => setFiltersOpen(true)} style={{ flexShrink: 0, whiteSpace: 'nowrap' }}>
-              Filters{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
+              {t('pwa.filters')}{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
             </Button>
           </div>
         </Card>
       )}
 
       <Card className={tab === 'rewards' ? 'mt-card' : ''}>
-        {tab === 'distributions' && (!distributions ? <p className="page-subtitle">Loading…</p> :
-          distributions.length === 0 ? <EmptyState title="No distributions yet" /> : (
+        {tab === 'distributions' && (!distributions ? <p className="page-subtitle">{t('common.loading')}</p> :
+          distributions.length === 0 ? <EmptyState title={t('history.noDistributionsYet')} /> : (
             <table className="data-table">
               <thead>
-                <tr><th>Date</th><th>Gift</th><th>Type</th><th>Operator</th></tr>
+                <tr><th>{t('history.tableDate')}</th><th>{t('common.gift')}</th><th>{t('history.tableType')}</th><th>{t('history.tableOperator')}</th></tr>
               </thead>
               <tbody>
                 {distributions.map(d => (
                   <tr key={d.id}>
                     <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{formatDT(d.created_at)}</td>
-                    <td><GiftPill slotIndex={d.slot_index} name={d.gift_name || `Case ${d.slot_index + 1}`} /></td>
-                    <td><Badge tone={d.is_demo ? 'neutral' : 'green'}>{d.is_demo ? 'Demo' : 'Real'}</Badge></td>
+                    <td><GiftPill slotIndex={d.slot_index} name={d.gift_name || t('dashboard.caseLabel', { n: d.slot_index + 1 })} /></td>
+                    <td><Badge tone={d.is_demo ? 'neutral' : 'green'}>{d.is_demo ? t('history.demoBadge') : t('history.realBadge')}</Badge></td>
                     <td style={{ color: 'var(--text-muted)' }}>{d.operator_name || '—'}</td>
                   </tr>
                 ))}
@@ -235,12 +214,12 @@ export default function History() {
           )
         )}
 
-        {tab === 'rewards' && (!rewards ? <p className="page-subtitle">Loading…</p> :
-          rewards.length === 0 ? <EmptyState title="No rewards yet" /> :
-          filteredRewards.length === 0 ? <EmptyState title="No leads match your search or filters" /> : (
+        {tab === 'rewards' && (!rewards ? <p className="page-subtitle">{t('common.loading')}</p> :
+          rewards.length === 0 ? <EmptyState title={t('history.noRewardsYet')} /> :
+          filteredRewards.length === 0 ? <EmptyState title={t('history.noLeadsMatch')} /> : (
             <table className="data-table">
               <thead>
-                <tr><th>Reward ID</th><th>Name</th><th>Email</th><th>Gift</th><th>Campaign</th><th>Status</th><th>Segment</th><th>Note</th><th></th></tr>
+                <tr><th>{t('history.tableRewardId')}</th><th>{t('history.tableName')}</th><th>{t('history.tableEmail')}</th><th>{t('common.gift')}</th><th>{t('history.tableCampaign')}</th><th>{t('history.tableStatus')}</th><th>{t('common.segment')}</th><th>{t('common.noteLabel')}</th><th></th></tr>
               </thead>
               <tbody>
                 {filteredRewards.map(r => (
@@ -259,15 +238,15 @@ export default function History() {
                     <td style={{ color: 'var(--text-muted)' }}>
                       {isPlaceholderEmail(r.email) ? (
                         <span style={{ fontSize: 11, fontWeight: 700, color: '#B45309', background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: '1px 8px' }}>
-                          No email{r.gift_on_hold ? ' · gift on hold' : ''}
+                          {t('history.noEmailLabel')}{r.gift_on_hold ? t('history.giftOnHoldSuffix') : ''}
                         </span>
                       ) : (
                         <EmailStatusBadge email={r.email} status={r.email_status} isCatchAll={r.email_is_catch_all} isDisposable={r.email_is_disposable} isRoleAccount={r.email_is_role_account} />
                       )}
                     </td>
-                    <td>{r.gift_name ? <GiftPill slotIndex={0} name={r.gift_name} /> : <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>No gift</span>}</td>
+                    <td>{r.gift_name ? <GiftPill slotIndex={0} name={r.gift_name} /> : <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>{t('pwa.noGift')}</span>}</td>
                     <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{r.campaign_name || '—'}</td>
-                    <td><Badge tone={REWARD_TONE[r.status] || 'neutral'}>{STATUS_LABELS[r.status] || r.status}</Badge></td>
+                    <td><Badge tone={REWARD_TONE[r.status] || 'neutral'}>{STATUS_TKEY[r.status] ? t(`history.${STATUS_TKEY[r.status]}`) : r.status}</Badge></td>
                     <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{r.segment || '—'}</td>
                     <td style={{ maxWidth: 180 }}>
                       {r.note ? (
@@ -287,7 +266,7 @@ export default function History() {
                           className="btn btn-ghost btn-sm"
                           disabled={lookupBusy}
                           onClick={() => openRedeemPage(r.id)}
-                        >Open →</button>
+                        >{t('history.openLink')}</button>
                       )}
                     </td>
                   </tr>
@@ -302,27 +281,27 @@ export default function History() {
         <div className="modal-overlay">
           <div className="modal-card">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>Filters</h3>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>{t('pwa.filters')}</h3>
               {activeFilterCount > 0 && (
                 <button
                   onClick={clearFilters}
                   style={{ background: 'none', border: 'none', padding: 0, color: 'var(--link)', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
-                >Clear all</button>
+                >{t('pwa.clearAll')}</button>
               )}
             </div>
 
-            <FilterGroup title="Campaign" options={campaignOptions} selected={filterCampaigns}
+            <FilterGroup title={t('history.tableCampaign')} options={campaignOptions} selected={filterCampaigns}
               onToggle={(v) => setFilterCampaigns(toggleValue(filterCampaigns, v))} />
-            <FilterGroup title="Gift" options={giftOptions} selected={filterGifts}
+            <FilterGroup title={t('common.gift')} options={giftOptions} selected={filterGifts}
               onToggle={(v) => setFilterGifts(toggleValue(filterGifts, v))} />
-            <FilterGroup title="Status" options={statusOptions} selected={filterStatuses}
+            <FilterGroup title={t('history.tableStatus')} options={statusOptions} selected={filterStatuses}
               onToggle={(v) => setFilterStatuses(toggleValue(filterStatuses, v))} />
-            <FilterGroup title="Segment" options={segmentOptions} selected={filterSegments}
+            <FilterGroup title={t('common.segment')} options={segmentOptions} selected={filterSegments}
               onToggle={(v) => setFilterSegments(toggleValue(filterSegments, v))} />
-            <FilterGroup title="Note" options={NOTE_OPTIONS} selected={filterNotes}
+            <FilterGroup title={t('common.noteLabel')} options={noteOptions} selected={filterNotes}
               onToggle={(v) => setFilterNotes(toggleValue(filterNotes, v))} />
 
-            <Button onClick={() => setFiltersOpen(false)} style={{ marginTop: 4 }}>Done</Button>
+            <Button onClick={() => setFiltersOpen(false)} style={{ marginTop: 4 }}>{t('common.done')}</Button>
           </div>
         </div>
       )}
@@ -330,49 +309,49 @@ export default function History() {
       {exportOpen && (
         <div className="modal-overlay">
           <div className="modal-card">
-            <h3 style={{ margin: '0 0 4px', fontSize: 16, fontWeight: 800 }}>Export {tab === 'distributions' ? 'distributions' : 'CRM'}</h3>
+            <h3 style={{ margin: '0 0 4px', fontSize: 16, fontWeight: 800 }}>{tab === 'distributions' ? t('history.exportModalTitleDistributions') : t('history.exportModalTitleCrm')}</h3>
             <p style={{ margin: '0 0 16px', fontSize: 12, color: 'var(--text-muted)' }}>
-              {tab === 'rewards' ? 'Only the leads matching these filters and date range will be exported.' : 'Only distributions in this date range will be exported.'}
+              {tab === 'rewards' ? t('history.exportCrmDesc') : t('history.exportDistributionsDesc')}
             </p>
 
             {error && <div className="error-banner" style={{ marginBottom: 14 }}>{error}</div>}
 
             {tab === 'rewards' && (
               <>
-                <FilterGroup title="Campaign" options={campaignOptions} selected={filterCampaigns}
+                <FilterGroup title={t('history.tableCampaign')} options={campaignOptions} selected={filterCampaigns}
                   onToggle={(v) => setFilterCampaigns(toggleValue(filterCampaigns, v))} />
-                <FilterGroup title="Gift" options={giftOptions} selected={filterGifts}
+                <FilterGroup title={t('common.gift')} options={giftOptions} selected={filterGifts}
                   onToggle={(v) => setFilterGifts(toggleValue(filterGifts, v))} />
-                <FilterGroup title="Status" options={statusOptions} selected={filterStatuses}
+                <FilterGroup title={t('history.tableStatus')} options={statusOptions} selected={filterStatuses}
                   onToggle={(v) => setFilterStatuses(toggleValue(filterStatuses, v))} />
-                <FilterGroup title="Segment" options={segmentOptions} selected={filterSegments}
+                <FilterGroup title={t('common.segment')} options={segmentOptions} selected={filterSegments}
                   onToggle={(v) => setFilterSegments(toggleValue(filterSegments, v))} />
-                <FilterGroup title="Note" options={NOTE_OPTIONS} selected={filterNotes}
+                <FilterGroup title={t('common.noteLabel')} options={noteOptions} selected={filterNotes}
                   onToggle={(v) => setFilterNotes(toggleValue(filterNotes, v))} />
               </>
             )}
 
             <div style={{ marginBottom: 18 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', marginBottom: 8 }}>Date range</div>
+              <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', marginBottom: 8 }}>{t('history.dateRangeTitle')}</div>
               <div style={{ display: 'flex', gap: 10 }}>
-                <label style={{ fontSize: 12, color: 'var(--text-muted)', flex: 1 }}>From
+                <label style={{ fontSize: 12, color: 'var(--text-muted)', flex: 1 }}>{t('history.fromLabel')}
                   <input type="date" value={exportFrom} onChange={(e) => setExportFrom(e.target.value)}
                     style={{ display: 'block', width: '100%', marginTop: 4, padding: '7px 10px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13, boxSizing: 'border-box' }} />
                 </label>
-                <label style={{ fontSize: 12, color: 'var(--text-muted)', flex: 1 }}>To
+                <label style={{ fontSize: 12, color: 'var(--text-muted)', flex: 1 }}>{t('history.toLabel')}
                   <input type="date" value={exportTo} onChange={(e) => setExportTo(e.target.value)}
                     style={{ display: 'block', width: '100%', marginTop: 4, padding: '7px 10px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13, boxSizing: 'border-box' }} />
                 </label>
               </div>
             </div>
 
-            <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', marginBottom: 8 }}>Format</div>
+            <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', marginBottom: 8 }}>{t('history.formatTitle')}</div>
             <div style={{ display: 'flex', gap: 8, marginBottom: 4 }}>
               <Button disabled={exportBusy} onClick={() => handleExport('csv')}>{exportBusy ? '…' : 'CSV'}</Button>
               <Button variant="secondary" disabled={exportBusy} onClick={() => handleExport('pdf')}>{exportBusy ? '…' : 'PDF'}</Button>
               <Button variant="secondary" disabled={exportBusy} onClick={() => handleExport('json')}>{exportBusy ? '…' : 'JSON'}</Button>
             </div>
-            <Button variant="secondary" onClick={() => setExportOpen(false)} style={{ marginTop: 14 }}>Close</Button>
+            <Button variant="secondary" onClick={() => setExportOpen(false)} style={{ marginTop: 14 }}>{t('common.close')}</Button>
           </div>
         </div>
       )}
@@ -390,9 +369,9 @@ export default function History() {
       {openNote && (
         <div className="modal-overlay">
           <div className="modal-card">
-            <h3 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 800 }}>Note</h3>
+            <h3 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 800 }}>{t('common.noteLabel')}</h3>
             <p style={{ fontSize: 14, color: '#334155', whiteSpace: 'pre-wrap', margin: 0 }}>{openNote}</p>
-            <Button size="sm" variant="secondary" onClick={() => setOpenNote(null)} style={{ marginTop: 18 }}>Close</Button>
+            <Button size="sm" variant="secondary" onClick={() => setOpenNote(null)} style={{ marginTop: 18 }}>{t('common.close')}</Button>
           </div>
         </div>
       )}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { Card, Stat, Badge, EmptyState } from '../components/ui';
 import EmailQuotaTable from '../components/EmailQuotaTable';
@@ -9,7 +10,7 @@ function formatDT(s) {
 }
 
 const SERVICE_TONE = { operational: 'green', degraded: 'orange', outage: 'red', unknown: 'neutral' };
-const SERVICE_LABEL = { operational: 'Operational', degraded: 'Degraded', outage: 'Outage', unknown: 'Unknown' };
+const SERVICE_TKEY = { operational: 'serviceOperational', degraded: 'serviceDegraded', outage: 'serviceOutage', unknown: 'serviceUnknown' };
 
 // Thresholds requested for the quota alert: green under 70%, orange past 80%,
 // red past 95% — mirrors emailStatus.js's quotaAlertTone computed server-side
@@ -25,20 +26,21 @@ const QUOTA_TONE_BADGE = { green: 'green', orange: 'orange', red: 'red' };
 // quota check itself failed" (bad key, network) — both are distinct from
 // "not configured at all".
 function ProviderQuotaTable({ status, hasData, rows }) {
+  const { t } = useTranslation('admin');
   const connected = status?.configured && hasData(status);
   const state = !status
     ? { icon: '⚪', label: '—' }
     : !status.configured
-    ? { icon: '⚪', label: 'Not configured' }
+    ? { icon: '⚪', label: t('appHealth.notConfiguredState') }
     : connected
-    ? { icon: '🟢', label: 'Connected' }
-    : { icon: '🟠', label: "Couldn't check" };
+    ? { icon: '🟢', label: t('appHealth.connectedState') }
+    : { icon: '🟠', label: t('appHealth.couldntCheckState') };
 
   return (
     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
       <tbody>
         <tr>
-          <td style={{ padding: '7px 0', color: 'var(--text-muted)', borderBottom: '1px solid var(--border-light)' }}>State</td>
+          <td style={{ padding: '7px 0', color: 'var(--text-muted)', borderBottom: '1px solid var(--border-light)' }}>{t('appHealth.stateLabel')}</td>
           <td style={{ padding: '7px 0', fontWeight: 500, textAlign: 'right', borderBottom: '1px solid var(--border-light)' }}>
             {state.icon} {state.label}
           </td>
@@ -55,8 +57,9 @@ function ProviderQuotaTable({ status, hasData, rows }) {
 }
 
 function ServiceBadge({ name, status }) {
+  const { t } = useTranslation('admin');
   const tone = SERVICE_TONE[status?.tone] || 'neutral';
-  const label = SERVICE_LABEL[status?.tone] || 'Unknown';
+  const label = SERVICE_TKEY[status?.tone] ? t(`appHealth.${SERVICE_TKEY[status?.tone]}`) : t('appHealth.serviceUnknown');
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
       <span style={{ fontSize: 13, fontWeight: 600 }}>{name}</span>
@@ -67,6 +70,7 @@ function ServiceBadge({ name, status }) {
 }
 
 export default function AppHealth() {
+  const { t } = useTranslation('admin');
   const [health, setHealth] = useState(null);
   const [error, setError] = useState('');
 
@@ -78,31 +82,31 @@ export default function AppHealth() {
     <div>
       <div className="page-header">
         <div>
-          <h1 className="page-title">App Health</h1>
-          <p className="page-subtitle">Usage, recent errors, and service status</p>
+          <h1 className="page-title">{t('appHealth.pageTitle')}</h1>
+          <p className="page-subtitle">{t('appHealth.pageSubtitle')}</p>
         </div>
       </div>
       {error && <div className="error-banner">{error}</div>}
-      {!health && !error && <p className="page-subtitle">Loading…</p>}
+      {!health && !error && <p className="page-subtitle">{t('common.loading')}</p>}
 
       {health && (
         <>
           <div className="grid-stats mt-card">
-            <div className="card"><Stat label="Active today" value={health.activeUsers.today} accent="blue" /></div>
-            <div className="card"><Stat label="Active over 7 days" value={health.activeUsers.last7Days} accent="blue" /></div>
-            <div className="card"><Stat label="Active over 30 days" value={health.activeUsers.last30Days} accent="blue" /></div>
+            <div className="card"><Stat label={t('appHealth.activeTodayLabel')} value={health.activeUsers.today} accent="blue" /></div>
+            <div className="card"><Stat label={t('appHealth.activeOver7DaysLabel')} value={health.activeUsers.last7Days} accent="blue" /></div>
+            <div className="card"><Stat label={t('appHealth.activeOver30DaysLabel')} value={health.activeUsers.last30Days} accent="blue" /></div>
             <div className="card">
               <Stat
-                label="Average response time"
+                label={t('appHealth.avgResponseTimeLabel')}
                 value={health.avgResponseTimeMs !== null ? `${health.avgResponseTimeMs} ms` : '—'}
                 accent="green"
               />
             </div>
           </div>
 
-          <Card title="Service status" className="mt-card">
+          <Card title={t('appHealth.serviceStatusTitle')} className="mt-card">
             <p style={{ fontSize: 12, color: '#94A3B8', marginBottom: 12 }}>
-              Read directly from Render's and Netlify's public status pages.
+              {t('appHealth.serviceStatusDesc')}
             </p>
             <div style={{ display: 'flex', gap: 28, flexWrap: 'wrap', rowGap: 12 }}>
               <ServiceBadge name="Render" status={health.serviceStatus.render} />
@@ -110,44 +114,44 @@ export default function AppHealth() {
             </div>
           </Card>
 
-          <Card title="Email quota" className="mt-card" action={<span style={{ fontSize: 11, color: '#94A3B8' }}>Brevo</span>}>
+          <Card title={t('appHealth.emailQuotaTitle')} className="mt-card" action={<span style={{ fontSize: 11, color: '#94A3B8' }}>Brevo</span>}>
             <EmailQuotaTable status={health.emailStatus} />
           </Card>
 
-          <Card title="Email finding quota" className="mt-card" action={<span style={{ fontSize: 11, color: '#94A3B8' }}>Hunter.io</span>}>
+          <Card title={t('appHealth.emailFindingQuotaTitle')} className="mt-card" action={<span style={{ fontSize: 11, color: '#94A3B8' }}>Hunter.io</span>}>
             <ProviderQuotaTable
               status={health.apiQuotaStatus?.hunter}
               hasData={(s) => !!(s.searches || s.credits || s.planName)}
               rows={(s) => [
-                ['Plan', s.planName || '—'],
+                [t('appHealth.planLabel'), s.planName || '—'],
                 s.searches
-                  ? ['Searches', `${s.searches.used.toLocaleString()} / ${s.searches.available.toLocaleString()} (${s.searches.remaining.toLocaleString()} left)`]
+                  ? [t('appHealth.searchesLabel'), t('appHealth.searchesCountLabel', { used: s.searches.used.toLocaleString(), available: s.searches.available.toLocaleString(), remaining: s.searches.remaining.toLocaleString() })]
                   : s.credits
-                  ? ['Credits', `${s.credits.used.toLocaleString()} / ${s.credits.available.toLocaleString()} (${s.credits.remaining.toLocaleString()} left)`]
-                  : ['Searches', '—'],
-                ['Resets', s.resetDate || '—'],
+                  ? [t('appHealth.creditsLabel'), t('appHealth.creditsCountLabel', { used: s.credits.used.toLocaleString(), available: s.credits.available.toLocaleString(), remaining: s.credits.remaining.toLocaleString() })]
+                  : [t('appHealth.searchesLabel'), '—'],
+                [t('appHealth.resetsLabel'), s.resetDate || '—'],
               ]}
             />
           </Card>
 
-          <Card title="Verification quota" className="mt-card" action={<span style={{ fontSize: 11, color: '#94A3B8' }}>Bouncer</span>}>
+          <Card title={t('appHealth.verificationQuotaTitle')} className="mt-card" action={<span style={{ fontSize: 11, color: '#94A3B8' }}>Bouncer</span>}>
             <ProviderQuotaTable
               status={health.apiQuotaStatus?.bouncer}
               hasData={(s) => s.credits != null}
               rows={(s) => [
-                ['Credits remaining', s.credits != null ? s.credits.toLocaleString() : '—'],
+                [t('appHealth.creditsRemainingLabel'), s.credits != null ? s.credits.toLocaleString() : '—'],
               ]}
             />
           </Card>
 
           {health.emailStatus?.quotaPercentUsed !== null && health.emailStatus?.quotaPercentUsed !== undefined && (
-            <Card title="Brevo alerts" className="mt-card">
+            <Card title={t('appHealth.brevoAlertsTitle')} className="mt-card">
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: health.emailStatus.quotaAlertTone !== 'green' ? 10 : 0 }}>
                 <span style={{ fontSize: 13, fontWeight: 600 }}>
-                  {QUOTA_TONE_ICON[health.emailStatus.quotaAlertTone]} Email quota
+                  {QUOTA_TONE_ICON[health.emailStatus.quotaAlertTone]} {t('appHealth.emailQuotaTitle')}
                 </span>
                 <Badge tone={QUOTA_TONE_BADGE[health.emailStatus.quotaAlertTone] || 'neutral'}>
-                  {health.emailStatus.quotaPercentUsed}% used
+                  {t('appHealth.usedSuffix', { pct: health.emailStatus.quotaPercentUsed })}
                 </Badge>
               </div>
               {health.emailStatus.quotaAlertTone !== 'green' && (
@@ -156,23 +160,23 @@ export default function AppHealth() {
                   background: health.emailStatus.quotaAlertTone === 'red' ? '#FEF2F2' : '#FFFBEB',
                   color: health.emailStatus.quotaAlertTone === 'red' ? '#991B1B' : '#92400E',
                 }}>
-                  Warning: your Brevo quota is almost reached. The next emails may not be sent.
+                  {t('appHealth.brevoWarning')}
                 </p>
               )}
             </Card>
           )}
 
-          <Card title="Recent backend errors" className="mt-card">
+          <Card title={t('appHealth.recentErrorsTitle')} className="mt-card">
             <p style={{ fontSize: 12, color: '#94A3B8', marginBottom: 12 }}>
               {health.sentryEnabled
-                ? 'Sent to Sentry for persistent tracking (with alerts) — the list below stays a quick in-memory view since the last restart.'
-                : "Captured in memory since the server's last restart — no external tool (e.g. Sentry) wired up yet."}
+                ? t('appHealth.sentryEnabledDesc')
+                : t('appHealth.sentryDisabledDesc')}
             </p>
             {health.recentErrors.length === 0 ? (
-              <EmptyState title="No recent errors" />
+              <EmptyState title={t('appHealth.noRecentErrors')} />
             ) : (
               <table className="data-table">
-                <thead><tr><th>Message</th><th>Route</th><th>Date</th></tr></thead>
+                <thead><tr><th>{t('appHealth.tableMessage')}</th><th>{t('appHealth.tableRoute')}</th><th>{t('history.tableDate')}</th></tr></thead>
                 <tbody>
                   {health.recentErrors.map((e, i) => (
                     <tr key={i}>

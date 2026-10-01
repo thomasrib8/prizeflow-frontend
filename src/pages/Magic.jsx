@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { Card, Badge } from '../components/ui';
 import { useWheelSocket } from '../hooks/useWheelSocket';
@@ -45,6 +46,7 @@ const MOVE_THRESHOLD = 0.5;
 /// inline banner green for a few seconds as a "yes, that worked"
 /// confirmation; it never sends Free on its own.
 export default function Magic() {
+  const { t } = useTranslation('admin');
   const { wheelStatus, agentConnected } = useWheelSocket();
   const [armedSlot, setArmedSlot] = useState(null);
   const [justLanded, setJustLanded] = useState(false);
@@ -135,13 +137,13 @@ export default function Magic() {
       <div className="page-header">
         <div>
           <h1 className="page-title">Magic</h1>
-          <p className="page-subtitle">Click a case to force it on the wheel's next spin</p>
+          <p className="page-subtitle">{t('magic.pageSubtitle')}</p>
         </div>
-        <Badge tone={isForced ? 'orange' : 'green'}>{isForced ? 'FORCE' : 'FREE'}</Badge>
+        <Badge tone={isForced ? 'orange' : 'green'}>{isForced ? t('magic.forceLabel') : t('magic.freeLabel')}</Badge>
       </div>
 
       {!agentConnected && (
-        <div className="error-banner" style={{ marginBottom: 12 }}>Wheel agent is not connected.</div>
+        <div className="error-banner" style={{ marginBottom: 12 }}>{t('magic.wheelAgentNotConnected')}</div>
       )}
       {error && <div className="error-banner" style={{ marginBottom: 12 }}>{error}</div>}
 
@@ -157,11 +159,11 @@ export default function Magic() {
           {armedSlot !== null && (
             justLanded ? (
               <div style={{ fontSize: 13, fontWeight: 700, color: '#10B981', background: '#ECFDF5', padding: '8px 18px', borderRadius: 20 }}>
-                ✓ Case {armedSlot + 1} forced
+                {t('magic.caseForced', { n: armedSlot + 1 })}
               </div>
             ) : (
               <div style={{ fontSize: 13, fontWeight: 700, color: '#F59E0B', background: '#FFFBEB', padding: '8px 18px', borderRadius: 20 }}>
-                ⟳ Case {armedSlot + 1} armed — spin the wheel now
+                {t('magic.caseArmed', { n: armedSlot + 1 })}
               </div>
             )
           )}
@@ -176,7 +178,7 @@ export default function Magic() {
               cursor: agentConnected ? 'pointer' : 'not-allowed', opacity: agentConnected ? 1 : 0.5, fontFamily: 'inherit',
             }}
           >
-Free the wheel
+            {t('magic.freeWheelBtn')}
           </button>
         </div>
       </Card>
