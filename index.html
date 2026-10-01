@@ -13,7 +13,12 @@
          the URL for the name shown under the home screen icon. -->
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-title" content="Spark" />
+    <!-- apple-mobile-web-app-capable is iOS Safari's own name for this and still
+         needed there; mobile-web-app-capable is the standard name Chrome/Android
+         expect instead (apple-mobile-web-app-capable alone logs a deprecation
+         warning in their console) — both stay, each for its own browser. -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   </head>
   <body>
