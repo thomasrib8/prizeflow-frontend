@@ -786,7 +786,8 @@
     "recordingSilenceHint": "(stoppt nach 8s Stille)",
     "recordVoiceNote": "🎙 Sprachnotiz aufnehmen",
     "tagPlaceholder": "Ein freies Label, das Sie diesem Gast zuordnen können",
-    "saveBtn": "Speichern"
+    "saveBtn": "Speichern",
+    "analyzeNowBtn": "Jetzt analysieren"
   },
   "newProspectModal": {
     "title": "Neuer Interessent",

@@ -7,10 +7,12 @@ function getToken() {
 
 async function request(path, { method = 'GET', body, auth = true } = {}) {
   const headers = { 'Content-Type': 'application/json' };
-  if (auth) {
-    const token = getToken();
-    if (token) headers.Authorization = `Bearer ${token}`;
-  }
+  // Captured up front so the 401 handler below can tell "this exact token
+  // just got rejected" apart from "a newer login already replaced it while
+  // this request was in flight" — see the comment down there for why that
+  // distinction matters.
+  const tokenForThisRequest = auth ? getToken() : null;
+  if (tokenForThisRequest) headers.Authorization = `Bearer ${tokenForThisRequest}`;
   const res = await fetch(`${API_BASE}${path}`, {
     method,
     headers,
@@ -36,11 +38,22 @@ async function request(path, { method = 'GET', body, auth = true } = {}) {
   // routes) never send a token, so they can't hit this — only a rejected
   // Bearer token does.
   if (res.status === 401 && auth) {
-    localStorage.removeItem('prizeflow_token');
-    localStorage.removeItem('prizeflow_user');
-    const returnTo = encodeURIComponent(window.location.pathname + window.location.search);
-    window.location.href = `/login?returnTo=${returnTo}`;
-    return new Promise(() => {}); // navigation is already underway
+    // Several requests fired at once (Dashboard + Layout's sidebar badge,
+    // say) all read the same stale token and are all in flight together —
+    // the first 401 to come back already starts the redirect below. If a
+    // slower one among them resolves AFTER the operator has since logged
+    // back in (a fresh token now sits in storage), clearing storage here
+    // would silently rip out that brand-new, perfectly valid session right
+    // out from under them and bounce them straight back to /login — which
+    // is exactly the "I log in and it immediately kicks me out" symptom.
+    // Only act when the token that just failed is still the one in storage.
+    if (getToken() === tokenForThisRequest) {
+      localStorage.removeItem('prizeflow_token');
+      localStorage.removeItem('prizeflow_user');
+      const returnTo = encodeURIComponent(window.location.pathname + window.location.search);
+      window.location.href = `/login?returnTo=${returnTo}`;
+    }
+    return new Promise(() => {}); // navigation is already underway (or a newer session is active — either way, this caller gets nothing more)
   }
   if (!res.ok) {
     const err = new Error((data && data.error) || `Request failed (${res.status})`);

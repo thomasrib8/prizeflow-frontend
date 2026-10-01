@@ -786,7 +786,8 @@
     "recordingSilenceHint": "(stops after 8s of silence)",
     "recordVoiceNote": "🎙 Record voice note",
     "tagPlaceholder": "A free label you can attach to this guest",
-    "saveBtn": "Save"
+    "saveBtn": "Save",
+    "analyzeNowBtn": "Analyse now"
   },
   "newProspectModal": {
     "title": "New prospect",

@@ -119,6 +119,17 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
     return () => clearInterval(t);
   }, [emailStatus, campaignId, guest.email]);
 
+  // Read inside the SpeechRecognition callbacks below, which close over the
+  // component's very first render (the effect that creates `rec` only runs
+  // once) — these always hold the current value instead.
+  const noteRef = useRef(note);
+  noteRef.current = note;
+  const aiAnalyzedNoteRef = useRef(aiAnalyzedNote);
+  aiAnalyzedNoteRef.current = aiAnalyzedNote;
+  const aiAssistantEnabledRef = useRef(user?.aiAssistantEnabled);
+  aiAssistantEnabledRef.current = user?.aiAssistantEnabled;
+  const handleAnalyzeRef = useRef(null);
+
   function clearSilenceTimer() {
     if (silenceTimerRef.current) {
       clearTimeout(silenceTimerRef.current);
@@ -155,7 +166,18 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
     };
     rec.onspeechstart = armSilenceTimer;
     rec.onerror = () => { clearSilenceTimer(); setRecording(false); };
-    rec.onend = () => { clearSilenceTimer(); setRecording(false); };
+    rec.onend = () => {
+      clearSilenceTimer();
+      setRecording(false);
+      // As soon as the voice note is done and transcribed into the note,
+      // kick off the AI assistant on its own — no need to wait for the rep
+      // to hit Save first. Skipped if nothing actually changed since the
+      // last analysis (e.g. the mic was opened and closed with no speech).
+      const trimmedNote = noteRef.current.trim();
+      if (aiAssistantEnabledRef.current && trimmedNote && trimmedNote !== (aiAnalyzedNoteRef.current || '').trim()) {
+        handleAnalyzeRef.current?.();
+      }
+    };
     recognitionRef.current = rec;
     return () => { clearSilenceTimer(); try { rec.stop(); } catch { /* already stopped */ } };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -210,23 +232,35 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
     }
   }
 
-  // Manual trigger from AISuggestionsPanel — either the first analysis of a
-  // note that's never been run, or a rep-requested re-analysis after editing
-  // the note. Updates local state directly from the response rather than
-  // reloading the whole card.
+  // Triggered from AISuggestionsPanel's own link, the dedicated "Analyse IA"
+  // button below the note, or automatically right when a voice note finishes
+  // recording (see the SpeechRecognition effect above). Updates local state
+  // directly from the response rather than reloading the whole card.
+  //
+  // Saves the current note + fields first: the backend's analyze endpoint
+  // always reads the note from the database, never from this request, so
+  // skipping this step would either analyze a stale note or fail outright
+  // for a prospect whose note was only just dictated/typed and never saved
+  // via the main Save button yet.
   async function handleAnalyze() {
     setAnalyzing(true);
     setError('');
     try {
+      const trimmedNote = note.trim();
+      await api.saveGuestNote({
+        campaignId, email: guest.email, firstName: guest.firstName, lastName: guest.lastName,
+        note: trimmedNote, leadRating, segments, tags, customFields,
+      });
       const result = await api.analyzeGuestNote({ campaignId, email: guest.email });
       setAiSuggestions(result);
-      setAiAnalyzedNote(note.trim());
+      setAiAnalyzedNote(trimmedNote);
     } catch (err) {
       setError(err.message);
     } finally {
       setAnalyzing(false);
     }
   }
+  handleAnalyzeRef.current = handleAnalyze;
 
   // Accepting a proposal both marks it applied (mirrors the backend, so it
   // drops out of AISuggestionsPanel's pending list) and merges the accepted
@@ -544,6 +578,15 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
                 </div>
               )}
             </div>
+
+            {/* Explicit fallback for whenever the automatic trigger (on Save,
+                or right when a voice note finishes recording) didn't fire —
+                e.g. the note was typed rather than dictated. */}
+            {user?.aiAssistantEnabled && note.trim() && (
+              <Button type="button" variant="secondary" size="sm" disabled={analyzing} onClick={handleAnalyze} style={{ marginTop: 10 }}>
+                {analyzing ? t('aiSuggestionsPanel.analyzing') : t('prospectCard.analyzeNowBtn')}
+              </Button>
+            )}
 
             {user?.aiAssistantEnabled && note && (
               <AISuggestionsPanel

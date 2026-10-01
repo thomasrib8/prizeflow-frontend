@@ -4,9 +4,18 @@ import { api } from '../api/client';
 import { Button } from './ui';
 import DynamicFieldInput from './DynamicFieldInput';
 import { prepareScanImage } from '../utils/scanImage';
+import { useAuth } from '../context/AuthContext';
+
+// Chrome/Edge only (webkitSpeechRecognition) — same as ProspectCard.jsx, see
+// there for why this doesn't render anywhere else.
+const SpeechRecognitionCtor =
+  typeof window !== 'undefined' ? window.SpeechRecognition || window.webkitSpeechRecognition : null;
 
 const STARS = [1, 2, 3];
 const EMPTY_FORM = { firstName: '', lastName: '', email: '' };
+// A voice note stops on its own after this long without any speech, so a
+// rep who forgets to tap stop doesn't leave the mic open indefinitely.
+const SILENCE_TIMEOUT_MS = 8000;
 
 // Lets a sales rep put someone in the CRM from the Launch page without that
 // person filling in anything — typed by hand, or pre-filled from a photo of
@@ -25,6 +34,7 @@ const EMPTY_FORM = { firstName: '', lastName: '', email: '' };
 // attests they agreed to be contacted and to get their gift by email.
 export default function NewProspectModal({ campaign, initialFile = null, scanEnabled = false, onClose, onCreated }) {
   const { t } = useTranslation('admin');
+  const { user } = useAuth();
   const guestFields = (campaign.fields || []).filter((f) => f.scope === 'guest');
   const salesFields = (campaign.fields || []).filter((f) => f.scope === 'sales');
   const segmentCategories = campaign.segmentCategories || [];
@@ -59,6 +69,69 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
   const hunterRequestIdRef = useRef(0); // bumped per request so a late response from an older search is ignored
   const emailRef = useRef(form.email); // always current, read inside the async .then() below where `form` itself would be stale
   emailRef.current = form.email;
+
+  const [recording, setRecording] = useState(false);
+  const recognitionRef = useRef(null);
+  const silenceTimerRef = useRef(null);
+
+  function clearSilenceTimer() {
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current);
+      silenceTimerRef.current = null;
+    }
+  }
+
+  // Any sign of speech (interim or final) pushes the auto-stop back; only
+  // true silence for SILENCE_TIMEOUT_MS ends the recording on its own.
+  function armSilenceTimer() {
+    clearSilenceTimer();
+    silenceTimerRef.current = setTimeout(() => {
+      try { recognitionRef.current?.stop(); } catch { /* already stopped */ }
+    }, SILENCE_TIMEOUT_MS);
+  }
+
+  useEffect(() => {
+    if (!SpeechRecognitionCtor) return undefined;
+    const rec = new SpeechRecognitionCtor();
+    rec.continuous = true;
+    // Interim results are only used as a "still talking" signal for the
+    // silence timer — just the final ones are appended to the note.
+    rec.interimResults = true;
+    rec.lang = 'fr-FR';
+    rec.onresult = (e) => {
+      armSilenceTimer();
+      let transcript = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) transcript += e.results[i][0].transcript;
+      }
+      if (transcript.trim()) {
+        setNote((prev) => (prev ? `${prev} ${transcript.trim()}` : transcript.trim()));
+      }
+    };
+    rec.onspeechstart = armSilenceTimer;
+    rec.onerror = () => { clearSilenceTimer(); setRecording(false); };
+    rec.onend = () => { clearSilenceTimer(); setRecording(false); };
+    recognitionRef.current = rec;
+    return () => { clearSilenceTimer(); try { rec.stop(); } catch { /* already stopped */ } };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function startRecording() {
+    if (!recognitionRef.current) return;
+    try {
+      recognitionRef.current.start();
+      setRecording(true);
+      armSilenceTimer();
+    } catch {
+      // start() throws if already started (rapid double-click) — ignore
+    }
+  }
+
+  function stopRecording() {
+    clearSilenceTimer();
+    try { recognitionRef.current?.stop(); } catch { /* already stopped */ }
+    setRecording(false);
+  }
 
   function applyReading({ fields, customFields: fromCampaign = {}, confidence }, source) {
     setForm({ firstName: fields.firstName || '', lastName: fields.lastName || '', email: fields.email || '' });
@@ -158,8 +231,12 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
   // Live Hunter.io search: once first name, last name and company are all
   // known (typically right after a scan) and there's no email yet, look one
   // up automatically — debounced, so typing a company by hand doesn't fire a
-  // request per keystroke, and never twice for the same combination.
+  // request per keystroke, and never twice for the same combination. Never
+  // fires at all once an email is already known (typed by the rep, or read
+  // straight off the badge) — there is nothing to look up, and it would only
+  // burn a Hunter.io credit for a result that gets thrown away.
   useEffect(() => {
+    if (form.email.trim()) return undefined;
     const first = form.firstName.trim();
     const last = form.lastName.trim();
     const comp = company.trim();
@@ -169,7 +246,7 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
     const timer = setTimeout(() => runHunterSearch(first, last, comp), 800);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.firstName, form.lastName, company]);
+  }, [form.firstName, form.lastName, company, form.email]);
 
   async function submit(addToQueue, confirmDuplicate = false) {
     if (!formRef.current.reportValidity()) return;
@@ -193,6 +270,16 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
         emailFoundViaHunter: emailIsHunterFind,
         hunterScore: emailIsHunterFind ? hunterSearch.score : undefined,
       });
+      // Fire-and-forget, same as ProspectCard.jsx's own save: the note (typed
+      // or dictated) only exists in the database from this point on — the
+      // assistant's analyze endpoint always reads it from there, so this is
+      // the earliest moment analysis can actually run for a prospect that
+      // didn't exist a moment ago. The modal closes right after, so nothing
+      // here is awaited or shown — the result is just waiting on this
+      // prospect's card the next time anyone opens it.
+      if (user?.aiAssistantEnabled && note.trim() && res.email) {
+        api.analyzeGuestNote({ campaignId: campaign.id, email: res.email }).catch(() => {});
+      }
       onCreated?.({
         name: `${form.firstName.trim()} ${form.lastName.trim()}`.trim(),
         queued: res.queued,
@@ -272,16 +359,21 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
               style={{ ...flagStyle('email'), flex: 1, minWidth: 0 }}
               onChange={(e) => { setForm({ ...form, email: e.target.value }); setHunterSearch({ state: 'idle' }); }}
             />
-            <Button
-              type="button"
-              variant="secondary"
-              disabled={hunterSearch.state === 'searching' || !form.firstName.trim() || !form.lastName.trim() || !company.trim()}
-              onClick={() => runHunterSearch(form.firstName.trim(), form.lastName.trim(), company.trim())}
-              title={!company.trim() ? t('newProspectModal.fillCompanyFirstTitle') : undefined}
-              style={{ flexShrink: 0, whiteSpace: 'nowrap' }}
-            >
-              {hunterSearch.state === 'searching' ? t('newProspectModal.searchingBtn') : t('newProspectModal.findEmailBtn')}
-            </Button>
+            {/* Hunter.io is only ever worth it when there's no email yet —
+                once one is known (typed, or already on the badge), there's
+                nothing to look up and no reason to spend a credit on it. */}
+            {!form.email.trim() && (
+              <Button
+                type="button"
+                variant="secondary"
+                disabled={hunterSearch.state === 'searching' || !form.firstName.trim() || !form.lastName.trim() || !company.trim()}
+                onClick={() => runHunterSearch(form.firstName.trim(), form.lastName.trim(), company.trim())}
+                title={!company.trim() ? t('newProspectModal.fillCompanyFirstTitle') : undefined}
+                style={{ flexShrink: 0, whiteSpace: 'nowrap' }}
+              >
+                {hunterSearch.state === 'searching' ? t('newProspectModal.searchingBtn') : t('newProspectModal.findEmailBtn')}
+              </Button>
+            )}
           </div>
           {doubtHint('email')}
           {hunterSearch.state === 'searching' && (
@@ -295,12 +387,12 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
               {hunterSearch.score != null ? t('newProspectModal.hunterFoundWithScore', { score: hunterSearch.score }) : t('newProspectModal.hunterFound')}
             </div>
           )}
-          {hunterSearch.state === 'not_found' && (
+          {hunterSearch.state === 'not_found' && !form.email.trim() && (
             <div style={{ fontSize: 11, color: '#B45309', marginTop: 3 }}>
               {t('newProspectModal.hunterNotFound')}
             </div>
           )}
-          {hunterSearch.state === 'error' && (
+          {hunterSearch.state === 'error' && !form.email.trim() && (
             <div style={{ fontSize: 11, color: '#B45309', marginTop: 3 }}>
               {t('newProspectModal.hunterError')}
             </div>
@@ -368,6 +460,40 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
             placeholder={t('newProspectModal.notePlaceholder')}
             style={{ width: '100%', fontFamily: 'inherit', resize: 'vertical' }}
           />
+          {SpeechRecognitionCtor && (
+            <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+              {recording ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={stopRecording}
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 6, minHeight: 36,
+                      background: '#EF4444', color: 'white', border: 'none', borderRadius: 20,
+                      padding: '6px 16px', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+                    }}
+                  >
+                    {t('prospectCard.stopRecording')}
+                  </button>
+                  <span style={{ fontSize: 12, color: '#EF4444', fontWeight: 600 }}>
+                    {t('prospectCard.recordingLabel')} <span style={{ color: '#94A3B8', fontWeight: 500 }}>{t('prospectCard.recordingSilenceHint')}</span>
+                  </span>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={startRecording}
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 6, minHeight: 36,
+                    background: '#F1F5F9', color: '#334155', border: 'none', borderRadius: 20,
+                    padding: '6px 14px', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+                  }}
+                >
+                  {t('prospectCard.recordVoiceNote')}
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="field">

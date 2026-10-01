@@ -786,7 +786,8 @@
     "recordingSilenceHint": "(se detiene tras 8s de silencio)",
     "recordVoiceNote": "🎙 Grabar nota de voz",
     "tagPlaceholder": "Una etiqueta libre para asociar a este invitado",
-    "saveBtn": "Guardar"
+    "saveBtn": "Guardar",
+    "analyzeNowBtn": "Analizar ahora"
   },
   "newProspectModal": {
     "title": "Nuevo prospecto",

@@ -786,7 +786,8 @@
     "recordingSilenceHint": "(s'arrête après 8s de silence)",
     "recordVoiceNote": "🎙 Enregistrer une note vocale",
     "tagPlaceholder": "Une étiquette libre à associer à cet invité",
-    "saveBtn": "Valider"
+    "saveBtn": "Valider",
+    "analyzeNowBtn": "Analyse IA"
   },
   "newProspectModal": {
     "title": "Nouveau prospect",
