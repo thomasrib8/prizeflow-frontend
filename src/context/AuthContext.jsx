@@ -1,14 +1,15 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { api } from '../api/client';
+import { getToken, setToken, readStoredUser, writeStoredUser } from '../api/tokenStore';
 import i18n from '../i18n';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => {
-    const raw = localStorage.getItem('prizeflow_user');
-    return raw ? JSON.parse(raw) : null;
-  });
+  // A stored user without a token (or the reverse) is a half-cleared session —
+  // treat it as signed out rather than rendering the app and letting every
+  // request bounce.
+  const [user, setUser] = useState(() => (getToken() ? readStoredUser() : null));
 
   // The admin panel's own language (distinct from a campaign's guest-facing
   // language — see i18n/index.js) is set globally, once per account, since
@@ -20,8 +21,8 @@ export function AuthProvider({ children }) {
 
   const login = useCallback(async (email, password) => {
     const { user, token } = await api.login(email, password);
-    localStorage.setItem('prizeflow_token', token);
-    localStorage.setItem('prizeflow_user', JSON.stringify(user));
+    setToken(token);
+    writeStoredUser(user);
     setUser(user);
   }, []);
 
@@ -30,8 +31,8 @@ export function AuthProvider({ children }) {
   const register = useCallback((payload) => api.register(payload), []);
 
   const logout = useCallback(() => {
-    localStorage.removeItem('prizeflow_token');
-    localStorage.removeItem('prizeflow_user');
+    setToken(null);
+    writeStoredUser(null);
     setUser(null);
   }, []);
 
@@ -40,7 +41,7 @@ export function AuthProvider({ children }) {
   const updateStoredUser = useCallback((partialUser) => {
     setUser((prev) => {
       const next = { ...prev, ...partialUser };
-      localStorage.setItem('prizeflow_user', JSON.stringify(next));
+      writeStoredUser(next);
       return next;
     });
   }, []);

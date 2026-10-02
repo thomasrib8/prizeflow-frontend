@@ -48,7 +48,7 @@ function usePwaManifest() {
 /// A phone-only, single-purpose shell for a sales rep working a booth:
 /// capture a lead (typed or scanned from a badge), watch the live queue, and
 /// annotate whoever just played — nothing else. Meant to be installed to a
-/// home screen from this exact URL (sparkapp360.com/pwa) rather than used in
+/// home screen from this exact URL (app.sparkapp360.com/pwa) rather than used in
 /// a regular browser tab; see usePwaManifest above for why installing from
 /// here scopes the shortcut to just this page. Reuses the same data/actions
 /// as the full Launch page (useLaunchQueue) but never the QR code or the

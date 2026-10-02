@@ -5,11 +5,15 @@ import { Button } from './ui';
 
 // Shown from the Dashboard's "Download the app" button. Scanning the QR
 // (or opening the link) takes a sales rep straight to the installable
-// booth shell (LaunchPWA.jsx) at sparkapp360.com/pwa — not the main site.
+// booth shell (LaunchPWA.jsx) at app.sparkapp360.com/pwa — not the main site.
+// The public URL is fixed in production (not window.location.origin) so the
+// QR is right even if the dashboard is opened from an old address.
+const APP_ORIGIN = import.meta.env.PROD ? 'https://app.sparkapp360.com' : window.location.origin;
+
 export default function DownloadAppModal({ onClose }) {
   const { t } = useTranslation('admin');
   const [qrDataUrl, setQrDataUrl] = useState(null);
-  const pwaUrl = `${window.location.origin}/pwa`;
+  const pwaUrl = `${APP_ORIGIN}/pwa`;
 
   useEffect(() => {
     QRCode.toDataURL(pwaUrl, { width: 280, margin: 1 }).then(setQrDataUrl).catch(() => {});
@@ -25,7 +29,7 @@ export default function DownloadAppModal({ onClose }) {
         </p>
 
         {qrDataUrl ? (
-          <img src={qrDataUrl} alt="QR code to sparkapp360.com/pwa" style={{ width: 200, height: 200 }} />
+          <img src={qrDataUrl} alt="QR code to app.sparkapp360.com/pwa" style={{ width: 200, height: 200 }} />
         ) : (
           <div style={{ width: 200, height: 200, margin: '0 auto' }} />
         )}

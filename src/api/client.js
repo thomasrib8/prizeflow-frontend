@@ -1,9 +1,7 @@
+import { getToken, setToken, dropToken } from './tokenStore';
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
 const WS_BASE = import.meta.env.VITE_WS_BASE_URL || API_BASE.replace(/^http/, 'ws');
 
-function getToken() {
-  return localStorage.getItem('prizeflow_token');
-}
 
 async function request(path, { method = 'GET', body, auth = true } = {}) {
   const headers = { 'Content-Type': 'application/json' };
@@ -22,7 +20,7 @@ async function request(path, { method = 'GET', body, auth = true } = {}) {
   // hands back a fresh token once the current one is past half its life, so
   // an operator actively using SPARK never hits the 12h wall mid-shift.
   const refreshedToken = res.headers.get('X-Refreshed-Token');
-  if (refreshedToken) localStorage.setItem('prizeflow_token', refreshedToken);
+  if (refreshedToken) setToken(refreshedToken);
   let data = null;
   try {
     data = await res.json();
@@ -46,10 +44,9 @@ async function request(path, { method = 'GET', body, auth = true } = {}) {
     // would silently rip out that brand-new, perfectly valid session right
     // out from under them and bounce them straight back to /login — which
     // is exactly the "I log in and it immediately kicks me out" symptom.
-    // Only act when the token that just failed is still the one in storage.
+    // Only act when the token that just failed is still this tab's session.
     if (getToken() === tokenForThisRequest) {
-      localStorage.removeItem('prizeflow_token');
-      localStorage.removeItem('prizeflow_user');
+      dropToken(tokenForThisRequest);
       const returnTo = encodeURIComponent(window.location.pathname + window.location.search);
       window.location.href = `/login?returnTo=${returnTo}`;
     }
