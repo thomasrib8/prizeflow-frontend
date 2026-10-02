@@ -38,6 +38,14 @@ export function getToken() {
   return memoryToken;
 }
 
+// A token handed back by the server's sliding-session renewal. Only taken if
+// it is NEWER than the one we already hold: a replayed/cached response (or a
+// slow stale one) carrying an older renewed token must never replace a fresher
+// session.
+export function adoptRefreshedToken(token) {
+  if (tokenIat(token) > tokenIat(memoryToken)) setToken(token);
+}
+
 export function setToken(token) {
   memoryToken = token || null;
   if (token) safeSet(TOKEN_KEY, token);

@@ -1,4 +1,4 @@
-import { getToken, setToken, dropToken } from './tokenStore';
+import { getToken, adoptRefreshedToken, dropToken } from './tokenStore';
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
 const WS_BASE = import.meta.env.VITE_WS_BASE_URL || API_BASE.replace(/^http/, 'ws');
 
@@ -11,16 +11,21 @@ async function request(path, { method = 'GET', body, auth = true } = {}) {
   // distinction matters.
   const tokenForThisRequest = auth ? getToken() : null;
   if (tokenForThisRequest) headers.Authorization = `Bearer ${tokenForThisRequest}`;
+  // cache: 'no-store' — never let the browser's HTTP cache answer (or
+  // revalidate) an API call: a cached response would replay an old
+  // X-Refreshed-Token header (see the matching note in the backend's
+  // server.js).
   const res = await fetch(`${API_BASE}${path}`, {
     method,
     headers,
     body: body ? JSON.stringify(body) : undefined,
+    cache: 'no-store',
   });
   // Sliding session (see backend auth.js requireAuth): the server quietly
   // hands back a fresh token once the current one is past half its life, so
   // an operator actively using SPARK never hits the 12h wall mid-shift.
   const refreshedToken = res.headers.get('X-Refreshed-Token');
-  if (refreshedToken) setToken(refreshedToken);
+  if (refreshedToken) adoptRefreshedToken(refreshedToken);
   let data = null;
   try {
     data = await res.json();
@@ -67,6 +72,7 @@ async function downloadFile(path) {
   const token = getToken();
   const res = await fetch(`${API_BASE}${path}`, {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
+    cache: 'no-store',
   });
   if (!res.ok) {
     let message = `Request failed (${res.status})`;
