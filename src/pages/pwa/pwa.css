@@ -227,7 +227,7 @@
 
 /* ── Bottom navigation ────────────────────────────────────────────────── */
 .pw-nav {
-  position: fixed; left: 0; right: 0; bottom: 0; margin: 0 auto; z-index: 50; width: 100%; max-width: 480px;
+  position: fixed; left: 0; right: 0; bottom: calc(var(--pw-gap, 0px) * -1); margin: 0 auto; z-index: 50; width: 100%; max-width: 480px;
   height: calc(var(--pw-nav-h) + env(safe-area-inset-bottom, 0px)); padding: 8px 8px env(safe-area-inset-bottom, 0px);
   display: grid; grid-template-columns: 1fr 1fr 82px 1fr 1fr; align-items: end;
   background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
@@ -287,3 +287,10 @@
 .pw-shell .pw-settings-form input[type='checkbox']:checked { background: #0055F8; }
 .pw-shell .pw-settings-form input[type='checkbox']:checked::after { transform: translateX(18px); }
 .pw-shell .pw-settings-form label:has(> input[type='checkbox']) { justify-content: space-between; gap: 14px; }
+
+/* Applied to <html> while the PWA is mounted (see useStandaloneViewportFix).
+   The global html/body overflow-x:hidden + height:100% turns body into a
+   scroll container, which on iOS standalone shortens the area position:fixed
+   is measured against. overflow-x: clip hides sideways overflow without
+   creating a scroll container. Desktop pages are untouched. */
+html.pw-root, html.pw-root body, html.pw-root #root { height: auto; min-height: 100%; overflow-x: clip; overflow-y: visible; background: #F3F6FC; }
