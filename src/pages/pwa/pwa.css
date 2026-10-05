@@ -227,7 +227,7 @@
 
 /* ── Bottom navigation ────────────────────────────────────────────────── */
 .pw-nav {
-  position: fixed; left: 50%; bottom: 0; transform: translateX(-50%); z-index: 50; width: 100%; max-width: 480px;
+  position: fixed; left: 0; right: 0; bottom: 0; margin: 0 auto; z-index: 50; width: 100%; max-width: 480px;
   height: calc(var(--pw-nav-h) + env(safe-area-inset-bottom, 0px)); padding: 8px 8px env(safe-area-inset-bottom, 0px);
   display: grid; grid-template-columns: 1fr 1fr 82px 1fr 1fr; align-items: end;
   background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
@@ -259,3 +259,31 @@
 .pw-shell .modal-card { padding-top: calc(20px + env(safe-area-inset-top, 0px)); padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)); }
 @media (min-width: 561px) { .pw-shell .modal-card { padding-top: 24px; } }
 .pw-shell input, .pw-shell textarea, .pw-shell select { font-size: 16px; } /* no iOS zoom-on-focus */
+
+/* Bar background that keeps painting below the layout viewport: on iOS
+   standalone the fixed viewport can end above the physical screen edge, which
+   left a visible strip under the bar. This extends the bar to the edge. */
+.pw-nav::after { content: ''; position: absolute; left: 0; right: 0; top: 100%; height: 240px; background: rgba(255, 255, 255, 0.96); }
+
+/* Status-bar cover: with the translucent iOS status bar the page draws under
+   the clock, so scrolled content must not show through there. */
+.pw-shell::before {
+  content: ''; position: fixed; top: 0; left: 0; right: 0; height: env(safe-area-inset-top, 0px);
+  background: #0055F8; z-index: 60; pointer-events: none;
+}
+
+/* Settings: checkboxes of the shared campaign-settings form shown as toggles
+   (scoped to the PWA — the desktop form keeps its checkboxes). */
+.pw-shell .pw-settings-form input[type='checkbox'] {
+  -webkit-appearance: none; appearance: none; flex-shrink: 0;
+  width: 46px !important; height: 28px !important; border-radius: 999px; margin: 0;
+  background: #CBD5E1; position: relative; cursor: pointer; transition: background 0.18s ease;
+  order: 2; margin-left: auto;
+}
+.pw-shell .pw-settings-form input[type='checkbox']::after {
+  content: ''; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%;
+  background: #fff; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.3); transition: transform 0.18s ease;
+}
+.pw-shell .pw-settings-form input[type='checkbox']:checked { background: #0055F8; }
+.pw-shell .pw-settings-form input[type='checkbox']:checked::after { transform: translateX(18px); }
+.pw-shell .pw-settings-form label:has(> input[type='checkbox']) { justify-content: space-between; gap: 14px; }
