@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
+import { Button } from './ui';
 import WheelDiagnosticsRows, { Row, since } from './WheelDiagnosticsRows';
 
 const POLL_MS = 5000;
@@ -38,7 +39,6 @@ export default function ConnectionDiagnosticsModal({ onClose, agentConnected, co
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
           <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#03041A' }}>{t('connectionDiagnostics.title')}</h3>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 18, color: '#94A3B8', cursor: 'pointer' }}>✕</button>
         </div>
 
         <Row tone={connectedSince ? (latencyTone(latencyMs)) : 'red'} title={t('connectionDiagnostics.tabletCloudTitle')}>
@@ -62,6 +62,10 @@ export default function ConnectionDiagnosticsModal({ onClose, agentConnected, co
         <p style={{ fontSize: 11, color: '#94A3B8', marginTop: 12, marginBottom: 0 }}>
           {t('connectionDiagnostics.autoRefreshNote')}
         </p>
+
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20 }}>
+          <Button variant="secondary" onClick={onClose} style={{ minWidth: 160, minHeight: 46 }}>{t('common.close')}</Button>
+        </div>
       </div>
     </div>
   );
