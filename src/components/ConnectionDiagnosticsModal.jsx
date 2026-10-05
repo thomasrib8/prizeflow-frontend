@@ -64,7 +64,7 @@ export default function ConnectionDiagnosticsModal({ onClose, agentConnected, co
         </p>
 
         <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20 }}>
-          <Button variant="secondary" onClick={onClose} style={{ minWidth: 160, minHeight: 46 }}>{t('common.close')}</Button>
+          <Button variant="secondary" onClick={onClose} style={{ minWidth: 160, minHeight: 46, justifyContent: 'center', textAlign: 'center' }}>{t('common.close')}</Button>
         </div>
       </div>
     </div>

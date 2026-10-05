@@ -294,3 +294,28 @@
    is measured against. overflow-x: clip hides sideways overflow without
    creating a scroll container. Desktop pages are untouched. */
 html.pw-root, html.pw-root body, html.pw-root #root { height: auto; min-height: 100%; overflow-x: clip; overflow-y: visible; background: #F3F6FC; }
+
+.pw-social-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.pw-social-chips span { display: inline-flex; align-items: center; gap: 7px; padding: 7px 12px; border-radius: 999px; background: #EEF3FF; color: #0055F8; font-size: 13.5px; font-weight: 700; }
+.pw-social-chips svg { width: 18px; height: 18px; }
+
+/* Forms inside the popups (sales form / ProspectCard, New prospect): every
+   field is exactly the card's width and the card never scrolls sideways.
+   Date/time inputs and long <select> options have an intrinsic width on
+   iOS that otherwise pushes some fields wider than the rest. */
+.pw-shell .modal-card { overflow-x: hidden; overflow-y: auto; overscroll-behavior-x: none; }
+.pw-shell .modal-card input:not([type='checkbox']):not([type='radio']),
+.pw-shell .modal-card select,
+.pw-shell .modal-card textarea {
+  display: block; width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box;
+}
+.pw-shell .modal-card input[type='date'],
+.pw-shell .modal-card input[type='time'],
+.pw-shell .modal-card input[type='datetime-local'],
+.pw-shell .modal-card input[type='month'],
+.pw-shell .modal-card input[type='week'] {
+  -webkit-appearance: none; appearance: none; min-height: 42px; text-align: left;
+}
+.pw-shell .modal-card input[type='date']::-webkit-date-and-time-value { text-align: left; }
+.pw-shell .modal-card .field, .pw-shell .modal-card label { min-width: 0; max-width: 100%; }
+.pw-shell .modal-card select { text-overflow: ellipsis; }

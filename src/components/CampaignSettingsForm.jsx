@@ -4,12 +4,20 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { Card } from './ui';
 
+// Line icons (24px, 1.8 stroke — same style as the PWA's menu icons) used by
+// the compact/mobile variant instead of emoji.
+const svgProps = { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': true, width: 20, height: 20 };
+const FacebookIcon = () => <svg {...svgProps}><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" /></svg>;
+const InstagramIcon = () => <svg {...svgProps}><rect x="2" y="2" width="20" height="20" rx="5" /><path d="M16 11.4A4 4 0 1 1 12.6 8 4 4 0 0 1 16 11.4z" /><path d="M17.5 6.5h.01" /></svg>;
+const LinkedinIcon = () => <svg {...svgProps}><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" /><rect x="2" y="9" width="4" height="12" /><circle cx="4" cy="4" r="2" /></svg>;
+const XIcon = () => <svg {...svgProps}><path d="M4 4l16 16M20 4 4 20" /></svg>;
+
 // Brand names — never translated. Keys match GET /account/settings.
 const SOCIAL_PLATFORMS = [
-  { key: 'facebookUrl', label: 'Facebook', icon: '📘' },
-  { key: 'instagramUrl', label: 'Instagram', icon: '📷' },
-  { key: 'linkedinUrl', label: 'LinkedIn', icon: '💼' },
-  { key: 'xUrl', label: 'X', icon: '✖️' },
+  { key: 'facebookUrl', label: 'Facebook', icon: '📘', Svg: FacebookIcon },
+  { key: 'instagramUrl', label: 'Instagram', icon: '📷', Svg: InstagramIcon },
+  { key: 'linkedinUrl', label: 'LinkedIn', icon: '💼', Svg: LinkedinIcon },
+  { key: 'xUrl', label: 'X', icon: '✖️', Svg: XIcon },
 ];
 
 export const DEFAULT_CAMPAIGN_SETTINGS = {
@@ -41,7 +49,9 @@ const warnStyle = { background: '#FFFBEB', border: '1px solid #FDE68A', borderRa
 //
 // `value` is controlled by the parent; `onChange(patch)` receives only the
 // changed fields so the parent can merge them into its own state.
-export default function CampaignSettingsForm({ value, onChange }) {
+// `compact` is the mobile (PWA) presentation: same fields and behaviour, but
+// without the explanatory paragraphs and with line icons instead of emoji.
+export default function CampaignSettingsForm({ value, onChange, compact = false }) {
   const { t } = useTranslation('admin');
   const [account, setAccount] = useState(null);
   const [aiConfigured, setAiConfigured] = useState(null);
@@ -70,17 +80,24 @@ export default function CampaignSettingsForm({ value, onChange }) {
   return (
     <>
       <Card title={t('campaignSettings.googleReviewTitle')} className="mt-card">
-        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px', lineHeight: 1.6 }}>
-          {t('campaignSettings.googleReviewDesc')}
-        </p>
+        {!compact && (
+          <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px', lineHeight: 1.6 }}>
+            {t('campaignSettings.googleReviewDesc')}
+          </p>
+        )}
         <div className="field">
-          <label>{t('campaignSettings.googleReviewModeLabel')}</label>
-          <select value={value.googleReviewMode} onChange={(e) => onChange({ googleReviewMode: e.target.value })} style={selectStyle}>
+          {!compact && <label>{t('campaignSettings.googleReviewModeLabel')}</label>}
+          <select
+            aria-label={t('campaignSettings.googleReviewModeLabel')}
+            value={value.googleReviewMode}
+            onChange={(e) => onChange({ googleReviewMode: e.target.value })}
+            style={selectStyle}
+          >
             <option value="off">{t('settings.googleReview.reviewOptionOff')}</option>
             <option value="before">{t('settings.googleReview.beforeGameLabel')}</option>
             <option value="after">{t('settings.googleReview.afterGameLabel')}</option>
           </select>
-          {reviewOn && (
+          {reviewOn && !compact && (
             <div style={hintStyle}>
               {value.googleReviewMode === 'before' ? t('settings.googleReview.beforeGameDesc') : t('settings.googleReview.afterGameDesc')}
             </div>
@@ -105,11 +122,13 @@ export default function CampaignSettingsForm({ value, onChange }) {
                 {t('campaignSettings.useDefaultLinkBtn')}
               </button>
             )}
-            <div style={hintStyle}>{accountUrl ? t('campaignSettings.linkDefaultHint') : t('campaignSettings.linkMissingHint')}</div>
+            {(!compact || !accountUrl) && (
+              <div style={hintStyle}>{accountUrl ? t('campaignSettings.linkDefaultHint') : t('campaignSettings.linkMissingHint')}</div>
+            )}
           </div>
         )}
 
-        {reviewOn && (
+        {reviewOn && !compact && (
           <p style={{ fontSize: 12, color: '#64748B', margin: 0, lineHeight: 1.5 }}>
             {t('settings.googleReview.neverConditionNote')}
           </p>
@@ -117,9 +136,11 @@ export default function CampaignSettingsForm({ value, onChange }) {
       </Card>
 
       <Card title={t('campaignSettings.socialTitle')} className="mt-card">
-        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px', lineHeight: 1.6 }}>
-          {t('campaignSettings.socialDesc')}
-        </p>
+        {!compact && (
+          <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px', lineHeight: 1.6 }}>
+            {t('campaignSettings.socialDesc')}
+          </p>
+        )}
         <label style={{ display: 'flex', gap: 10, alignItems: 'center', cursor: 'pointer', marginBottom: 12 }}>
           <input
             type="checkbox"
@@ -129,7 +150,12 @@ export default function CampaignSettingsForm({ value, onChange }) {
           />
           <span style={{ fontSize: 14, fontWeight: 600 }}>{t('campaignSettings.socialToggleLabel')}</span>
         </label>
-        {account && configuredSocials.length > 0 && (
+        {account && configuredSocials.length > 0 && compact && (
+          <div className="pw-social-chips">
+            {configuredSocials.map((p) => <span key={p.key}><p.Svg />{p.label}</span>)}
+          </div>
+        )}
+        {account && configuredSocials.length > 0 && !compact && (
           <div style={{ fontSize: 13, color: '#64748B' }}>
             {t('campaignSettings.socialLinksUsed')}{' '}
             {configuredSocials.map((p) => `${p.icon} ${p.label}`).join(' · ')}
@@ -144,9 +170,11 @@ export default function CampaignSettingsForm({ value, onChange }) {
       </Card>
 
       <Card title={t('campaignSettings.aiTitle')} className="mt-card">
-        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px', lineHeight: 1.6 }}>
-          {t('campaignSettings.aiDesc')}
-        </p>
+        {!compact && (
+          <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px', lineHeight: 1.6 }}>
+            {t('campaignSettings.aiDesc')}
+          </p>
+        )}
         {aiConfigured === false && (
           <div style={{ ...warnStyle, marginBottom: 14 }}>{t('settings.aiAssistant.notConfiguredWarning')}</div>
         )}

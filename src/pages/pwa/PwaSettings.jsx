@@ -86,6 +86,7 @@ export default function PwaSettings() {
           {settings && (
             <div className="pw-settings-form">
               <CampaignSettingsForm
+                compact
                 value={settings}
                 onChange={(patch) => { setSettings((s) => ({ ...s, ...patch })); setDirty(true); setSaved(false); }}
               />
