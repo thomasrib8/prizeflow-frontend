@@ -6,7 +6,7 @@ const POLL_MAX_ATTEMPTS = 8; // ~12s — comfortably past Hunter's own 10s serve
 const DISMISS_MS = 6000;
 
 /// The "✓ X added" toast shown after New prospect saves, shared by the
-/// desktop Launch page and the PWA shell (LaunchCampaign.jsx / LaunchPWA.jsx)
+/// desktop Launch page and the PWA app (LaunchCampaign.jsx / pages/pwa/PwaLayout.jsx)
 /// so the two don't drift. When the backend kicked off an automatic Hunter
 /// email lookup (POST /prospects's emailEnrichment flag — see
 /// NewProspectModal), polls for the result and updates the same toast in

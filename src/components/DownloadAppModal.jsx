@@ -5,7 +5,7 @@ import { Button } from './ui';
 
 // Shown from the Dashboard's "Download the app" button. Scanning the QR
 // (or opening the link) takes a sales rep straight to the installable
-// booth shell (LaunchPWA.jsx) at app.sparkapp360.com/pwa — not the main site.
+// booth app (pages/pwa/) at app.sparkapp360.com/pwa — not the main site.
 // The public URL is fixed in production (not window.location.origin) so the
 // QR is right even if the dashboard is opened from an old address.
 const APP_ORIGIN = import.meta.env.PROD ? 'https://app.sparkapp360.com' : window.location.origin;

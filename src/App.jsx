@@ -14,7 +14,11 @@ import EditCampaignSettings from './pages/EditCampaignSettings';
 import CampaignSettings from './pages/CampaignSettings';
 import CampaignDetail from './pages/CampaignDetail';
 import LaunchCampaign from './pages/LaunchCampaign';
-import LaunchPWA from './pages/LaunchPWA';
+import PwaLayout from './pages/pwa/PwaLayout';
+import PwaHome from './pages/pwa/PwaHome';
+import PwaProspects from './pages/pwa/PwaProspects';
+import PwaAnalytics from './pages/pwa/PwaAnalytics';
+import PwaSettings from './pages/pwa/PwaSettings';
 import Guest from './pages/Guest';
 import RedeemPage from './pages/RedeemPage';
 import Rewards from './pages/Rewards';
@@ -67,12 +71,20 @@ export default function App() {
               wrapped in PrivateRoute: it's its own full-screen page (not the
               app shell) that redirects to /login itself if not signed in. */}
           <Route path="/redeem/:code" element={<RedeemPage />} />
-          {/* The installable sales-rep shell (see LaunchPWA.jsx) — its own
-              full-screen page, not the sidebar app shell, and not wrapped in
-              PrivateRoute: it gates and redirects to /login itself (same
-              pattern as /redeem/:code above) so "Add to Home Screen" from
-              here opens straight into this page, never the sidebar. */}
-          <Route path="/pwa" element={<LaunchPWA />} />
+          {/* The installable sales-rep app (pages/pwa/) — its own full-screen
+              mobile shell, not the sidebar app shell, and not wrapped in
+              PrivateRoute: PwaLayout gates and redirects to /login itself
+              (returnTo included, same pattern as /redeem/:code above) so
+              "Add to Home Screen" opens straight into /pwa/home, never the
+              sidebar. */}
+          <Route path="/pwa" element={<PwaLayout />}>
+            <Route index element={<Navigate to="home" replace />} />
+            <Route path="home" element={<PwaHome />} />
+            <Route path="prospects" element={<PwaProspects />} />
+            <Route path="analytics" element={<PwaAnalytics />} />
+            <Route path="settings" element={<PwaSettings />} />
+            <Route path="*" element={<Navigate to="/pwa/home" replace />} />
+          </Route>
           <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
           <Route path="/campaigns" element={<PrivateRoute><Campaigns /></PrivateRoute>} />
           <Route path="/campaigns/new" element={<PrivateRoute><NewCampaign /></PrivateRoute>} />

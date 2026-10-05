@@ -39,7 +39,7 @@ function KioskOverlay({ token, onClose }) {
 // active — each campaign has its own token (so guests from a past campaign
 // never collide with a new one) — plus a "Spin the wheel" button that opens
 // the same guest flow full-screen on this device, for walk-up guests without
-// a phone. See LaunchPWA.jsx for the phone-only, QR-less equivalent meant to
+// a phone. See pages/pwa/ for the phone-only, QR-less equivalent meant to
 // be installed as its own home-screen app for a sales rep.
 export default function LaunchCampaign() {
   const { t } = useTranslation('admin');

@@ -11,7 +11,7 @@ import './Layout.css';
 // Native-language labels, same as NewCampaign.jsx/EditCampaign.jsx's guest
 // LANGUAGE_OPTIONS — a language switcher always shows each option in its
 // own language, never translated into whichever one is currently active.
-const ADMIN_LANGUAGE_OPTIONS = [
+export const ADMIN_LANGUAGE_OPTIONS = [
   { value: 'en', label: 'English' },
   { value: 'fr', label: 'Français' },
   { value: 'es', label: 'Español' },
