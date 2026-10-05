@@ -45,36 +45,16 @@ function usePwaManifest() {
   }, []);
 }
 
-// iOS home-screen apps can lay the page out on a viewport shorter than the
-// screen (the bottom of the page then stops above the screen edge, so a
-// position:fixed bottom bar floats). Two defences while the PWA is mounted:
-// 1. html/body/#root stop being overflow-x:hidden scroll containers (which is
-//    what breaks fixed positioning on iOS) — see .pw-root in pwa.css;
-// 2. on iOS standalone only, measure the real gap between the layout
-//    viewport and the physical screen and push the bar down by exactly that,
-//    per phone (--pw-gap). Android is left alone: there screen.height
-//    includes system bars the page can't draw under.
-function useStandaloneViewportFix() {
+// iOS home-screen apps measure position:fixed against a viewport that stops
+// short of the screen edge when html/body are overflow-x:hidden scroll
+// containers (index.css), which left the bottom bar floating above the edge.
+// While the PWA is mounted, <html> gets .pw-root (see pwa.css) so those
+// containers go away; the desktop app is untouched.
+function usePwaRootClass() {
   useEffect(() => {
     const root = document.documentElement;
     root.classList.add('pw-root');
-    const isIosStandalone = window.navigator.standalone === true;
-    function measure() {
-      if (!isIosStandalone) { root.style.removeProperty('--pw-gap'); return; }
-      const gap = Math.round(window.screen.height - window.innerHeight);
-      // Only ever a small strip (status-bar / home-indicator sized); anything
-      // else (rotation, keyboard) is not this bug.
-      root.style.setProperty('--pw-gap', `${gap > 0 && gap <= 110 ? gap : 0}px`);
-    }
-    measure();
-    window.addEventListener('resize', measure);
-    window.addEventListener('orientationchange', measure);
-    return () => {
-      window.removeEventListener('resize', measure);
-      window.removeEventListener('orientationchange', measure);
-      root.classList.remove('pw-root');
-      root.style.removeProperty('--pw-gap');
-    };
+    return () => root.classList.remove('pw-root');
   }, []);
 }
 
@@ -88,7 +68,7 @@ function PwaShell() {
   const { t } = useTranslation('admin');
   const navigate = useNavigate();
   usePwaManifest();
-  useStandaloneViewportFix();
+  usePwaRootClass();
 
   const { agentConnected, connectedSince, latencyMs } = useWheelSocket();
   const q = useLaunchQueue({ watch: true });
