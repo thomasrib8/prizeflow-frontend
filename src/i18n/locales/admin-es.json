@@ -18,7 +18,6 @@
     "done": "Hecho",
     "save": "Guardar",
     "saved": "Guardado",
-    "noCampaignsYet": "Aún no hay campañas.",
     "statusAll": "Todas",
     "statusDraft": "Borrador",
     "statusActive": "Activa",
@@ -393,7 +392,8 @@
     "deleteWarningSuffix": "y todos los datos asociados: regalos, historial de distribución, y cada lead / ficha CRM capturado para esta campaña. No se puede deshacer.",
     "typeToConfirm": "Escribe el nombre de la campaña para confirmar:",
     "deletingBtn": "Eliminando…",
-    "deletePermanentlyBtn": "Eliminar permanentemente"
+    "deletePermanentlyBtn": "Eliminar permanentemente",
+    "editSettingsBtn": "Editar ajustes"
   },
   "editCampaign": {
     "archivedReadOnlyError": "Las campañas archivadas son de solo lectura.",
@@ -426,7 +426,7 @@
   },
   "newCampaign": {
     "pageTitle": "Nueva campaña",
-    "stepOf": "Paso {{step}} de 3 — {{label}}",
+    "stepOf": "Paso {{step}} de {{total}} — {{label}}",
     "step1Label": "Regalos",
     "step2Label": "Segmentación y formulario comercial",
     "step3Label": "Formulario de invitado",
@@ -464,7 +464,8 @@
     "categoryNeedsNameError": "Cada categoría de segmentación necesita un nombre",
     "categoryNeedsOptionError": "La categoría «{{name}}» necesita al menos una opción",
     "fieldNeedsLabelError": "Cada campo personalizado necesita una etiqueta",
-    "copyOfPrefix": "Copia de {{name}}"
+    "copyOfPrefix": "Copia de {{name}}",
+    "step4Label": "Ajustes"
   },
   "builders": {
     "categoryNamePlaceholder": "Nombre de la categoría — p. ej. Presupuesto",
@@ -657,32 +658,24 @@
       "sendingBtn": "Enviando…"
     },
     "googleReview": {
-      "googleReviewLinkTitle": "Enlace de reseña de Google",
-      "googleReviewLinkDesc1": "Los invitados que ganaron un regalo son invitados opcionalmente a abrir este enlace después. Pega el enlace a tu página de Google donde la gente puede dejar una reseña.",
+      "googleReviewLinkTitle": "Enlace de reseña de Google predeterminado",
+      "googleReviewLinkDesc1": "El enlace usado para la invitación a dejar una reseña de Google en tus campañas. Si se muestra la invitación (y, si quieres, otro enlace solo para esa campaña) se elige en los Ajustes de cada campaña. Pega el enlace de tu página de Google donde se pueden dejar reseñas.",
       "howToGetItLabel": "Cómo obtenerlo:",
       "howToGetItText1": "busca el nombre de tu negocio en Google Búsqueda o Maps → abre tu perfil de negocio → haz clic en",
       "askForReviewsLabel": "«Solicitar reseñas»",
       "howToGetItText2": "(o el icono de compartir junto a tu valoración) → copia el enlace que te da. Se parece a",
       "howToGetItText3": "Pégalo abajo.",
       "watchVideoLink": "¿No sabes dónde encontrarlo? Mira este vídeo rápido →",
-      "inviteForReviewTitle": "Invitación a una reseña de Google",
-      "inviteForReviewDesc": "Por campaña, elige cuándo se invita a los invitados a dejar una reseña de Google:",
       "beforeGameLabel": "Antes del juego",
       "beforeGameDesc": "— justo después de que un invitado envíe el formulario, una pantalla «Déjanos una reseña de Google» abre la página de reseñas en una nueva pestaña. Si no hace clic, la pantalla desaparece sola tras 15 segundos y continúa hacia el juego (la rueda o la cola de espera).",
       "afterGameLabel": "Después del juego",
       "afterGameDesc": "— se muestra un botón «Dejar una reseña» una vez ganado el regalo.",
       "neverConditionNote": "Nunca es una condición para jugar o reclamar la recompensa — las políticas de Google prohíben condicionar un juego o recompensa a dejar una reseña, incluso como filtro no verificado.",
-      "reviewSelectAriaLabel": "Invitación a reseña de Google para {{name}}",
-      "reviewOptionOff": "Sin invitación a reseña",
-      "setLinkFirstWarning": "Define un enlace de reseña de Google arriba antes de activar esto en una campaña."
+      "reviewOptionOff": "Sin invitación a reseña"
     },
     "socialMedia": {
       "socialLinksTitle": "Enlaces de redes sociales",
-      "socialLinksDesc": "Los invitados que ganaron un regalo son invitados opcionalmente a seguirte después. Solo las plataformas con un enlace rellenado abajo mostrarán un botón — deja uno en blanco para omitirlo por completo.",
-      "inviteToFollowTitle": "Invitación a seguir tras girar",
-      "inviteToFollowDesc": "Por campaña — cuando está activado, los invitados ven botones opcionales «Síguenos» una vez ganado su regalo, junto a la invitación a reseña de Google si también está activada. Nunca una condición para jugar.",
-      "inviteToFollowCheckboxLabel": "Invitar a seguir",
-      "setLinkFirstWarningSocial": "Define al menos un enlace de red social arriba antes de activar esto en una campaña."
+      "socialLinksDesc": "Estos enlaces los usan todas las campañas que tengan activada la invitación a redes sociales (en los Ajustes de la campaña). Solo las plataformas con un enlace rellenado abajo mostrarán un botón — deja uno en blanco para omitirlo."
     },
     "emailTemplates": {
       "headerLogoTitle": "Logo de cabecera",
@@ -711,9 +704,8 @@
     },
     "aiAssistant": {
       "title": "Asistente IA",
-      "description": "Lee la nota guardada de un prospecto y propone actualizaciones del CRM — haciendo coincidir una categoría de segmentación de tu campaña, un campo comercial, una valoración de lead, o una etiqueta sugerida cuando nada más encaja — además de sugerencias de información faltante y próximas acciones. Nada se aplica nunca a la ficha de un prospecto sin que un comercial haga clic en Aceptar, en cualquiera de los modos siguientes.",
+      "description": "Lee la nota guardada de un prospecto y propone actualizaciones del CRM — relacionándola con una de las categorías de segmentación de tu campaña, un campo comercial, una valoración de potencial o una etiqueta sugerida cuando nada más encaja — además de información que falta y próximas acciones. Nunca se aplica nada a la ficha de un prospecto sin que un comercial pulse Aceptar, en cualquiera de los dos modos. Actívalo campaña por campaña, en los Ajustes de la campaña.",
       "notConfiguredWarning": "El asistente IA aún no está configurado en este despliegue — activarlo aquí no hará nada hasta que lo esté.",
-      "enableCheckboxLabel": "Activar el asistente IA para esta cuenta",
       "modeLabel": "Modo",
       "modeSupervised": "Supervisado — un comercial revisa y acepta cada propuesta",
       "modeAutomatic": "Automático — próximamente (actualmente se comporta igual que Supervisado)"
@@ -946,5 +938,26 @@
     "forcingCaseLabel": "⟳ Forzando el caso {{n}} — gira la rueda ahora ({{position}}/{{total}})",
     "sequenceCompleteLabel": "✓ Secuencia completa — rueda libre",
     "stopSequenceBtn": "Detener secuencia"
+  },
+  "campaignSettings": {
+    "googleReviewTitle": "Reseña de Google",
+    "googleReviewDesc": "Invita a los visitantes a dejar una reseña de Google sobre tu negocio. Elige cuándo aparece la invitación, o déjala desactivada para esta campaña.",
+    "googleReviewModeLabel": "Invitación a dejar una reseña",
+    "linkLabel": "Enlace de la reseña de Google",
+    "linkDefaultHint": "Rellenado con el enlace de los Ajustes de la app. Edítalo para usar otro enlace solo en esta campaña — el enlace de tus Ajustes no cambia.",
+    "linkMissingHint": "Aún no hay un enlace predeterminado en los Ajustes de la app. Pega aquí el enlace de esta campaña (también puedes definir uno predeterminado en Ajustes).",
+    "useDefaultLinkBtn": "Usar el enlace de Ajustes",
+    "googleReviewLinkRequiredError": "Añade un enlace de reseña de Google para activar la invitación.",
+    "socialTitle": "Redes sociales",
+    "socialDesc": "Invita a los visitantes a seguirte cuando ganen su regalo. Los botones usan los enlaces de redes sociales de los Ajustes de la app — no se pueden cambiar para una sola campaña.",
+    "socialToggleLabel": "Invitar a los visitantes a seguirnos en redes sociales",
+    "socialLinksUsed": "Botones mostrados:",
+    "socialNoLinksWarning": "Aún no hay ningún enlace de redes sociales en los Ajustes de la app, así que no aparecería ningún botón.",
+    "manageInSettingsLink": "Gestionar enlaces en Ajustes →",
+    "aiTitle": "Asistente de IA",
+    "aiDesc": "Lee la nota que un comercial guarda sobre un prospecto y propone actualizaciones del CRM para esta campaña. Nunca se aplica nada sin que un comercial pulse Aceptar.",
+    "aiToggleLabel": "Activar el asistente de IA para esta campaña",
+    "editPageTitle": "Ajustes — {{name}}",
+    "editPageSubtitle": "Invitación a la reseña de Google, invitación a redes sociales y asistente de IA para esta campaña."
   }
 }

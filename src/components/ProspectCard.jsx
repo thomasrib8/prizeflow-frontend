@@ -5,7 +5,6 @@ import { Button } from './ui';
 import DynamicFieldInput from './DynamicFieldInput';
 import EmailStatusBadge from './EmailStatusBadge';
 import AISuggestionsPanel from './AISuggestionsPanel';
-import { useAuth } from '../context/AuthContext';
 import { isPlaceholderEmail } from '../utils/placeholderEmail';
 
 // Chrome/Edge only (webkitSpeechRecognition) — Safari/Firefox don't support
@@ -38,7 +37,6 @@ function formatFieldValue(field, raw, t) {
 // up-to-date info regardless of how stale the caller's own list was.
 export default function ProspectCard({ campaignId, guest, initialMode = 'edit', onClose, onSaved }) {
   const { t } = useTranslation('admin');
-  const { user } = useAuth();
   const [mode, setMode] = useState(initialMode);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -74,6 +72,8 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
   const [aiSuggestions, setAiSuggestions] = useState(null);
   const [aiAnalyzedNote, setAiAnalyzedNote] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
+  // Whether the AI assistant is on for THIS campaign (campaign Settings).
+  const [aiEnabled, setAiEnabled] = useState(false);
 
   function load() {
     setLoading(true);
@@ -88,6 +88,7 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
         setPendingGift(guestNote.pendingGift || null);
         setConsentInfo(guestNote.consent || null);
         setSegmentCategories(campaign.segmentCategories || []);
+        setAiEnabled(!!campaign.ai_assistant_enabled);
         setNote(guestNote.note || '');
         setLeadRating(guestNote.leadRating ?? null);
         setSegments(guestNote.segments || {});
@@ -126,8 +127,8 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
   noteRef.current = note;
   const aiAnalyzedNoteRef = useRef(aiAnalyzedNote);
   aiAnalyzedNoteRef.current = aiAnalyzedNote;
-  const aiAssistantEnabledRef = useRef(user?.aiAssistantEnabled);
-  aiAssistantEnabledRef.current = user?.aiAssistantEnabled;
+  const aiAssistantEnabledRef = useRef(false);
+  aiAssistantEnabledRef.current = aiEnabled;
   const handleAnalyzeRef = useRef(null);
 
   function clearSilenceTimer() {
@@ -220,7 +221,7 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
       // is a fast tap-through at a booth), so the analysis isn't awaited or
       // shown here — it finishes in the background and is already waiting,
       // stored on the note, the next time anyone opens this prospect's card.
-      if (user?.aiAssistantEnabled && trimmedNote && trimmedNote !== aiAnalyzedNote) {
+      if (aiEnabled && trimmedNote && trimmedNote !== aiAnalyzedNote) {
         api.analyzeGuestNote({ campaignId, email: guest.email }).catch(() => {});
       }
       onSaved?.();
@@ -470,7 +471,7 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
               </div>
             )}
 
-            {user?.aiAssistantEnabled && note && (
+            {aiEnabled && note && (
               <AISuggestionsPanel
                 suggestions={aiSuggestions}
                 analyzedNote={aiAnalyzedNote}
@@ -582,13 +583,13 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
             {/* Explicit fallback for whenever the automatic trigger (on Save,
                 or right when a voice note finishes recording) didn't fire —
                 e.g. the note was typed rather than dictated. */}
-            {user?.aiAssistantEnabled && note.trim() && (
+            {aiEnabled && note.trim() && (
               <Button type="button" variant="secondary" size="sm" disabled={analyzing} onClick={handleAnalyze} style={{ marginTop: 10 }}>
                 {analyzing ? t('aiSuggestionsPanel.analyzing') : t('prospectCard.analyzeNowBtn')}
               </Button>
             )}
 
-            {user?.aiAssistantEnabled && note && (
+            {aiEnabled && note && (
               <AISuggestionsPanel
                 suggestions={aiSuggestions}
                 analyzedNote={aiAnalyzedNote}

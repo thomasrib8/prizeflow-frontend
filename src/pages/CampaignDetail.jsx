@@ -134,6 +134,9 @@ export default function CampaignDetail() {
             <Button variant="secondary" onClick={() => navigate(`/campaigns/${campaign.id}/edit-settings`)}>{t('campaignDetail.editSegmentationBtn')}</Button>
           )}
           {campaign.status !== 'archived' && (
+            <Button variant="secondary" onClick={() => navigate(`/campaigns/${campaign.id}/settings`)}>{t('campaignDetail.editSettingsBtn')}</Button>
+          )}
+          {campaign.status !== 'archived' && (
             <Button variant="secondary" onClick={() => navigate(`/campaigns/new?from=${campaign.id}`)}>{t('campaignDetail.duplicateBtn')}</Button>
           )}
           {isAdmin && !!campaign.is_test && (

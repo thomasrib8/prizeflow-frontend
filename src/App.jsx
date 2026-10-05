@@ -11,6 +11,7 @@ import Campaigns from './pages/Campaigns';
 import NewCampaign from './pages/NewCampaign';
 import EditCampaign from './pages/EditCampaign';
 import EditCampaignSettings from './pages/EditCampaignSettings';
+import CampaignSettings from './pages/CampaignSettings';
 import CampaignDetail from './pages/CampaignDetail';
 import LaunchCampaign from './pages/LaunchCampaign';
 import LaunchPWA from './pages/LaunchPWA';
@@ -77,6 +78,7 @@ export default function App() {
           <Route path="/campaigns/new" element={<PrivateRoute><NewCampaign /></PrivateRoute>} />
           <Route path="/campaigns/:id/edit" element={<PrivateRoute><EditCampaign /></PrivateRoute>} />
           <Route path="/campaigns/:id/edit-settings" element={<PrivateRoute><EditCampaignSettings /></PrivateRoute>} />
+          <Route path="/campaigns/:id/settings" element={<PrivateRoute><CampaignSettings /></PrivateRoute>} />
           <Route path="/campaigns/:id" element={<PrivateRoute><CampaignDetail /></PrivateRoute>} />
           <Route path="/launch" element={<PrivateRoute><LaunchCampaign /></PrivateRoute>} />
           <Route path="/calibration" element={<PrivateRoute><Calibration /></PrivateRoute>} />

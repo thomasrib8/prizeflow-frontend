@@ -18,7 +18,6 @@
     "done": "Done",
     "save": "Save",
     "saved": "Saved",
-    "noCampaignsYet": "No campaigns yet.",
     "statusAll": "All",
     "statusDraft": "Draft",
     "statusActive": "Active",
@@ -393,7 +392,8 @@
     "deleteWarningSuffix": "and all associated data: gifts, distribution history, and every lead / CRM record captured for this campaign. This cannot be undone.",
     "typeToConfirm": "Type the campaign name to confirm:",
     "deletingBtn": "Deleting…",
-    "deletePermanentlyBtn": "Delete permanently"
+    "deletePermanentlyBtn": "Delete permanently",
+    "editSettingsBtn": "Edit settings"
   },
   "editCampaign": {
     "archivedReadOnlyError": "Archived campaigns are read-only.",
@@ -426,7 +426,7 @@
   },
   "newCampaign": {
     "pageTitle": "New campaign",
-    "stepOf": "Step {{step}} of 3 — {{label}}",
+    "stepOf": "Step {{step}} of {{total}} — {{label}}",
     "step1Label": "Gifts",
     "step2Label": "Segmentation & sales form",
     "step3Label": "Guest form",
@@ -464,7 +464,8 @@
     "categoryNeedsNameError": "Every segmentation category needs a name",
     "categoryNeedsOptionError": "Category \"{{name}}\" needs at least one option",
     "fieldNeedsLabelError": "Every custom field needs a label",
-    "copyOfPrefix": "Copy of {{name}}"
+    "copyOfPrefix": "Copy of {{name}}",
+    "step4Label": "Settings"
   },
   "builders": {
     "categoryNamePlaceholder": "Category name — e.g. Budget",
@@ -657,32 +658,24 @@
       "sendingBtn": "Sending…"
     },
     "googleReview": {
-      "googleReviewLinkTitle": "Google review link",
-      "googleReviewLinkDesc1": "Guests who won a gift are optionally invited to open this link afterwards. Paste the link to your Google page where people can leave a review.",
+      "googleReviewLinkTitle": "Default Google review link",
+      "googleReviewLinkDesc1": "The link used for the Google review invite in your campaigns. Whether the invite is shown (and, if you want, a different link for that campaign only) is chosen in each campaign's Settings. Paste the link to your Google page where people can leave a review.",
       "howToGetItLabel": "How to get it:",
       "howToGetItText1": "search your business name on Google Search or Maps → open your business profile → click",
       "askForReviewsLabel": "\"Ask for reviews\"",
       "howToGetItText2": "(or the share icon next to your rating) → copy the link it gives you. It looks like",
       "howToGetItText3": "Paste it below.",
       "watchVideoLink": "Not sure where to find it? Watch this quick video →",
-      "inviteForReviewTitle": "Invite for a Google review",
-      "inviteForReviewDesc": "Per campaign, choose when guests are invited to leave a Google review:",
       "beforeGameLabel": "Before the game",
       "beforeGameDesc": "— right after a guest submits the form, a \"Leave us a Google review\" screen opens the review page in a new tab. If they don't click it, the screen goes away by itself after 15 seconds and they continue to the game (the wheel or the waiting line).",
       "afterGameLabel": "After the game",
       "afterGameDesc": "— a \"Leave a review\" button is shown once their gift is won.",
       "neverConditionNote": "It's never a condition to play or to claim the reward — Google's policies prohibit tying a game or reward to leaving a review, even as an unverified gate.",
-      "reviewSelectAriaLabel": "Google review invite for {{name}}",
-      "reviewOptionOff": "No review invite",
-      "setLinkFirstWarning": "Set a Google review link above before enabling this on a campaign."
+      "reviewOptionOff": "No review invite"
     },
     "socialMedia": {
       "socialLinksTitle": "Social media links",
-      "socialLinksDesc": "Guests who won a gift are optionally invited to follow you afterwards. Only platforms with a link filled in below will ever show a button — leave one blank to skip it entirely.",
-      "inviteToFollowTitle": "Invite to follow after spinning",
-      "inviteToFollowDesc": "Per campaign — when enabled, guests see optional \"Follow us\" buttons once their gift is already won, alongside the Google review invite if that's also enabled. Never a condition to play.",
-      "inviteToFollowCheckboxLabel": "Invite to follow",
-      "setLinkFirstWarningSocial": "Set at least one social media link above before enabling this on a campaign."
+      "socialLinksDesc": "These links are used by every campaign that has the social media invite turned on (in that campaign's Settings). Only platforms with a link filled in below will ever show a button — leave one blank to skip it entirely."
     },
     "emailTemplates": {
       "headerLogoTitle": "Header logo",
@@ -711,9 +704,8 @@
     },
     "aiAssistant": {
       "title": "AI Assistant",
-      "description": "Reads a prospect's saved note and proposes CRM updates — matching one of your campaign's own segmentation categories, a sales field, a lead rating, or a suggested tag when nothing else fits — plus missing-info and next-action suggestions. Nothing is ever applied to a prospect's record without a rep clicking Accept, in either mode below.",
+      "description": "Reads a prospect's saved note and proposes CRM updates — matching one of your campaign's own segmentation categories, a sales field, a lead rating, or a suggested tag when nothing else fits — plus missing-info and next-action suggestions. Nothing is ever applied to a prospect's record without a rep clicking Accept, in either mode below. Turn it on per campaign, in that campaign's Settings.",
       "notConfiguredWarning": "The AI assistant isn't configured on this deployment yet — turning it on here won't do anything until it is.",
-      "enableCheckboxLabel": "Enable the AI assistant for this account",
       "modeLabel": "Mode",
       "modeSupervised": "Supervised — a rep reviews and accepts every proposal",
       "modeAutomatic": "Automatic — coming soon (currently behaves the same as Supervised)"
@@ -946,5 +938,26 @@
     "forcingCaseLabel": "⟳ Forcing Case {{n}} — spin the wheel now ({{position}}/{{total}})",
     "sequenceCompleteLabel": "✓ Sequence complete — wheel is free",
     "stopSequenceBtn": "Stop sequence"
+  },
+  "campaignSettings": {
+    "googleReviewTitle": "Google review",
+    "googleReviewDesc": "Invite guests to leave a Google review of your business. Choose when the invite appears, or leave it off for this campaign.",
+    "googleReviewModeLabel": "Review invite",
+    "linkLabel": "Google review link",
+    "linkDefaultHint": "Pre-filled with the link from your app Settings. Edit it to use a different link for this campaign only — the link in your Settings stays unchanged.",
+    "linkMissingHint": "No default link is set in your app Settings yet. Paste the link for this campaign here (you can also set a default in Settings).",
+    "useDefaultLinkBtn": "Use the link from Settings",
+    "googleReviewLinkRequiredError": "Add a Google review link to turn the review invite on.",
+    "socialTitle": "Social media",
+    "socialDesc": "Invite guests to follow you once their gift is won. The buttons use the social media links from your app Settings — they can't be changed for a single campaign.",
+    "socialToggleLabel": "Invite guests to follow us on social media",
+    "socialLinksUsed": "Buttons shown:",
+    "socialNoLinksWarning": "No social media link is set in your app Settings yet, so no button would appear.",
+    "manageInSettingsLink": "Manage links in Settings →",
+    "aiTitle": "AI assistant",
+    "aiDesc": "Reads the note a sales rep saves on a prospect and proposes CRM updates for this campaign. Nothing is ever applied without a rep clicking Accept.",
+    "aiToggleLabel": "Enable the AI assistant for this campaign",
+    "editPageTitle": "Settings — {{name}}",
+    "editPageSubtitle": "Google review invite, social media invite and AI assistant for this campaign."
   }
 }

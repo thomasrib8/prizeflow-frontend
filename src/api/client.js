@@ -194,10 +194,10 @@ export const api = {
   endCampaign: (id) => request(`/campaigns/${id}/end`, { method: 'POST' }),
   archiveCampaign: (id) => request(`/campaigns/${id}/archive`, { method: 'POST' }),
   deleteCampaign: (id) => request(`/campaigns/${id}`, { method: 'DELETE' }),
-  setCampaignGoogleReview: (id, required, position) =>
-    request(`/campaigns/${id}/google-review`, { method: 'PATCH', body: { required, position } }),
-  setCampaignSocialMedia: (id, required) =>
-    request(`/campaigns/${id}/social-media`, { method: 'PATCH', body: { required } }),
+  // Google review invite (+ its link), social media invite and AI assistant
+  // for one campaign — see CampaignSettingsForm.jsx.
+  updateCampaignSettings: (id, settings) =>
+    request(`/campaigns/${id}/settings`, { method: 'PATCH', body: settings }),
 
   // Reusable slot/gift configs — "start from template" and "duplicate an
   // existing campaign" both prefill NewCampaign.jsx's form (stock reset to 0,

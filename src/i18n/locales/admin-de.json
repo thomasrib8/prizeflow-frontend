@@ -18,7 +18,6 @@
     "done": "Fertig",
     "save": "Speichern",
     "saved": "Gespeichert",
-    "noCampaignsYet": "Noch keine Kampagnen.",
     "statusAll": "Alle",
     "statusDraft": "Entwurf",
     "statusActive": "Aktiv",
@@ -393,7 +392,8 @@
     "deleteWarningSuffix": "und alle zugehörigen Daten dauerhaft: Geschenke, Verteilungsverlauf und jeden Lead-/CRM-Datensatz dieser Kampagne. Dies kann nicht rückgängig gemacht werden.",
     "typeToConfirm": "Geben Sie den Kampagnennamen zur Bestätigung ein:",
     "deletingBtn": "Wird gelöscht…",
-    "deletePermanentlyBtn": "Endgültig löschen"
+    "deletePermanentlyBtn": "Endgültig löschen",
+    "editSettingsBtn": "Einstellungen bearbeiten"
   },
   "editCampaign": {
     "archivedReadOnlyError": "Archivierte Kampagnen sind schreibgeschützt.",
@@ -426,7 +426,7 @@
   },
   "newCampaign": {
     "pageTitle": "Neue Kampagne",
-    "stepOf": "Schritt {{step}} von 3 — {{label}}",
+    "stepOf": "Schritt {{step}} von {{total}} — {{label}}",
     "step1Label": "Geschenke",
     "step2Label": "Segmentierung & Vertriebsformular",
     "step3Label": "Gästeformular",
@@ -464,7 +464,8 @@
     "categoryNeedsNameError": "Jede Segmentierungskategorie braucht einen Namen",
     "categoryNeedsOptionError": "Kategorie „{{name}}“ braucht mindestens eine Option",
     "fieldNeedsLabelError": "Jedes benutzerdefinierte Feld braucht eine Bezeichnung",
-    "copyOfPrefix": "Kopie von {{name}}"
+    "copyOfPrefix": "Kopie von {{name}}",
+    "step4Label": "Einstellungen"
   },
   "builders": {
     "categoryNamePlaceholder": "Kategoriename — z. B. Budget",
@@ -657,32 +658,24 @@
       "sendingBtn": "Wird gesendet…"
     },
     "googleReview": {
-      "googleReviewLinkTitle": "Google-Bewertungslink",
-      "googleReviewLinkDesc1": "Gäste, die ein Geschenk gewonnen haben, werden optional eingeladen, diesen Link anschließend zu öffnen. Fügen Sie den Link zu Ihrer Google-Seite ein, auf der Personen eine Bewertung hinterlassen können.",
+      "googleReviewLinkTitle": "Standard-Link zur Google-Bewertung",
+      "googleReviewLinkDesc1": "Der Link, der für die Einladung zur Google-Bewertung in Ihren Kampagnen verwendet wird. Ob die Einladung angezeigt wird (und, falls gewünscht, ein anderer Link nur für diese Kampagne), legen Sie in den Einstellungen der jeweiligen Kampagne fest. Fügen Sie den Link zu Ihrer Google-Seite ein, auf der Bewertungen abgegeben werden können.",
       "howToGetItLabel": "So erhalten Sie ihn:",
       "howToGetItText1": "suchen Sie Ihren Firmennamen bei Google Suche oder Maps → öffnen Sie Ihr Unternehmensprofil → klicken Sie auf",
       "askForReviewsLabel": "„Nach Bewertungen fragen“",
       "howToGetItText2": "(oder das Teilen-Symbol neben Ihrer Bewertung) → kopieren Sie den angezeigten Link. Er sieht aus wie",
       "howToGetItText3": "Fügen Sie ihn unten ein.",
       "watchVideoLink": "Nicht sicher, wo Sie ihn finden? Sehen Sie sich dieses kurze Video an →",
-      "inviteForReviewTitle": "Einladung zur Google-Bewertung",
-      "inviteForReviewDesc": "Pro Kampagne wählen Sie, wann Gäste eingeladen werden, eine Google-Bewertung zu hinterlassen:",
       "beforeGameLabel": "Vor dem Spiel",
       "beforeGameDesc": "— direkt nachdem ein Gast das Formular absendet, öffnet ein Bildschirm „Hinterlassen Sie uns eine Google-Bewertung“ die Bewertungsseite in einem neuen Tab. Klickt der Gast nicht darauf, verschwindet der Bildschirm nach 15 Sekunden von selbst und er geht weiter zum Spiel (dem Rad oder der Warteschlange).",
       "afterGameLabel": "Nach dem Spiel",
       "afterGameDesc": "— sobald das Geschenk gewonnen ist, wird ein Button „Bewertung hinterlassen“ angezeigt.",
       "neverConditionNote": "Es ist nie eine Bedingung, um zu spielen oder die Belohnung zu erhalten — die Google-Richtlinien verbieten es, ein Spiel oder eine Belohnung an eine Bewertung zu knüpfen, selbst als unverifizierte Hürde.",
-      "reviewSelectAriaLabel": "Google-Bewertungseinladung für {{name}}",
-      "reviewOptionOff": "Keine Bewertungseinladung",
-      "setLinkFirstWarning": "Legen Sie oben einen Google-Bewertungslink fest, bevor Sie dies für eine Kampagne aktivieren."
+      "reviewOptionOff": "Keine Bewertungseinladung"
     },
     "socialMedia": {
       "socialLinksTitle": "Social-Media-Links",
-      "socialLinksDesc": "Gäste, die ein Geschenk gewonnen haben, werden optional eingeladen, Ihnen anschließend zu folgen. Nur Plattformen mit einem unten ausgefüllten Link zeigen jemals einen Button — lassen Sie eine leer, um sie ganz zu überspringen.",
-      "inviteToFollowTitle": "Einladung zum Folgen nach dem Drehen",
-      "inviteToFollowDesc": "Pro Kampagne — wenn aktiviert, sehen Gäste optionale „Folgen Sie uns“-Buttons, sobald ihr Geschenk bereits gewonnen ist, neben der Google-Bewertungseinladung, falls diese ebenfalls aktiviert ist. Nie eine Bedingung, um zu spielen.",
-      "inviteToFollowCheckboxLabel": "Zum Folgen einladen",
-      "setLinkFirstWarningSocial": "Legen Sie oben mindestens einen Social-Media-Link fest, bevor Sie dies für eine Kampagne aktivieren."
+      "socialLinksDesc": "Diese Links verwenden alle Kampagnen, bei denen die Einladung zu sozialen Medien aktiviert ist (in den Einstellungen der Kampagne). Nur Plattformen mit einem unten eingetragenen Link zeigen einen Button — lassen Sie ein Feld leer, um sie ganz auszulassen."
     },
     "emailTemplates": {
       "headerLogoTitle": "Kopfzeilenlogo",
@@ -711,9 +704,8 @@
     },
     "aiAssistant": {
       "title": "KI-Assistent",
-      "description": "Liest die gespeicherte Notiz eines Interessenten und schlägt CRM-Aktualisierungen vor — passend zu einer Segmentierungskategorie Ihrer Kampagne, einem Vertriebsfeld, einer Lead-Bewertung oder einem vorgeschlagenen Tag, wenn nichts anderes passt — sowie Vorschläge zu fehlenden Informationen und nächsten Schritten. Nichts wird jemals auf den Datensatz eines Interessenten angewendet, ohne dass ein Vertriebsmitarbeiter in einem der folgenden Modi auf Akzeptieren klickt.",
+      "description": "Liest die gespeicherte Notiz eines Interessenten und schlägt CRM-Aktualisierungen vor — passend zu einer Segmentierungskategorie Ihrer Kampagne, einem Vertriebsfeld, einer Potenzialbewertung oder einem vorgeschlagenen Tag, wenn nichts anderes passt — sowie fehlende Informationen und nächste Schritte. Nichts wird je in den Datensatz eines Interessenten übernommen, ohne dass ein Mitarbeiter auf Akzeptieren klickt, in beiden Modi unten. Aktivieren Sie ihn pro Kampagne in deren Einstellungen.",
       "notConfiguredWarning": "Der KI-Assistent ist auf diesem Deployment noch nicht konfiguriert — ihn hier zu aktivieren hat noch keine Wirkung.",
-      "enableCheckboxLabel": "KI-Assistent für dieses Konto aktivieren",
       "modeLabel": "Modus",
       "modeSupervised": "Überwacht — ein Vertriebsmitarbeiter prüft und akzeptiert jeden Vorschlag",
       "modeAutomatic": "Automatisch — demnächst verfügbar (verhält sich derzeit wie Überwacht)"
@@ -946,5 +938,26 @@
     "forcingCaseLabel": "⟳ Fall {{n}} wird erzwungen — jetzt das Rad drehen ({{position}}/{{total}})",
     "sequenceCompleteLabel": "✓ Sequenz abgeschlossen — Rad ist frei",
     "stopSequenceBtn": "Sequenz stoppen"
+  },
+  "campaignSettings": {
+    "googleReviewTitle": "Google-Bewertung",
+    "googleReviewDesc": "Laden Sie Gäste ein, eine Google-Bewertung für Ihr Unternehmen abzugeben. Legen Sie fest, wann die Einladung erscheint, oder lassen Sie sie für diese Kampagne deaktiviert.",
+    "googleReviewModeLabel": "Einladung zur Bewertung",
+    "linkLabel": "Link zur Google-Bewertung",
+    "linkDefaultHint": "Vorausgefüllt mit dem Link aus den App-Einstellungen. Ändern Sie ihn, um nur für diese Kampagne einen anderen Link zu verwenden — der Link in Ihren Einstellungen bleibt unverändert.",
+    "linkMissingHint": "In den App-Einstellungen ist noch kein Standardlink hinterlegt. Fügen Sie hier den Link für diese Kampagne ein (Sie können auch einen Standardlink in den Einstellungen festlegen).",
+    "useDefaultLinkBtn": "Link aus den Einstellungen verwenden",
+    "googleReviewLinkRequiredError": "Fügen Sie einen Link zur Google-Bewertung hinzu, um die Einladung zu aktivieren.",
+    "socialTitle": "Soziale Medien",
+    "socialDesc": "Laden Sie Gäste ein, Ihnen zu folgen, sobald ihr Geschenk gewonnen ist. Die Buttons nutzen die Social-Media-Links aus Ihren App-Einstellungen — sie können nicht für eine einzelne Kampagne geändert werden.",
+    "socialToggleLabel": "Gäste einladen, uns in den sozialen Medien zu folgen",
+    "socialLinksUsed": "Angezeigte Buttons:",
+    "socialNoLinksWarning": "In den App-Einstellungen ist noch kein Social-Media-Link hinterlegt, daher würde kein Button erscheinen.",
+    "manageInSettingsLink": "Links in den Einstellungen verwalten →",
+    "aiTitle": "KI-Assistent",
+    "aiDesc": "Liest die Notiz, die ein Vertriebsmitarbeiter zu einem Interessenten speichert, und schlägt CRM-Aktualisierungen für diese Kampagne vor. Nichts wird übernommen, ohne dass ein Mitarbeiter auf Akzeptieren klickt.",
+    "aiToggleLabel": "KI-Assistent für diese Kampagne aktivieren",
+    "editPageTitle": "Einstellungen — {{name}}",
+    "editPageSubtitle": "Einladung zur Google-Bewertung, Einladung zu sozialen Medien und KI-Assistent für diese Kampagne."
   }
 }

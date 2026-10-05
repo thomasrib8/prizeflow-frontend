@@ -171,17 +171,12 @@ function GoogleReviewModule() {
   const [savedUrl, setSavedUrl] = useState('');
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
-  const [campaigns, setCampaigns] = useState(null);
   const [error, setError] = useState('');
-  const [togglingId, setTogglingId] = useState(null);
   const [showVideo, setShowVideo] = useState(false);
 
   useEffect(() => {
     api.getAccountSettings()
       .then((res) => { setGoogleReviewUrl(res.googleReviewUrl); setSavedUrl(res.googleReviewUrl); })
-      .catch((e) => setError(e.message));
-    api.listCampaigns()
-      .then(setCampaigns)
       .catch((e) => setError(e.message));
   }, []);
 
@@ -198,23 +193,6 @@ function GoogleReviewModule() {
       setError(err.message);
     } finally {
       setSaving(false);
-    }
-  }
-
-  // mode: 'off' | 'before' | 'after' — 'off' keeps the stored position so
-  // switching it back on remembers the last placement.
-  async function handleReviewMode(campaign, mode) {
-    setTogglingId(campaign.id);
-    try {
-      const position = mode === 'off' ? campaign.google_review_position || 'after' : mode;
-      await api.setCampaignGoogleReview(campaign.id, mode !== 'off', position);
-      setCampaigns((prev) =>
-        prev.map((c) => (c.id === campaign.id ? { ...c, google_review_required: mode === 'off' ? 0 : 1, google_review_position: position } : c))
-      );
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setTogglingId(null);
     }
   }
 
@@ -285,52 +263,6 @@ function GoogleReviewModule() {
           </div>
         </div>
       )}
-
-      <Card title={t('settings.googleReview.inviteForReviewTitle')} className="mt-card">
-        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 10px' }}>
-          {t('settings.googleReview.inviteForReviewDesc')}
-        </p>
-        <ul style={{ fontSize: 13, color: '#64748B', margin: '0 0 12px', paddingLeft: 20, lineHeight: 1.6 }}>
-          <li><strong>{t('settings.googleReview.beforeGameLabel')}</strong> {t('settings.googleReview.beforeGameDesc')}</li>
-          <li><strong>{t('settings.googleReview.afterGameLabel')}</strong> {t('settings.googleReview.afterGameDesc')}</li>
-        </ul>
-        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 16px' }}>
-          {t('settings.googleReview.neverConditionNote')}
-        </p>
-        {!campaigns && <p className="page-subtitle">{t('common.loading')}</p>}
-        {campaigns && campaigns.length === 0 && <p className="page-subtitle">{t('common.noCampaignsYet')}</p>}
-        {campaigns && campaigns.length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {campaigns.map((c) => (
-              <div key={c.id} style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '12px 14px', border: '1px solid #F1F5F9', borderRadius: 10,
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ fontSize: 14, fontWeight: 600, color: '#03041A' }}>{c.name}</span>
-                  <Badge tone={c.status === 'active' ? 'green' : 'neutral'}>{c.status}</Badge>
-                </div>
-                <select
-                  aria-label={t('settings.googleReview.reviewSelectAriaLabel', { name: c.name })}
-                  value={c.google_review_required ? (c.google_review_position === 'before' ? 'before' : 'after') : 'off'}
-                  disabled={togglingId === c.id || !savedUrl}
-                  onChange={(e) => handleReviewMode(c, e.target.value)}
-                  style={{ padding: '8px 10px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13, fontFamily: 'inherit', background: 'white' }}
-                >
-                  <option value="off">{t('settings.googleReview.reviewOptionOff')}</option>
-                  <option value="before">{t('settings.googleReview.beforeGameLabel')}</option>
-                  <option value="after">{t('settings.googleReview.afterGameLabel')}</option>
-                </select>
-              </div>
-            ))}
-          </div>
-        )}
-        {!savedUrl && (
-          <p style={{ fontSize: 12, color: '#EF4444', marginTop: 12 }}>
-            {t('settings.googleReview.setLinkFirstWarning')}
-          </p>
-        )}
-      </Card>
     </>
   );
 }
@@ -341,9 +273,7 @@ function SocialMediaModule() {
   const [savedUrls, setSavedUrls] = useState({ facebookUrl: '', instagramUrl: '', linkedinUrl: '', xUrl: '' });
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
-  const [campaigns, setCampaigns] = useState(null);
   const [error, setError] = useState('');
-  const [togglingId, setTogglingId] = useState(null);
 
   useEffect(() => {
     api.getAccountSettings()
@@ -353,7 +283,6 @@ function SocialMediaModule() {
         setSavedUrls(loaded);
       })
       .catch((e) => setError(e.message));
-    api.listCampaigns().then(setCampaigns).catch((e) => setError(e.message));
   }, []);
 
   async function handleSave(e) {
@@ -372,22 +301,7 @@ function SocialMediaModule() {
     }
   }
 
-  async function handleToggle(campaign) {
-    setTogglingId(campaign.id);
-    try {
-      await api.setCampaignSocialMedia(campaign.id, !campaign.social_media_required);
-      setCampaigns((prev) =>
-        prev.map((c) => (c.id === campaign.id ? { ...c, social_media_required: c.social_media_required ? 0 : 1 } : c))
-      );
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setTogglingId(null);
-    }
-  }
-
   const dirty = SOCIAL_PLATFORMS.some((p) => urls[p.key] !== savedUrls[p.key]);
-  const hasAnyLink = SOCIAL_PLATFORMS.some((p) => savedUrls[p.key]);
 
   return (
     <>
@@ -414,43 +328,6 @@ function SocialMediaModule() {
             {saveMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{saveMsg}</span>}
           </div>
         </form>
-      </Card>
-
-      <Card title={t('settings.socialMedia.inviteToFollowTitle')} className="mt-card">
-        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 16px' }}>
-          {t('settings.socialMedia.inviteToFollowDesc')}
-        </p>
-        {!campaigns && <p className="page-subtitle">{t('common.loading')}</p>}
-        {campaigns && campaigns.length === 0 && <p className="page-subtitle">{t('common.noCampaignsYet')}</p>}
-        {campaigns && campaigns.length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {campaigns.map((c) => (
-              <div key={c.id} style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '12px 14px', border: '1px solid #F1F5F9', borderRadius: 10,
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ fontSize: 14, fontWeight: 600, color: '#0F172A' }}>{c.name}</span>
-                  <Badge tone={c.status === 'active' ? 'green' : 'neutral'}>{c.status}</Badge>
-                </div>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 13, color: '#64748B' }}>
-                  <input
-                    type="checkbox"
-                    checked={!!c.social_media_required}
-                    disabled={togglingId === c.id || !hasAnyLink}
-                    onChange={() => handleToggle(c)}
-                  />
-                  {t('settings.socialMedia.inviteToFollowCheckboxLabel')}
-                </label>
-              </div>
-            ))}
-          </div>
-        )}
-        {!hasAnyLink && (
-          <p style={{ fontSize: 12, color: '#EF4444', marginTop: 12 }}>
-            {t('settings.socialMedia.setLinkFirstWarningSocial')}
-          </p>
-        )}
       </Card>
     </>
   );
@@ -781,9 +658,6 @@ function EmailTemplatesModule() {
 
 function AIAssistantModule() {
   const { t } = useTranslation('admin');
-  const { updateStoredUser } = useAuth();
-  const [enabled, setEnabled] = useState(false);
-  const [savedEnabled, setSavedEnabled] = useState(false);
   const [mode, setMode] = useState('supervised');
   const [savedMode, setSavedMode] = useState('supervised');
   const [configured, setConfigured] = useState(null); // null = loading, then true/false
@@ -794,8 +668,6 @@ function AIAssistantModule() {
   useEffect(() => {
     api.getAccountSettings()
       .then((res) => {
-        setEnabled(res.aiAssistantEnabled);
-        setSavedEnabled(res.aiAssistantEnabled);
         setMode(res.aiAssistantMode);
         setSavedMode(res.aiAssistantMode);
       })
@@ -808,10 +680,8 @@ function AIAssistantModule() {
     setSaving(true);
     setSaveMsg('');
     try {
-      await api.updateAccountSettings({ aiAssistantEnabled: enabled, aiAssistantMode: mode });
-      setSavedEnabled(enabled);
+      await api.updateAccountSettings({ aiAssistantMode: mode });
       setSavedMode(mode);
-      updateStoredUser({ aiAssistantEnabled: enabled });
       setSaveMsg(t('common.saved'));
       setTimeout(() => setSaveMsg(''), 2000);
     } catch (err) {
@@ -821,7 +691,7 @@ function AIAssistantModule() {
     }
   }
 
-  const dirty = enabled !== savedEnabled || mode !== savedMode;
+  const dirty = mode !== savedMode;
 
   return (
     <>
@@ -839,14 +709,9 @@ function AIAssistantModule() {
         )}
 
         <form onSubmit={handleSave}>
-          <label style={{ display: 'flex', gap: 10, alignItems: 'flex-start', cursor: 'pointer', marginBottom: 16 }}>
-            <input type="checkbox" checked={enabled} onChange={(e) => setEnabled(e.target.checked)} style={{ marginTop: 2, flexShrink: 0, width: 18, height: 18 }} />
-            <span style={{ fontSize: 14, fontWeight: 600 }}>{t('settings.aiAssistant.enableCheckboxLabel')}</span>
-          </label>
-
           <div className="field">
             <label>{t('settings.aiAssistant.modeLabel')}</label>
-            <select value={mode} onChange={(e) => setMode(e.target.value)} disabled={!enabled}>
+            <select value={mode} onChange={(e) => setMode(e.target.value)}>
               <option value="supervised">{t('settings.aiAssistant.modeSupervised')}</option>
               <option value="automatic">{t('settings.aiAssistant.modeAutomatic')}</option>
             </select>

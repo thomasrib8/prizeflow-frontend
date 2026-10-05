@@ -11,6 +11,7 @@ import { CASE_COUNT, isGiftReady } from '../components/giftPlanning';
 import SegmentationBuilder from '../components/SegmentationBuilder';
 import CampaignFieldsBuilder from '../components/CampaignFieldsBuilder';
 import { SALES_FIELD_TYPES, GUEST_FIELD_TYPES } from '../components/fieldTypes';
+import CampaignSettingsForm, { DEFAULT_CAMPAIGN_SETTINGS, settingsFromCampaign } from '../components/CampaignSettingsForm';
 
 // The 12 gifts are defined first and only afterwards dragged onto a case of
 // the wheel: `id` is the gift's own fixed position in the list, `caseIndex`
@@ -28,17 +29,19 @@ const LANGUAGE_OPTIONS = [
   { value: 'es', label: 'Español' },
   { value: 'de', label: 'Deutsch' },
 ];
-const STEP_TKEYS = { 1: 'step1Label', 2: 'step2Label', 3: 'step3Label' };
+const STEP_TKEYS = { 1: 'step1Label', 2: 'step2Label', 3: 'step3Label', 4: 'step4Label' };
 
-// Three-step campaign creation wizard: (1) gifts + basic details, same as
+// Four-step campaign creation wizard: (1) gifts + basic details, same as
 // before, (2) customer segmentation categories + the sales rep's own
 // "Autres informations" fields (filled in later from Launch/CRM — see
 // ProspectCard.jsx), (3) the guest-facing pre-spin form's custom fields
-// (GuestFlowScreen.jsx). Nothing is created until step 3's final submit —
-// all three steps' state lives here and is sent together in one POST.
+// (GuestFlowScreen.jsx), (4) settings: Google review invite, social media
+// invite, AI assistant (CampaignSettingsForm.jsx). Nothing is created until
+// step 4's final submit — all four steps' state lives here and is sent
+// together in one POST.
 export default function NewCampaign() {
   const { t } = useTranslation('admin');
-  const STEPS = [1, 2, 3].map((n) => ({ n, label: t(`newCampaign.${STEP_TKEYS[n]}`) }));
+  const STEPS = [1, 2, 3, 4].map((n) => ({ n, label: t(`newCampaign.${STEP_TKEYS[n]}`) }));
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const fromCampaignId = searchParams.get('from');
@@ -60,6 +63,7 @@ export default function NewCampaign() {
   const [segmentCategories, setSegmentCategories] = useState([]);
   const [salesFields, setSalesFields] = useState([]);
   const [guestFields, setGuestFields] = useState([]);
+  const [settings, setSettings] = useState(DEFAULT_CAMPAIGN_SETTINGS);
   const { wheelStatus, agentConnected } = useWheelSocket();
 
   // Mirror the real physical wheel live whenever it's connected — the on-screen
@@ -90,6 +94,7 @@ export default function NewCampaign() {
     if (!fromCampaignId) return;
     api.getCampaign(fromCampaignId).then((source) => {
       setName(t('newCampaign.copyOfPrefix', { name: source.name }));
+      setSettings(settingsFromCampaign(source));
       applySlotConfig(source.slots.map((s) => ({
         slotIndex: s.slot_index,
         giftName: s.gift_name,
@@ -192,12 +197,16 @@ export default function NewCampaign() {
     for (const f of [...salesFields, ...guestFields]) {
       if (!f.label.trim()) { setError(t('newCampaign.fieldNeedsLabelError')); return; }
     }
+    if (settings.googleReviewMode !== 'off' && !settings.googleReviewUrl.trim()) {
+      setError(t('campaignSettings.googleReviewLinkRequiredError')); setStep(4); return;
+    }
     setError('');
     setSaving(true);
     const active = gifts.filter((g) => g.caseIndex !== null);
     try {
       const created = await api.createCampaign({
         name, description, eventName, language, isTest,
+        ...settings, googleReviewUrl: settings.googleReviewUrl.trim(),
         slots: active.map(g => ({
           slotIndex: g.caseIndex,
           giftName: g.giftName,
@@ -224,7 +233,7 @@ export default function NewCampaign() {
       <div className="page-header">
         <div>
           <h1 className="page-title">{t('newCampaign.pageTitle')}</h1>
-          <p className="page-subtitle">{t('newCampaign.stepOf', { step, label: STEPS[step - 1].label })}</p>
+          <p className="page-subtitle">{t('newCampaign.stepOf', { step, total: STEPS.length, label: STEPS[step - 1].label })}</p>
         </div>
       </div>
 
@@ -370,8 +379,19 @@ export default function NewCampaign() {
             </Card>
 
             <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
-              <Button type="submit" disabled={saving}>{saving ? t('newCampaign.creatingBtn') : t('newCampaign.createCampaignBtn')}</Button>
+              <Button type="button" onClick={() => goToStep(4)}>{t('newCampaign.nextBtn')}</Button>
               <Button type="button" variant="secondary" onClick={() => setStep(2)}>{t('newCampaign.backBtn')}</Button>
+            </div>
+          </>
+        )}
+
+        {step === 4 && (
+          <>
+            <CampaignSettingsForm value={settings} onChange={(patch) => setSettings((s) => ({ ...s, ...patch }))} />
+
+            <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
+              <Button type="submit" disabled={saving}>{saving ? t('newCampaign.creatingBtn') : t('newCampaign.createCampaignBtn')}</Button>
+              <Button type="button" variant="secondary" onClick={() => setStep(3)}>{t('newCampaign.backBtn')}</Button>
             </div>
           </>
         )}

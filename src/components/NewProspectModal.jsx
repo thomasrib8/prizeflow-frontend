@@ -4,7 +4,6 @@ import { api } from '../api/client';
 import { Button } from './ui';
 import DynamicFieldInput from './DynamicFieldInput';
 import { prepareScanImage } from '../utils/scanImage';
-import { useAuth } from '../context/AuthContext';
 
 // Chrome/Edge only (webkitSpeechRecognition) — same as ProspectCard.jsx, see
 // there for why this doesn't render anywhere else.
@@ -34,7 +33,6 @@ const SILENCE_TIMEOUT_MS = 8000;
 // attests they agreed to be contacted and to get their gift by email.
 export default function NewProspectModal({ campaign, initialFile = null, scanEnabled = false, onClose, onCreated }) {
   const { t } = useTranslation('admin');
-  const { user } = useAuth();
   const guestFields = (campaign.fields || []).filter((f) => f.scope === 'guest');
   const salesFields = (campaign.fields || []).filter((f) => f.scope === 'sales');
   const segmentCategories = campaign.segmentCategories || [];
@@ -277,7 +275,7 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
       // didn't exist a moment ago. The modal closes right after, so nothing
       // here is awaited or shown — the result is just waiting on this
       // prospect's card the next time anyone opens it.
-      if (user?.aiAssistantEnabled && note.trim() && res.email) {
+      if (campaign.ai_assistant_enabled && note.trim() && res.email) {
         api.analyzeGuestNote({ campaignId: campaign.id, email: res.email }).catch(() => {});
       }
       onCreated?.({
