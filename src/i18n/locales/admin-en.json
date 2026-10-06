@@ -829,7 +829,6 @@
     "filledTitle": "Filled in by the AI",
     "toCheckTitle": "To check (not applied)",
     "unmappedTitle": "Not covered by any field",
-    "worthAskingTitle": "Worth asking",
     "nextStepsTitle": "Suggested next steps",
     "leadRatingLabel": "Lead rating: {{stars}}",
     "tagLabel": "Tag: {{tag}}",

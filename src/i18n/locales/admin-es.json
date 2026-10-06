@@ -829,7 +829,6 @@
     "filledTitle": "Rellenado por la IA",
     "toCheckTitle": "A verificar (no aplicado)",
     "unmappedTitle": "No cubierto por ningún campo",
-    "worthAskingTitle": "Preguntas que hacer",
     "nextStepsTitle": "Próximos pasos sugeridos",
     "leadRatingLabel": "Potencial del lead: {{stars}}",
     "tagLabel": "Etiqueta: {{tag}}",

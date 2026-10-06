@@ -104,15 +104,6 @@ export default function AISuggestionsPanel({ suggestions, analyzedNote, currentN
             </div>
           )}
 
-          {suggestions.missingInfo?.length > 0 && (
-            <div>
-              <div style={sectionTitle}>{t('aiSuggestionsPanel.worthAskingTitle')}</div>
-              <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: '#334155', lineHeight: 1.6 }}>
-                {suggestions.missingInfo.map((q, i) => <li key={i}>{q}</li>)}
-              </ul>
-            </div>
-          )}
-
           {suggestions.nextActions?.length > 0 && (
             <div>
               <div style={sectionTitle}>{t('aiSuggestionsPanel.nextStepsTitle')}</div>
