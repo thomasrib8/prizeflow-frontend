@@ -23,6 +23,10 @@ function formatFieldValue(field, raw, t) {
   if (raw == null || raw === '') return null;
   if (field.fieldType === 'multi_choice') return Array.isArray(raw) ? raw.join(', ') : raw;
   if (field.fieldType === 'checkbox') return raw ? t('common.yes') : null;
+  if (field.fieldType === 'datetime') {
+    const d = new Date(raw); // "YYYY-MM-DDTHH:MM" = the rep's wall-clock time, parsed as local
+    return Number.isNaN(d.getTime()) ? String(raw) : d.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+  }
   return String(raw);
 }
 
@@ -219,10 +223,12 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
       });
       // Fire-and-forget: the card is about to close (this popup's whole flow
       // is a fast tap-through at a booth), so the analysis isn't awaited or
-      // shown here — it finishes in the background and is already waiting,
-      // stored on the note, the next time anyone opens this prospect's card.
+      // shown here — it finishes in the background, fills the CRM record and
+      // leaves the AI note ready for the next time anyone opens this card.
       if (aiEnabled && trimmedNote && trimmedNote !== aiAnalyzedNote) {
-        api.analyzeGuestNote({ campaignId, email: guest.email }).catch(() => {});
+        // The assistant fills this prospect's segments/rating/tags itself, so
+        // the parent's lists are refreshed once more when it lands.
+        api.analyzeGuestNote({ campaignId, email: guest.email }).then(() => onSaved?.()).catch(() => {});
       }
       onSaved?.();
       onClose();
@@ -233,7 +239,7 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
     }
   }
 
-  // Triggered from AISuggestionsPanel's own link, the dedicated "Analyse IA"
+  // Triggered from the AI note's own link, the dedicated "Analyse IA"
   // button below the note, or automatically right when a voice note finishes
   // recording (see the SpeechRecognition effect above). Updates local state
   // directly from the response rather than reloading the whole card.
@@ -252,9 +258,16 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
         campaignId, email: guest.email, firstName: guest.firstName, lastName: guest.lastName,
         note: trimmedNote, leadRating, segments, tags, customFields,
       });
-      const result = await api.analyzeGuestNote({ campaignId, email: guest.email });
-      setAiSuggestions(result);
+      const { analysis, values } = await api.analyzeGuestNote({ campaignId, email: guest.email });
+      // The assistant has already written its values into the record — mirror
+      // them in this open card so the rep sees the fields filled right away.
+      setSegments(values.segments || {});
+      setCustomFields(values.customFields || {});
+      setLeadRating(values.leadRating ?? null);
+      setTags(values.tags || '');
+      setAiSuggestions(analysis);
       setAiAnalyzedNote(trimmedNote);
+      onSaved?.();
     } catch (err) {
       setError(err.message);
     } finally {
@@ -262,50 +275,6 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
     }
   }
   handleAnalyzeRef.current = handleAnalyze;
-
-  // Accepting a proposal both marks it applied (mirrors the backend, so it
-  // drops out of AISuggestionsPanel's pending list) and merges the accepted
-  // value into this card's own edit-mode state, so the rep sees it reflected
-  // immediately without reopening the card. Ignoring just marks it dismissed.
-  function markSuggestionStatus(suggestionId, status) {
-    setAiSuggestions((prev) => {
-      if (!prev) return prev;
-      const mapItem = (i) => (i.id === suggestionId ? { ...i, status } : i);
-      return {
-        ...prev,
-        fieldUpdates: prev.fieldUpdates.map(mapItem),
-        segmentUpdates: prev.segmentUpdates.map(mapItem),
-        leadRating: prev.leadRating?.id === suggestionId ? { ...prev.leadRating, status } : prev.leadRating,
-        suggestedTag: prev.suggestedTag?.id === suggestionId ? { ...prev.suggestedTag, status } : prev.suggestedTag,
-      };
-    });
-  }
-
-  async function handleApplySuggestion(suggestionId) {
-    const fieldItem = aiSuggestions.fieldUpdates.find((i) => i.id === suggestionId);
-    const segmentItem = aiSuggestions.segmentUpdates.find((i) => i.id === suggestionId);
-    const isRating = aiSuggestions.leadRating?.id === suggestionId;
-    const isTag = aiSuggestions.suggestedTag?.id === suggestionId;
-    try {
-      await api.applyAiSuggestion({ campaignId, email: guest.email, suggestionId });
-      markSuggestionStatus(suggestionId, 'applied');
-      if (fieldItem) setCustomFields((prev) => ({ ...prev, [fieldItem.fieldLabel]: fieldItem.value }));
-      else if (segmentItem) setSegments((prev) => ({ ...prev, [segmentItem.categoryName]: segmentItem.optionLabel }));
-      else if (isRating) setLeadRating(aiSuggestions.leadRating.value);
-      else if (isTag) setTags((prev) => (prev.trim() ? `${prev.trim()}, ${aiSuggestions.suggestedTag.tag}` : aiSuggestions.suggestedTag.tag));
-    } catch (err) {
-      setError(err.message);
-    }
-  }
-
-  async function handleDismissSuggestion(suggestionId) {
-    try {
-      await api.dismissAiSuggestion({ campaignId, email: guest.email, suggestionId });
-      markSuggestionStatus(suggestionId, 'dismissed');
-    } catch (err) {
-      setError(err.message);
-    }
-  }
 
   // Swaps the placeholder for a real address everywhere it's used and sends
   // the gift email that was being held back, if they already won. The card
@@ -478,8 +447,6 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
                 currentNote={note}
                 analyzing={analyzing}
                 onAnalyze={handleAnalyze}
-                onApply={handleApplySuggestion}
-                onDismiss={handleDismissSuggestion}
               />
             )}
 
@@ -596,8 +563,6 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
                 currentNote={note}
                 analyzing={analyzing}
                 onAnalyze={handleAnalyze}
-                onApply={handleApplySuggestion}
-                onDismiss={handleDismissSuggestion}
               />
             )}
 

@@ -10,6 +10,9 @@ export const SALES_FIELD_TYPES = [
   { value: 'dropdown', tKey: 'salesDropdown' },
   { value: 'multi_choice', tKey: 'salesMultiChoice' },
   { value: 'date', tKey: 'salesDate' },
+  // Date + time in one value (an appointment) — the AI assistant can fill it
+  // from a note like "mardi à 14h" (routes/campaigns.js SALES_FIELD_TYPES).
+  { value: 'datetime', tKey: 'salesDateTime' },
 ];
 
 export const GUEST_FIELD_TYPES = [

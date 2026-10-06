@@ -70,7 +70,7 @@ export default function DynamicFieldInput({ field, value, onChange, selectPlaceh
     );
   }
 
-  const inputType = fieldType === 'email' ? 'email' : fieldType === 'phone' ? 'tel' : fieldType === 'number' ? 'number' : fieldType === 'date' ? 'date' : 'text';
+  const inputType = fieldType === 'email' ? 'email' : fieldType === 'phone' ? 'tel' : fieldType === 'number' ? 'number' : fieldType === 'date' ? 'date' : fieldType === 'datetime' ? 'datetime-local' : 'text';
   return (
     <div className="field">
       <label>{label}{required ? ' *' : ''}</label>

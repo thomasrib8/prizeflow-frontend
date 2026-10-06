@@ -485,6 +485,7 @@
       "salesText": "Text",
       "salesDropdown": "Dropdown",
       "salesMultiChoice": "Multiple choice",
+      "salesDateTime": "Date & time",
       "salesDate": "Date",
       "guestText": "Free text",
       "guestEmail": "Email",
@@ -704,11 +705,8 @@
     },
     "aiAssistant": {
       "title": "AI Assistant",
-      "description": "Reads a prospect's saved note and proposes CRM updates — matching one of your campaign's own segmentation categories, a sales field, a lead rating, or a suggested tag when nothing else fits — plus missing-info and next-action suggestions. Nothing is ever applied to a prospect's record without a rep clicking Accept, in either mode below. Turn it on per campaign, in that campaign's Settings.",
-      "notConfiguredWarning": "The AI assistant isn't configured on this deployment yet — turning it on here won't do anything until it is.",
-      "modeLabel": "Mode",
-      "modeSupervised": "Supervised — a rep reviews and accepts every proposal",
-      "modeAutomatic": "Automatic — coming soon (currently behaves the same as Supervised)"
+      "description": "Reads the note a rep writes or dictates on a prospect and fills in the campaign's segmentation categories, sales fields, lead rating and — when nothing else fits — a tag, then adds an AI note with what it couldn't place, questions worth asking and suggested next steps. A value a rep entered by hand is never overwritten. Turn it on per campaign, in that campaign's Settings.",
+      "notConfiguredWarning": "The AI assistant isn't configured on this deployment yet — turning it on here won't do anything until it is."
     }
   },
   "nav": {
@@ -822,19 +820,22 @@
     "tickToSaveHint": "Tick the box above to save."
   },
   "aiSuggestionsPanel": {
-    "title": "✨ AI analysis",
+    "title": "✨ AI note",
     "analyzeLink": "Analyze with AI",
     "reanalyzeLink": "Re-analyze",
     "analyzing": "Analyzing…",
-    "staleWarning": "The note has changed since this analysis — click Re-analyze above for an up-to-date result.",
-    "neverAnalyzed": "No analysis yet — click \"Analyze with AI\" above.",
-    "applyAllBtn": "Apply all",
+    "staleWarning": "The note has changed since this analysis — click Re-analyze to update the fields.",
+    "neverAnalyzed": "Not analyzed yet — the AI fills in the segments, tags and rating from your note.",
+    "filledTitle": "Filled in by the AI",
+    "toCheckTitle": "To check (not applied)",
+    "unmappedTitle": "Not covered by any field",
     "worthAskingTitle": "Worth asking",
     "nextStepsTitle": "Suggested next steps",
-    "acceptBtn": "Accept",
-    "ignoreBtn": "Ignore",
     "leadRatingLabel": "Lead rating: {{stars}}",
-    "newTagLabel": "New tag: {{tag}}"
+    "tagLabel": "Tag: {{tag}}",
+    "ratingLabel": "Lead rating",
+    "reasonConflict": "you set a different value",
+    "reasonLowConfidence": "not certain enough"
   },
   "userDetail": {
     "backToUsers": "← Back to Users",
@@ -955,7 +956,7 @@
     "socialNoLinksWarning": "No social media link is set in your app Settings yet, so no button would appear.",
     "manageInSettingsLink": "Manage links in Settings →",
     "aiTitle": "AI assistant",
-    "aiDesc": "Reads the note a sales rep saves on a prospect and proposes CRM updates for this campaign. Nothing is ever applied without a rep clicking Accept.",
+    "aiDesc": "Reads the note a sales rep writes or dictates on a prospect and fills in this campaign's segments, sales fields, lead rating and tags from it. Anything a rep entered by hand is never overwritten.",
     "aiToggleLabel": "Enable the AI assistant for this campaign",
     "editPageTitle": "Settings — {{name}}",
     "editPageSubtitle": "Google review invite, social media invite and AI assistant for this campaign."

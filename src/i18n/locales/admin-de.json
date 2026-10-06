@@ -485,6 +485,7 @@
       "salesText": "Text",
       "salesDropdown": "Dropdown",
       "salesMultiChoice": "Mehrfachauswahl",
+      "salesDateTime": "Datum und Uhrzeit",
       "salesDate": "Datum",
       "guestText": "Freitext",
       "guestEmail": "E-Mail",
@@ -704,11 +705,8 @@
     },
     "aiAssistant": {
       "title": "KI-Assistent",
-      "description": "Liest die gespeicherte Notiz eines Interessenten und schlägt CRM-Aktualisierungen vor — passend zu einer Segmentierungskategorie Ihrer Kampagne, einem Vertriebsfeld, einer Potenzialbewertung oder einem vorgeschlagenen Tag, wenn nichts anderes passt — sowie fehlende Informationen und nächste Schritte. Nichts wird je in den Datensatz eines Interessenten übernommen, ohne dass ein Mitarbeiter auf Akzeptieren klickt, in beiden Modi unten. Aktivieren Sie ihn pro Kampagne in deren Einstellungen.",
-      "notConfiguredWarning": "Der KI-Assistent ist auf diesem Deployment noch nicht konfiguriert — ihn hier zu aktivieren hat noch keine Wirkung.",
-      "modeLabel": "Modus",
-      "modeSupervised": "Überwacht — ein Vertriebsmitarbeiter prüft und akzeptiert jeden Vorschlag",
-      "modeAutomatic": "Automatisch — demnächst verfügbar (verhält sich derzeit wie Überwacht)"
+      "description": "Liest die Notiz, die ein Mitarbeiter zu einem Interessenten schreibt oder diktiert, und füllt die Segmentierungskategorien der Kampagne, die Vertriebsfelder, die Sterne und — wenn nichts anderes passt — einen Tag aus. Danach ergänzt sie eine KI-Notiz mit allem, was sie nicht zuordnen konnte, sinnvollen Fragen und vorgeschlagenen nächsten Schritten. Ein von Hand eingetragener Wert wird nie überschrieben. Aktivieren Sie sie pro Kampagne in deren Einstellungen.",
+      "notConfiguredWarning": "Der KI-Assistent ist auf diesem Deployment noch nicht konfiguriert — ihn hier zu aktivieren hat noch keine Wirkung."
     }
   },
   "nav": {
@@ -822,19 +820,22 @@
     "tickToSaveHint": "Kreuzen Sie das Kästchen oben an, um zu speichern."
   },
   "aiSuggestionsPanel": {
-    "title": "✨ KI-Analyse",
+    "title": "✨ KI-Notiz",
     "analyzeLink": "Mit KI analysieren",
     "reanalyzeLink": "Erneut analysieren",
-    "analyzing": "Wird analysiert…",
-    "staleWarning": "Die Notiz hat sich seit dieser Analyse geändert — klicken Sie oben auf „Erneut analysieren“ für ein aktuelles Ergebnis.",
-    "neverAnalyzed": "Noch keine Analyse — klicken Sie oben auf „Mit KI analysieren“.",
-    "applyAllBtn": "Alle übernehmen",
-    "worthAskingTitle": "Wert nachzufragen",
+    "analyzing": "Analyse läuft…",
+    "staleWarning": "Die Notiz wurde seit dieser Analyse geändert — auf „Erneut analysieren“ klicken, um die Felder zu aktualisieren.",
+    "neverAnalyzed": "Noch nicht analysiert — die KI füllt Segmente, Tags und Sterne aus Ihrer Notiz aus.",
+    "filledTitle": "Von der KI ausgefüllt",
+    "toCheckTitle": "Zu prüfen (nicht übernommen)",
+    "unmappedTitle": "Von keinem Feld abgedeckt",
+    "worthAskingTitle": "Fragen, die sich lohnen",
     "nextStepsTitle": "Vorgeschlagene nächste Schritte",
-    "acceptBtn": "Akzeptieren",
-    "ignoreBtn": "Ignorieren",
-    "leadRatingLabel": "Lead-Bewertung: {{stars}}",
-    "newTagLabel": "Neuer Tag: {{tag}}"
+    "leadRatingLabel": "Lead-Potenzial: {{stars}}",
+    "tagLabel": "Tag: {{tag}}",
+    "ratingLabel": "Lead-Potenzial",
+    "reasonConflict": "Sie haben einen anderen Wert eingetragen",
+    "reasonLowConfidence": "nicht sicher genug"
   },
   "userDetail": {
     "backToUsers": "← Zurück zu Benutzer",
@@ -955,7 +956,7 @@
     "socialNoLinksWarning": "In den App-Einstellungen ist noch kein Social-Media-Link hinterlegt, daher würde kein Button erscheinen.",
     "manageInSettingsLink": "Links in den Einstellungen verwalten →",
     "aiTitle": "KI-Assistent",
-    "aiDesc": "Liest die Notiz, die ein Vertriebsmitarbeiter zu einem Interessenten speichert, und schlägt CRM-Aktualisierungen für diese Kampagne vor. Nichts wird übernommen, ohne dass ein Mitarbeiter auf Akzeptieren klickt.",
+    "aiDesc": "Liest die Notiz, die ein Vertriebsmitarbeiter zu einem Interessenten schreibt oder diktiert, und füllt daraus die Segmente, Vertriebsfelder, Sterne und Tags dieser Kampagne aus. Was ein Mitarbeiter von Hand eingetragen hat, wird nie überschrieben.",
     "aiToggleLabel": "KI-Assistent für diese Kampagne aktivieren",
     "editPageTitle": "Einstellungen — {{name}}",
     "editPageSubtitle": "Einladung zur Google-Bewertung, Einladung zu sozialen Medien und KI-Assistent für diese Kampagne."

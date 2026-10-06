@@ -1,48 +1,42 @@
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button } from './ui';
 
-// Renders the last AI analysis of a prospect's note (services/salesAssistant)
-// inside ProspectCard.jsx — summary, proposed CRM updates the rep can accept
-// or ignore one at a time (or all at once), missing-info questions worth
-// asking, and suggested next steps. Nothing here writes anything itself —
-// onApply/onDismiss are provided by ProspectCard.jsx, which calls the
-// backend and updates its own field/segment/tag/rating state once a
-// proposal is accepted.
-export default function AISuggestionsPanel({ suggestions, analyzedNote, currentNote, analyzing, onAnalyze, onApply, onDismiss }) {
+// The "AI note" on a prospect's card (services/salesAssistant): what the
+// assistant filled into the record from the rep's note (segments, sales
+// fields, lead rating, tag), then what it could NOT place — values it left
+// alone because the rep had set another, points that fit no field — plus
+// questions worth asking and suggested next steps. Read-only: the assistant
+// writes its values itself (routes/account.js POST /ai-assistant/analyze),
+// so there is nothing to accept here, only a link to run it again.
+//
+// Older stored analyses (from when the rep had to accept each proposal)
+// only carry summary/missingInfo/nextActions — every other list below
+// simply defaults to empty for them.
+const DATETIME_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
+
+function formatValue(value) {
+  if (typeof value === 'string' && DATETIME_RE.test(value)) {
+    const d = new Date(value);
+    if (!Number.isNaN(d.getTime())) return d.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+  }
+  return String(value);
+}
+
+function itemText(item, t) {
+  if (item.kind === 'rating') return t('aiSuggestionsPanel.leadRatingLabel', { stars: '★'.repeat(item.value) + '☆'.repeat(3 - item.value) });
+  if (item.kind === 'tag') return t('aiSuggestionsPanel.tagLabel', { tag: item.value });
+  return `${item.label}: ${formatValue(item.value)}`;
+}
+
+const sectionTitle = { fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#5B21B6', marginBottom: 4 };
+
+export default function AISuggestionsPanel({ suggestions, analyzedNote, currentNote, analyzing, onAnalyze }) {
   const { t } = useTranslation('admin');
-  const [busyId, setBusyId] = useState(null);
 
   const stale = !!suggestions && analyzedNote != null && currentNote.trim() !== (analyzedNote || '').trim();
   const neverAnalyzed = !suggestions;
-
-  async function handle(action, id) {
-    setBusyId(id);
-    try {
-      await action(id);
-    } finally {
-      setBusyId(null);
-    }
-  }
-
-  const pendingItems = suggestions
-    ? [
-        ...suggestions.fieldUpdates.filter((i) => i.status === 'pending').map((i) => ({ ...i, kind: 'field' })),
-        ...suggestions.segmentUpdates.filter((i) => i.status === 'pending').map((i) => ({ ...i, kind: 'segment' })),
-        ...(suggestions.leadRating?.status === 'pending' ? [{ ...suggestions.leadRating, kind: 'rating' }] : []),
-        ...(suggestions.suggestedTag?.status === 'pending' ? [{ ...suggestions.suggestedTag, kind: 'tag' }] : []),
-      ]
-    : [];
-
-  async function applyAll() {
-    // Sequential, not Promise.all — each accept is its own small write on
-    // the backend (see PATCH /account/ai-assistant/suggestions), so this
-    // just fires them one after another rather than in parallel.
-    for (const item of pendingItems) {
-      // eslint-disable-next-line no-await-in-loop
-      await handle(onApply, item.id);
-    }
-  }
+  const applied = suggestions?.applied || [];
+  const toCheck = suggestions?.toCheck || [];
+  const unmapped = suggestions?.unmappedInfo || [];
 
   return (
     <div style={{ marginTop: 16, padding: 14, borderRadius: 12, background: '#F5F3FF', border: '1px solid #DDD6FE' }}>
@@ -62,9 +56,7 @@ export default function AISuggestionsPanel({ suggestions, analyzedNote, currentN
       {analyzing && <div style={{ fontSize: 13, color: '#5B21B6' }}>{t('aiSuggestionsPanel.analyzing')}</div>}
 
       {!analyzing && stale && (
-        <div style={{ fontSize: 12, color: '#B45309', marginBottom: 10 }}>
-          {t('aiSuggestionsPanel.staleWarning')}
-        </div>
+        <div style={{ fontSize: 12, color: '#B45309', marginBottom: 10 }}>{t('aiSuggestionsPanel.staleWarning')}</div>
       )}
 
       {!analyzing && neverAnalyzed && (
@@ -75,27 +67,46 @@ export default function AISuggestionsPanel({ suggestions, analyzedNote, currentN
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {suggestions.summary && <p style={{ fontSize: 13, color: '#334155', margin: 0, lineHeight: 1.5 }}>{suggestions.summary}</p>}
 
-          {pendingItems.length > 0 && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {pendingItems.map((item) => (
-                <SuggestionItem
-                  key={item.id}
-                  item={item}
-                  t={t}
-                  busy={busyId === item.id}
-                  onApply={() => handle(onApply, item.id)}
-                  onDismiss={() => handle(onDismiss, item.id)}
-                />
-              ))}
-              {pendingItems.length > 1 && (
-                <Button type="button" size="sm" onClick={applyAll}>{t('aiSuggestionsPanel.applyAllBtn')}</Button>
-              )}
+          {applied.length > 0 && (
+            <div>
+              <div style={sectionTitle}>{t('aiSuggestionsPanel.filledTitle')}</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                {applied.map((item, i) => (
+                  <span key={i} style={{ background: 'white', border: '1px solid #DDD6FE', borderRadius: 999, padding: '4px 10px', fontSize: 12, fontWeight: 600, color: '#4C1D95', overflowWrap: 'anywhere' }}>
+                    {itemText(item, t)}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {toCheck.length > 0 && (
+            <div>
+              <div style={{ ...sectionTitle, color: '#B45309' }}>{t('aiSuggestionsPanel.toCheckTitle')}</div>
+              <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: '#334155', lineHeight: 1.6 }}>
+                {toCheck.map((item, i) => (
+                  <li key={i}>
+                    <strong>{itemText(item, t)}</strong>
+                    {' — '}
+                    <span style={{ color: '#64748B' }}>{t(item.reason === 'conflict' ? 'aiSuggestionsPanel.reasonConflict' : 'aiSuggestionsPanel.reasonLowConfidence')}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {unmapped.length > 0 && (
+            <div>
+              <div style={sectionTitle}>{t('aiSuggestionsPanel.unmappedTitle')}</div>
+              <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: '#334155', lineHeight: 1.6 }}>
+                {unmapped.map((x, i) => <li key={i}>{x}</li>)}
+              </ul>
             </div>
           )}
 
           {suggestions.missingInfo?.length > 0 && (
             <div>
-              <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#5B21B6', marginBottom: 4 }}>{t('aiSuggestionsPanel.worthAskingTitle')}</div>
+              <div style={sectionTitle}>{t('aiSuggestionsPanel.worthAskingTitle')}</div>
               <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: '#334155', lineHeight: 1.6 }}>
                 {suggestions.missingInfo.map((q, i) => <li key={i}>{q}</li>)}
               </ul>
@@ -104,7 +115,7 @@ export default function AISuggestionsPanel({ suggestions, analyzedNote, currentN
 
           {suggestions.nextActions?.length > 0 && (
             <div>
-              <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#5B21B6', marginBottom: 4 }}>{t('aiSuggestionsPanel.nextStepsTitle')}</div>
+              <div style={sectionTitle}>{t('aiSuggestionsPanel.nextStepsTitle')}</div>
               {suggestions.nextActions.map((a, i) => (
                 <div key={i} style={{ fontSize: 12, color: '#334155', marginBottom: 2, lineHeight: 1.5 }}>
                   <strong>{a.title}</strong>{a.description ? ` — ${a.description}` : ''}
@@ -114,27 +125,6 @@ export default function AISuggestionsPanel({ suggestions, analyzedNote, currentN
           )}
         </div>
       )}
-    </div>
-  );
-}
-
-function itemLabel(item, t) {
-  if (item.kind === 'field') return `${item.fieldLabel}: ${item.value}`;
-  if (item.kind === 'segment') return `${item.categoryName}: ${item.optionLabel}`;
-  if (item.kind === 'rating') return t('aiSuggestionsPanel.leadRatingLabel', { stars: '★'.repeat(item.value) + '☆'.repeat(3 - item.value) });
-  if (item.kind === 'tag') return t('aiSuggestionsPanel.newTagLabel', { tag: item.tag });
-  return '';
-}
-
-function SuggestionItem({ item, t, busy, onApply, onDismiss }) {
-  return (
-    <div style={{ background: 'white', borderRadius: 8, padding: 10, border: '1px solid #EDE9FE' }}>
-      <div style={{ fontSize: 13, fontWeight: 700, color: '#03041A' }}>{itemLabel(item, t)}</div>
-      {item.reasoning && <div style={{ fontSize: 12, color: '#64748B', marginTop: 2, lineHeight: 1.4 }}>{item.reasoning}</div>}
-      <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-        <Button type="button" size="sm" disabled={busy} onClick={onApply}>{busy ? '…' : t('aiSuggestionsPanel.acceptBtn')}</Button>
-        <Button type="button" size="sm" variant="secondary" disabled={busy} onClick={onDismiss}>{t('aiSuggestionsPanel.ignoreBtn')}</Button>
-      </div>
     </div>
   );
 }

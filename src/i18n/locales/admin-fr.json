@@ -485,6 +485,7 @@
       "salesText": "Texte",
       "salesDropdown": "Liste déroulante",
       "salesMultiChoice": "Choix multiple",
+      "salesDateTime": "Date et heure",
       "salesDate": "Date",
       "guestText": "Texte libre",
       "guestEmail": "Email",
@@ -704,11 +705,8 @@
     },
     "aiAssistant": {
       "title": "Assistant IA",
-      "description": "Lit la note enregistrée sur un prospect et propose des mises à jour du CRM — en la rattachant à l'une des catégories de segmentation de votre campagne, un champ commercial, une note de potentiel, ou un tag suggéré si rien d'autre ne convient — ainsi que des informations manquantes et des prochaines actions. Rien n'est jamais appliqué à la fiche d'un prospect sans qu'un commercial clique sur Accepter, quel que soit le mode ci-dessous. À activer campagne par campagne, dans les Paramètres de la campagne.",
-      "notConfiguredWarning": "L'assistant IA n'est pas encore configuré sur ce déploiement — l'activer ici n'aura aucun effet tant que ce n'est pas fait.",
-      "modeLabel": "Mode",
-      "modeSupervised": "Supervisé — un commercial vérifie et accepte chaque proposition",
-      "modeAutomatic": "Automatique — bientôt disponible (se comporte actuellement comme Supervisé)"
+      "description": "Lit la note qu'un commercial écrit ou dicte sur un prospect et remplit les catégories de segmentation de la campagne, les champs commerciaux, les étoiles et — si rien d'autre ne convient — un tag, puis ajoute une note IA avec ce qu'il n'a pas pu classer, les questions à poser et les prochaines étapes suggérées. Une valeur saisie à la main par un commercial n'est jamais écrasée. À activer campagne par campagne, dans les Paramètres de la campagne.",
+      "notConfiguredWarning": "L'assistant IA n'est pas encore configuré sur ce déploiement — l'activer ici n'aura aucun effet tant que ce n'est pas fait."
     }
   },
   "nav": {
@@ -822,19 +820,22 @@
     "tickToSaveHint": "Cochez la case ci-dessus pour enregistrer."
   },
   "aiSuggestionsPanel": {
-    "title": "✨ Analyse IA",
+    "title": "✨ Note IA",
     "analyzeLink": "Analyser avec l'IA",
     "reanalyzeLink": "Relancer l'analyse",
     "analyzing": "Analyse en cours…",
-    "staleWarning": "La note a changé depuis cette analyse — cliquez sur Relancer l'analyse ci-dessus pour un résultat à jour.",
-    "neverAnalyzed": "Pas encore d'analyse — cliquez sur « Analyser avec l'IA » ci-dessus.",
-    "applyAllBtn": "Tout appliquer",
-    "worthAskingTitle": "À demander",
+    "staleWarning": "La note a changé depuis cette analyse — cliquez sur Relancer l'analyse pour mettre les champs à jour.",
+    "neverAnalyzed": "Pas encore analysée — l'IA remplit les segments, tags et étoiles à partir de votre note.",
+    "filledTitle": "Rempli par l'IA",
+    "toCheckTitle": "À vérifier (non appliqué)",
+    "unmappedTitle": "Non couvert par un champ",
+    "worthAskingTitle": "Questions à poser",
     "nextStepsTitle": "Prochaines étapes suggérées",
-    "acceptBtn": "Accepter",
-    "ignoreBtn": "Ignorer",
     "leadRatingLabel": "Potentiel du lead : {{stars}}",
-    "newTagLabel": "Nouveau tag : {{tag}}"
+    "tagLabel": "Tag : {{tag}}",
+    "ratingLabel": "Potentiel du lead",
+    "reasonConflict": "vous avez saisi une autre valeur",
+    "reasonLowConfidence": "pas assez certain"
   },
   "userDetail": {
     "backToUsers": "← Retour aux utilisateurs",
@@ -955,7 +956,7 @@
     "socialNoLinksWarning": "Aucun lien de réseau social n'est défini dans les Paramètres de l'app, donc aucun bouton ne s'afficherait.",
     "manageInSettingsLink": "Gérer les liens dans les Paramètres →",
     "aiTitle": "Assistant IA",
-    "aiDesc": "Lit la note qu'un commercial enregistre sur un prospect et propose des mises à jour du CRM pour cette campagne. Rien n'est jamais appliqué sans qu'un commercial clique sur Accepter.",
+    "aiDesc": "Lit la note qu'un commercial écrit ou dicte sur un prospect et remplit à partir d'elle les segments, champs commerciaux, étoiles et tags de cette campagne. Ce qu'un commercial a saisi à la main n'est jamais écrasé.",
     "aiToggleLabel": "Activer l'assistant IA pour cette campagne",
     "editPageTitle": "Paramètres — {{name}}",
     "editPageSubtitle": "Invitation à l'avis Google, invitation aux réseaux sociaux et assistant IA pour cette campagne."

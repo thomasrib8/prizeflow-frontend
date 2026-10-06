@@ -485,6 +485,7 @@
       "salesText": "Texto",
       "salesDropdown": "Lista desplegable",
       "salesMultiChoice": "Opción múltiple",
+      "salesDateTime": "Fecha y hora",
       "salesDate": "Fecha",
       "guestText": "Texto libre",
       "guestEmail": "Email",
@@ -704,11 +705,8 @@
     },
     "aiAssistant": {
       "title": "Asistente IA",
-      "description": "Lee la nota guardada de un prospecto y propone actualizaciones del CRM — relacionándola con una de las categorías de segmentación de tu campaña, un campo comercial, una valoración de potencial o una etiqueta sugerida cuando nada más encaja — además de información que falta y próximas acciones. Nunca se aplica nada a la ficha de un prospecto sin que un comercial pulse Aceptar, en cualquiera de los dos modos. Actívalo campaña por campaña, en los Ajustes de la campaña.",
-      "notConfiguredWarning": "El asistente IA aún no está configurado en este despliegue — activarlo aquí no hará nada hasta que lo esté.",
-      "modeLabel": "Modo",
-      "modeSupervised": "Supervisado — un comercial revisa y acepta cada propuesta",
-      "modeAutomatic": "Automático — próximamente (actualmente se comporta igual que Supervisado)"
+      "description": "Lee la nota que un comercial escribe o dicta sobre un prospecto y rellena las categorías de segmentación de la campaña, los campos comerciales, las estrellas y — si nada más encaja — una etiqueta; después añade una nota IA con lo que no pudo clasificar, preguntas que hacer y próximos pasos sugeridos. Un valor introducido a mano por un comercial nunca se sobrescribe. Actívalo campaña por campaña, en los Ajustes de la campaña.",
+      "notConfiguredWarning": "El asistente IA aún no está configurado en este despliegue — activarlo aquí no hará nada hasta que lo esté."
     }
   },
   "nav": {
@@ -822,19 +820,22 @@
     "tickToSaveHint": "Marca la casilla de arriba para guardar."
   },
   "aiSuggestionsPanel": {
-    "title": "✨ Análisis IA",
+    "title": "✨ Nota IA",
     "analyzeLink": "Analizar con IA",
     "reanalyzeLink": "Volver a analizar",
     "analyzing": "Analizando…",
-    "staleWarning": "La nota ha cambiado desde este análisis — haz clic en Volver a analizar arriba para un resultado actualizado.",
-    "neverAnalyzed": "Aún sin análisis — haz clic en «Analizar con IA» arriba.",
-    "applyAllBtn": "Aplicar todo",
-    "worthAskingTitle": "Vale la pena preguntar",
+    "staleWarning": "La nota ha cambiado desde este análisis — haz clic en Volver a analizar para actualizar los campos.",
+    "neverAnalyzed": "Aún sin analizar — la IA rellena los segmentos, etiquetas y estrellas a partir de tu nota.",
+    "filledTitle": "Rellenado por la IA",
+    "toCheckTitle": "A verificar (no aplicado)",
+    "unmappedTitle": "No cubierto por ningún campo",
+    "worthAskingTitle": "Preguntas que hacer",
     "nextStepsTitle": "Próximos pasos sugeridos",
-    "acceptBtn": "Aceptar",
-    "ignoreBtn": "Ignorar",
     "leadRatingLabel": "Potencial del lead: {{stars}}",
-    "newTagLabel": "Nueva etiqueta: {{tag}}"
+    "tagLabel": "Etiqueta: {{tag}}",
+    "ratingLabel": "Potencial del lead",
+    "reasonConflict": "has introducido otro valor",
+    "reasonLowConfidence": "no es lo bastante seguro"
   },
   "userDetail": {
     "backToUsers": "← Volver a Usuarios",
@@ -955,7 +956,7 @@
     "socialNoLinksWarning": "Aún no hay ningún enlace de redes sociales en los Ajustes de la app, así que no aparecería ningún botón.",
     "manageInSettingsLink": "Gestionar enlaces en Ajustes →",
     "aiTitle": "Asistente de IA",
-    "aiDesc": "Lee la nota que un comercial guarda sobre un prospecto y propone actualizaciones del CRM para esta campaña. Nunca se aplica nada sin que un comercial pulse Aceptar.",
+    "aiDesc": "Lee la nota que un comercial escribe o dicta sobre un prospecto y rellena a partir de ella los segmentos, campos comerciales, estrellas y etiquetas de esta campaña. Lo que un comercial haya introducido a mano nunca se sobrescribe.",
     "aiToggleLabel": "Activar el asistente de IA para esta campaña",
     "editPageTitle": "Ajustes — {{name}}",
     "editPageSubtitle": "Invitación a la reseña de Google, invitación a redes sociales y asistente de IA para esta campaña."

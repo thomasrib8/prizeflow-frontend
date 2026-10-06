@@ -658,72 +658,26 @@ function EmailTemplatesModule() {
 
 function AIAssistantModule() {
   const { t } = useTranslation('admin');
-  const [mode, setMode] = useState('supervised');
-  const [savedMode, setSavedMode] = useState('supervised');
   const [configured, setConfigured] = useState(null); // null = loading, then true/false
-  const [saving, setSaving] = useState(false);
-  const [saveMsg, setSaveMsg] = useState('');
-  const [error, setError] = useState('');
 
   useEffect(() => {
-    api.getAccountSettings()
-      .then((res) => {
-        setMode(res.aiAssistantMode);
-        setSavedMode(res.aiAssistantMode);
-      })
-      .catch((e) => setError(e.message));
     api.getAiAssistantStatus().then((res) => setConfigured(res.configured)).catch(() => setConfigured(false));
   }, []);
 
-  async function handleSave(e) {
-    e.preventDefault();
-    setSaving(true);
-    setSaveMsg('');
-    try {
-      await api.updateAccountSettings({ aiAssistantMode: mode });
-      setSavedMode(mode);
-      setSaveMsg(t('common.saved'));
-      setTimeout(() => setSaveMsg(''), 2000);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  const dirty = mode !== savedMode;
-
+  // Nothing to set here: the assistant is switched on per campaign (that
+  // campaign's Settings) and fills the CRM record itself — this tab only
+  // explains how it behaves and warns when the deployment has no AI key.
   return (
-    <>
-      {error && <div className="error-banner">{error}</div>}
-
-      <Card title={t('settings.aiAssistant.title')} className="mt-card">
-        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 16px', lineHeight: 1.6 }}>
-          {t('settings.aiAssistant.description')}
-        </p>
-
-        {configured === false && (
-          <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: 12, marginBottom: 16, fontSize: 13, color: '#92400E' }}>
-            {t('settings.aiAssistant.notConfiguredWarning')}
-          </div>
-        )}
-
-        <form onSubmit={handleSave}>
-          <div className="field">
-            <label>{t('settings.aiAssistant.modeLabel')}</label>
-            <select value={mode} onChange={(e) => setMode(e.target.value)}>
-              <option value="supervised">{t('settings.aiAssistant.modeSupervised')}</option>
-              <option value="automatic">{t('settings.aiAssistant.modeAutomatic')}</option>
-            </select>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <Button type="submit" disabled={saving || !dirty}>{saving ? t('common.saving') : t('common.save')}</Button>
-            {saveMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{saveMsg}</span>}
-          </div>
-        </form>
-      </Card>
-    </>
+    <Card title={t('settings.aiAssistant.title')} className="mt-card">
+      <p style={{ fontSize: 13, color: '#64748B', margin: 0, lineHeight: 1.6 }}>
+        {t('settings.aiAssistant.description')}
+      </p>
+      {configured === false && (
+        <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: 12, marginTop: 16, fontSize: 13, color: '#92400E' }}>
+          {t('settings.aiAssistant.notConfiguredWarning')}
+        </div>
+      )}
+    </Card>
   );
 }
 
