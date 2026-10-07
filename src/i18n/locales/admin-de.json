@@ -556,7 +556,12 @@
     "clickNameHint": "Klicken Sie auf einen Namen, um eine Notiz, eine Lead-Bewertung oder ein Kundensegment hinzuzufügen oder zu bearbeiten.",
     "searchPlaceholder": "Suche nach Name, E-Mail, Geschenk, Segment oder Notiz…",
     "tableNameHeader": "Name",
-    "tableLeadHeader": "Lead"
+    "tableLeadHeader": "Lead",
+    "connectionLost": "Verbindung verloren",
+    "switchToLocal": "Auf lokalen Modus wechseln",
+    "editBoxAddress": "Adresse der Box",
+    "boxAddressPrompt": "Adresse der Offline-Box (z. B. http://192.168.0.250:3001)",
+    "switchToLocalHotspot": "Über das Box-WLAN"
   },
   "dashboard": {
     "pageTitle": "Übersicht",
@@ -1001,5 +1006,17 @@
     "openFullApp": "Die vollständige SPARK-App öffnen",
     "loadError": "Konnte gerade nicht geladen werden.",
     "retryBtn": "Erneut versuchen"
+  },
+  "offlineBox": {
+    "notSeen": "Box: nicht verbunden",
+    "inSync": "Box synchron",
+    "silent": "Box seit {{seconds}} s stumm",
+    "behind": "Box {{count}} Ereignis(se) im Rückstand",
+    "reviewsTitle": "Zu prüfende Drehungen",
+    "reviewsHelp": "Während des Ausfalls war das Rad mitten in einer Drehung, als die Verbindung abbrach. Aus den Daten lässt sich nicht erkennen, ob es stehen blieb und ein Geschenk übergeben wurde — bitte einzeln prüfen.",
+    "unknownGift": "Geschenk",
+    "reviewQuestion": "Wurde dieses Geschenk an den Spieler übergeben?",
+    "given": "Ja, übergeben",
+    "notGiven": "Nein, nicht übergeben"
   }
 }

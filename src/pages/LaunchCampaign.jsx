@@ -8,6 +8,8 @@ import { useGuestFlow } from '../hooks/useGuestFlow';
 import { useLaunchQueue, toggleValue } from '../hooks/useLaunchQueue';
 import { useProspectAddedToast } from '../hooks/useProspectAddedToast';
 import GuestFlowScreen from '../components/GuestFlowScreen';
+import { boxHotspotKioskUrl, boxKioskUrl, getBoxUrl, setBoxUrl } from '../utils/offlineBox';
+import { OfflineBoxBadge, OfflineReviews, useOfflineBox } from '../components/OfflineBoxStatus';
 import ProspectCard from '../components/ProspectCard';
 import NewProspectModal from '../components/NewProspectModal';
 import FilterGroup from '../components/FilterGroup';
@@ -16,8 +18,43 @@ import FilterGroup from '../components/FilterGroup';
 // the personal-phone guest page: never persist the session, and auto-return
 // to the form 7s after the reveal instead of staying on it.
 function KioskOverlay({ token, onClose }) {
-  const flow = useGuestFlow({ token, persistSession: false, autoReturnMs: 7000, source: 'kiosk' });
+  const { t } = useTranslation('admin');
+  const flow = useGuestFlow({ token, persistSession: false, autoReturnMs: 7000, source: 'kiosk', watchConnection: true });
+  function editBoxAddress() {
+    const next = window.prompt(t('launchCampaign.boxAddressPrompt'), getBoxUrl());
+    if (next !== null) setBoxUrl(next);
+  }
   return (
+    <>
+    {flow.connectionLost && (
+      <div
+        role="alert"
+        style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, flexWrap: 'wrap', padding: '10px 14px', background: '#B91C1C', color: 'white', fontSize: 14, fontWeight: 700 }}
+      >
+        <span>{t('launchCampaign.connectionLost')}</span>
+        <button
+          type="button"
+          onClick={() => { window.location.href = boxKioskUrl(token); }}
+          style={{ background: 'white', color: '#B91C1C', border: 'none', borderRadius: 8, padding: '8px 14px', fontWeight: 800, fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' }}
+        >
+          {t('launchCampaign.switchToLocal')}
+        </button>
+        <button
+          type="button"
+          onClick={() => { window.location.href = boxHotspotKioskUrl(token); }}
+          style={{ background: 'none', border: '1px solid white', color: 'white', borderRadius: 8, padding: '6px 10px', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit' }}
+        >
+          {t('launchCampaign.switchToLocalHotspot')}
+        </button>
+        <button
+          type="button"
+          onClick={editBoxAddress}
+          style={{ background: 'none', border: 'none', color: 'white', textDecoration: 'underline', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit' }}
+        >
+          {t('launchCampaign.editBoxAddress')}
+        </button>
+      </div>
+    )}
     <GuestFlowScreen
       view={flow.view}
       campaignInfo={flow.campaignInfo}
@@ -31,6 +68,7 @@ function KioskOverlay({ token, onClose }) {
       onClose={onClose}
       onOpenReview={flow.openReviewLink}
     />
+    </>
   );
 }
 
@@ -45,6 +83,7 @@ export default function LaunchCampaign() {
   const { t } = useTranslation('admin');
   const { agentConnected } = useWheelSocket();
   const q = useLaunchQueue();
+  const offlineBox = useOfflineBox();
   const [qrDataUrl, setQrDataUrl] = useState(null);
   const [guestUrl, setGuestUrl] = useState('');
   const [showKiosk, setShowKiosk] = useState(false);
@@ -93,6 +132,7 @@ export default function LaunchCampaign() {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
           <Badge tone={agentConnected ? 'green' : 'red'}>{agentConnected ? t('pwa.wheelReady') : t('pwa.wheelOffline')}</Badge>
+          <OfflineBoxBadge status={offlineBox.status} />
           {q.scanEnabled && q.campaign && (
             // A label around a hidden file input, so one tap opens the camera
             // directly (the browser only allows that from a real tap).
@@ -115,6 +155,8 @@ export default function LaunchCampaign() {
           <Button onClick={() => setShowKiosk(true)} disabled={!q.campaign}>{t('launchCampaign.spinWheelBtn')}</Button>
         </div>
       </div>
+
+      <OfflineReviews reviews={offlineBox.reviews} onChanged={offlineBox.reload} />
 
       {showKiosk && q.campaign && <KioskOverlay token={q.campaign.public_token} onClose={() => setShowKiosk(false)} />}
 

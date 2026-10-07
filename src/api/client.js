@@ -267,6 +267,10 @@ export const api = {
   // proposes CRM updates for a rep to accept/dismiss; never applies anything
   // by itself. See ProspectCard.jsx / AISuggestionsPanel.jsx.
   getAiAssistantStatus: () => request('/account/ai-assistant'),
+  // Offline event box (see components/OfflineBoxStatus.jsx)
+  getOfflineStatus: () => request('/offline/status'),
+  getOfflineReviews: () => request('/offline/reviews'),
+  resolveOfflineReview: (id, action) => request(`/offline/reviews/${id}/resolve`, { method: 'POST', body: { action } }),
   // The assistant fills the prospect's CRM record itself and answers with
   // { analysis (the AI note), values (the record after filling) }. The browser's
   // time zone lets it resolve "mardi à 14h" for a date+time field.

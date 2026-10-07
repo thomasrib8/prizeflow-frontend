@@ -556,7 +556,12 @@
     "clickNameHint": "Click a name to add or edit a note, lead rating, or customer segment for them.",
     "searchPlaceholder": "Search by name, email, gift, segment or note…",
     "tableNameHeader": "Name",
-    "tableLeadHeader": "Lead"
+    "tableLeadHeader": "Lead",
+    "connectionLost": "Connection lost",
+    "switchToLocal": "Switch to local mode",
+    "editBoxAddress": "Box address",
+    "boxAddressPrompt": "Address of the offline box (e.g. http://192.168.0.250:3001)",
+    "switchToLocalHotspot": "Via the box Wi-Fi"
   },
   "dashboard": {
     "pageTitle": "Dashboard",
@@ -1001,5 +1006,17 @@
     "openFullApp": "Open the full SPARK app",
     "loadError": "Couldn't load this right now.",
     "retryBtn": "Retry"
+  },
+  "offlineBox": {
+    "notSeen": "Box: not connected",
+    "inSync": "Box in sync",
+    "silent": "Box silent for {{seconds}} s",
+    "behind": "Box {{count}} event(s) behind",
+    "reviewsTitle": "Spins to check",
+    "reviewsHelp": "During the outage the wheel was in the middle of a spin when the connection broke. Nobody can tell from the data whether it landed and a gift was handed over — please check, one by one.",
+    "unknownGift": "Gift",
+    "reviewQuestion": "Was this gift handed out to the player?",
+    "given": "Yes, handed out",
+    "notGiven": "No, not handed out"
   }
 }

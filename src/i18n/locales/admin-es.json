@@ -556,7 +556,12 @@
     "clickNameHint": "Haz clic en un nombre para añadir o editar una nota, un potencial de lead o un segmento de cliente.",
     "searchPlaceholder": "Buscar por nombre, email, regalo, segmento o nota…",
     "tableNameHeader": "Nombre",
-    "tableLeadHeader": "Potencial"
+    "tableLeadHeader": "Potencial",
+    "connectionLost": "Conexión perdida",
+    "switchToLocal": "Pasar al modo local",
+    "editBoxAddress": "Dirección de la caja",
+    "boxAddressPrompt": "Dirección de la caja sin conexión (p. ej. http://192.168.0.250:3001)",
+    "switchToLocalHotspot": "Por el Wi-Fi de la caja"
   },
   "dashboard": {
     "pageTitle": "Panel",
@@ -1001,5 +1006,17 @@
     "openFullApp": "Abrir la aplicación SPARK completa",
     "loadError": "No se pudo cargar ahora mismo.",
     "retryBtn": "Reintentar"
+  },
+  "offlineBox": {
+    "notSeen": "Caja: no conectada",
+    "inSync": "Caja sincronizada",
+    "silent": "Caja sin señal desde hace {{seconds}} s",
+    "behind": "Caja con {{count}} evento(s) de retraso",
+    "reviewsTitle": "Giros por comprobar",
+    "reviewsHelp": "Durante el corte, la rueda estaba en pleno giro cuando se interrumpió la conexión. Los datos no permiten saber si se detuvo y si se entregó un regalo — compruébalo uno por uno.",
+    "unknownGift": "Regalo",
+    "reviewQuestion": "¿Se entregó este regalo al jugador?",
+    "given": "Sí, entregado",
+    "notGiven": "No, no entregado"
   }
 }

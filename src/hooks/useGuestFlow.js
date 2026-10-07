@@ -42,7 +42,7 @@ function getOrCreateDeviceId() {
 /// their own phone" (source: 'guest') apart from "an operator ran this from
 /// the Launch page's kiosk button for a walk-up guest without a phone"
 /// (source: 'kiosk').
-export function useGuestFlow({ token, persistSession = false, autoReturnMs = null, source = 'guest' }) {
+export function useGuestFlow({ token, persistSession = false, autoReturnMs = null, source = 'guest', watchConnection = false }) {
   const storageKey = `prizeflow_guest_session_${token}`;
   const [view, setView] = useState('loading'); // loading | no_campaign | form | queue | expired
   const [campaignInfo, setCampaignInfo] = useState(null);
@@ -64,6 +64,28 @@ export function useGuestFlow({ token, persistSession = false, autoReturnMs = nul
   // meanwhile. Never set for a resumed session or the staff kiosk.
   const [reviewPending, setReviewPending] = useState(false);
   const sessionTokenRef = useRef(persistSession ? localStorage.getItem(storageKey) : null);
+
+  // Staff kiosk only (watchConnection): is the cloud still reachable from this
+  // tablet? A cheap request every few seconds; two network failures in a row
+  // (a failed fetch, not an HTTP error) means the connection is lost, which lets
+  // the overlay offer to switch to the local event box.
+  const [connectionLost, setConnectionLost] = useState(false);
+  useEffect(() => {
+    if (!watchConnection) return undefined;
+    let failures = 0;
+    let cancelled = false;
+    async function beat() {
+      try {
+        await api.getGuestCampaign(token);
+        failures = 0;
+      } catch (err) {
+        if (err instanceof TypeError) failures += 1; // network failure, not a server answer
+      }
+      if (!cancelled) setConnectionLost(failures >= 2);
+    }
+    const t = setInterval(beat, 4000);
+    return () => { cancelled = true; clearInterval(t); };
+  }, [watchConnection, token]);
 
   function checkCampaign() {
     return api.getGuestCampaign(token)
@@ -201,5 +223,5 @@ export function useGuestFlow({ token, persistSession = false, autoReturnMs = nul
     setReviewPending(false);
   }
 
-  return { view, campaignInfo, form, setForm, error, busy, status, handleSubmit, restart, openReviewLink, reviewPending, dismissReview };
+  return { view, campaignInfo, form, setForm, error, busy, status, handleSubmit, restart, openReviewLink, reviewPending, dismissReview, connectionLost };
 }

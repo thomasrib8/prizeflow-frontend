@@ -556,7 +556,12 @@
     "clickNameHint": "Cliquez sur un nom pour ajouter ou modifier une note, un potentiel ou un segment client.",
     "searchPlaceholder": "Rechercher par nom, email, cadeau, segment ou note…",
     "tableNameHeader": "Nom",
-    "tableLeadHeader": "Potentiel"
+    "tableLeadHeader": "Potentiel",
+    "connectionLost": "Connexion perdue",
+    "switchToLocal": "Passer en mode local",
+    "editBoxAddress": "Adresse du boîtier",
+    "boxAddressPrompt": "Adresse du boîtier hors ligne (ex. http://192.168.0.250:3001)",
+    "switchToLocalHotspot": "Via le Wi-Fi du boîtier"
   },
   "dashboard": {
     "pageTitle": "Tableau de bord",
@@ -1001,5 +1006,17 @@
     "openFullApp": "Ouvrir l'application SPARK complète",
     "loadError": "Impossible de charger pour le moment.",
     "retryBtn": "Réessayer"
+  },
+  "offlineBox": {
+    "notSeen": "Boîtier : non connecté",
+    "inSync": "Boîtier synchronisé",
+    "silent": "Boîtier muet depuis {{seconds}} s",
+    "behind": "Boîtier en retard de {{count}} événement(s)",
+    "reviewsTitle": "Tirages à vérifier",
+    "reviewsHelp": "Pendant la coupure, la roue était en plein tirage quand la connexion s'est interrompue. Les données ne permettent pas de savoir si elle s'est arrêtée et si un cadeau a été remis — merci de vérifier, un par un.",
+    "unknownGift": "Cadeau",
+    "reviewQuestion": "Ce cadeau a-t-il été remis au joueur ?",
+    "given": "Oui, remis",
+    "notGiven": "Non, pas remis"
   }
 }
