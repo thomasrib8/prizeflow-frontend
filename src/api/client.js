@@ -1,5 +1,9 @@
 import { getToken, adoptRefreshedToken, dropToken } from './tokenStore';
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+// 'same-origin' = this page and the API come from the same server — what the
+// offline event box does (it serves the built app itself, reached by IP).
+const API_BASE = import.meta.env.VITE_API_BASE_URL === 'same-origin'
+  ? window.location.origin
+  : (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001');
 const WS_BASE = import.meta.env.VITE_WS_BASE_URL || API_BASE.replace(/^http/, 'ws');
 
 

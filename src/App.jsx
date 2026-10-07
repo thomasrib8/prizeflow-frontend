@@ -20,6 +20,7 @@ import PwaProspects from './pages/pwa/PwaProspects';
 import PwaAnalytics from './pages/pwa/PwaAnalytics';
 import PwaSettings from './pages/pwa/PwaSettings';
 import Guest from './pages/Guest';
+import Kiosk from './pages/Kiosk';
 import RedeemPage from './pages/RedeemPage';
 import Rewards from './pages/Rewards';
 import Calibration from './pages/Calibration';
@@ -67,6 +68,9 @@ export default function App() {
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           {/* Public guest flow — scanned via QR code, no login, outside the authenticated shell */}
           <Route path="/play/:token" element={<Guest />} />
+          {/* Staff tablet kiosk ("Spin the wheel" for walk-up guests), public like /play/:token —
+              served by the offline event box so a tablet can play with no internet. */}
+          <Route path="/kiosk/:token" element={<Kiosk />} />
           {/* Reward redemption — scanned via the QR code in the reward email. Not
               wrapped in PrivateRoute: it's its own full-screen page (not the
               app shell) that redirects to /login itself if not signed in. */}

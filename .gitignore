@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Offline event-box build (VITE_API_BASE_URL=same-origin) — rebuilt on demand, never committed
+dist-offline

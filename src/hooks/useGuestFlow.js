@@ -90,6 +90,11 @@ export function useGuestFlow({ token, persistSession = false, autoReturnMs = nul
     let cancelled = false;
 
     async function poll() {
+      // restart() clears the session and re-checks the campaign while the view
+      // is still 'queue' for a moment: a poll with no session can only come
+      // back "not found" and, on a fast network (the offline event box), could
+      // land after the form is shown again and flip it to "expired".
+      if (!sessionTokenRef.current) return;
       try {
         const res = await api.getGuestStatus(token, sessionTokenRef.current);
         if (cancelled) return;
