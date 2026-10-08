@@ -301,7 +301,10 @@
       "signInBtn": "Iniciar sesión",
       "forgotPasswordLink": "¿Olvidaste tu contraseña?",
       "noAccountYetText": "¿Aún no tienes cuenta?",
-      "createOneLink": "Crea una"
+      "createOneLink": "Crea una",
+      "mfaCodeLabel": "Código de verificación",
+      "mfaCodeHelp": "Introduce el código de 6 dígitos de tu aplicación de autenticación, o uno de tus códigos de recuperación.",
+      "mfaVerifyBtn": "Verificar"
     },
     "register": {
       "createAccountTitle": "Crear una cuenta",
@@ -737,6 +740,26 @@
       "exportDone": "Descargado ({{rewards}} regalo(s), {{notes}} nota(s)).",
       "eraseDone": "Hecho: {{rewards}} regalo(s) anonimizado(s), {{notes}} nota(s) eliminada(s).",
       "legalNote": "Estas herramientas te ayudan a cumplir tus obligaciones; lo que se aplica a tu situación lo decides tú (o tu asesor jurídico)."
+    },
+    "mfa": {
+      "title": "Verificación en dos pasos",
+      "intro": "Protege tu cuenta con un código de una aplicación de autenticación (Google Authenticator, Microsoft Authenticator, 1Password…). Aunque alguien conozca tu contraseña, no podrá entrar sin tu teléfono.",
+      "adminHint": "Eres administrador: se recomienda activarla.",
+      "enableBtn": "Activar",
+      "continueBtn": "Continuar",
+      "scanHelp": "Escanea este código QR con tu aplicación de autenticación y escribe el código de 6 dígitos que muestra.",
+      "manualKey": "¿No puedes escanear? Introduce esta clave a mano:",
+      "codeLabel": "Código de 6 dígitos",
+      "confirmBtn": "Confirmar y activar",
+      "recoveryWarning": "Guarda estos códigos de recuperación en un lugar seguro (gestor de contraseñas). Cada uno funciona una sola vez si pierdes el teléfono. No se volverán a mostrar. Tus otras sesiones se han cerrado.",
+      "downloadBtn": "Descargar",
+      "savedBtn": "Ya los he guardado",
+      "recoveryFileTitle": "códigos de recuperación",
+      "isOn_one": "La verificación en dos pasos está activada (queda {{count}} código de recuperación).",
+      "isOn_other": "La verificación en dos pasos está activada (quedan {{count}} códigos de recuperación).",
+      "disableBtn": "Desactivar",
+      "codeOrRecoveryLabel": "Código actual o código de recuperación",
+      "confirmDisableBtn": "Desactivar la verificación en dos pasos"
     }
   },
   "nav": {

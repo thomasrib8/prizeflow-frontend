@@ -19,12 +19,24 @@ export function AuthProvider({ children }) {
     if (user?.language) i18n.changeLanguage(user.language);
   }, [user?.language]);
 
-  const login = useCallback(async (email, password) => {
-    const { user, token } = await api.login(email, password);
+  const startSession = useCallback(({ user, token }) => {
     setToken(token);
     writeStoredUser(user);
     setUser(user);
   }, []);
+
+  // Returns { mfaRequired, mfaToken } when the account needs its authenticator code too;
+  // the caller then finishes with completeMfa().
+  const login = useCallback(async (email, password) => {
+    const res = await api.login(email, password);
+    if (res.mfaRequired) return { mfaRequired: true, mfaToken: res.mfaToken };
+    startSession(res);
+    return { mfaRequired: false };
+  }, [startSession]);
+
+  const completeMfa = useCallback(async (mfaToken, code) => {
+    startSession(await api.verifyMfa(mfaToken, code));
+  }, [startSession]);
 
   // New accounts are pending until an admin approves them — this never logs
   // the caller in, it just returns the backend's confirmation message.
@@ -47,7 +59,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, updateStoredUser }}>
+    <AuthContext.Provider value={{ user, login, completeMfa, register, logout, updateStoredUser }}>
       {children}
     </AuthContext.Provider>
   );

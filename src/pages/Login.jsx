@@ -20,25 +20,34 @@ function safeReturnTo(value) {
 
 export default function Login() {
   const { t } = useTranslation('admin');
-  const { login } = useAuth();
+  const { login, completeMfa } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [mfaToken, setMfaToken] = useState(null); // set once the password is right and the app code is still needed
+  const [code, setCode] = useState('');
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
-      await login(email, password);
+      if (mfaToken) {
+        await completeMfa(mfaToken, code.trim());
+      } else {
+        const res = await login(email, password);
+        if (res.mfaRequired) { setMfaToken(res.mfaToken); setPassword(''); return; }
+      }
       // Lets a reward link (e.g. /redeem/:code, reached by scanning a QR
       // while logged out) send the operator back to the same page instead
       // of always dropping them on the dashboard.
       navigate(safeReturnTo(searchParams.get('returnTo')) || '/');
     } catch (err) {
+      // the 5-minute step-one pass ran out: start again from the password
+      if (err.code === 'MFA_EXPIRED') { setMfaToken(null); setCode(''); }
       setError(err.message);
     } finally {
       setLoading(false);
@@ -59,20 +68,32 @@ export default function Login() {
 
         {error && <div className="error-banner" style={{ textAlign: 'left' }}>{error}</div>}
 
-        <div className="field" style={{ textAlign: 'left' }}>
-          <label>{t('auth.emailLabel')}</label>
-          <input type="email" value={email} onChange={e => setEmail(e.target.value)}
-            placeholder={t('auth.emailPlaceholder')} required autoFocus />
-        </div>
-        <div className="field" style={{ textAlign: 'left' }}>
-          <label>{t('auth.login.passwordLabel')}</label>
-          <input type="password" value={password} onChange={e => setPassword(e.target.value)}
-            placeholder="••••••••" required />
-        </div>
+        {mfaToken ? (
+          <div className="field" style={{ textAlign: 'left' }}>
+            <label>{t('auth.login.mfaCodeLabel')}</label>
+            <input type="text" inputMode="text" autoComplete="one-time-code" value={code} onChange={e => setCode(e.target.value)}
+              placeholder="123 456" required autoFocus maxLength={20} />
+            <div style={{ fontSize: 12, color: '#64748B', marginTop: 6 }}>{t('auth.login.mfaCodeHelp')}</div>
+          </div>
+        ) : (
+          <>
+          <div className="field" style={{ textAlign: 'left' }}>
+            <label>{t('auth.emailLabel')}</label>
+            <input type="email" value={email} onChange={e => setEmail(e.target.value)}
+              placeholder={t('auth.emailPlaceholder')} required autoFocus />
+          </div>
+          <div className="field" style={{ textAlign: 'left' }}>
+            <label>{t('auth.login.passwordLabel')}</label>
+            <input type="password" value={password} onChange={e => setPassword(e.target.value)}
+              placeholder="••••••••" required />
+          </div>
+
+          </>
+        )}
 
         <button className="btn btn-primary" type="submit" disabled={loading}
           style={{ width: '100%', justifyContent: 'center', marginTop: 6 }}>
-          {loading ? t('auth.login.signingInBtn') : t('auth.login.signInBtn')}
+          {loading ? t('auth.login.signingInBtn') : mfaToken ? t('auth.login.mfaVerifyBtn') : t('auth.login.signInBtn')}
         </button>
 
         <p style={{ fontSize: 13, color: '#64748B', marginTop: 16 }}>

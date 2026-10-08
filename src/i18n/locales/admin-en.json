@@ -301,7 +301,10 @@
       "signInBtn": "Sign in",
       "forgotPasswordLink": "Forgot your password?",
       "noAccountYetText": "No account yet?",
-      "createOneLink": "Create one"
+      "createOneLink": "Create one",
+      "mfaCodeLabel": "Verification code",
+      "mfaCodeHelp": "Enter the 6-digit code from your authenticator app, or one of your recovery codes.",
+      "mfaVerifyBtn": "Verify"
     },
     "register": {
       "createAccountTitle": "Create an account",
@@ -737,6 +740,26 @@
       "exportDone": "Downloaded ({{rewards}} gift(s), {{notes}} note(s)).",
       "eraseDone": "Done: {{rewards}} gift record(s) anonymized, {{notes}} note(s) deleted.",
       "legalNote": "These tools help you meet your obligations; what applies to your situation is for you (or your legal adviser) to decide."
+    },
+    "mfa": {
+      "title": "Two-step sign-in",
+      "intro": "Protect your account with a code from an authenticator app (Google Authenticator, Microsoft Authenticator, 1Password…). Even if someone learns your password, they cannot sign in without your phone.",
+      "adminHint": "You are an administrator: turning this on is strongly recommended.",
+      "enableBtn": "Turn on",
+      "continueBtn": "Continue",
+      "scanHelp": "Scan this QR code with your authenticator app, then type the 6-digit code it shows.",
+      "manualKey": "Can't scan? Enter this key manually:",
+      "codeLabel": "6-digit code",
+      "confirmBtn": "Confirm and turn on",
+      "recoveryWarning": "Keep these recovery codes somewhere safe (a password manager). Each works once if you lose your phone. They will not be shown again. Your other sessions were signed out.",
+      "downloadBtn": "Download",
+      "savedBtn": "I have saved them",
+      "recoveryFileTitle": "recovery codes",
+      "isOn_one": "Two-step sign-in is on ({{count}} recovery code left).",
+      "isOn_other": "Two-step sign-in is on ({{count}} recovery codes left).",
+      "disableBtn": "Turn off",
+      "codeOrRecoveryLabel": "Current code or recovery code",
+      "confirmDisableBtn": "Turn off two-step sign-in"
     }
   },
   "nav": {

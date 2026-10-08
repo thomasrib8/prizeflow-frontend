@@ -24,6 +24,115 @@ const PROFILE_FIELD_KEYS = [
   { key: 'phone', tKey: 'fieldPhone', type: 'tel' },
 ];
 
+function MfaCard() {
+  const { t } = useTranslation('admin');
+  const [status, setStatus] = useState(null);
+  const [step, setStep] = useState('idle'); // idle | password | scan | codes | disable
+  const [password, setPassword] = useState('');
+  const [setup, setSetup] = useState(null);
+  const [code, setCode] = useState('');
+  const [codes, setCodes] = useState([]);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+
+  const refresh = () => api.getMfaStatus().then(setStatus).catch((e) => setError(e.message));
+  useEffect(() => { refresh(); }, []);
+
+  async function run(fn) {
+    setBusy(true); setError('');
+    try { await fn(); } catch (e) { setError(e.message); } finally { setBusy(false); }
+  }
+  const reset = () => { setStep('idle'); setPassword(''); setCode(''); setSetup(null); };
+
+  const startSetup = () => run(async () => { setSetup(await api.setupMfa(password)); setPassword(''); setStep('scan'); });
+  const enable = () => run(async () => { const r = await api.enableMfa(code.trim()); setCodes(r.recoveryCodes); setCode(''); setSetup(null); setStep('codes'); refresh(); });
+  const disable = () => run(async () => { await api.disableMfa(password, code.trim()); reset(); refresh(); });
+
+  function downloadCodes() {
+    const blob = new Blob([`SPARK — ${t('settings.mfa.recoveryFileTitle')}\n\n${codes.join('\n')}\n`], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob); const a = document.createElement('a');
+    a.href = url; a.download = 'spark-recovery-codes.txt'; a.click(); URL.revokeObjectURL(url);
+  }
+
+  if (!status) return null;
+  const note = { fontSize: 13, color: '#64748B', margin: '0 0 14px', lineHeight: 1.6 };
+  return (
+    <Card title={t('settings.mfa.title')} className="mt-card">
+      {error && <div className="error-banner">{error}</div>}
+      <p style={note}>{t('settings.mfa.intro')}</p>
+
+      {step === 'idle' && !status.enabled && (
+        <>
+          {status.isAdmin && <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: 12, marginBottom: 12, fontSize: 13, color: '#92400E' }}>{t('settings.mfa.adminHint')}</div>}
+          <Button type="button" onClick={() => setStep('password')}>{t('settings.mfa.enableBtn')}</Button>
+        </>
+      )}
+      {step === 'idle' && status.enabled && (
+        <>
+          <p style={{ ...note, color: '#047857', fontWeight: 600 }}>✓ {t('settings.mfa.isOn', { count: status.recoveryCodesLeft })}</p>
+          <Button type="button" variant="ghost" onClick={() => setStep('disable')} style={{ color: '#EF4444' }}>{t('settings.mfa.disableBtn')}</Button>
+        </>
+      )}
+
+      {step === 'password' && (
+        <div style={{ maxWidth: 360 }}>
+          <div className="field"><label>{t('settings.information.currentPasswordLabel')}</label>
+            <input type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} autoFocus /></div>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <Button type="button" disabled={busy || !password} onClick={startSetup}>{t('settings.mfa.continueBtn')}</Button>
+            <Button type="button" variant="ghost" onClick={reset}>{t('common.cancel')}</Button>
+          </div>
+        </div>
+      )}
+
+      {step === 'scan' && setup && (
+        <div>
+          <p style={note}>{t('settings.mfa.scanHelp')}</p>
+          <div style={{ display: 'flex', gap: 18, alignItems: 'center', flexWrap: 'wrap', marginBottom: 14 }}>
+            <img src={setup.qr} alt="QR" width={180} height={180} style={{ border: '1px solid #D8E1F3', borderRadius: 10 }} />
+            <div style={{ fontSize: 12, color: '#64748B' }}>
+              {t('settings.mfa.manualKey')}<br />
+              <code style={{ fontSize: 14, color: '#0B1437', wordBreak: 'break-all', letterSpacing: 1 }}>{setup.secret.match(/.{1,4}/g).join(' ')}</code>
+            </div>
+          </div>
+          <div className="field" style={{ maxWidth: 260 }}><label>{t('settings.mfa.codeLabel')}</label>
+            <input type="text" inputMode="numeric" autoComplete="one-time-code" maxLength={7} value={code} onChange={(e) => setCode(e.target.value)} placeholder="123 456" /></div>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <Button type="button" disabled={busy || code.replace(/\s/g, '').length < 6} onClick={enable}>{t('settings.mfa.confirmBtn')}</Button>
+            <Button type="button" variant="ghost" onClick={reset}>{t('common.cancel')}</Button>
+          </div>
+        </div>
+      )}
+
+      {step === 'codes' && (
+        <div>
+          <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: 12, marginBottom: 12, fontSize: 13, color: '#92400E' }}>{t('settings.mfa.recoveryWarning')}</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 8, fontFamily: 'monospace', fontSize: 14, marginBottom: 14 }}>
+            {codes.map((c) => <div key={c} style={{ background: '#F1F5F9', borderRadius: 8, padding: '6px 10px' }}>{c}</div>)}
+          </div>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <Button type="button" variant="secondary" onClick={downloadCodes}>{t('settings.mfa.downloadBtn')}</Button>
+            <Button type="button" onClick={() => { setCodes([]); reset(); }}>{t('settings.mfa.savedBtn')}</Button>
+          </div>
+        </div>
+      )}
+
+      {step === 'disable' && (
+        <div style={{ maxWidth: 360 }}>
+          <div className="field"><label>{t('settings.information.currentPasswordLabel')}</label>
+            <input type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} /></div>
+          <div className="field"><label>{t('settings.mfa.codeOrRecoveryLabel')}</label>
+            <input type="text" autoComplete="one-time-code" maxLength={20} value={code} onChange={(e) => setCode(e.target.value)} /></div>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <Button type="button" disabled={busy || !password || !code.trim()} onClick={disable} style={{ background: '#EF4444' }}>{t('settings.mfa.confirmDisableBtn')}</Button>
+            <Button type="button" variant="ghost" onClick={reset}>{t('common.cancel')}</Button>
+          </div>
+        </div>
+      )}
+    </Card>
+  );
+}
+
 function InformationModule() {
   const { t } = useTranslation('admin');
   const { updateStoredUser } = useAuth();
@@ -159,6 +268,8 @@ function InformationModule() {
           {pwMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{pwMsg}</span>}
         </form>
       </Card>
+
+      <MfaCard />
 
       <Card title={t('settings.information.deleteAccountTitle')} className="mt-card">
         <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px' }}>

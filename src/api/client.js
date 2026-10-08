@@ -105,6 +105,12 @@ async function downloadFile(path) {
 
 export const api = {
   login: (email, password) => request('/auth/login', { method: 'POST', body: { email, password }, auth: false }),
+  // Second step when the account has two-step sign-in on (login answered { mfaRequired, mfaToken })
+  verifyMfa: (mfaToken, code) => request('/auth/mfa/verify', { method: 'POST', body: { mfaToken, code }, auth: false }),
+  getMfaStatus: () => request('/account/mfa'),
+  setupMfa: (password) => request('/account/mfa/setup', { method: 'POST', body: { password } }),
+  enableMfa: (code) => request('/account/mfa/enable', { method: 'POST', body: { code } }),
+  disableMfa: (password, code) => request('/account/mfa/disable', { method: 'POST', body: { password, code } }),
   register: (payload) => request('/auth/register', { method: 'POST', body: payload, auth: false }),
   forgotPassword: (email) => request('/auth/forgot-password', { method: 'POST', body: { email }, auth: false }),
   resetPassword: (token, password) =>

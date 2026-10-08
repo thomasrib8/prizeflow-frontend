@@ -301,7 +301,10 @@
       "signInBtn": "Se connecter",
       "forgotPasswordLink": "Mot de passe oublié ?",
       "noAccountYetText": "Pas encore de compte ?",
-      "createOneLink": "En créer un"
+      "createOneLink": "En créer un",
+      "mfaCodeLabel": "Code de vérification",
+      "mfaCodeHelp": "Saisissez le code à 6 chiffres de votre application d'authentification, ou un de vos codes de secours.",
+      "mfaVerifyBtn": "Valider"
     },
     "register": {
       "createAccountTitle": "Créer un compte",
@@ -737,6 +740,26 @@
       "exportDone": "Téléchargé ({{rewards}} cadeau(x), {{notes}} note(s)).",
       "eraseDone": "Terminé : {{rewards}} cadeau(x) anonymisé(s), {{notes}} note(s) supprimée(s).",
       "legalNote": "Ces outils vous aident à respecter vos obligations ; ce qui s'applique à votre situation relève de vous (ou de votre conseil juridique)."
+    },
+    "mfa": {
+      "title": "Double authentification",
+      "intro": "Protégez votre compte avec un code généré par une application d'authentification (Google Authenticator, Microsoft Authenticator, 1Password…). Même si quelqu'un connaît votre mot de passe, il ne peut pas se connecter sans votre téléphone.",
+      "adminHint": "Vous êtes administrateur : l'activer est fortement recommandé.",
+      "enableBtn": "Activer",
+      "continueBtn": "Continuer",
+      "scanHelp": "Scannez ce QR code avec votre application d'authentification, puis saisissez le code à 6 chiffres qu'elle affiche.",
+      "manualKey": "Impossible de scanner ? Saisissez cette clé à la main :",
+      "codeLabel": "Code à 6 chiffres",
+      "confirmBtn": "Confirmer et activer",
+      "recoveryWarning": "Conservez ces codes de secours en lieu sûr (gestionnaire de mots de passe). Chacun fonctionne une seule fois si vous perdez votre téléphone. Ils ne seront plus affichés. Vos autres sessions ont été déconnectées.",
+      "downloadBtn": "Télécharger",
+      "savedBtn": "Je les ai enregistrés",
+      "recoveryFileTitle": "codes de secours",
+      "isOn_one": "La double authentification est activée ({{count}} code de secours restant).",
+      "isOn_other": "La double authentification est activée ({{count}} codes de secours restants).",
+      "disableBtn": "Désactiver",
+      "codeOrRecoveryLabel": "Code actuel ou code de secours",
+      "confirmDisableBtn": "Désactiver la double authentification"
     }
   },
   "nav": {

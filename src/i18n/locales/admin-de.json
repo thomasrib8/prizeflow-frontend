@@ -301,7 +301,10 @@
       "signInBtn": "Anmelden",
       "forgotPasswordLink": "Passwort vergessen?",
       "noAccountYetText": "Noch kein Konto?",
-      "createOneLink": "Eines erstellen"
+      "createOneLink": "Eines erstellen",
+      "mfaCodeLabel": "Bestätigungscode",
+      "mfaCodeHelp": "Geben Sie den 6-stelligen Code Ihrer Authenticator-App oder einen Ihrer Wiederherstellungscodes ein.",
+      "mfaVerifyBtn": "Bestätigen"
     },
     "register": {
       "createAccountTitle": "Konto erstellen",
@@ -737,6 +740,26 @@
       "exportDone": "Heruntergeladen ({{rewards}} Geschenk(e), {{notes}} Notiz(en)).",
       "eraseDone": "Erledigt: {{rewards}} Geschenkeintrag/-einträge anonymisiert, {{notes}} Notiz(en) gelöscht.",
       "legalNote": "Diese Werkzeuge helfen Ihnen bei der Erfüllung Ihrer Pflichten; was in Ihrem Fall gilt, entscheiden Sie (oder Ihre Rechtsberatung)."
+    },
+    "mfa": {
+      "title": "Zwei-Faktor-Anmeldung",
+      "intro": "Schützen Sie Ihr Konto mit einem Code aus einer Authenticator-App (Google Authenticator, Microsoft Authenticator, 1Password…). Selbst wenn jemand Ihr Passwort kennt, kann er sich ohne Ihr Telefon nicht anmelden.",
+      "adminHint": "Sie sind Administrator: Die Aktivierung wird dringend empfohlen.",
+      "enableBtn": "Aktivieren",
+      "continueBtn": "Weiter",
+      "scanHelp": "Scannen Sie diesen QR-Code mit Ihrer Authenticator-App und geben Sie den angezeigten 6-stelligen Code ein.",
+      "manualKey": "Scannen nicht möglich? Geben Sie diesen Schlüssel manuell ein:",
+      "codeLabel": "6-stelliger Code",
+      "confirmBtn": "Bestätigen und aktivieren",
+      "recoveryWarning": "Bewahren Sie diese Wiederherstellungscodes sicher auf (Passwortmanager). Jeder funktioniert nur einmal, falls Sie Ihr Telefon verlieren. Sie werden nicht erneut angezeigt. Ihre anderen Sitzungen wurden abgemeldet.",
+      "downloadBtn": "Herunterladen",
+      "savedBtn": "Ich habe sie gespeichert",
+      "recoveryFileTitle": "Wiederherstellungscodes",
+      "isOn_one": "Die Zwei-Faktor-Anmeldung ist aktiv ({{count}} Wiederherstellungscode übrig).",
+      "isOn_other": "Die Zwei-Faktor-Anmeldung ist aktiv ({{count}} Wiederherstellungscodes übrig).",
+      "disableBtn": "Deaktivieren",
+      "codeOrRecoveryLabel": "Aktueller Code oder Wiederherstellungscode",
+      "confirmDisableBtn": "Zwei-Faktor-Anmeldung deaktivieren"
     }
   },
   "nav": {
