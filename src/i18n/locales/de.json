@@ -50,7 +50,10 @@
     "consent": "Ich stimme zu, mein Geschenk per E-Mail zu erhalten, und willige in die Verarbeitung meiner personenbezogenen Daten ein.",
     "submitBusy": "BITTE WARTEN…",
     "submitIdle": "PRÜFEN UND RAD DREHEN",
-    "selectPlaceholder": "— Auswählen —"
+    "selectPlaceholder": "— Auswählen —",
+    "marketingConsent": "Ich möchte außerdem Neuigkeiten und Angebote von {{company}} erhalten (optional).",
+    "theOrganizer": "dem Veranstalter",
+    "privacyLink": "Datenschutzerklärung"
   },
   "errors": {
     "consentRequired": "Eine Einwilligung ist erforderlich, um teilzunehmen.",

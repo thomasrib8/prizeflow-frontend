@@ -1,0 +1,19 @@
+# Netlify response headers (picked up from the build output).
+# Camera and microphone stay allowed for this site: the badge scan and the
+# voice notes need them.
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Strict-Transport-Security: max-age=15552000
+  Permissions-Policy: camera=(self), microphone=(self), geolocation=(), payment=(), usb=()
+  # REPORT-ONLY for now: nothing is blocked, the browser console just lists what
+  # a strict policy would have refused. Once a few days of real use show no
+  # violations, rename this header to Content-Security-Policy to enforce it.
+  Content-Security-Policy-Report-Only: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' blob:; connect-src 'self' https: wss:; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'
+
+# Hashed build assets can be cached for a long time; the app shell must not be.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+/index.html
+  Cache-Control: no-cache

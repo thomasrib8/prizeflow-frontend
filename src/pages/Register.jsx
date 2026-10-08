@@ -82,7 +82,7 @@ export default function Register() {
                 value={values[f.key] || ''}
                 onChange={(e) => setField(f.key, e.target.value)}
                 placeholder={f.placeholder}
-                minLength={f.key === 'password' ? 8 : undefined}
+                minLength={f.key === 'password' ? 10 : undefined}
                 required
                 autoFocus={i === 0}
               />

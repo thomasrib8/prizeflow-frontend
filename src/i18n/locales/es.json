@@ -50,7 +50,10 @@
     "consent": "Acepto recibir mi regalo por email y consiento el tratamiento de mis datos personales.",
     "submitBusy": "ESPERA UN MOMENTO…",
     "submitIdle": "COMPROBAR Y GIRAR LA RUEDA",
-    "selectPlaceholder": "— Seleccionar —"
+    "selectPlaceholder": "— Seleccionar —",
+    "marketingConsent": "También acepto recibir novedades y ofertas de {{company}} (opcional).",
+    "theOrganizer": "el organizador",
+    "privacyLink": "Política de privacidad"
   },
   "errors": {
     "consentRequired": "Se requiere tu consentimiento para participar.",

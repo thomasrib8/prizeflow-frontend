@@ -468,6 +468,19 @@ export default function GuestFlowScreen({
             <input type="checkbox" checked={form.consent} onChange={e => setForm({ ...form, consent: e.target.checked })} style={{ marginTop: 2, flexShrink: 0 }} />
             {t('form.consent')}
           </label>
+          {/* Optional, separate marketing opt-in (only when the account turned it on) +
+              the account's own privacy-policy link. Both come from the campaign info. */}
+          {campaignInfo?.marketingConsentEnabled && (
+            <label style={{ display: 'flex', gap: 10, alignItems: 'flex-start', fontSize: 12, color: '#64748B', cursor: 'pointer', margin: '-8px 0 14px', lineHeight: 1.5 }}>
+              <input type="checkbox" checked={!!form.marketingConsent} onChange={e => setForm({ ...form, marketingConsent: e.target.checked })} style={{ marginTop: 2, flexShrink: 0 }} />
+              <span>{t('form.marketingConsent', { company: campaignInfo.companyName || t('form.theOrganizer') })}</span>
+            </label>
+          )}
+          {campaignInfo?.privacyPolicyUrl && (
+            <div style={{ fontSize: 12, margin: '-8px 0 18px' }}>
+              <a href={campaignInfo.privacyPolicyUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#64748B', textDecoration: 'underline' }}>{t('form.privacyLink')}</a>
+            </div>
+          )}
           <button type="submit" disabled={busy} style={{
             width: '100%', background: '#09B2FD', color: '#03041A', border: 'none',
             borderRadius: 10, padding: '15px', fontSize: 15, fontWeight: 700,

@@ -6,7 +6,7 @@ const POLL_INTERVAL_MS = 1500;
 // Phone is no longer a fixed field — it's available as an optional custom
 // guest-form field (see routes/campaigns.js's campaign_fields, scope='guest')
 // like everything else beyond the three fixed firstName/lastName/email.
-const EMPTY_FORM = { firstName: '', lastName: '', email: '', consent: false, customFields: {} };
+const EMPTY_FORM = { firstName: '', lastName: '', email: '', consent: false, marketingConsent: false, customFields: {} };
 
 // One random id per browser, reused across every campaign this browser ever
 // plays — hardens the backend's "already played" guard (guestQueue.js's

@@ -653,7 +653,7 @@
       "passwordTitle": "Mot de passe",
       "currentPasswordLabel": "Mot de passe actuel",
       "newPasswordLabel": "Nouveau mot de passe",
-      "newPasswordPlaceholder": "Au moins 8 caractères",
+      "newPasswordPlaceholder": "Au moins 10 caractères",
       "changePasswordBtn": "Changer le mot de passe",
       "passwordUpdated": "Mot de passe mis à jour",
       "deleteAccountTitle": "Supprimer le compte",
@@ -661,7 +661,9 @@
       "deletionRequestConfirm": "Demander à un administrateur de supprimer votre compte ? Il sera notifié et pourra agir — cela ne le supprime pas immédiatement.",
       "deletionRequestSent": "Demande envoyée — un administrateur a été notifié.",
       "requestAccountDeletionBtn": "Demander la suppression du compte",
-      "sendingBtn": "Envoi…"
+      "sendingBtn": "Envoi…",
+      "emailChangePasswordLabel": "Mot de passe actuel",
+      "emailChangeHint": "Nécessaire pour changer votre adresse email."
     },
     "googleReview": {
       "googleReviewLinkTitle": "Lien d'avis Google par défaut",
@@ -712,6 +714,29 @@
       "title": "Assistant IA",
       "description": "Lit la note qu'un commercial écrit ou dicte sur un prospect et remplit les catégories de segmentation de la campagne, les champs commerciaux, les étoiles et — si rien d'autre ne convient — un tag, puis ajoute une note IA avec ce qu'il n'a pas pu classer, les questions à poser et les prochaines étapes suggérées. Une valeur saisie à la main par un commercial n'est jamais écrasée. À activer campagne par campagne, dans les Paramètres de la campagne.",
       "notConfiguredWarning": "L'assistant IA n'est pas encore configuré sur ce déploiement — l'activer ici n'aura aucun effet tant que ce n'est pas fait."
+    },
+    "tabPrivacy": "Confidentialité",
+    "privacy": {
+      "formTitle": "Confidentialité et consentement",
+      "formIntro": "Ce que vos invités voient sur le formulaire, et combien de temps vous gardez leurs données.",
+      "policyUrlLabel": "Lien vers la politique de confidentialité",
+      "policyUrlHelp": "Affiché sous la case de consentement. Indiquez la page de votre propre politique de confidentialité.",
+      "marketingLabel": "Proposer un consentement marketing séparé",
+      "marketingHelp": "Ajoute une case facultative, non cochée, pour que l'invité accepte de recevoir vos actualités et offres. Le choix est enregistré avec chaque contact et présent dans vos exports.",
+      "retentionLabel": "Supprimer automatiquement les données des invités après",
+      "retentionOff": "Jamais (je les supprime moi-même)",
+      "retentionMonths_one": "{{count}} mois",
+      "retentionMonths_other": "{{count}} mois",
+      "retentionHelp": "Passé ce délai, noms, emails, téléphones et notes sont effacés automatiquement. Les cadeaux restent comptés dans vos statistiques. Choisissez une durée cohérente avec votre politique de confidentialité.",
+      "personTitle": "Les données d'une personne",
+      "personHelp": "Répondez à la demande d'un invité : téléchargez tout ce que vous détenez sur lui, ou effacez-le.",
+      "personEmailLabel": "Adresse email de l'invité",
+      "exportBtn": "Télécharger ses données",
+      "eraseBtn": "Effacer ses données",
+      "eraseConfirm": "Effacer toutes les données personnelles détenues pour {{email}} ? Ses coordonnées et ses notes seront supprimées définitivement. Cette action est irréversible.",
+      "exportDone": "Téléchargé ({{rewards}} cadeau(x), {{notes}} note(s)).",
+      "eraseDone": "Terminé : {{rewards}} cadeau(x) anonymisé(s), {{notes}} note(s) supprimée(s).",
+      "legalNote": "Ces outils vous aident à respecter vos obligations ; ce qui s'applique à votre situation relève de vous (ou de votre conseil juridique)."
     }
   },
   "nav": {

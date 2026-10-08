@@ -653,7 +653,7 @@
       "passwordTitle": "Contraseña",
       "currentPasswordLabel": "Contraseña actual",
       "newPasswordLabel": "Nueva contraseña",
-      "newPasswordPlaceholder": "Al menos 8 caracteres",
+      "newPasswordPlaceholder": "Al menos 10 caracteres",
       "changePasswordBtn": "Cambiar contraseña",
       "passwordUpdated": "Contraseña actualizada",
       "deleteAccountTitle": "Eliminar cuenta",
@@ -661,7 +661,9 @@
       "deletionRequestConfirm": "¿Solicitar que un administrador elimine tu cuenta? Será notificado y podrá actuar — esto no la elimina de inmediato.",
       "deletionRequestSent": "Solicitud enviada — se ha notificado a un administrador.",
       "requestAccountDeletionBtn": "Solicitar eliminación de cuenta",
-      "sendingBtn": "Enviando…"
+      "sendingBtn": "Enviando…",
+      "emailChangePasswordLabel": "Contraseña actual",
+      "emailChangeHint": "Necesaria para cambiar tu dirección de email."
     },
     "googleReview": {
       "googleReviewLinkTitle": "Enlace de reseña de Google predeterminado",
@@ -712,6 +714,29 @@
       "title": "Asistente IA",
       "description": "Lee la nota que un comercial escribe o dicta sobre un prospecto y rellena las categorías de segmentación de la campaña, los campos comerciales, las estrellas y — si nada más encaja — una etiqueta; después añade una nota IA con lo que no pudo clasificar, preguntas que hacer y próximos pasos sugeridos. Un valor introducido a mano por un comercial nunca se sobrescribe. Actívalo campaña por campaña, en los Ajustes de la campaña.",
       "notConfiguredWarning": "El asistente IA aún no está configurado en este despliegue — activarlo aquí no hará nada hasta que lo esté."
+    },
+    "tabPrivacy": "Privacidad",
+    "privacy": {
+      "formTitle": "Privacidad y consentimiento",
+      "formIntro": "Lo que ven tus invitados en el formulario y cuánto tiempo conservas sus datos.",
+      "policyUrlLabel": "Enlace a la política de privacidad",
+      "policyUrlHelp": "Se muestra bajo la casilla de consentimiento. Usa la página de tu propia política de privacidad.",
+      "marketingLabel": "Ofrecer un consentimiento de marketing aparte",
+      "marketingHelp": "Añade una casilla opcional, sin marcar, para que el invitado acepte recibir tus novedades y ofertas. La elección se guarda con cada contacto y aparece en tus exportaciones.",
+      "retentionLabel": "Eliminar automáticamente los datos de los invitados después de",
+      "retentionOff": "Nunca (los elimino yo)",
+      "retentionMonths_one": "{{count}} mes",
+      "retentionMonths_other": "{{count}} meses",
+      "retentionHelp": "Pasado este plazo, nombres, emails, teléfonos y notas se borran automáticamente. Los regalos siguen contando en tus estadísticas. Elige un plazo coherente con tu política de privacidad.",
+      "personTitle": "Los datos de una persona",
+      "personHelp": "Responde a la solicitud de un invitado: descarga todo lo que tienes sobre él, o bórralo.",
+      "personEmailLabel": "Email del invitado",
+      "exportBtn": "Descargar sus datos",
+      "eraseBtn": "Borrar sus datos",
+      "eraseConfirm": "¿Borrar todos los datos personales de {{email}}? Sus datos de contacto y notas se eliminarán definitivamente. No se puede deshacer.",
+      "exportDone": "Descargado ({{rewards}} regalo(s), {{notes}} nota(s)).",
+      "eraseDone": "Hecho: {{rewards}} regalo(s) anonimizado(s), {{notes}} nota(s) eliminada(s).",
+      "legalNote": "Estas herramientas te ayudan a cumplir tus obligaciones; lo que se aplica a tu situación lo decides tú (o tu asesor jurídico)."
     }
   },
   "nav": {

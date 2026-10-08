@@ -50,7 +50,10 @@
     "consent": "I agree to receive my reward by email and consent to the processing of my personal data.",
     "submitBusy": "PLEASE WAIT…",
     "submitIdle": "CHECK AND SPIN THE WHEEL",
-    "selectPlaceholder": "— Select —"
+    "selectPlaceholder": "— Select —",
+    "marketingConsent": "I also agree to receive news and offers from {{company}} (optional).",
+    "theOrganizer": "the organizer",
+    "privacyLink": "Privacy policy"
   },
   "errors": {
     "consentRequired": "Consent is required to claim your reward.",

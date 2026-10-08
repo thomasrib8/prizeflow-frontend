@@ -50,7 +50,10 @@
     "consent": "J'accepte de recevoir mon cadeau par email et je consens au traitement de mes données personnelles.",
     "submitBusy": "VEUILLEZ PATIENTER…",
     "submitIdle": "VALIDER ET LANCER LA ROUE",
-    "selectPlaceholder": "— Sélectionner —"
+    "selectPlaceholder": "— Sélectionner —",
+    "marketingConsent": "J'accepte aussi de recevoir les actualités et offres de {{company}} (facultatif).",
+    "theOrganizer": "l'organisateur",
+    "privacyLink": "Politique de confidentialité"
   },
   "errors": {
     "consentRequired": "Le consentement est requis pour tenter votre chance.",

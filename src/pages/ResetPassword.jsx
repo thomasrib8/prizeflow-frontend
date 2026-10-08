@@ -55,12 +55,12 @@ export default function ResetPassword() {
         <div className="field" style={{ textAlign: 'left' }}>
           <label>{t('settings.information.newPasswordLabel')}</label>
           <input type="password" value={password} onChange={e => setPassword(e.target.value)}
-            placeholder={t('settings.information.newPasswordPlaceholder')} minLength={8} required autoFocus />
+            placeholder={t('settings.information.newPasswordPlaceholder')} minLength={10} required autoFocus />
         </div>
         <div className="field" style={{ textAlign: 'left' }}>
           <label>{t('auth.resetPassword.confirmPasswordLabel')}</label>
           <input type="password" value={confirm} onChange={e => setConfirm(e.target.value)}
-            placeholder={t('auth.resetPassword.confirmPasswordPlaceholder')} minLength={8} required />
+            placeholder={t('auth.resetPassword.confirmPasswordPlaceholder')} minLength={10} required />
         </div>
 
         <button className="btn btn-primary" type="submit" disabled={loading}

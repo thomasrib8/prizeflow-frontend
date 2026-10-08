@@ -653,7 +653,7 @@
       "passwordTitle": "Password",
       "currentPasswordLabel": "Current password",
       "newPasswordLabel": "New password",
-      "newPasswordPlaceholder": "At least 8 characters",
+      "newPasswordPlaceholder": "At least 10 characters",
       "changePasswordBtn": "Change password",
       "passwordUpdated": "Password updated",
       "deleteAccountTitle": "Delete account",
@@ -661,7 +661,9 @@
       "deletionRequestConfirm": "Request that an admin delete your account? They'll be notified and can act on it — this doesn't delete it immediately.",
       "deletionRequestSent": "Request sent — an admin has been notified.",
       "requestAccountDeletionBtn": "Request account deletion",
-      "sendingBtn": "Sending…"
+      "sendingBtn": "Sending…",
+      "emailChangePasswordLabel": "Current password",
+      "emailChangeHint": "Required to change your email address."
     },
     "googleReview": {
       "googleReviewLinkTitle": "Default Google review link",
@@ -712,6 +714,29 @@
       "title": "AI Assistant",
       "description": "Reads the note a rep writes or dictates on a prospect and fills in the campaign's segmentation categories, sales fields, lead rating and — when nothing else fits — a tag, then adds an AI note with what it couldn't place, questions worth asking and suggested next steps. A value a rep entered by hand is never overwritten. Turn it on per campaign, in that campaign's Settings.",
       "notConfiguredWarning": "The AI assistant isn't configured on this deployment yet — turning it on here won't do anything until it is."
+    },
+    "tabPrivacy": "Privacy",
+    "privacy": {
+      "formTitle": "Privacy & consent",
+      "formIntro": "What your guests see on the sign-up form, and how long you keep their details.",
+      "policyUrlLabel": "Privacy policy link",
+      "policyUrlHelp": "Shown as a link under the consent box. Use the page of your own privacy policy.",
+      "marketingLabel": "Offer a separate marketing opt-in",
+      "marketingHelp": "Adds an optional, unticked box so guests can agree to receive your news and offers. The choice is saved with each contact and included in your exports.",
+      "retentionLabel": "Delete guest data automatically after",
+      "retentionOff": "Never (keep until I delete it)",
+      "retentionMonths_one": "{{count}} month",
+      "retentionMonths_other": "{{count}} months",
+      "retentionHelp": "Past this delay, names, emails, phones and notes are erased automatically. The gifts still count in your statistics. Choose a period that matches your own privacy policy.",
+      "personTitle": "One person's data",
+      "personHelp": "Answer a request from a guest: download everything you hold about them, or erase it.",
+      "personEmailLabel": "Guest's email address",
+      "exportBtn": "Download their data",
+      "eraseBtn": "Erase their data",
+      "eraseConfirm": "Erase all personal data held for {{email}}? Their contact details and notes will be removed for good. This cannot be undone.",
+      "exportDone": "Downloaded ({{rewards}} gift(s), {{notes}} note(s)).",
+      "eraseDone": "Done: {{rewards}} gift record(s) anonymized, {{notes}} note(s) deleted.",
+      "legalNote": "These tools help you meet your obligations; what applies to your situation is for you (or your legal adviser) to decide."
     }
   },
   "nav": {

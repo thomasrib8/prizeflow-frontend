@@ -653,7 +653,7 @@
       "passwordTitle": "Passwort",
       "currentPasswordLabel": "Aktuelles Passwort",
       "newPasswordLabel": "Neues Passwort",
-      "newPasswordPlaceholder": "Mindestens 8 Zeichen",
+      "newPasswordPlaceholder": "Mindestens 10 Zeichen",
       "changePasswordBtn": "Passwort ändern",
       "passwordUpdated": "Passwort aktualisiert",
       "deleteAccountTitle": "Konto löschen",
@@ -661,7 +661,9 @@
       "deletionRequestConfirm": "Einen Administrator bitten, Ihr Konto zu löschen? Er wird benachrichtigt und kann handeln — dies löscht es nicht sofort.",
       "deletionRequestSent": "Anfrage gesendet — ein Administrator wurde benachrichtigt.",
       "requestAccountDeletionBtn": "Kontolöschung beantragen",
-      "sendingBtn": "Wird gesendet…"
+      "sendingBtn": "Wird gesendet…",
+      "emailChangePasswordLabel": "Aktuelles Passwort",
+      "emailChangeHint": "Erforderlich, um Ihre E-Mail-Adresse zu ändern."
     },
     "googleReview": {
       "googleReviewLinkTitle": "Standard-Link zur Google-Bewertung",
@@ -712,6 +714,29 @@
       "title": "KI-Assistent",
       "description": "Liest die Notiz, die ein Mitarbeiter zu einem Interessenten schreibt oder diktiert, und füllt die Segmentierungskategorien der Kampagne, die Vertriebsfelder, die Sterne und — wenn nichts anderes passt — einen Tag aus. Danach ergänzt sie eine KI-Notiz mit allem, was sie nicht zuordnen konnte, sinnvollen Fragen und vorgeschlagenen nächsten Schritten. Ein von Hand eingetragener Wert wird nie überschrieben. Aktivieren Sie sie pro Kampagne in deren Einstellungen.",
       "notConfiguredWarning": "Der KI-Assistent ist auf diesem Deployment noch nicht konfiguriert — ihn hier zu aktivieren hat noch keine Wirkung."
+    },
+    "tabPrivacy": "Datenschutz",
+    "privacy": {
+      "formTitle": "Datenschutz und Einwilligung",
+      "formIntro": "Was Ihre Gäste im Formular sehen und wie lange Sie ihre Daten aufbewahren.",
+      "policyUrlLabel": "Link zur Datenschutzerklärung",
+      "policyUrlHelp": "Wird unter dem Einwilligungsfeld angezeigt. Verwenden Sie die Seite Ihrer eigenen Datenschutzerklärung.",
+      "marketingLabel": "Separate Marketing-Einwilligung anbieten",
+      "marketingHelp": "Fügt ein optionales, nicht vorangekreuztes Feld hinzu, mit dem Gäste Neuigkeiten und Angebote von Ihnen erhalten möchten. Die Wahl wird mit jedem Kontakt gespeichert und in Ihren Exporten aufgeführt.",
+      "retentionLabel": "Gästedaten automatisch löschen nach",
+      "retentionOff": "Nie (ich lösche selbst)",
+      "retentionMonths_one": "{{count}} Monat",
+      "retentionMonths_other": "{{count}} Monate",
+      "retentionHelp": "Nach dieser Frist werden Namen, E-Mails, Telefonnummern und Notizen automatisch gelöscht. Die Geschenke zählen weiterhin in Ihren Statistiken. Wählen Sie eine Frist, die zu Ihrer Datenschutzerklärung passt.",
+      "personTitle": "Daten einer Person",
+      "personHelp": "Beantworten Sie die Anfrage eines Gastes: Laden Sie alles herunter, was Sie über ihn gespeichert haben, oder löschen Sie es.",
+      "personEmailLabel": "E-Mail-Adresse des Gastes",
+      "exportBtn": "Daten herunterladen",
+      "eraseBtn": "Daten löschen",
+      "eraseConfirm": "Alle personenbezogenen Daten zu {{email}} löschen? Kontaktdaten und Notizen werden endgültig entfernt. Dies kann nicht rückgängig gemacht werden.",
+      "exportDone": "Heruntergeladen ({{rewards}} Geschenk(e), {{notes}} Notiz(en)).",
+      "eraseDone": "Erledigt: {{rewards}} Geschenkeintrag/-einträge anonymisiert, {{notes}} Notiz(en) gelöscht.",
+      "legalNote": "Diese Werkzeuge helfen Ihnen bei der Erfüllung Ihrer Pflichten; was in Ihrem Fall gilt, entscheiden Sie (oder Ihre Rechtsberatung)."
     }
   },
   "nav": {

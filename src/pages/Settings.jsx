@@ -33,6 +33,7 @@ function InformationModule() {
   const [saveMsg, setSaveMsg] = useState('');
   const [error, setError] = useState('');
 
+  const [emailPassword, setEmailPassword] = useState(''); // current password, asked only when the email is being changed
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [pwSaving, setPwSaving] = useState(false);
@@ -58,8 +59,9 @@ function InformationModule() {
     setError('');
     setSaveMsg('');
     try {
-      const { user: updated } = await api.updateProfile(form);
+      const { user: updated } = await api.updateProfile(emailChanged ? { ...form, currentPassword: emailPassword } : form);
       setProfile(updated);
+      setEmailPassword('');
       updateStoredUser({ name: updated.name });
       setSaveMsg(t('common.saved'));
       setTimeout(() => setSaveMsg(''), 2000);
@@ -104,6 +106,8 @@ function InformationModule() {
 
   if (!profile) return <Card className="mt-card"><p className="page-subtitle">{t('common.loading')}</p></Card>;
 
+  const emailChanged = (form.email || '').trim() !== (profile.email || '');
+
   return (
     <>
       {error && <div className="error-banner">{error}</div>}
@@ -122,8 +126,15 @@ function InformationModule() {
               </div>
             ))}
           </div>
+          {emailChanged && (
+            <div className="field" style={{ marginTop: 14, maxWidth: 360 }}>
+              <label>{t('settings.information.emailChangePasswordLabel')}</label>
+              <input type="password" autoComplete="current-password" value={emailPassword} onChange={(e) => setEmailPassword(e.target.value)} />
+              <div style={{ fontSize: 12, color: '#64748B', marginTop: 4 }}>{t('settings.information.emailChangeHint')}</div>
+            </div>
+          )}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 16 }}>
-            <Button type="submit" disabled={saving}>{saving ? t('common.saving') : t('common.save')}</Button>
+            <Button type="submit" disabled={saving || (emailChanged && !emailPassword)}>{saving ? t('common.saving') : t('common.save')}</Button>
             {saveMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{saveMsg}</span>}
           </div>
         </form>
@@ -139,7 +150,7 @@ function InformationModule() {
             </div>
             <div className="field" style={{ flex: 1, margin: 0 }}>
               <label>{t('settings.information.newPasswordLabel')}</label>
-              <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} minLength={8} placeholder={t('settings.information.newPasswordPlaceholder')} />
+              <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} minLength={10} placeholder={t('settings.information.newPasswordPlaceholder')} />
             </div>
             <Button type="submit" disabled={pwSaving || !currentPassword || !newPassword}>
               {pwSaving ? t('common.saving') : t('settings.information.changePasswordBtn')}
@@ -681,12 +692,150 @@ function AIAssistantModule() {
   );
 }
 
+const RETENTION_OPTIONS = [6, 12, 24, 36, 60];
+
+function PrivacyModule() {
+  const { t } = useTranslation('admin');
+  const [form, setForm] = useState({ retentionMonths: '', privacyPolicyUrl: '', marketingConsentEnabled: false });
+  const [saved, setSaved] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [saveMsg, setSaveMsg] = useState('');
+  const [error, setError] = useState('');
+
+  const [personEmail, setPersonEmail] = useState('');
+  const [personBusy, setPersonBusy] = useState(false);
+  const [personMsg, setPersonMsg] = useState('');
+
+  useEffect(() => {
+    api.getAccountSettings()
+      .then((res) => {
+        const loaded = {
+          retentionMonths: res.retentionMonths == null ? '' : String(res.retentionMonths),
+          privacyPolicyUrl: res.privacyPolicyUrl || '',
+          marketingConsentEnabled: !!res.marketingConsentEnabled,
+        };
+        setForm(loaded);
+        setSaved(loaded);
+      })
+      .catch((e) => setError(e.message));
+  }, []);
+
+  async function handleSave(e) {
+    e.preventDefault();
+    setSaving(true);
+    setError('');
+    setSaveMsg('');
+    try {
+      await api.updateAccountSettings({
+        retentionMonths: form.retentionMonths === '' ? null : Number(form.retentionMonths),
+        privacyPolicyUrl: form.privacyPolicyUrl.trim(),
+        marketingConsentEnabled: form.marketingConsentEnabled,
+      });
+      setSaved(form);
+      setSaveMsg(t('common.saved'));
+      setTimeout(() => setSaveMsg(''), 2000);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleExport() {
+    setPersonBusy(true);
+    setError('');
+    setPersonMsg('');
+    try {
+      const data = await api.exportPersonData(personEmail.trim());
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `personal-data-${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      setPersonMsg(t('settings.privacy.exportDone', { rewards: data.rewards.length, notes: data.notes.length }));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setPersonBusy(false);
+    }
+  }
+
+  async function handleErase() {
+    if (!confirm(t('settings.privacy.eraseConfirm', { email: personEmail.trim() }))) return;
+    setPersonBusy(true);
+    setError('');
+    setPersonMsg('');
+    try {
+      const res = await api.erasePersonData(personEmail.trim());
+      setPersonMsg(t('settings.privacy.eraseDone', { rewards: res.rewardsAnonymized, notes: res.notesDeleted }));
+      setPersonEmail('');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setPersonBusy(false);
+    }
+  }
+
+  const dirty = saved && (form.retentionMonths !== saved.retentionMonths || form.privacyPolicyUrl !== saved.privacyPolicyUrl || form.marketingConsentEnabled !== saved.marketingConsentEnabled);
+  const note = { fontSize: 13, color: '#64748B', margin: '0 0 14px', lineHeight: 1.6 };
+
+  return (
+    <>
+      {error && <div className="error-banner">{error}</div>}
+
+      <Card title={t('settings.privacy.formTitle')} className="mt-card">
+        <p style={note}>{t('settings.privacy.formIntro')}</p>
+        <form onSubmit={handleSave}>
+          <div className="field">
+            <label>{t('settings.privacy.policyUrlLabel')}</label>
+            <input type="url" placeholder="https://your-company.com/privacy" value={form.privacyPolicyUrl} onChange={(e) => setForm((f) => ({ ...f, privacyPolicyUrl: e.target.value }))} />
+            <div style={{ fontSize: 12, color: '#64748B', marginTop: 4 }}>{t('settings.privacy.policyUrlHelp')}</div>
+          </div>
+          <label style={{ display: 'flex', gap: 10, alignItems: 'flex-start', fontSize: 13, cursor: 'pointer', margin: '4px 0 16px' }}>
+            <input type="checkbox" checked={form.marketingConsentEnabled} onChange={(e) => setForm((f) => ({ ...f, marketingConsentEnabled: e.target.checked }))} style={{ marginTop: 3 }} />
+            <span><strong>{t('settings.privacy.marketingLabel')}</strong><br /><span style={{ color: '#64748B' }}>{t('settings.privacy.marketingHelp')}</span></span>
+          </label>
+          <div className="field">
+            <label>{t('settings.privacy.retentionLabel')}</label>
+            <select value={form.retentionMonths} onChange={(e) => setForm((f) => ({ ...f, retentionMonths: e.target.value }))}>
+              <option value="">{t('settings.privacy.retentionOff')}</option>
+              {RETENTION_OPTIONS.map((m) => <option key={m} value={String(m)}>{t('settings.privacy.retentionMonths', { count: m })}</option>)}
+            </select>
+            <div style={{ fontSize: 12, color: '#64748B', marginTop: 4 }}>{t('settings.privacy.retentionHelp')}</div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <Button type="submit" disabled={saving || !dirty}>{saving ? t('common.saving') : t('common.save')}</Button>
+            {saveMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{saveMsg}</span>}
+          </div>
+        </form>
+      </Card>
+
+      <Card title={t('settings.privacy.personTitle')} className="mt-card">
+        <p style={note}>{t('settings.privacy.personHelp')}</p>
+        <div className="field" style={{ maxWidth: 420 }}>
+          <label>{t('settings.privacy.personEmailLabel')}</label>
+          <input type="email" value={personEmail} onChange={(e) => setPersonEmail(e.target.value)} placeholder="name@company.com" />
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          <Button type="button" variant="secondary" disabled={personBusy || !personEmail.trim()} onClick={handleExport}>{t('settings.privacy.exportBtn')}</Button>
+          <Button type="button" variant="ghost" disabled={personBusy || !personEmail.trim()} onClick={handleErase} style={{ color: '#EF4444' }}>{t('settings.privacy.eraseBtn')}</Button>
+          {personMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{personMsg}</span>}
+        </div>
+        <p style={{ ...note, margin: '14px 0 0', fontSize: 12 }}>{t('settings.privacy.legalNote')}</p>
+      </Card>
+    </>
+  );
+}
+
 const MODULE_KEYS = [
   { key: 'information', tKey: 'tabInformation' },
   { key: 'google-review', tKey: 'tabGoogleReview' },
   { key: 'social-media', tKey: 'tabSocialMedia' },
   { key: 'email-templates', tKey: 'tabEmailTemplates' },
   { key: 'ai-assistant', tKey: 'tabAiAssistant' },
+  { key: 'privacy', tKey: 'tabPrivacy' },
   { key: 'calibration', tKey: 'tabCalibration' },
 ];
 
@@ -716,6 +865,7 @@ export default function Settings() {
       {module === 'social-media' && <SocialMediaModule />}
       {module === 'email-templates' && <EmailTemplatesModule />}
       {module === 'ai-assistant' && <AIAssistantModule />}
+      {module === 'privacy' && <PrivacyModule />}
       {module === 'calibration' && <Calibration onExit={() => setModule('information')} />}
     </div>
   );

@@ -115,6 +115,9 @@ export const api = {
   getProfile: () => request('/account/profile'),
   updateProfile: (payload) => request('/account/profile', { method: 'PATCH', body: payload }),
   requestAccountDeletion: () => request('/account/request-deletion', { method: 'POST' }),
+  // Personal data of ONE person (RGPD): export everything held, or anonymize/delete it.
+  exportPersonData: (email) => request(`/account/privacy/person?email=${encodeURIComponent(email)}`),
+  erasePersonData: (email) => request('/account/privacy/erase', { method: 'POST', body: { email } }),
 
   // Admin-only account management.
   listUsers: () => request('/users'),
