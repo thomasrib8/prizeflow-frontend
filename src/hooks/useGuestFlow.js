@@ -3,6 +3,12 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 
 const POLL_INTERVAL_MS = 1500;
+// Someone far back in the queue cannot be called for at least several turns
+// (a spin takes ~10 s), so they poll less often — at an event with many people
+// waiting, status polling is by far most of the server's traffic. Anyone in the
+// first places (or already playing) keeps the quick refresh.
+const FAR_BACK_POLL_MS = 4000;
+const FAR_BACK_FROM_POSITION = 3; // 0 = next in line
 // Phone is no longer a fixed field — it's available as an optional custom
 // guest-form field (see routes/campaigns.js's campaign_fields, scope='guest')
 // like everything else beyond the three fixed firstName/lastName/email.
@@ -110,6 +116,8 @@ export function useGuestFlow({ token, persistSession = false, autoReturnMs = nul
     if (view !== 'queue') return undefined;
     if (status && (status.status === 'done' || TERMINAL_STATUSES.includes(status.status))) return undefined;
     let cancelled = false;
+    let timer = null;
+    let lastPosition = null;
 
     async function poll() {
       // restart() clears the session and re-checks the campaign while the view
@@ -125,6 +133,7 @@ export function useGuestFlow({ token, persistSession = false, autoReturnMs = nul
           setView('expired');
           return;
         }
+        lastPosition = res.status === 'waiting' && typeof res.position === 'number' ? res.position : null;
         setStatus(res);
         if (TERMINAL_STATUSES.includes(res.status)) {
           if (persistSession) localStorage.removeItem(storageKey);
@@ -135,9 +144,13 @@ export function useGuestFlow({ token, persistSession = false, autoReturnMs = nul
       }
     }
 
-    poll();
-    const t = setInterval(poll, POLL_INTERVAL_MS);
-    return () => { cancelled = true; clearInterval(t); };
+    async function loop() {
+      await poll();
+      if (cancelled) return;
+      timer = setTimeout(loop, lastPosition !== null && lastPosition >= FAR_BACK_FROM_POSITION ? FAR_BACK_POLL_MS : POLL_INTERVAL_MS);
+    }
+    loop();
+    return () => { cancelled = true; clearTimeout(timer); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view, token, status?.status]);
 
