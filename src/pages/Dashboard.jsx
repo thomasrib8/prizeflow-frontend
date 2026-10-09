@@ -373,7 +373,7 @@ export default function Dashboard() {
 
       </div>
 
-      {/* Admin-only: email send log. Quota/Brevo status now lives only on
+      {/* Admin-only: email send log. Quota (Resend) status now lives only on
           the Health page — see AppHealth.jsx. */}
       {isAdmin && <EmailHistoryCard />}
     </div>

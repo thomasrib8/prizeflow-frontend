@@ -5,6 +5,10 @@ import { api } from '../api/client';
 import { Button } from './ui';
 import DynamicFieldInput from './DynamicFieldInput';
 import { prepareScanImage } from '../utils/scanImage';
+import LinkedInIcon from './linkedin/LinkedInIcon';
+import LinkedInSearchDialog from './linkedin/LinkedInSearchDialog';
+import { useLinkedInStatus } from '../hooks/useLinkedInStatus';
+import { canSearchLinkedIn, shortLinkedInUrl } from '../utils/linkedin';
 
 // Chrome/Edge only (webkitSpeechRecognition) — same as ProspectCard.jsx, see
 // there for why this doesn't render anywhere else.
@@ -60,6 +64,20 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
   const [duplicate, setDuplicate] = useState(null); // { message, addToQueue }
   // { state: 'idle' | 'reading' | 'done' | 'error', message, source: 'qr' | 'photo', confidence }
   const [scan, setScan] = useState({ state: 'idle' });
+
+  // LinkedIn profile (Apollo): a rep-started search. The confirmed result stays on the server while this form is
+  // open and is attached to the prospect when the form is saved (linkedinOperationId); a typed link goes along as is.
+  const li = useLinkedInStatus(campaign.id);
+  const [linkedin, setLinkedin] = useState(null); // { url, source, operationId }
+  const [liDialog, setLiDialog] = useState(false);
+  const [liNotice, setLiNotice] = useState('');
+  const liOffered = !!campaign.linkedin_search_enabled && (IS_BOX_BUILD || !!(li.status && li.status.available));
+  const liBlocked = li.offline ? t('linkedin.offline') : li.status && li.status.credits.remaining <= 0 ? t('linkedin.exhausted') : '';
+  function openLinkedIn() {
+    if (!canSearchLinkedIn({ firstName: form.firstName, lastName: form.lastName, email: form.email, company })) { setLiNotice(t('linkedin.needMoreInfo')); return; }
+    setLiNotice('');
+    setLiDialog(true);
+  }
   // { state: 'idle' | 'searching' | 'found' | 'not_found', email, score } —
   // live Hunter.io lookup, so the rep sees a result (and can review/correct
   // it) before saving, instead of only finding out afterwards via a toast.
@@ -269,6 +287,8 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
         confirmDuplicate,
         emailFoundViaHunter: emailIsHunterFind,
         hunterScore: emailIsHunterFind ? hunterSearch.score : undefined,
+        linkedinOperationId: linkedin && linkedin.operationId ? linkedin.operationId : undefined,
+        linkedinUrl: linkedin && !linkedin.operationId ? linkedin.url : undefined,
       });
       // Fire-and-forget, same as ProspectCard.jsx's own save: the note (typed
       // or dictated) only exists in the database from this point on — the
@@ -395,6 +415,24 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
           {hunterSearch.state === 'error' && !form.email.trim() && (
             <div style={{ fontSize: 11, color: '#B45309', marginTop: 3 }}>
               {t('newProspectModal.hunterError')}
+            </div>
+          )}
+          {liOffered && (
+            <div className="li-field">
+              {linkedin ? (
+                <div className="li-field-linked">
+                  <LinkedInIcon />
+                  <a href={linkedin.url} target="_blank" rel="noopener noreferrer">{shortLinkedInUrl(linkedin.url)}</a>
+                  <button type="button" onClick={() => setLinkedin(null)}>{t('linkedin.fieldClear')}</button>
+                </div>
+              ) : (
+                <>
+                  <Button type="button" variant="secondary" onClick={openLinkedIn} disabled={!!liBlocked} title={liBlocked || undefined} style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                    <LinkedInIcon style={{ width: 18, height: 18 }} />{t('linkedin.buttonSearch')}
+                  </Button>
+                  {(liBlocked || liNotice) && <div className="li-field-note">{liBlocked || liNotice}</div>}
+                </>
+              )}
             </div>
           )}
           {hunterSearch.state === 'idle' && !form.email && (
@@ -544,6 +582,17 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
         </div>
         {!consent && <div style={{ fontSize: 11, color: '#94A3B8', marginTop: 8 }}>{t('newProspectModal.tickToSaveHint')}</div>}
       </form>
+      {liDialog && (
+        <LinkedInSearchDialog
+          campaignId={campaign.id}
+          person={{ firstName: form.firstName.trim(), lastName: form.lastName.trim(), email: form.email.trim(), company: company.trim() }}
+          prospectSaved={false}
+          credits={li.status && li.status.credits}
+          onCredits={li.setCredits}
+          onClose={() => setLiDialog(false)}
+          onLinked={(r) => setLinkedin(r)}
+        />
+      )}
     </div>
   );
 }

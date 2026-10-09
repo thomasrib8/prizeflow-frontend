@@ -15,6 +15,7 @@ import TagsField from './prospect/TagsField';
 import EmailMissingBox from './prospect/EmailMissingBox';
 import { ProspectHistory, ProspectCampaigns, ProspectManualNotes, ProspectExtrasMobile } from './prospect/ProspectExtras';
 import { IcBack, IcClose, IcMore } from './prospect/icons';
+import LinkedInSearchDialog from './linkedin/LinkedInSearchDialog';
 import './prospect/prospect-card.css';
 
 function MoreMenu({ c, email }) {
@@ -92,6 +93,18 @@ export default function ProspectCard({ campaignId, guest, initialMode = 'edit', 
               <SuggestedNextSteps c={c} />
             </aside>
           </div>
+        )}
+
+        {c.linkedinDialog && (
+          <LinkedInSearchDialog
+            campaignId={campaignId}
+            person={{ firstName: guest.firstName, lastName: guest.lastName, email: c.emailMissing ? '' : guest.email, company: c.companyHint }}
+            prospectSaved
+            credits={c.linkedinCredits}
+            onCredits={c.setLinkedinCredits}
+            onClose={() => c.setLinkedinDialog(false)}
+            onLinked={c.handleLinkedInLinked}
+          />
         )}
 
         {!c.loading && c.editing ? (

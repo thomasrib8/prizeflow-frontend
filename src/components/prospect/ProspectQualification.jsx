@@ -4,6 +4,7 @@ import DynamicFieldInput from '../DynamicFieldInput';
 import { formatFieldValue } from './useProspectCard';
 import { IcList, IcPencil } from './icons';
 import TagsField from './TagsField';
+import { shortLinkedInUrl } from '../../utils/linkedin';
 
 function Cell({ label, value, wide }) {
   return (
@@ -37,6 +38,19 @@ export default function ProspectQualification({ c }) {
           {c.salesFields.map((f) => (
             <DynamicFieldInput key={f.id} field={f} value={c.customFields[f.label]} onChange={(v) => c.setCustomFields((prev) => ({ ...prev, [f.label]: v }))} />
           ))}
+          {(c.linkedinEditable || c.linkedin) && (
+            <div className="field pc-span">
+              <label htmlFor="pc-linkedin">{t('linkedin.fieldLabel')}</label>
+              {c.linkedinEditable || c.linkedinDraft === '' ? (
+                <input id="pc-linkedin" type="url" inputMode="url" value={c.linkedinDraft} placeholder={t('linkedin.manualPlaceholder')} disabled={!c.linkedinEditable} onChange={(e) => c.setLinkedinDraft(e.target.value)} />
+              ) : (
+                <div className="pc-li-readonly">
+                  <a href={c.linkedin.url} target="_blank" rel="noopener noreferrer">{shortLinkedInUrl(c.linkedin.url)}</a>
+                  <button type="button" className="pc-linkbtn danger" onClick={() => c.setLinkedinDraft('')}>{t('linkedin.fieldClear')}</button>
+                </div>
+              )}
+            </div>
+          )}
           {/* tags: this card on the phone, the right column on desktop (same state) */}
           <div className="pc-only-mobile pc-span"><TagsField c={c} /></div>
         </div>
@@ -44,6 +58,9 @@ export default function ProspectQualification({ c }) {
         <>
           <div className="pc-grid">
             {c.guestFields.map((f) => <Cell key={`g-${f.label}`} label={f.label} value={formatFieldValue(f, c.guestAnswers[f.label], t)} />)}
+            {c.linkedin && c.linkedin.url && (
+              <div className="pc-cell wide"><div className="pc-cell-label">{t('linkedin.fieldLabel')}</div><div className="pc-cell-value"><a href={c.linkedin.url} target="_blank" rel="noopener noreferrer">{shortLinkedInUrl(c.linkedin.url)}</a></div></div>
+            )}
             {segs.map((s) => <Cell key={s.cat.id} label={s.cat.name} value={s.value} />)}
             {c.salesFields.map((f) => {
               const v = formatFieldValue(f, c.customFields[f.label], t);

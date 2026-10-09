@@ -12,6 +12,8 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../../api/client';
 import { IS_BOX_BUILD } from '../../utils/boxMode';
 import { isPlaceholderEmail } from '../../utils/placeholderEmail';
+import { canSearchLinkedIn, normalizeLinkedInUrl } from '../../utils/linkedin';
+import { useLinkedInStatus } from '../../hooks/useLinkedInStatus';
 
 // Chrome/Edge only, HTTPS only, needs the internet (the browser sends the audio to its own service).
 export const SpeechRecognitionCtor =
@@ -20,6 +22,7 @@ export const SpeechRecognitionCtor =
 // A voice note stops on its own after this long without any speech.
 const SILENCE_TIMEOUT_MS = 8000;
 
+const COMPANY_LABEL_RE = /^(company|entreprise|soci[ée]t[ée]|organi[sz]ation|organisation|firma|unternehmen|empresa)$/i;
 const PHONE_LABEL_RE = /^(phone|telephone|téléphone|tel\.?|tél\.?|mobile|portable|gsm)$/i;
 
 export function formatFieldValue(field, raw, t) {
@@ -80,6 +83,14 @@ export function useProspectCard({ campaignId, guest, initialMode, onClose, onSav
   const [addingNote, setAddingNote] = useState(false);
   const [noteError, setNoteError] = useState('');
 
+  // LinkedIn profile (Apollo): the saved link, its draft while editing, whether the campaign has the option
+  // (also known offline: it is part of the replicated campaign), and the search dialog.
+  const li = useLinkedInStatus(campaignId);
+  const [linkedin, setLinkedin] = useState(null);
+  const [linkedinDraft, setLinkedinDraft] = useState('');
+  const [linkedinCampaign, setLinkedinCampaign] = useState(false);
+  const [linkedinDialog, setLinkedinDialog] = useState(false);
+
   const baselineRef = useRef('');
   const snapshot = (n, r, s, tg, cf) => JSON.stringify({ n: (n || '').trim(), r, s, tg: tg || '', cf });
 
@@ -98,6 +109,9 @@ export function useProspectCard({ campaignId, guest, initialMode, onClose, onSav
         setConsentInfo(guestNote.consent || null);
         setSegmentCategories(campaign.segmentCategories || []);
         setAiEnabledCampaign(!!campaign.ai_assistant_enabled);
+        setLinkedinCampaign(!!campaign.linkedin_search_enabled);
+        setLinkedin(guestNote.linkedin || null);
+        setLinkedinDraft((guestNote.linkedin && guestNote.linkedin.url) || '');
         setNote(guestNote.note || '');
         setLeadRating(guestNote.leadRating ?? null);
         setSegments(guestNote.segments || {});
@@ -154,7 +168,8 @@ export function useProspectCard({ campaignId, guest, initialMode, onClose, onSav
     return () => clearInterval(timer);
   }, [emailStatus, campaignId, guest.email]);
 
-  const dirty = !loading && baselineRef.current !== '' && snapshot(note, leadRating, segments, tags, customFields) !== baselineRef.current;
+  const linkedinDirty = editing && linkedinDraft.trim() !== ((linkedin && linkedin.url) || '');
+  const dirty = !loading && ((baselineRef.current !== '' && snapshot(note, leadRating, segments, tags, customFields) !== baselineRef.current) || linkedinDirty);
 
   // ── closing, with the phone's Back button ────────────────────────────────
   // Opening the card adds one history entry; Back (or the arrow) removes it and closes the card — the app
@@ -251,11 +266,14 @@ export function useProspectCard({ campaignId, guest, initialMode, onClose, onSav
   });
 
   async function handleSave() {
+    const draftUrl = linkedinDraft.trim();
+    if (linkedinDirty && draftUrl && !normalizeLinkedInUrl(draftUrl)) { setError(t('linkedin.manualInvalid')); return; }
     setSaving(true);
     setError('');
     try {
       const trimmed = note.trim();
       await api.saveGuestNote(payload());
+      if (linkedinDirty) await api.setLinkedinUrl({ campaignId, email: guest.email, url: draftUrl ? normalizeLinkedInUrl(draftUrl) : null });
       baselineRef.current = snapshot(note, leadRating, segments, tags, customFields);
       // Fire-and-forget: the card is about to close, the analysis finishes in the background and fills the record.
       if (aiOn && trimmed && trimmed !== aiAnalyzedNote) {
@@ -340,6 +358,23 @@ export function useProspectCard({ campaignId, guest, initialMode, onClose, onSav
     }
   }
 
+  // The LinkedIn dialog finished: a profile was confirmed (or typed). It is already saved on the server when the
+  // prospect exists; the card only mirrors it.
+  function handleLinkedInLinked({ url, source }) {
+    setLinkedin({ url, source });
+    setLinkedinDraft(url);
+    onSaved?.();
+    loadExtras();
+  }
+  function openLinkedInSearch() {
+    if (!canSearchLinkedIn({ firstName: guest.firstName, lastName: guest.lastName, email: emailMissing ? '' : guest.email, company: companyHint })) {
+      setError(t('linkedin.needMoreInfo'));
+      return;
+    }
+    setError('');
+    setLinkedinDialog(true);
+  }
+
   function startEdit() { setEditing(true); }
   function cancelEdit() {
     if (dirty && !window.confirm(t('prospect.discardConfirm'))) return;
@@ -364,6 +399,15 @@ export function useProspectCard({ campaignId, guest, initialMode, onClose, onSav
   const toCheck = analysisFresh ? aiSuggestions.toCheck || [] : [];
   const nextActions = analysisFresh ? aiSuggestions.nextActions || [] : [];
 
+  // What the campaign collected as "company" (the form's field, whatever it is called in this campaign's language).
+  const companyHint = [guestAnswers, customFields].map((o) => Object.entries(o || {}).find(([label, v]) => COMPANY_LABEL_RE.test(label.trim()) && v)?.[1]).find(Boolean) || '';
+  // open = a link is saved (always viewable); search = may start a search; exhausted / offline = shown but disabled; none = no icon
+  const linkedinMode = linkedin && linkedin.url ? 'open'
+    : li.offline ? (linkedinCampaign ? 'offline' : 'none')
+    : li.status && li.status.available ? (li.status.credits.remaining <= 0 ? 'exhausted' : 'search')
+    : 'none';
+  const linkedinEditable = !li.offline && !!(li.status && li.status.accountEnabled && li.status.campaignEnabled);
+
   const phone = phoneFromForm || Object.entries(guestAnswers).find(([label, v]) => PHONE_LABEL_RE.test(label.trim()) && v)?.[1] || null;
 
   // Up to 3 facts for the header, taken from what this campaign actually collects (never hard-coded names).
@@ -380,6 +424,8 @@ export function useProspectCard({ campaignId, guest, initialMode, onClose, onSav
     note, setNote, leadRating, setRating, segments, setSegments, tags, setTags, customFields, setCustomFields,
     aiOn, analyzing, aiError, analysisFresh, analysisStale, hasReworked, reworkedText, toCheck, nextActions, aiSuggestions,
     handleAnalyze, handleSave, requestClose,
+    linkedin, linkedinDraft, setLinkedinDraft, linkedinMode, linkedinEditable, linkedinDialog, setLinkedinDialog, linkedinCredits: li.status && li.status.credits,
+    setLinkedinCredits: li.setCredits, openLinkedInSearch, handleLinkedInLinked, companyHint,
     history, otherCampaigns, manualNotes, addManualNote, addingNote, noteError, campaignId,
     recording, startRecording, stopRecording, canDictate: !!SpeechRecognitionCtor,
     newEmail, setNewEmail, addingEmail, handleAddEmail, confirmVoid, setConfirmVoid, voiding, handleVoidReward,

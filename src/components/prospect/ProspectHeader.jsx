@@ -5,6 +5,7 @@ import { IS_BOX_BUILD } from '../../utils/boxMode';
 import EmailStatusBadge, { META_TKEY, explain } from '../EmailStatusBadge';
 import LeadPotentialRating from './LeadPotentialRating';
 import { IcMail, IcPencil, IcPhone } from './icons';
+import LinkedInIcon from '../linkedin/LinkedInIcon';
 
 // Discreet verdict next to the address: the colour and word come from the real check (Bouncer), the longer
 // explanation sits in the tooltip instead of taking lines on the card. A deliverability check is a signal,
@@ -64,9 +65,15 @@ export default function ProspectHeader({ c, email }) {
           <div className="pc-quick">
             {c.phone && <a className="pc-iconbtn" href={`tel:${String(c.phone).replace(/[^\d+]/g, '')}`} aria-label={t('prospect.call')} title={t('prospect.call')}><IcPhone /></a>}
             {!c.emailMissing && <a className="pc-iconbtn" href={`mailto:${email}`} aria-label={t('prospect.sendEmail')} title={t('prospect.sendEmail')}><IcMail /></a>}
+            {c.linkedinMode === 'open' && <a className="pc-iconbtn" href={c.linkedin.url} target="_blank" rel="noopener noreferrer" aria-label={t('linkedin.iconOpenTitle')} title={t('linkedin.iconOpenTitle')}><LinkedInIcon /></a>}
+            {c.linkedinMode === 'search' && <button type="button" className="pc-iconbtn" onClick={c.openLinkedInSearch} aria-label={t('linkedin.iconSearchTitle')} title={t('linkedin.iconSearchTitle')}><LinkedInIcon /></button>}
+            {(c.linkedinMode === 'exhausted' || c.linkedinMode === 'offline') && <button type="button" className="pc-iconbtn" disabled aria-disabled="true" title={c.linkedinMode === 'offline' ? t('linkedin.offline') : t('linkedin.exhausted')} aria-label={c.linkedinMode === 'offline' ? t('linkedin.offline') : t('linkedin.exhausted')}><LinkedInIcon /></button>}
             {!c.editing && <button type="button" className="pc-iconbtn" onClick={c.startEdit} aria-label={t('prospectCard.editTitle')} title={t('prospectCard.editTitle')}><IcPencil /></button>}
           </div>
         </div>
+        {(c.linkedinMode === 'exhausted' || c.linkedinMode === 'offline') && (
+          <div className="pc-li-note">{c.linkedinMode === 'offline' ? t('linkedin.offline') : t('linkedin.exhausted')}</div>
+        )}
       </div>
     </header>
   );

@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { Card } from './ui';
+import CreditsBar from './linkedin/CreditsBar';
+import LinkedInIcon from './linkedin/LinkedInIcon';
 
 // Line icons (24px, 1.8 stroke — same style as the PWA's menu icons) used by
 // the compact/mobile variant instead of emoji.
@@ -25,6 +27,7 @@ export const DEFAULT_CAMPAIGN_SETTINGS = {
   googleReviewUrl: '', // '' = follow the account's link (Settings)
   socialMediaRequired: false,
   aiAssistantEnabled: false,
+  linkedinSearchEnabled: false,
 };
 
 // Maps a campaigns row (snake_case columns, as returned by the API) to this
@@ -35,6 +38,7 @@ export function settingsFromCampaign(c) {
     googleReviewUrl: c.google_review_url || '',
     socialMediaRequired: !!c.social_media_required,
     aiAssistantEnabled: !!c.ai_assistant_enabled,
+    linkedinSearchEnabled: !!c.linkedin_search_enabled,
   };
 }
 
@@ -188,6 +192,33 @@ export default function CampaignSettingsForm({ value, onChange, compact = false 
           <span style={{ fontSize: 14, fontWeight: 600 }}>{t('campaignSettings.aiToggleLabel')}</span>
         </label>
       </Card>
+
+      {/* LinkedIn profile search: only offered when an SPARK admin has allowed it for this account */}
+      {account?.linkedinSearch?.enabled && (
+        <Card title={<span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}><LinkedInIcon style={{ width: 18, height: 18 }} />{t('linkedin.cardTitle')}</span>} className="mt-card">
+          {!compact && (
+            <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px', lineHeight: 1.6 }}>{t('linkedin.cardDesc')}</p>
+          )}
+          <label style={{ display: 'flex', gap: 10, alignItems: 'center', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={!!value.linkedinSearchEnabled}
+              onChange={(e) => onChange({ linkedinSearchEnabled: e.target.checked })}
+              style={{ width: 18, height: 18, flexShrink: 0 }}
+            />
+            <span style={{ fontSize: 14, fontWeight: 600 }}>{t('linkedin.cardToggle')}</span>
+          </label>
+          {value.linkedinSearchEnabled && (
+            <div style={{ marginTop: 16 }}>
+              <CreditsBar
+                credits={account.linkedinSearch}
+                label={t('linkedin.creditsOf', { remaining: account.linkedinSearch.remaining.toLocaleString(), total: account.linkedinSearch.total.toLocaleString() })}
+              />
+              <p style={{ ...hintStyle, marginTop: 10 }}>{account.linkedinSearch.remaining <= 0 ? t('linkedin.cardExhausted') : t('linkedin.cardNote')}</p>
+            </div>
+          )}
+        </Card>
+      )}
     </>
   );
 }

@@ -125,6 +125,14 @@
 .pc-menu button { text-align: left; border: none; background: none; padding: 10px 12px; border-radius: 8px; font-size: 14px; font-family: inherit; cursor: pointer; color: var(--pc-ink); }
 .pc-menu button:hover { background: var(--pc-accent-soft); } .pc-menu-done { padding: 10px 12px; font-size: 14px; color: #047857; font-weight: 700; }
 
+/* LinkedIn */
+.pc-iconbtn:disabled { opacity: 0.45; cursor: not-allowed; }
+.pc-iconbtn:disabled:hover { background: #fff; }
+.pc-li-note { margin-top: 8px; font-size: 12px; color: var(--pc-muted); text-align: right; }
+.pc-li-readonly { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 11px; border: 1px solid #D5DDEB; border-radius: 10px; font-size: 14px; overflow-wrap: anywhere; }
+.pc-li-readonly a, .pc-cell-value a { color: var(--pc-accent-text); font-weight: 700; text-decoration: none; }
+.pc-li-readonly .pc-linkbtn.danger { margin-top: 0; flex-shrink: 0; }
+
 /* history, other campaigns, manual notes */
 .pc-extra .pc-card-title { margin-bottom: 10px; }
 .pc-extra-empty { margin: 0; font-size: 13.5px; color: var(--pc-muted); }

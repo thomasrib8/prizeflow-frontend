@@ -26,7 +26,7 @@ function eventLabel(ev, t) {
     case 'reward_voided': return t('prospect.ev_reward_voided', { gift: d.gift || '—' });
     case 'offline_edit': return d.merged ? t('prospect.ev_offline_merged') : t('prospect.ev_offline_edit');
     case 'created': case 'created_manual': case 'note_updated': case 'tags_changed': case 'fields_changed':
-    case 'ai_analyzed': case 'manual_note_added': case 'email_added':
+    case 'ai_analyzed': case 'manual_note_added': case 'email_added': case 'linkedin_changed':
       return t(`prospect.ev_${d.manual && ev.type === 'created' ? 'created_manual' : ev.type}`);
     default: return null; // a type this version doesn't know: leave it out rather than show a raw code
   }

@@ -147,7 +147,8 @@ export const api = {
   adminResetUserPassword: (id) => request(`/users/${id}/reset-password`, { method: 'POST' }),
   deleteUser: (id) => request(`/users/${id}`, { method: 'DELETE' }),
   getAppHealth: () => request('/admin/health'),
-  getEmailStatus: () => request('/admin/email-status'),
+  // refresh = true skips the server's one-minute cache (the widget's manual refresh button)
+  getEmailStatus: (refresh = false) => request(`/admin/email-status${refresh ? '?refresh=1' : ''}`),
   getEmailLog: (limit = 30) => request(`/admin/email-log?limit=${limit}`),
 
   dashboard: (campaignId = 'all') => request(`/dashboard?campaignId=${encodeURIComponent(campaignId)}`),
@@ -278,6 +279,13 @@ export const api = {
   getProspectCampaigns: (email) => request(`/account/prospect-campaigns?email=${encodeURIComponent(email)}`),
   getProspectNotes: (campaignId, email) => request(`/account/prospect-notes?campaignId=${encodeURIComponent(campaignId)}&email=${encodeURIComponent(email)}`),
   addProspectNote: (payload) => request('/account/prospect-notes', { method: 'POST', body: payload }),
+  // LinkedIn profile search (Apollo.io). Credits live only on the server; each search is started by a rep's click.
+  linkedinStatus: (campaignId) => request(`/account/linkedin/status?campaignId=${encodeURIComponent(campaignId)}`),
+  linkedinSearch: (payload) => request('/account/linkedin/search', { method: 'POST', body: payload }),
+  linkedinDecision: (operationId, decision) => request(`/account/linkedin/searches/${encodeURIComponent(operationId)}/decision`, { method: 'POST', body: { decision } }),
+  setLinkedinUrl: (payload) => request('/account/linkedin/url', { method: 'PUT', body: payload }),
+  getUserLinkedin: (id) => request(`/users/${id}/linkedin`),
+  setUserLinkedin: (id, payload) => request(`/users/${id}/linkedin`, { method: 'PATCH', body: payload }),
   getRecentPlayers: (campaignId) => request(`/account/recent-players?campaignId=${encodeURIComponent(campaignId)}`),
   getAccountSettings: () => request('/account/settings'),
   updateAccountSettings: (payload) => request('/account/settings', { method: 'PATCH', body: payload }),

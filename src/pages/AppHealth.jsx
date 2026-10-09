@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { Card, Stat, Badge, EmptyState } from '../components/ui';
-import EmailQuotaTable from '../components/EmailQuotaTable';
+import ResendQuotaCard from '../components/ResendQuotaCard';
 
 function formatDT(s) {
   if (!s) return '—';
@@ -12,15 +12,8 @@ function formatDT(s) {
 const SERVICE_TONE = { operational: 'green', degraded: 'orange', outage: 'red', unknown: 'neutral' };
 const SERVICE_TKEY = { operational: 'serviceOperational', degraded: 'serviceDegraded', outage: 'serviceOutage', unknown: 'serviceUnknown' };
 
-// Thresholds requested for the quota alert: green under 70%, orange past 80%,
-// red past 95% — mirrors emailStatus.js's quotaAlertTone computed server-side
-// (kept here only for the icon/wording, the tone itself is authoritative
-// from the backend).
-const QUOTA_TONE_ICON = { green: '🟢', orange: '🟠', red: '🔴' };
-const QUOTA_TONE_BADGE = { green: 'green', orange: 'orange', red: 'red' };
-
 // Generic "State" + custom rows table for a quota-checked provider (Hunter,
-// Bouncer) — same row-table look as EmailQuotaTable, but the two providers'
+// Bouncer) — same row-table look as the other health cards, but the two providers'
 // data shapes differ too much to share that component directly. `hasData`
 // tells apart "configured and the check succeeded" from "configured but the
 // quota check itself failed" (bad key, network) — both are distinct from
@@ -114,9 +107,7 @@ export default function AppHealth() {
             </div>
           </Card>
 
-          <Card title={t('appHealth.emailQuotaTitle')} className="mt-card" action={<span style={{ fontSize: 11, color: '#94A3B8' }}>Brevo</span>}>
-            <EmailQuotaTable status={health.emailStatus} />
-          </Card>
+          <ResendQuotaCard initial={health.emailStatus} />
 
           <Card title={t('appHealth.emailFindingQuotaTitle')} className="mt-card" action={<span style={{ fontSize: 11, color: '#94A3B8' }}>Hunter.io</span>}>
             <ProviderQuotaTable
@@ -143,28 +134,6 @@ export default function AppHealth() {
               ]}
             />
           </Card>
-
-          {health.emailStatus?.quotaPercentUsed !== null && health.emailStatus?.quotaPercentUsed !== undefined && (
-            <Card title={t('appHealth.brevoAlertsTitle')} className="mt-card">
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: health.emailStatus.quotaAlertTone !== 'green' ? 10 : 0 }}>
-                <span style={{ fontSize: 13, fontWeight: 600 }}>
-                  {QUOTA_TONE_ICON[health.emailStatus.quotaAlertTone]} {t('appHealth.emailQuotaTitle')}
-                </span>
-                <Badge tone={QUOTA_TONE_BADGE[health.emailStatus.quotaAlertTone] || 'neutral'}>
-                  {t('appHealth.usedSuffix', { pct: health.emailStatus.quotaPercentUsed })}
-                </Badge>
-              </div>
-              {health.emailStatus.quotaAlertTone !== 'green' && (
-                <p style={{
-                  fontSize: 13, margin: 0, padding: '10px 14px', borderRadius: 8,
-                  background: health.emailStatus.quotaAlertTone === 'red' ? '#FEF2F2' : '#FFFBEB',
-                  color: health.emailStatus.quotaAlertTone === 'red' ? '#991B1B' : '#92400E',
-                }}>
-                  {t('appHealth.brevoWarning')}
-                </p>
-              )}
-            </Card>
-          )}
 
           <Card title={t('appHealth.recentErrorsTitle')} className="mt-card">
             <p style={{ fontSize: 12, color: '#94A3B8', marginBottom: 12 }}>

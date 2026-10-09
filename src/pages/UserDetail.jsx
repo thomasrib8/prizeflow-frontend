@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import LinkedInAdminCard from '../components/LinkedInAdminCard';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
@@ -21,6 +22,7 @@ export default function UserDetail() {
     { key: 'overview', label: t('userDetail.tabOverview') },
     { key: 'profile', label: t('userDetail.tabProfile') },
     { key: 'activity', label: t('userDetail.tabActivity') },
+    { key: 'linkedin', label: t('linkedin.tabLabel') },
     { key: 'actions', label: t('userDetail.tabActions') },
     { key: 'notes', label: t('userDetail.tabNotes') },
   ];
@@ -411,6 +413,8 @@ WHEEL_SECURITY_KEY=...`}
       )}
 
       {/* B. Activity log — metadata only, never the content of what was configured. */}
+      {module === 'linkedin' && <LinkedInAdminCard userId={id} />}
+
       {module === 'activity' && (
         <Card title={t('userDetail.activityTitle')} className="mt-card">
           {!activity && <p className="page-subtitle">{t('common.loading')}</p>}
