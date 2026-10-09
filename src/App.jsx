@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { useAdmin } from './hooks/useAdmin';
 import Layout from './components/Layout';
 import Login from './pages/Login';
+import { IS_BOX_BUILD } from './utils/boxMode';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
@@ -63,9 +64,11 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
+          {!IS_BOX_BUILD && <>
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
+          </>}
           {/* Public guest flow — scanned via QR code, no login, outside the authenticated shell */}
           <Route path="/play/:token" element={<Guest />} />
           {/* Staff tablet kiosk ("Spin the wheel" for walk-up guests), public like /play/:token —
@@ -89,6 +92,7 @@ export default function App() {
             <Route path="settings" element={<PwaSettings />} />
             <Route path="*" element={<Navigate to="/pwa/home" replace />} />
           </Route>
+          {!IS_BOX_BUILD && <>
           <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
           <Route path="/campaigns" element={<PrivateRoute><Campaigns /></PrivateRoute>} />
           <Route path="/campaigns/new" element={<PrivateRoute><NewCampaign /></PrivateRoute>} />
@@ -106,7 +110,8 @@ export default function App() {
           <Route path="/health" element={<AdminRoute><AppHealth /></AdminRoute>} />
           <Route path="/magic" element={<AdminRoute><Magic /></AdminRoute>} />
           <Route path="/sequence" element={<AdminRoute><SequenceBuilder /></AdminRoute>} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          </>}
+          <Route path="*" element={<Navigate to={IS_BOX_BUILD ? '/pwa/home' : '/'} replace />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

@@ -457,3 +457,11 @@ table.data-table tr:hover td { background: #FAFBFC; }
   0% { left: -40%; }
   100% { left: 100%; }
 }
+
+/* Event-box sign-in (offline PWA): same dark amber as the offline app, so it is obvious from the first screen */
+.auth-screen.auth-offline { background: linear-gradient(160deg, #B45309 0%, #92400E 100%); }
+.auth-offline .btn-primary { background: #B45309; color: #fff; }
+.auth-offline .btn-primary:hover:not(:disabled) { background: #92400E; }
+.auth-offline .field input:focus { border-color: #B45309; }
+.auth-offline .auth-title { color: #7C2D12; }
+.auth-offline-pill { display: inline-block; margin: 0 0 14px; padding: 5px 12px; border-radius: 999px; background: #FEF3C7; color: #92400E; font-size: 12px; font-weight: 800; letter-spacing: 0.06em; }

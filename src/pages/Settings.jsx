@@ -940,6 +940,59 @@ function PrivacyModule() {
   );
 }
 
+function OfflineModeModule() {
+  const { t } = useTranslation('admin');
+  const [codeSet, setCodeSet] = useState(null);
+  const [code, setCode] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState('');
+  const [error, setError] = useState('');
+
+  useEffect(() => { api.getAccountSettings().then((r) => setCodeSet(!!r.offlineAccessCodeSet)).catch((e) => setError(e.message)); }, []);
+
+  async function save(value) {
+    setSaving(true); setError(''); setMsg('');
+    try {
+      const r = await api.updateAccountSettings({ offlineAccessCode: value });
+      setCodeSet(!!r.offlineAccessCodeSet); setCode('');
+      setMsg(value ? t('settings.offlineMode.saved') : t('settings.offlineMode.removed'));
+      setTimeout(() => setMsg(''), 3000);
+    } catch (e) { setError(e.message); } finally { setSaving(false); }
+  }
+  const note = { fontSize: 13, color: '#64748B', margin: '0 0 14px', lineHeight: 1.6 };
+  const weak = code && (code.length < 8 || /^\d+$/.test(code));
+
+  return (
+    <>
+      {error && <div className="error-banner">{error}</div>}
+      <Card title={t('settings.offlineMode.title')} className="mt-card">
+        <p style={note}>{t('settings.offlineMode.intro')}</p>
+        <table style={{ fontSize: 13, marginBottom: 16, borderCollapse: 'collapse' }}>
+          <tbody>
+            <tr><td style={{ padding: '4px 16px 4px 0', color: '#64748B' }}>{t('settings.offlineMode.wifiLabel')}</td><td><strong>Spark-Local</strong></td></tr>
+            <tr><td style={{ padding: '4px 16px 4px 0', color: '#64748B' }}>{t('settings.offlineMode.addressLabel')}</td><td><strong>http://sparkoff.box</strong></td></tr>
+            <tr><td style={{ padding: '4px 16px 4px 0', color: '#64748B' }}>{t('settings.offlineMode.addressAltLabel')}</td><td>http://192.168.0.250:3001/pwa</td></tr>
+          </tbody>
+        </table>
+        <p style={{ ...note, color: codeSet ? '#047857' : '#92400E', fontWeight: 600 }}>
+          {codeSet === null ? '' : codeSet ? `✓ ${t('settings.offlineMode.codeIsSet')}` : t('settings.offlineMode.codeNotSet')}
+        </p>
+        <div className="field" style={{ maxWidth: 360 }}>
+          <label>{t('settings.offlineMode.codeLabel')}</label>
+          <input type="text" autoComplete="off" value={code} onChange={(e) => setCode(e.target.value)} maxLength={64} placeholder={t('settings.offlineMode.codePlaceholder')} />
+          {weak && <div style={{ fontSize: 12, color: '#92400E', marginTop: 4 }}>{t('settings.offlineMode.weakHint')}</div>}
+        </div>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          <Button type="button" disabled={saving || code.length < 6} onClick={() => save(code)}>{t('settings.offlineMode.saveBtn')}</Button>
+          {codeSet && <Button type="button" variant="ghost" disabled={saving} onClick={() => save('')} style={{ color: '#EF4444' }}>{t('settings.offlineMode.removeBtn')}</Button>}
+          {msg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{msg}</span>}
+        </div>
+        <p style={{ ...note, margin: '16px 0 0', fontSize: 12 }}>{t('settings.offlineMode.wipeNote')}</p>
+      </Card>
+    </>
+  );
+}
+
 const MODULE_KEYS = [
   { key: 'information', tKey: 'tabInformation' },
   { key: 'google-review', tKey: 'tabGoogleReview' },
@@ -947,6 +1000,7 @@ const MODULE_KEYS = [
   { key: 'email-templates', tKey: 'tabEmailTemplates' },
   { key: 'ai-assistant', tKey: 'tabAiAssistant' },
   { key: 'privacy', tKey: 'tabPrivacy' },
+  { key: 'offline', tKey: 'tabOffline' },
   { key: 'calibration', tKey: 'tabCalibration' },
 ];
 
@@ -977,6 +1031,7 @@ export default function Settings() {
       {module === 'email-templates' && <EmailTemplatesModule />}
       {module === 'ai-assistant' && <AIAssistantModule />}
       {module === 'privacy' && <PrivacyModule />}
+      {module === 'offline' && <OfflineModeModule />}
       {module === 'calibration' && <Calibration onExit={() => setModule('information')} />}
     </div>
   );

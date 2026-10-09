@@ -1,4 +1,5 @@
 import { getToken, adoptRefreshedToken, dropToken } from './tokenStore';
+import i18n from '../i18n';
 // 'same-origin' = this page and the API come from the same server — what the
 // offline event box does (it serves the built app itself, reached by IP).
 const API_BASE = import.meta.env.VITE_API_BASE_URL === 'same-origin'
@@ -62,7 +63,9 @@ async function request(path, { method = 'GET', body, auth = true } = {}) {
     return new Promise(() => {}); // navigation is already underway (or a newer session is active — either way, this caller gets nothing more)
   }
   if (!res.ok) {
-    const err = new Error((data && data.error) || `Request failed (${res.status})`);
+    // Event-box answers worth showing in the rep's own language
+    const boxKey = { BOX_NOT_PRIMARY: 'boxApp.readOnly', BOX_BAD_CODE: 'boxApp.badCode', BOX_NO_CODE: 'boxApp.noCode', BOX_NOT_READY: 'boxApp.notReady' }[data && data.code];
+    const err = new Error(boxKey ? i18n.t(boxKey, { ns: 'admin' }) : (data && data.error) || `Request failed (${res.status})`);
     if (data && data.code) err.code = data.code; // e.g. POSSIBLE_DUPLICATE — lets a screen offer a specific way forward
     throw err;
   }
@@ -106,6 +109,8 @@ async function downloadFile(path) {
 export const api = {
   login: (email, password) => request('/auth/login', { method: 'POST', body: { email, password }, auth: false }),
   // Second step when the account has two-step sign-in on (login answered { mfaRequired, mfaToken })
+  boxLogin: (code) => request('/box/login', { method: 'POST', body: { code }, auth: false }),
+  boxStatus: () => request('/box/status', { auth: false }),
   verifyMfa: (mfaToken, code) => request('/auth/mfa/verify', { method: 'POST', body: { mfaToken, code }, auth: false }),
   getMfaStatus: () => request('/account/mfa'),
   setupMfa: (password) => request('/account/mfa/setup', { method: 'POST', body: { password } }),
@@ -268,6 +273,11 @@ export const api = {
   },
   saveGuestNote: (payload) => request('/account/guest-notes', { method: 'PATCH', body: payload }),
   getGuestNote: (campaignId, email) => request(`/account/guest-notes?campaignId=${encodeURIComponent(campaignId)}&email=${encodeURIComponent(email)}`),
+  // The prospect card's right-hand column. History and other campaigns are cloud-only; manual notes also work on the event box.
+  getProspectHistory: (campaignId, email) => request(`/account/prospect-history?campaignId=${encodeURIComponent(campaignId)}&email=${encodeURIComponent(email)}`),
+  getProspectCampaigns: (email) => request(`/account/prospect-campaigns?email=${encodeURIComponent(email)}`),
+  getProspectNotes: (campaignId, email) => request(`/account/prospect-notes?campaignId=${encodeURIComponent(campaignId)}&email=${encodeURIComponent(email)}`),
+  addProspectNote: (payload) => request('/account/prospect-notes', { method: 'POST', body: payload }),
   getRecentPlayers: (campaignId) => request(`/account/recent-players?campaignId=${encodeURIComponent(campaignId)}`),
   getAccountSettings: () => request('/account/settings'),
   updateAccountSettings: (payload) => request('/account/settings', { method: 'PATCH', body: payload }),

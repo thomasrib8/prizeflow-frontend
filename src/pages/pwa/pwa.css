@@ -319,3 +319,26 @@ html.pw-root, html.pw-root body, html.pw-root #root { height: auto; min-height: 
 .pw-shell .modal-card input[type='date']::-webkit-date-and-time-value { text-align: left; }
 .pw-shell .modal-card .field, .pw-shell .modal-card label { min-width: 0; max-width: 100%; }
 .pw-shell .modal-card select { text-overflow: ellipsis; }
+
+/* ── Event-box build: amber theme + permanent "offline" bar ───────────────────
+   The local copy on the box must never be mistaken for the normal app, so every
+   brand-blue surface becomes dark amber. */
+.pw-shell.pw-offline { --link: #B45309; }
+.pw-offline .pw-header { background: linear-gradient(160deg, #B45309 0%, #92400E 100%); }
+.pw-shell.pw-offline::before { background: #7C2D12; }
+.pw-offline-bar {
+  position: sticky; top: 0; z-index: 70; display: flex; align-items: center; gap: 8px;
+  padding: calc(env(safe-area-inset-top, 0px) + 7px) 16px 7px; background: #7C2D12; color: #FFF7ED;
+  font-size: 12.5px; line-height: 1.2; box-shadow: 0 2px 8px -2px rgba(124, 45, 18, 0.5);
+}
+.pw-offline-bar strong { letter-spacing: 0.04em; font-weight: 800; font-size: 12px; white-space: nowrap; }
+.pw-offline-count { margin-left: auto; min-width: 0; padding: 3px 9px; border-radius: 999px; background: rgba(255, 247, 237, 0.16); font-weight: 600; font-size: 11.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pw-offline-count.has { background: #FDE68A; color: #7C2D12; font-weight: 800; }
+.pw-offline .pw-action.primary { background: linear-gradient(135deg, #B45309, #D97706); box-shadow: 0 14px 28px -14px rgba(180, 83, 9, 0.75); }
+.pw-offline .pw-action-icon, .pw-offline .pw-empty-icon { background: #FEF3C7; color: #B45309; }
+.pw-offline .pw-nav-item.active, .pw-offline .pw-queue-win strong, .pw-offline .pw-person-gift, .pw-offline .pw-period button.on { color: #B45309; }
+.pw-offline .pw-nav-scan-btn { background: linear-gradient(145deg, #B45309, #D97706); box-shadow: 0 12px 24px -8px rgba(180, 83, 9, 0.7); }
+.pw-offline .pw-tab-chip.on, .pw-offline .pw-save { background: #B45309; border-color: #B45309; }
+.pw-offline .pw-filter-btn.active, .pw-offline .pw-retry { color: #B45309; border-color: #FCD34D; background: #FFFBEB; }
+.pw-offline .pw-social-chips span { background: #FEF3C7; color: #B45309; }
+.pw-offline .pw-settings-form input[type='checkbox']:checked { background: #B45309; }

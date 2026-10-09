@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { IS_BOX_BUILD } from '../utils/boxMode';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { Button } from './ui';
@@ -8,7 +9,7 @@ import { prepareScanImage } from '../utils/scanImage';
 // Chrome/Edge only (webkitSpeechRecognition) — same as ProspectCard.jsx, see
 // there for why this doesn't render anywhere else.
 const SpeechRecognitionCtor =
-  typeof window !== 'undefined' ? window.SpeechRecognition || window.webkitSpeechRecognition : null;
+  typeof window !== 'undefined' && window.isSecureContext && !IS_BOX_BUILD ? window.SpeechRecognition || window.webkitSpeechRecognition : null; // needs HTTPS and the internet
 
 const STARS = [1, 2, 3];
 const EMPTY_FORM = { firstName: '', lastName: '', email: '' };
@@ -234,6 +235,7 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
   // straight off the badge) — there is nothing to look up, and it would only
   // burn a Hunter.io credit for a result that gets thrown away.
   useEffect(() => {
+    if (IS_BOX_BUILD) return undefined; // e-mail search needs the internet: not on the event box
     if (form.email.trim()) return undefined;
     const first = form.firstName.trim();
     const last = form.lastName.trim();
@@ -360,7 +362,7 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
             {/* Hunter.io is only ever worth it when there's no email yet —
                 once one is known (typed, or already on the badge), there's
                 nothing to look up and no reason to spend a credit on it. */}
-            {!form.email.trim() && (
+            {!IS_BOX_BUILD && !form.email.trim() && (
               <Button
                 type="button"
                 variant="secondary"
@@ -517,7 +519,7 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
 
         <div className="field">
           <label>{t('common.tagLabel')}</label>
-          <input placeholder={t('newProspectModal.tagPlaceholder')} value={tags} onChange={(e) => setTags(e.target.value)} />
+          <input placeholder={t('prospectCard.tagPlaceholder')} value={tags} onChange={(e) => setTags(e.target.value)} />
         </div>
 
         <label style={{ display: 'flex', gap: 10, alignItems: 'flex-start', fontSize: 13, color: '#334155', cursor: 'pointer', margin: '16px 0 4px', lineHeight: 1.45 }}>

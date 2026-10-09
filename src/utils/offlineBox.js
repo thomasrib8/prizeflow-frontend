@@ -20,7 +20,7 @@ export function setBoxUrl(value) {
 
 export const boxKioskUrl = (token) => `${getBoxUrl()}/kiosk/${encodeURIComponent(token)}`;
 
-// The box also runs its own Wi-Fi ("PrizeFlow-Local") for when the TP-Link is
+// The box also runs its own Wi-Fi ("Spark-Local") for when the TP-Link is
 // gone; on that network it has another, fixed address.
 const HOTSPOT_URL = import.meta.env.VITE_OFFLINE_BOX_HOTSPOT_URL || 'http://10.42.0.1:3001';
 export const boxHotspotKioskUrl = (token) => `${HOTSPOT_URL}/kiosk/${encodeURIComponent(token)}`;

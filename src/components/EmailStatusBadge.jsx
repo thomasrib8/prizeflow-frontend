@@ -14,14 +14,14 @@
 
 import { useTranslation } from 'react-i18next';
 
-const META_TKEY = {
+export const META_TKEY = {
   verified: { tKey: 'labelVerified', color: '#065F46', bg: '#D1FAE5' },
   risky: { tKey: 'labelUncertain', color: '#92400E', bg: '#FEF3C7' },
   invalid: { tKey: 'labelInvalid', color: '#991B1B', bg: '#FEE2E2' },
   unknown: { tKey: 'labelUnverifiable', color: '#475569', bg: '#E2E8F0' },
 };
 
-function explain(status, { isCatchAll, isDisposable, isRoleAccount }, t) {
+export function explain(status, { isCatchAll, isDisposable, isRoleAccount }, t) {
   let text;
   if (status === 'verified') {
     text = t('emailStatusBadge.explainVerified');

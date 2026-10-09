@@ -34,6 +34,9 @@ export function AuthProvider({ children }) {
     return { mfaRequired: false };
   }, [startSession]);
 
+  // Event box (offline PWA): the shared access code instead of e-mail + password.
+  const loginBox = useCallback(async (code) => { startSession(await api.boxLogin(code)); }, [startSession]);
+
   const completeMfa = useCallback(async (mfaToken, code) => {
     startSession(await api.verifyMfa(mfaToken, code));
   }, [startSession]);
@@ -59,7 +62,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, login, completeMfa, register, logout, updateStoredUser }}>
+    <AuthContext.Provider value={{ user, login, loginBox, completeMfa, register, logout, updateStoredUser }}>
       {children}
     </AuthContext.Provider>
   );

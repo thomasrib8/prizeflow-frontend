@@ -1,7 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
+import { IS_BOX_BUILD } from '../utils/boxMode';
+import { api } from '../api/client';
+import i18n from '../i18n';
 
 // returnTo comes straight from the URL, so it's attacker-controllable —
 // resolve it against our own origin and refuse anything that doesn't land
@@ -20,7 +23,7 @@ function safeReturnTo(value) {
 
 export default function Login() {
   const { t } = useTranslation('admin');
-  const { login, completeMfa } = useAuth();
+  const { login, loginBox, completeMfa } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [email, setEmail] = useState('');
@@ -30,12 +33,21 @@ export default function Login() {
   const [mfaToken, setMfaToken] = useState(null); // set once the password is right and the app code is still needed
   const [code, setCode] = useState('');
 
+  // On the box, nobody is signed in yet, so the screen would show the default language: ask the box which
+  // language the account uses.
+  useEffect(() => {
+    if (!IS_BOX_BUILD) return;
+    api.boxStatus().then((st) => { if (st && st.language) i18n.changeLanguage(st.language); }).catch(() => {});
+  }, []);
+
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
-      if (mfaToken) {
+      if (IS_BOX_BUILD) {
+        await loginBox(code.trim());
+      } else if (mfaToken) {
         await completeMfa(mfaToken, code.trim());
       } else {
         const res = await login(email, password);
@@ -44,7 +56,7 @@ export default function Login() {
       // Lets a reward link (e.g. /redeem/:code, reached by scanning a QR
       // while logged out) send the operator back to the same page instead
       // of always dropping them on the dashboard.
-      navigate(safeReturnTo(searchParams.get('returnTo')) || '/');
+      navigate(safeReturnTo(searchParams.get('returnTo')) || (IS_BOX_BUILD ? '/pwa/home' : '/'));
     } catch (err) {
       // the 5-minute step-one pass ran out: start again from the password
       if (err.code === 'MFA_EXPIRED') { setMfaToken(null); setCode(''); }
@@ -55,7 +67,7 @@ export default function Login() {
   }
 
   return (
-    <div className="auth-screen">
+    <div className={`auth-screen${IS_BOX_BUILD ? ' auth-offline' : ''}`}>
       <form className="auth-card" onSubmit={handleSubmit} style={{ textAlign: 'center' }}>
 
         {/* Logo centered, larger */}
@@ -63,12 +75,20 @@ export default function Login() {
           <img src="/logo2.svg" alt="SPARK" style={{ width: 100, height: 100, objectFit: 'contain' }} />
         </div>
 
+        {IS_BOX_BUILD && <div className="auth-offline-pill">{t('boxApp.barOffline')}</div>}
+
         <h1 className="auth-title" style={{ textAlign: 'center' }}>{t('auth.login.welcomeBackTitle')}</h1>
         <p className="auth-subtitle" style={{ textAlign: 'center' }}>{t('auth.login.signInSubtitle')}</p>
 
         {error && <div className="error-banner" style={{ textAlign: 'left' }}>{error}</div>}
 
-        {mfaToken ? (
+        {IS_BOX_BUILD ? (
+          <div className="field" style={{ textAlign: 'left' }}>
+            <label>{t('boxApp.codeLabel')}</label>
+            <input type="password" autoComplete="off" value={code} onChange={e => setCode(e.target.value)} required autoFocus maxLength={100} />
+            <div style={{ fontSize: 12, color: '#64748B', marginTop: 6 }}>{t('boxApp.codeHelp')}</div>
+          </div>
+        ) : mfaToken ? (
           <div className="field" style={{ textAlign: 'left' }}>
             <label>{t('auth.login.mfaCodeLabel')}</label>
             <input type="text" inputMode="text" autoComplete="one-time-code" value={code} onChange={e => setCode(e.target.value)}
@@ -93,15 +113,17 @@ export default function Login() {
 
         <button className="btn btn-primary" type="submit" disabled={loading}
           style={{ width: '100%', justifyContent: 'center', marginTop: 6 }}>
-          {loading ? t('auth.login.signingInBtn') : mfaToken ? t('auth.login.mfaVerifyBtn') : t('auth.login.signInBtn')}
+          {loading ? t('auth.login.signingInBtn') : IS_BOX_BUILD ? t('boxApp.enterBtn') : mfaToken ? t('auth.login.mfaVerifyBtn') : t('auth.login.signInBtn')}
         </button>
 
+        {!IS_BOX_BUILD && <>
         <p style={{ fontSize: 13, color: '#64748B', marginTop: 16 }}>
           <Link to="/forgot-password">{t('auth.login.forgotPasswordLink')}</Link>
         </p>
         <p style={{ fontSize: 13, color: '#64748B', marginTop: 6 }}>
           {t('auth.login.noAccountYetText')} <Link to="/register">{t('auth.login.createOneLink')}</Link>
         </p>
+        </>}
       </form>
     </div>
   );

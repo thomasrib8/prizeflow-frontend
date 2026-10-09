@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { toggleValue } from '../../hooks/useLaunchQueue';
 import FilterGroup from '../../components/FilterGroup';
 import { Button } from '../../components/ui';
+import { IS_BOX_BUILD } from '../../utils/boxMode';
 import { IconChevronRight, IconFilter, IconPlus, IconScan, IconSearch, IconUsers } from '../../components/pwa/PwaIcons';
 import { CampaignLoading, NoCampaign, PersonCard, PersonSkeletons, Skel } from '../../components/pwa/PwaParts';
 import { usePwa } from './PwaContext';
@@ -85,21 +86,25 @@ export default function PwaHome() {
 
   return (
     <div className="pw-stack">
-      <button type="button" className="pw-action primary" onClick={openScan}>
-        <span className="pw-action-icon"><IconScan /></span>
-        <span className="pw-action-text">
-          <span className="pw-action-title" style={{ display: 'block' }}>{t('pwaApp.scanTitle')}</span>
-          <span className="pw-action-sub" style={{ display: 'block' }}>{t('pwaApp.scanSub')}</span>
-        </span>
-        <IconChevronRight className="pw-action-chev" />
-      </button>
+      {/* Scanning needs the internet (the photo is read by an online service): not offered on the event box */}
+      {!IS_BOX_BUILD && (
+        <button type="button" className="pw-action primary" onClick={openScan}>
+          <span className="pw-action-icon"><IconScan /></span>
+          <span className="pw-action-text">
+            <span className="pw-action-title" style={{ display: 'block' }}>{t('pwaApp.scanTitle')}</span>
+            <span className="pw-action-sub" style={{ display: 'block' }}>{t('pwaApp.scanSub')}</span>
+          </span>
+          <IconChevronRight className="pw-action-chev" />
+        </button>
+      )}
 
-      <button type="button" className="pw-action" onClick={openNewProspect}>
+      <button type="button" className={`pw-action${IS_BOX_BUILD ? ' primary' : ''}`} onClick={openNewProspect}>
         <span className="pw-action-icon"><IconPlus /></span>
         <span className="pw-action-text">
           <span className="pw-action-title" style={{ display: 'block' }}>{t('pwaApp.newProspectTitle')}</span>
           <span className="pw-action-sub" style={{ display: 'block' }}>{t('pwaApp.newProspectSub')}</span>
         </span>
+        {IS_BOX_BUILD && <IconChevronRight className="pw-action-chev" />}
       </button>
 
       <LiveQueueCard />

@@ -8,8 +8,10 @@ import { useProspectAddedToast } from '../../hooks/useProspectAddedToast';
 import ProspectCard from '../../components/ProspectCard';
 import NewProspectModal from '../../components/NewProspectModal';
 import ConnectionDiagnosticsModal from '../../components/ConnectionDiagnosticsModal';
-import { IconAnalytics, IconHome, IconProspects, IconScan, IconSettings, IconUser } from '../../components/pwa/PwaIcons';
+import { IconAnalytics, IconHome, IconPlus, IconProspects, IconScan, IconSettings, IconUser } from '../../components/pwa/PwaIcons';
 import { PwaContext } from './PwaContext';
+import { IS_BOX_BUILD } from '../../utils/boxMode';
+import { api } from '../../api/client';
 import './pwa.css';
 
 const MANIFEST_HREF = '/pwa-manifest.webmanifest';
@@ -64,6 +66,42 @@ function usePwaRootClass() {
 /// NewProspectModal); this is only the mobile presentation: header with the
 /// active campaign + wheel status, bottom navigation with the central Scan
 /// action, and the shared state the four tabs read from.
+// Event-box build only: tells the rep whether this box is in charge (internet down: changes are accepted and
+// sent later) or merely following the cloud (changes are refused: use the normal app).
+function useBoxStatus(refreshKey) {
+  const [status, setStatus] = useState(null);
+  useEffect(() => {
+    if (!IS_BOX_BUILD) return undefined;
+    let stop = false;
+    const load = () => api.boxStatus().then((s) => { if (!stop) setStatus(s); }).catch(() => {});
+    load();
+    const t = setInterval(load, 5000);
+    return () => { stop = true; clearInterval(t); };
+  }, [refreshKey]);
+  return status;
+}
+
+// Event-box build only. A slim bar that stays at the top while scrolling, so there is never a doubt
+// about which version of the app this is: amber = the local copy on the box, not the normal app.
+function OfflineBar({ status }) {
+  const { t } = useTranslation('admin');
+  const inCharge = !status || status.mode === 'primary'; // internet down: the box takes changes
+  const pending = status ? status.pendingChanges : 0;
+  return (
+    <div className="pw-offline-bar" role="status" aria-live="polite">
+      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M3 3l18 18" /><path d="M9.5 5.4A6 6 0 0 1 18 10a4 4 0 0 1 1.9 7.5" /><path d="M6.3 7.3A6 6 0 0 0 7 19h9.5" />
+      </svg>
+      <strong>{inCharge ? t('boxApp.barOffline') : t('boxApp.barReadOnly')}</strong>
+      {inCharge && status && (
+        <span className={`pw-offline-count${pending ? ' has' : ''}`}>
+          {pending ? t('boxApp.pending', { count: pending }) : `${t('boxApp.allSent')} ✓`}
+        </span>
+      )}
+    </div>
+  );
+}
+
 function PwaShell() {
   const { t } = useTranslation('admin');
   const navigate = useNavigate();
@@ -81,6 +119,7 @@ function PwaShell() {
   // prospects (Prospects, Analytics) refetch.
   const [dataVersion, setDataVersion] = useState(0);
   const fileInputRef = useRef(null);
+  const boxStatus = useBoxStatus(dataVersion); // re-read right after a save, so the counter moves at once
 
   const hasCampaign = !!q.campaign;
   const bump = () => setDataVersion((v) => v + 1);
@@ -118,7 +157,8 @@ function PwaShell() {
 
   return (
     <PwaContext.Provider value={ctx}>
-      <div className="pw-shell">
+      <div className={`pw-shell${IS_BOX_BUILD ? ' pw-offline' : ''}`}>
+        {IS_BOX_BUILD && <OfflineBar status={boxStatus} />}
         <header className="pw-header">
           <div className="pw-header-top">
             <div className="pw-brand">
@@ -154,10 +194,18 @@ function PwaShell() {
               {tab.label}
             </NavLink>
           ))}
-          <button type="button" className="pw-nav-scan" onClick={startScan} disabled={!hasCampaign} aria-label={t('pwaApp.navScan')}>
-            <span className="pw-nav-scan-btn"><IconScan /></span>
-            {t('pwaApp.navScan')}
-          </button>
+          {/* Online: Scan. On the event box scanning is not possible, so the same spot adds a prospect by hand. */}
+          {IS_BOX_BUILD ? (
+            <button type="button" className="pw-nav-scan" onClick={openNewProspect} disabled={!hasCampaign} aria-label={t('boxApp.navAdd')}>
+              <span className="pw-nav-scan-btn"><IconPlus /></span>
+              {t('boxApp.navAdd')}
+            </button>
+          ) : (
+            <button type="button" className="pw-nav-scan" onClick={startScan} disabled={!hasCampaign} aria-label={t('pwaApp.navScan')}>
+              <span className="pw-nav-scan-btn"><IconScan /></span>
+              {t('pwaApp.navScan')}
+            </button>
+          )}
           {tabs.slice(2).map((tab) => (
             <NavLink key={tab.to} to={tab.to} className={({ isActive }) => `pw-nav-item${isActive ? ' active' : ''}`}>
               <tab.icon />
