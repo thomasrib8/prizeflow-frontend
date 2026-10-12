@@ -1,3 +1,4 @@
+import { SocialGlyph } from '../components/SocialIcons';
 import { useEffect, useState } from 'react';
 import WifiQrSheet from '../components/WifiQrSheet';
 import { useTranslation } from 'react-i18next';
@@ -9,10 +10,10 @@ import Calibration from './Calibration';
 // Social platform names are proper nouns (Facebook/Instagram/LinkedIn/X) —
 // never translated. Profile field keys map to settings.information.field*.
 const SOCIAL_PLATFORMS = [
-  { key: 'facebookUrl', label: 'Facebook', icon: '📘', placeholder: 'https://facebook.com/yourpage' },
-  { key: 'instagramUrl', label: 'Instagram', icon: '📷', placeholder: 'https://instagram.com/yourpage' },
-  { key: 'linkedinUrl', label: 'LinkedIn', icon: '💼', placeholder: 'https://linkedin.com/company/yourpage' },
-  { key: 'xUrl', label: 'X', icon: '✖️', placeholder: 'https://x.com/yourpage' },
+  { key: 'facebookUrl', label: 'Facebook', placeholder: 'https://facebook.com/yourpage' },
+  { key: 'instagramUrl', label: 'Instagram', placeholder: 'https://instagram.com/yourpage' },
+  { key: 'linkedinUrl', label: 'LinkedIn', placeholder: 'https://linkedin.com/company/yourpage' },
+  { key: 'xUrl', label: 'X', placeholder: 'https://x.com/yourpage' },
 ];
 
 const PROFILE_FIELD_KEYS = [
@@ -437,7 +438,7 @@ function SocialMediaModule() {
         <form onSubmit={handleSave}>
           {SOCIAL_PLATFORMS.map((p) => (
             <div className="field" key={p.key}>
-              <label>{p.icon} {p.label}</label>
+              <label><SocialGlyph name={p.key} size={16} /> {p.label}</label>
               <input
                 type="url"
                 placeholder={p.placeholder}
@@ -945,6 +946,8 @@ function OfflineModeModule() {
   const { t } = useTranslation('admin');
   const [qrOpen, setQrOpen] = useState(false);
   const [codeSet, setCodeSet] = useState(null);
+  const [alertOn, setAlertOn] = useState(true); // e-mail when the wheel leaves the cloud during a campaign
+  const [alertGap, setAlertGap] = useState(30); // minimum minutes between two of those e-mails
   const [code, setCode] = useState('');
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState('');
@@ -953,7 +956,7 @@ function OfflineModeModule() {
   const [shown, setShown] = useState(null); // null = hidden, string = the code, '' = could not be shown (set before this existed)
   const [showBusy, setShowBusy] = useState(false);
 
-  useEffect(() => { api.getAccountSettings().then((r) => setCodeSet(!!r.offlineAccessCodeSet)).catch((e) => setError(e.message)); }, []);
+  useEffect(() => { api.getAccountSettings().then((r) => { setCodeSet(!!r.offlineAccessCodeSet); setAlertOn(r.cloudLossAlertEnabled !== false); setAlertGap(r.cloudLossAlertCooldownMinutes || 30); }).catch((e) => setError(e.message)); }, []);
   useEffect(() => {
     if (shown === null) return undefined;
     const id = setTimeout(() => setShown(null), 30000);
@@ -974,6 +977,15 @@ function OfflineModeModule() {
       setMsg(value ? t('settings.offlineMode.saved') : t('settings.offlineMode.removed'));
       setTimeout(() => setMsg(''), 3000);
     } catch (e) { setError(e.message); } finally { setSaving(false); }
+  }
+  async function changeAlert(on) {
+    setAlertOn(on); setError('');
+    try { await api.updateAccountSettings({ cloudLossAlertEnabled: on }); } catch (e) { setAlertOn(!on); setError(e.message); }
+  }
+  async function changeAlertGap(minutes) {
+    const before = alertGap;
+    setAlertGap(minutes); setError('');
+    try { await api.updateAccountSettings({ cloudLossAlertCooldownMinutes: minutes }); } catch (e) { setAlertGap(before); setError(e.message); }
   }
   const note = { fontSize: 13, color: '#64748B', margin: '0 0 14px', lineHeight: 1.6 };
   const weak = code && (code.length < 8 || /^\d+$/.test(code));
@@ -1022,6 +1034,21 @@ function OfflineModeModule() {
           {codeSet && <Button type="button" variant="ghost" disabled={saving} onClick={() => save('')} style={{ color: '#EF4444' }}>{t('settings.offlineMode.removeBtn')}</Button>}
           {msg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{msg}</span>}
         </div>
+        <label style={{ display: 'flex', gap: 10, alignItems: 'flex-start', margin: '18px 0 0', cursor: 'pointer' }}>
+          <input type="checkbox" checked={alertOn} onChange={(e) => changeAlert(e.target.checked)} style={{ width: 18, height: 18, marginTop: 2, flexShrink: 0 }} />
+          <span style={{ fontSize: 13, lineHeight: 1.55 }}><strong>{t('settings.offlineMode.alertLabel')}</strong><br /><span style={{ color: '#64748B' }}>{t('settings.offlineMode.alertHelp')}</span></span>
+        </label>
+        {alertOn && (
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', margin: '10px 0 0 28px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 13, color: '#334155' }}>{t('settings.offlineMode.alertGapLabel')}</span>
+            <select value={alertGap} onChange={(e) => changeAlertGap(Number(e.target.value))} style={{ padding: '6px 10px', borderRadius: 8, border: '1px solid #E2E8F0', fontSize: 13, fontFamily: 'inherit' }}>
+              {[5, 10, 15, 30, 60, 120, 240, 720, 1440].map((m) => (
+                <option key={m} value={m}>{m < 60 ? t('settings.offlineMode.gapMinutes', { count: m }) : t('settings.offlineMode.gapHours', { count: m / 60 })}</option>
+              ))}
+              {![5, 10, 15, 30, 60, 120, 240, 720, 1440].includes(alertGap) && <option value={alertGap}>{t('settings.offlineMode.gapMinutes', { count: alertGap })}</option>}
+            </select>
+          </div>
+        )}
         <p style={{ ...note, margin: '16px 0 0', fontSize: 12 }}>{t('settings.offlineMode.wipeNote')}</p>
       </Card>
     </>

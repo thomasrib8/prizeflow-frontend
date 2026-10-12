@@ -200,6 +200,11 @@ export const api = {
   downloadCampaignReport: (id) => downloadFile(`/campaigns/${id}/report.pdf`),
   exportCampaignGiftDistribution: (id) => downloadFile(`/campaigns/${id}/gift-distribution.csv`),
   downloadCommissioningGuide: () => downloadFile('/admin/guides/mise-en-service'),
+  // One-time activation code for an event box (admin, from the client's page)
+  prepareBoxActivation: (userId) => request('/box-activation/prepare', { method: 'POST', body: { userId } }),
+  getBoxActivation: (userId) => request(`/box-activation/${encodeURIComponent(userId)}`),
+  getWheelScript: (userId) => request(`/box-activation/${encodeURIComponent(userId)}/wheel-script`),
+  revokeBoxActivation: (userId) => request(`/box-activation/${encodeURIComponent(userId)}`, { method: 'DELETE' }),
   downloadCampaignQrPdf: (id) => downloadFile(`/campaigns/${id}/qr.pdf`),
   // Manual fallback for when scanning the QR fails — an already-logged-in
   // operator looks up a reward by ID and gets back the same signed code

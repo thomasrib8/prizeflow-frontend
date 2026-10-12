@@ -1,3 +1,4 @@
+import { CameraIcon } from './SocialIcons';
 import { useEffect, useRef, useState } from 'react';
 import { IS_BOX_BUILD } from '../utils/boxMode';
 import { useTranslation } from 'react-i18next';
@@ -340,6 +341,7 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
               onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; handleFile(f); }}
             />
             <Button type="button" variant="secondary" disabled={scan.state === 'reading' || saving} onClick={() => fileInputRef.current?.click()}>
+              <CameraIcon size={17} />
               {scan.state === 'reading' ? t('newProspectModal.scanReading') : scan.state === 'done' ? t('newProspectModal.scanAnother') : t('newProspectModal.scanBadgeOrCard')}
             </Button>
             {scan.state === 'idle' && (

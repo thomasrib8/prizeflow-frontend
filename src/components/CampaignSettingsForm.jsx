@@ -5,21 +5,14 @@ import { api } from '../api/client';
 import { Card } from './ui';
 import CreditsBar from './linkedin/CreditsBar';
 import LinkedInIcon from './linkedin/LinkedInIcon';
-
-// Line icons (24px, 1.8 stroke — same style as the PWA's menu icons) used by
-// the compact/mobile variant instead of emoji.
-const svgProps = { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': true, width: 20, height: 20 };
-const FacebookIcon = () => <svg {...svgProps}><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" /></svg>;
-const InstagramIcon = () => <svg {...svgProps}><rect x="2" y="2" width="20" height="20" rx="5" /><path d="M16 11.4A4 4 0 1 1 12.6 8 4 4 0 0 1 16 11.4z" /><path d="M17.5 6.5h.01" /></svg>;
-const LinkedinIcon = () => <svg {...svgProps}><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" /><rect x="2" y="9" width="4" height="12" /><circle cx="4" cy="4" r="2" /></svg>;
-const XIcon = () => <svg {...svgProps}><path d="M4 4l16 16M20 4 4 20" /></svg>;
+import { FacebookIcon, InstagramIcon, LinkedinIcon, XIcon } from './SocialIcons';
 
 // Brand names — never translated. Keys match GET /account/settings.
 const SOCIAL_PLATFORMS = [
-  { key: 'facebookUrl', label: 'Facebook', icon: '📘', Svg: FacebookIcon },
-  { key: 'instagramUrl', label: 'Instagram', icon: '📷', Svg: InstagramIcon },
-  { key: 'linkedinUrl', label: 'LinkedIn', icon: '💼', Svg: LinkedinIcon },
-  { key: 'xUrl', label: 'X', icon: '✖️', Svg: XIcon },
+  { key: 'facebookUrl', label: 'Facebook', Svg: FacebookIcon },
+  { key: 'instagramUrl', label: 'Instagram', Svg: InstagramIcon },
+  { key: 'linkedinUrl', label: 'LinkedIn', Svg: LinkedinIcon },
+  { key: 'xUrl', label: 'X', Svg: XIcon },
 ];
 
 export const DEFAULT_CAMPAIGN_SETTINGS = {
@@ -156,13 +149,13 @@ export default function CampaignSettingsForm({ value, onChange, compact = false 
         </label>
         {account && configuredSocials.length > 0 && compact && (
           <div className="pw-social-chips">
-            {configuredSocials.map((p) => <span key={p.key}><p.Svg />{p.label}</span>)}
+            {configuredSocials.map((p) => <span key={p.key}><p.Svg size={20} />{p.label}</span>)}
           </div>
         )}
         {account && configuredSocials.length > 0 && !compact && (
           <div style={{ fontSize: 13, color: '#64748B' }}>
             {t('campaignSettings.socialLinksUsed')}{' '}
-            {configuredSocials.map((p) => `${p.icon} ${p.label}`).join(' · ')}
+            {configuredSocials.map((p, i) => <span key={p.key}>{i > 0 ? ' · ' : ''}<p.Svg size={15} /> {p.label}</span>)}
           </div>
         )}
         {account && configuredSocials.length === 0 && (

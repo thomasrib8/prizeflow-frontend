@@ -3,14 +3,15 @@ import { useTranslation } from 'react-i18next';
 import WheelSVG from './WheelSVG';
 import DynamicFieldInput from './DynamicFieldInput';
 import { API_BASE } from '../api/client';
+import { SocialGlyph } from './SocialIcons';
 
 // Brand names — never translated, "Facebook" reads the same in every
 // language this app supports.
 const SOCIAL_PLATFORMS = [
-  { key: 'facebook', label: 'Facebook', icon: '📘' },
-  { key: 'instagram', label: 'Instagram', icon: '📷' },
-  { key: 'linkedin', label: 'LinkedIn', icon: '💼' },
-  { key: 'x', label: 'X', icon: '✖️' },
+  { key: 'facebook', label: 'Facebook' },
+  { key: 'instagram', label: 'Instagram' },
+  { key: 'linkedin', label: 'LinkedIn' },
+  { key: 'x', label: 'X' },
 ];
 
 const fullScreenLayout = {
@@ -327,9 +328,11 @@ export default function GuestFlowScreen({
                     rel="noopener noreferrer"
                     style={{
                       background: 'white', color: '#0F1C3F', textDecoration: 'none', borderRadius: 10,
-                      padding: '11px 18px', fontSize: 14, fontWeight: 700, fontFamily: 'inherit',
+                      padding: '11px 18px', fontSize: 14, fontWeight: 700, fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: 7,
                     }}
-                  >{p.icon} {p.label}</a>
+                  >
+                    <SocialGlyph name={p.key} size={16} /> {p.label}
+                  </a>
                 ))}
               </div>
             </div>
