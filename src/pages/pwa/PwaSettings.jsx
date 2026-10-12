@@ -8,6 +8,7 @@ import CampaignSettingsForm, { DEFAULT_CAMPAIGN_SETTINGS, settingsFromCampaign }
 import { IconGlobe, IconLogout, IconUser, IconWheel } from '../../components/pwa/PwaIcons';
 import { CampaignLoading, NoCampaign, Skel } from '../../components/pwa/PwaParts';
 import { usePwa } from './PwaContext';
+import { IS_BOX_BUILD } from '../../utils/boxMode';
 
 // Settings: the active campaign's own settings — the same "Settings" step as
 // campaign creation (Google review, social media, AI assistant), through the
@@ -81,9 +82,10 @@ export default function PwaSettings() {
             </div>
           </div>
 
-          <div className="pw-group-title">{t('pwaApp.campaignOptionsTitle')}</div>
-          {!settings && <Skel h={160} r={20} />}
-          {settings && (
+          {/* Not on the event box: a change here would only reach the cloud later, so the options are hidden there. */}
+          {!IS_BOX_BUILD && <div className="pw-group-title">{t('pwaApp.campaignOptionsTitle')}</div>}
+          {!IS_BOX_BUILD && !settings && <Skel h={160} r={20} />}
+          {!IS_BOX_BUILD && settings && (
             <div className="pw-settings-form">
               <CampaignSettingsForm
                 compact

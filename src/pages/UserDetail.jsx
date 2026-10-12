@@ -36,6 +36,7 @@ export default function UserDetail() {
   const [busy, setBusy] = useState(false);
   const [tokenCopied, setTokenCopied] = useState(false);
   const [showSetupHelp, setShowSetupHelp] = useState(false);
+  const [guideBusy, setGuideBusy] = useState(false);
   const [series, setSeries] = useState('1');
   const [wheelBusy, setWheelBusy] = useState(false);
   const [showManualWheelEntry, setShowManualWheelEntry] = useState(false);
@@ -102,6 +103,11 @@ export default function UserDetail() {
       setError(err.message);
       setBusy(false);
     }
+  }
+
+  async function handleDownloadGuide() {
+    setGuideBusy(true); setError('');
+    try { await api.downloadCommissioningGuide(); } catch (e) { setError(e.message); } finally { setGuideBusy(false); }
   }
 
   async function handleCopyAgentToken() {
@@ -222,6 +228,7 @@ export default function UserDetail() {
             </div>
           </Card>
 
+          <div className="ud-token-row">
           <Card title={t('userDetail.wheelTokenTitle')} className="mt-card">
             <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px' }}>
               {t('userDetail.wheelTokenDesc')}{' '}
@@ -245,6 +252,14 @@ export default function UserDetail() {
               <p className="page-subtitle">{t('userDetail.tokenNotGenerated')}</p>
             )}
           </Card>
+
+          <Card title={t('userDetail.guideTitle')} className="mt-card">
+            <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px', lineHeight: 1.55 }}>{t('userDetail.guideDesc')}</p>
+            <Button variant="secondary" disabled={guideBusy} onClick={handleDownloadGuide}>
+              {guideBusy ? t('userDetail.guideDownloading') : t('userDetail.guideBtn')}
+            </Button>
+          </Card>
+          </div>
 
           <Card title={t('userDetail.wheelIdentityTitle')} className="mt-card">
             <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px' }}>
@@ -369,6 +384,37 @@ WHEEL_SECURITY_KEY=...`}
 
               <h4 style={{ fontSize: 13, fontWeight: 700, color: '#03041A', margin: '16px 0 6px' }}>{t('userDetail.setupHelpStep3Title')}</h4>
               <p>{t('userDetail.setupHelpStep3Desc')}</p>
+
+              <h4 style={{ fontSize: 13, fontWeight: 700, color: '#03041A', margin: '16px 0 6px' }}>{t('userDetail.setupHelpStep4Title')}</h4>
+              <p>{t('userDetail.setupHelpStep4Line1')}</p>
+              <pre style={{ background: '#03041A', color: '#E2E8F0', padding: '10px 12px', borderRadius: 8, fontSize: 12, overflowX: 'auto' }}>
+{`FALLBACK_BASE_URL=ws://<BOX-NAME>.local:3001,ws://10.42.0.1:3001`}
+              </pre>
+              <p>{t('userDetail.setupHelpStep4Line2')}</p>
+              <pre style={{ background: '#03041A', color: '#E2E8F0', padding: '10px 12px', borderRadius: 8, fontSize: 12, overflowX: 'auto' }}>
+{`read -rs SPARK_PSK
+sudo nmcli connection add type wifi ifname wlan0 con-name spark-local ssid Spark-Local wifi-sec.key-mgmt wpa-psk wifi-sec.psk "$SPARK_PSK" connection.autoconnect yes connection.autoconnect-priority -10
+unset SPARK_PSK
+sudo systemctl restart wheel-agent`}
+              </pre>
+
+              <h4 style={{ fontSize: 13, fontWeight: 700, color: '#03041A', margin: '16px 0 6px' }}>{t('userDetail.setupHelpStep5Title')}</h4>
+              <p>{t('userDetail.setupHelpStep5Line1')}</p>
+              <pre style={{ background: '#03041A', color: '#E2E8F0', padding: '10px 12px', borderRadius: 8, fontSize: 12, overflowX: 'auto' }}>
+{`ssh spark@sparkoffline-box.local
+sudo bash ~/box-setup/box-personalize.sh`}
+              </pre>
+              <p>{t('userDetail.setupHelpStep5Line2')}</p>
+              <pre style={{ background: '#03041A', color: '#E2E8F0', padding: '10px 12px', borderRadius: 8, fontSize: 12, overflowX: 'auto' }}>
+{`bash ~/box-setup/check-box.sh`}
+              </pre>
+              <p>{t('userDetail.setupHelpStep5Line3')}</p>
+
+              <p style={{ marginTop: 16 }}>
+                <button type="button" onClick={handleDownloadGuide} disabled={guideBusy} style={{ background: 'none', border: 'none', padding: 0, color: '#002881', textDecoration: 'underline', cursor: 'pointer', fontSize: 13, fontFamily: 'inherit' }}>
+                  {t('userDetail.setupHelpGuideLink')}
+                </button>
+              </p>
             </div>
           </div>
         </div>

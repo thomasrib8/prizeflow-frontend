@@ -9,6 +9,8 @@ import { useLaunchQueue, toggleValue } from '../hooks/useLaunchQueue';
 import { useProspectAddedToast } from '../hooks/useProspectAddedToast';
 import GuestFlowScreen from '../components/GuestFlowScreen';
 import { boxHotspotKioskUrl, boxKioskUrl, getBoxUrl, setBoxUrl } from '../utils/offlineBox';
+import CloudLostBanner from '../components/CloudLostBanner';
+import { useCloudWatch } from '../hooks/useCloudWatch';
 import { OfflineBoxBadge, OfflineReviews, useOfflineBox } from '../components/OfflineBoxStatus';
 import ProspectCard from '../components/ProspectCard';
 import NewProspectModal from '../components/NewProspectModal';
@@ -84,6 +86,7 @@ export default function LaunchCampaign() {
   const { agentConnected } = useWheelSocket();
   const q = useLaunchQueue();
   const offlineBox = useOfflineBox();
+  const cloudLost = useCloudWatch(true);
   const [qrDataUrl, setQrDataUrl] = useState(null);
   const [guestUrl, setGuestUrl] = useState('');
   const [showKiosk, setShowKiosk] = useState(false);
@@ -125,6 +128,7 @@ export default function LaunchCampaign() {
 
   return (
     <div>
+      {cloudLost && <CloudLostBanner />}
       <div className="page-header launch-header">
         <div>
           <h1 className="page-title">{t('launchCampaign.pageTitle')}</h1>
@@ -133,10 +137,18 @@ export default function LaunchCampaign() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
           <Badge tone={agentConnected ? 'green' : 'red'}>{agentConnected ? t('pwa.wheelReady') : t('pwa.wheelOffline')}</Badge>
           <OfflineBoxBadge status={offlineBox.status} />
+          {q.campaign && (
+            // The tablet's kiosk, served by the offline box (works with no internet, on Spark-Local or the venue Wi-Fi).
+            <a className="btn btn-secondary" href={boxKioskUrl(q.campaign.public_token)} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2.5" /><path d="M11 18h2" /></svg>
+              {t('launchCampaign.offlineKioskBtn')}
+            </a>
+          )}
           {q.scanEnabled && q.campaign && (
             // A label around a hidden file input, so one tap opens the camera
             // directly (the browser only allows that from a real tap).
-            <label className="btn btn-secondary" style={{ cursor: 'pointer' }}>
+            <label className="btn btn-secondary" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 8h3l1.6-2.4h6.8L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z" /><circle cx="12" cy="13.5" r="3.5" /></svg>
               {t('launchCampaign.scanBadgeBtn')}
               <input
                 type="file"

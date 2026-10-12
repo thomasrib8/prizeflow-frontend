@@ -37,7 +37,7 @@ export function useOfflineBox() {
 export function OfflineBoxBadge({ status }) {
   const { t } = useTranslation('admin');
   if (!status || !status.enabled) return null;
-  if (!status.boxSeen) return <Badge tone="neutral">{t('offlineBox.notSeen')}</Badge>;
+  if (!status.boxSeen) return <Badge tone="red">{t('offlineBox.notSeen')}</Badge>;
   if (status.inSync) return <Badge tone="green">{t('offlineBox.inSync')}</Badge>;
   if (status.lastPollSecondsAgo > 15) return <Badge tone="red">{t('offlineBox.silent', { seconds: status.lastPollSecondsAgo })}</Badge>;
   return <Badge tone="orange">{t('offlineBox.behind', { count: status.eventsBehind })}</Badge>;

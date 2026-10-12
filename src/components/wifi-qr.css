@@ -12,6 +12,10 @@
 .wq-sheet { border: 2px solid #0B1437; border-radius: 18px; padding: 22px 20px; text-align: center; color: #0B1437; background: #fff; align-self: start; }
 .wq-sheet-brand { font-weight: 800; letter-spacing: 0.18em; font-size: 12px; color: #B45309; margin-bottom: 4px; }
 .wq-sheet h2 { margin: 0 0 12px; font-size: 22px; letter-spacing: -0.01em; }
+.wq-qrs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 8px; }
+.wq-qrs figure { margin: 0; }
+.wq-qrs figcaption { font-size: 11.5px; line-height: 1.35; color: #0B1437; margin-top: 4px; }
+.wq-qrs figcaption b { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: #B45309; color: #fff; font-size: 11px; margin-right: 4px; }
 .wq-qr { width: 100%; aspect-ratio: 1; max-width: 260px; margin: 0 auto 10px; display: grid; place-items: center; }
 .wq-qr img { width: 100%; height: 100%; image-rendering: pixelated; }
 .wq-qr-empty { font-size: 12px; color: #94A3B8; border: 2px dashed #CBD5E1; border-radius: 12px; padding: 20px; width: 100%; height: 100%; display: grid; place-items: center; }
@@ -28,8 +32,9 @@
 @media print {
   body * { visibility: hidden !important; }
   #wifi-qr-sheet, #wifi-qr-sheet * { visibility: visible !important; }
-  #wifi-qr-sheet { position: fixed; left: 50%; top: 14mm; transform: translateX(-50%); width: 120mm; border: 2px solid #000; border-radius: 6mm; padding: 10mm 8mm; }
-  .wq-qr { max-width: 90mm; }
+  #wifi-qr-sheet { position: fixed; left: 50%; top: 14mm; transform: translateX(-50%); width: 150mm; border: 2px solid #000; border-radius: 6mm; padding: 10mm 8mm; }
+  .wq-qr { max-width: 62mm; }
+  .wq-qrs figcaption { font-size: 10.5pt; }
   .wq-sheet h2 { font-size: 26pt; }
   .wq-creds { font-size: 15pt; }
   .wq-scan, .wq-open { font-size: 11pt; }

@@ -88,3 +88,8 @@ input, select, textarea { font-family: inherit; font-size: 14px; }
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
+
+/* Client profile: wheel token + commissioning guide side by side */
+.ud-token-row { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 16px; align-items: stretch; }
+.ud-token-row > .card { margin-top: 16px; }
+@media (max-width: 860px) { .ud-token-row { grid-template-columns: 1fr; } }

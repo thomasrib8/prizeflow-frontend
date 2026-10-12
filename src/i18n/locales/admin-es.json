@@ -527,7 +527,7 @@
   "launchCampaign": {
     "pageTitle": "Lanzar campaña",
     "pageSubtitle": "Los invitados escanean el código QR de abajo para jugar desde su propio teléfono",
-    "scanBadgeBtn": "📷 Escanear credencial",
+    "scanBadgeBtn": "Escanear credencial",
     "spinWheelBtn": "GIRAR LA RUEDA",
     "noCampaignDesc": "Inicia una desde la página de Campañas para obtener su código QR.",
     "guestQrCodeTitle": "Código QR de invitado",
@@ -546,7 +546,8 @@
     "switchToLocal": "Pasar al modo local",
     "editBoxAddress": "Dirección de la caja",
     "boxAddressPrompt": "Dirección de la caja sin conexión (p. ej. http://192.168.0.250:3001)",
-    "switchToLocalHotspot": "Por el Wi-Fi de la caja"
+    "switchToLocalHotspot": "Por el Wi-Fi de la caja",
+    "offlineKioskBtn": "Kiosco sin conexión"
   },
   "dashboard": {
     "pageTitle": "Panel",
@@ -770,13 +771,16 @@
       "qrNetworkLabel": "Nombre del Wi-Fi",
       "qrPasswordLabel": "Contraseña de Spark-Local",
       "qrPasswordPlaceholder": "8 caracteres como mínimo",
-      "qrKeptLocal": "La contraseña se queda en su navegador: no se envía ni se guarda.",
+      "qrKeptLocal": "La contraseña se memoriza en su cuenta (cifrada): no tendrá que volver a escribirla. Nunca se envía a la caja.",
       "qrPrint": "Imprimir",
       "sheetTitle": "Wi-Fi del stand",
-      "sheetScan": "Escanee este código con la cámara de su teléfono para conectarse.",
+      "sheetScan": "Escanee primero el código 1 para conectarse y después el 2 para abrir la página de la caja.",
       "sheetNetwork": "Red",
       "sheetPassword": "Contraseña",
-      "sheetOpen": "Para la app sin conexión, abra"
+      "sheetOpen": "Para la app sin conexión, abra",
+      "qrRemembered": "Memorizada",
+      "sheetStep1": "Unirse al Wi-Fi Spark-Local",
+      "sheetStep2": "Abrir la página de elección del Wi-Fi"
     }
   },
   "nav": {
@@ -976,7 +980,19 @@
     "noNotesYet": "No hay notas para esta cuenta.",
     "adminFallback": "Admin",
     "resetEmailSentAlert": "Correo de restablecimiento enviado.",
-    "deleteConfirmMessage": "¿Eliminar esta cuenta? Esto borra permanentemente su información personal (RGPD) y no se puede deshacer."
+    "deleteConfirmMessage": "¿Eliminar esta cuenta? Esto borra permanentemente su información personal (RGPD) y no se puede deshacer.",
+    "guideTitle": "Guía de puesta en servicio",
+    "guideDesc": "La guía completa paso a paso con todos los comandos: cuenta del cliente, rueda, caja sin conexión, controles antes de la entrega e imagen modelo de la caja.",
+    "guideBtn": "Descargar la guía",
+    "guideDownloading": "Descargando…",
+    "setupHelpStep4Title": "4. Respaldo en la caja sin conexión (si el cliente tiene una)",
+    "setupHelpStep4Line1": "En el mismo archivo .env de la rueda, añada esta línea (sustituya <BOX-NAME> por el nombre de la caja, p. ej. spark-box-003):",
+    "setupHelpStep4Line2": "Después añada a la rueda el Wi-Fi Spark-Local, usado como último recurso (el cursor espera: pegue la contraseña de Spark-Local, no se muestra nada):",
+    "setupHelpStep5Title": "5. Personalizar la caja",
+    "setupHelpStep5Line1": "En la caja creada desde la imagen modelo, ejecute el asistente:",
+    "setupHelpStep5Line2": "Pide: el nombre de la caja, la dirección de la nube, el token de la rueda (el mismo de arriba), la contraseña de Spark-Local y una contraseña nueva para la caja. Después compruebe:",
+    "setupHelpStep5Line3": "En la página Launch, la insignia «Caja offline» debe estar en verde.",
+    "setupHelpGuideLink": "Descargar la guía completa (PDF)"
   },
   "sequenceBuilder": {
     "pageSubtitle": "Crea un orden de ejecución personalizado a mano, luego actívalo en la rueda",
@@ -1073,10 +1089,10 @@
     "retryBtn": "Reintentar"
   },
   "offlineBox": {
-    "notSeen": "Caja: no conectada",
-    "inSync": "Caja sincronizada",
-    "silent": "Caja sin señal desde hace {{seconds}} s",
-    "behind": "Caja con {{count}} evento(s) de retraso",
+    "notSeen": "Caja offline: no conectada",
+    "inSync": "Caja offline",
+    "silent": "Caja offline sin respuesta desde hace {{seconds}} s",
+    "behind": "Caja offline con {{count}} evento(s) de retraso",
     "reviewsTitle": "Giros por comprobar",
     "reviewsHelp": "Durante el corte, la rueda estaba en pleno giro cuando se interrumpió la conexión. Los datos no permiten saber si se detuvo y si se entregó un regalo — compruébalo uno por uno.",
     "unknownGift": "Regalo",
@@ -1097,7 +1113,8 @@
     "pending_one": "{{count}} cambio pendiente",
     "pending_other": "{{count}} cambios pendientes",
     "allSent": "Todo enviado",
-    "navAdd": "Añadir"
+    "navAdd": "Añadir",
+    "backOnline": "Internet ha vuelto: sus cambios se han enviado"
   },
   "prospect": {
     "note": "Nota",
@@ -1275,5 +1292,10 @@
     "bill_unknown": "desconocido",
     "apolloNote": "La facturación de Apollo se deduce de sus reglas publicadas: la API no la informa por búsqueda. El contacto se oculta (iniciales y dominio).",
     "tabLabel": "LinkedIn"
+  },
+  "cloudLost": {
+    "message": "Conexión perdida: pase a Spark Offline",
+    "open": "Abrir Spark Offline",
+    "viaLocal": "Por el Wi-Fi Spark-Local"
   }
 }

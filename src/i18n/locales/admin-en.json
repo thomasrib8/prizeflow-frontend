@@ -527,7 +527,7 @@
   "launchCampaign": {
     "pageTitle": "Launch Campaign",
     "pageSubtitle": "Guests scan the QR code below to play from their own phone",
-    "scanBadgeBtn": "📷 Scan badge",
+    "scanBadgeBtn": "Scan badge",
     "spinWheelBtn": "SPIN THE WHEEL",
     "noCampaignDesc": "Start one from the Campaigns page to get its QR code.",
     "guestQrCodeTitle": "Guest QR code",
@@ -546,7 +546,8 @@
     "switchToLocal": "Switch to local mode",
     "editBoxAddress": "Box address",
     "boxAddressPrompt": "Address of the offline box (e.g. http://192.168.0.250:3001)",
-    "switchToLocalHotspot": "Via the box Wi-Fi"
+    "switchToLocalHotspot": "Via the box Wi-Fi",
+    "offlineKioskBtn": "Offline kiosk"
   },
   "dashboard": {
     "pageTitle": "Dashboard",
@@ -770,13 +771,16 @@
       "qrNetworkLabel": "Wi-Fi name",
       "qrPasswordLabel": "Spark-Local password",
       "qrPasswordPlaceholder": "8 characters minimum",
-      "qrKeptLocal": "The password stays in your browser: it is neither sent nor saved.",
+      "qrKeptLocal": "The password is remembered on your account (encrypted): you will not have to retype it. It is never sent to the box.",
       "qrPrint": "Print",
       "sheetTitle": "Stand Wi-Fi",
-      "sheetScan": "Scan this code with your phone's camera to connect.",
+      "sheetScan": "Scan code 1 first to connect, then code 2 to open the box's page.",
       "sheetNetwork": "Network",
       "sheetPassword": "Password",
-      "sheetOpen": "For the offline app, open"
+      "sheetOpen": "For the offline app, open",
+      "qrRemembered": "Remembered",
+      "sheetStep1": "Join the Spark-Local Wi-Fi",
+      "sheetStep2": "Open the Wi-Fi setup page"
     }
   },
   "nav": {
@@ -976,7 +980,19 @@
     "noNotesYet": "No notes for this account.",
     "adminFallback": "Admin",
     "resetEmailSentAlert": "Reset email sent.",
-    "deleteConfirmMessage": "Delete this account? This scrubs their personal info permanently (GDPR) and can't be undone."
+    "deleteConfirmMessage": "Delete this account? This scrubs their personal info permanently (GDPR) and can't be undone.",
+    "guideTitle": "Commissioning guide",
+    "guideDesc": "The complete step-by-step guide with every command: client account, wheel, offline box, checks before delivery and the box master image.",
+    "guideBtn": "Download the guide",
+    "guideDownloading": "Downloading…",
+    "setupHelpStep4Title": "4. Fallback to the offline box (if the client has one)",
+    "setupHelpStep4Line1": "In the same .env file of the wheel, add this line (replace <BOX-NAME> with the box name, e.g. spark-box-003):",
+    "setupHelpStep4Line2": "Then add the Spark-Local Wi-Fi to the wheel, used as a last resort (the cursor waits: paste the Spark-Local password, nothing is shown):",
+    "setupHelpStep5Title": "5. Personalise the box",
+    "setupHelpStep5Line1": "On the box set up from the master image, run the assistant:",
+    "setupHelpStep5Line2": "It asks for: the box name, the cloud address, the wheel token (the same as above), the Spark-Local password and a new password for the box. Then check:",
+    "setupHelpStep5Line3": "On the Launch page, the “Offline box” badge must be green.",
+    "setupHelpGuideLink": "Download the complete guide (PDF)"
   },
   "sequenceBuilder": {
     "pageSubtitle": "Build a custom run order by hand, then activate it on the wheel",
@@ -1073,10 +1089,10 @@
     "retryBtn": "Retry"
   },
   "offlineBox": {
-    "notSeen": "Box: not connected",
-    "inSync": "Box in sync",
-    "silent": "Box silent for {{seconds}} s",
-    "behind": "Box {{count}} event(s) behind",
+    "notSeen": "Offline box: not connected",
+    "inSync": "Offline box",
+    "silent": "Offline box silent for {{seconds}} s",
+    "behind": "Offline box {{count}} event(s) behind",
     "reviewsTitle": "Spins to check",
     "reviewsHelp": "During the outage the wheel was in the middle of a spin when the connection broke. Nobody can tell from the data whether it landed and a gift was handed over — please check, one by one.",
     "unknownGift": "Gift",
@@ -1097,7 +1113,8 @@
     "pending_one": "{{count}} change waiting",
     "pending_other": "{{count}} changes waiting",
     "allSent": "All sent",
-    "navAdd": "Add"
+    "navAdd": "Add",
+    "backOnline": "Internet is back: your changes have been sent"
   },
   "prospect": {
     "note": "Note",
@@ -1275,5 +1292,10 @@
     "bill_unknown": "unknown",
     "apolloNote": "Apollo’s own billing is inferred from its published rules: the API does not report it per search. The prospect is masked (initials and domain).",
     "tabLabel": "LinkedIn"
+  },
+  "cloudLost": {
+    "message": "Connection lost: switch to Spark Offline",
+    "open": "Open Spark Offline",
+    "viaLocal": "Via the Spark-Local Wi-Fi"
   }
 }

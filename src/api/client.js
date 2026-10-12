@@ -8,6 +8,14 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL === 'same-origin'
 const WS_BASE = import.meta.env.VITE_WS_BASE_URL || API_BASE.replace(/^http/, 'ws');
 
 
+// For idempotent calls only: one more try when the network itself failed before any answer.
+async function retryOnce(fn) {
+  try { return await fn(); } catch (e) {
+    if (e instanceof TypeError) { await new Promise((r) => setTimeout(r, 400)); return fn(); }
+    throw e;
+  }
+}
+
 async function request(path, { method = 'GET', body, auth = true } = {}) {
   const headers = { 'Content-Type': 'application/json' };
   // Captured up front so the 401 handler below can tell "this exact token
@@ -109,8 +117,9 @@ async function downloadFile(path) {
 export const api = {
   login: (email, password) => request('/auth/login', { method: 'POST', body: { email, password }, auth: false }),
   // Second step when the account has two-step sign-in on (login answered { mfaRequired, mfaToken })
-  boxLogin: (code) => request('/box/login', { method: 'POST', body: { code }, auth: false }),
-  boxStatus: () => request('/box/status', { auth: false }),
+  // A first attempt on a connection the box had just closed fails at once ("Load failed" on iPhone): try once more.
+  boxLogin: (code) => retryOnce(() => request('/box/login', { method: 'POST', body: { code }, auth: false })),
+  boxStatus: () => retryOnce(() => request('/box/status', { auth: false })),
   verifyMfa: (mfaToken, code) => request('/auth/mfa/verify', { method: 'POST', body: { mfaToken, code }, auth: false }),
   getMfaStatus: () => request('/account/mfa'),
   setupMfa: (password) => request('/account/mfa/setup', { method: 'POST', body: { password } }),
@@ -190,6 +199,7 @@ export const api = {
   },
   downloadCampaignReport: (id) => downloadFile(`/campaigns/${id}/report.pdf`),
   exportCampaignGiftDistribution: (id) => downloadFile(`/campaigns/${id}/gift-distribution.csv`),
+  downloadCommissioningGuide: () => downloadFile('/admin/guides/mise-en-service'),
   downloadCampaignQrPdf: (id) => downloadFile(`/campaigns/${id}/qr.pdf`),
   // Manual fallback for when scanning the QR fails — an already-logged-in
   // operator looks up a reward by ID and gets back the same signed code
@@ -286,7 +296,11 @@ export const api = {
   setLinkedinUrl: (payload) => request('/account/linkedin/url', { method: 'PUT', body: payload }),
   getUserLinkedin: (id) => request(`/users/${id}/linkedin`),
   setUserLinkedin: (id, payload) => request(`/users/${id}/linkedin`, { method: 'PATCH', body: payload }),
+  // Cheap reachability check of the cloud (no sign-in): throws a TypeError when the network itself fails.
+  pingCloud: async () => { const r = await fetch(`${API_BASE}/health`, { cache: 'no-store' }); return r.ok; },
   getRecentPlayers: (campaignId) => request(`/account/recent-players?campaignId=${encodeURIComponent(campaignId)}`),
+  getBoxWifiPassword: () => request('/account/box-wifi-password'),
+  setBoxWifiPassword: (password) => request('/account/box-wifi-password', { method: 'PUT', body: { password } }),
   getOfflineAccessCode: () => request('/account/offline-access-code'),
   getAccountSettings: () => request('/account/settings'),
   updateAccountSettings: (payload) => request('/account/settings', { method: 'PATCH', body: payload }),

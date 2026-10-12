@@ -7,6 +7,8 @@ import { useLaunchQueue } from '../../hooks/useLaunchQueue';
 import { useProspectAddedToast } from '../../hooks/useProspectAddedToast';
 import ProspectCard from '../../components/ProspectCard';
 import NewProspectModal from '../../components/NewProspectModal';
+import CloudLostBanner from '../../components/CloudLostBanner';
+import { useCloudWatch } from '../../hooks/useCloudWatch';
 import ConnectionDiagnosticsModal from '../../components/ConnectionDiagnosticsModal';
 import { IconAnalytics, IconHome, IconPlus, IconProspects, IconScan, IconSettings, IconUser } from '../../components/pwa/PwaIcons';
 import { PwaContext } from './PwaContext';
@@ -14,8 +16,10 @@ import { IS_BOX_BUILD } from '../../utils/boxMode';
 import { api } from '../../api/client';
 import './pwa.css';
 
-const MANIFEST_HREF = '/pwa-manifest.webmanifest';
-const APPLE_ICON_HREF = '/pwa-apple-touch-icon.png';
+// The event box's build is its own app on the home screen: "Spark Offline" with its own icon (see vite.config.js).
+const MANIFEST_HREF = IS_BOX_BUILD ? '/offline-manifest.webmanifest' : '/pwa-manifest.webmanifest';
+const APPLE_ICON_HREF = IS_BOX_BUILD ? '/offline-apple-touch-icon.png' : '/pwa-apple-touch-icon.png';
+const APP_TITLE = IS_BOX_BUILD ? 'Spark Offline' : 'Spark';
 
 // Swaps in the PWA-only manifest and this shortcut's own name/icon while the
 // PWA is mounted, so "Add to Home Screen" here installs "Spark" with its own
@@ -32,7 +36,7 @@ function usePwaManifest() {
 
     const titleMeta = document.createElement('meta');
     titleMeta.name = 'apple-mobile-web-app-title';
-    titleMeta.content = 'Spark';
+    titleMeta.content = APP_TITLE;
     document.head.appendChild(titleMeta);
 
     const appleIconLink = document.querySelector('link[rel="apple-touch-icon"]');
@@ -85,6 +89,19 @@ function useBoxStatus(refreshKey) {
 // about which version of the app this is: amber = the local copy on the box, not the normal app.
 function OfflineBar({ status }) {
   const { t } = useTranslation('admin');
+  // When the cloud is back and everything has gone up (the box hands back to the cloud), say so for a few seconds.
+  const prev = useRef(null);
+  const [backOnline, setBackOnline] = useState(false);
+  useEffect(() => {
+    if (!status) return undefined;
+    const was = prev.current; prev.current = status.mode;
+    if (was === 'primary' && status.mode === 'replica') {
+      setBackOnline(true);
+      const id = setTimeout(() => setBackOnline(false), 12000);
+      return () => clearTimeout(id);
+    }
+    return undefined;
+  }, [status]);
   const inCharge = !status || status.mode === 'primary'; // internet down: the box takes changes
   const pending = status ? status.pendingChanges : 0;
   return (
@@ -92,8 +109,8 @@ function OfflineBar({ status }) {
       <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <path d="M3 3l18 18" /><path d="M9.5 5.4A6 6 0 0 1 18 10a4 4 0 0 1 1.9 7.5" /><path d="M6.3 7.3A6 6 0 0 0 7 19h9.5" />
       </svg>
-      <strong>{inCharge ? t('boxApp.barOffline') : t('boxApp.barReadOnly')}</strong>
-      {inCharge && status && (
+      <strong>{backOnline ? t('boxApp.backOnline') : inCharge ? t('boxApp.barOffline') : t('boxApp.barReadOnly')}</strong>
+      {!backOnline && inCharge && status && (
         <span className={`pw-offline-count${pending ? ' has' : ''}`}>
           {pending ? t('boxApp.pending', { count: pending }) : `${t('boxApp.allSent')} ✓`}
         </span>
@@ -119,6 +136,7 @@ function PwaShell() {
   // prospects (Prospects, Analytics) refetch.
   const [dataVersion, setDataVersion] = useState(0);
   const fileInputRef = useRef(null);
+  const cloudLost = useCloudWatch(!IS_BOX_BUILD);
   const boxStatus = useBoxStatus(dataVersion); // re-read right after a save, so the counter moves at once
 
   const hasCampaign = !!q.campaign;
@@ -159,6 +177,7 @@ function PwaShell() {
     <PwaContext.Provider value={ctx}>
       <div className={`pw-shell${IS_BOX_BUILD ? ' pw-offline' : ''}`}>
         {IS_BOX_BUILD && <OfflineBar status={boxStatus} />}
+        {cloudLost && <CloudLostBanner />}
         <header className="pw-header">
           <div className="pw-header-top">
             <div className="pw-brand">
