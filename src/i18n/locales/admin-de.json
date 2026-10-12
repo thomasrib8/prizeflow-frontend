@@ -763,7 +763,20 @@
       "currentCode": "Aktueller Code",
       "showCode": "Code anzeigen",
       "hideCode": "Code verbergen",
-      "cannotShow": "Dieser Code wurde vor dieser Funktion festgelegt: Legen Sie ihn unten einmal neu fest, um ihn anzeigen zu können."
+      "cannotShow": "Dieser Code wurde vor dieser Funktion festgelegt: Legen Sie ihn unten einmal neu fest, um ihn anzeigen zu können.",
+      "qrButton": "WLAN-QR-Code zum Drucken",
+      "qrTitle": "QR-Code des WLANs Spark-Local",
+      "qrIntro": "Geben Sie das Passwort von Spark-Local ein: der Code aktualisiert sich. Kleben Sie das Blatt dann an die Box oder den Stand, damit sich alle mit einem Scan verbinden.",
+      "qrNetworkLabel": "WLAN-Name",
+      "qrPasswordLabel": "Passwort von Spark-Local",
+      "qrPasswordPlaceholder": "Mindestens 8 Zeichen",
+      "qrKeptLocal": "Das Passwort bleibt in Ihrem Browser: es wird weder gesendet noch gespeichert.",
+      "qrPrint": "Drucken",
+      "sheetTitle": "WLAN am Stand",
+      "sheetScan": "Scannen Sie diesen Code mit der Kamera Ihres Telefons, um sich zu verbinden.",
+      "sheetNetwork": "Netzwerk",
+      "sheetPassword": "Passwort",
+      "sheetOpen": "Für die Offline-App öffnen Sie"
     }
   },
   "nav": {

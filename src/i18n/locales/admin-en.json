@@ -763,7 +763,20 @@
       "currentCode": "Current code",
       "showCode": "Show the code",
       "hideCode": "Hide the code",
-      "cannotShow": "This code was set before this feature existed: set it once more below to be able to show it."
+      "cannotShow": "This code was set before this feature existed: set it once more below to be able to show it.",
+      "qrButton": "Wi-Fi QR code to print",
+      "qrTitle": "Spark-Local Wi-Fi QR code",
+      "qrIntro": "Type the Spark-Local password: the code updates. Then stick the printed page on the box or at the stand so everyone can connect with one scan.",
+      "qrNetworkLabel": "Wi-Fi name",
+      "qrPasswordLabel": "Spark-Local password",
+      "qrPasswordPlaceholder": "8 characters minimum",
+      "qrKeptLocal": "The password stays in your browser: it is neither sent nor saved.",
+      "qrPrint": "Print",
+      "sheetTitle": "Stand Wi-Fi",
+      "sheetScan": "Scan this code with your phone's camera to connect.",
+      "sheetNetwork": "Network",
+      "sheetPassword": "Password",
+      "sheetOpen": "For the offline app, open"
     }
   },
   "nav": {

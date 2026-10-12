@@ -763,7 +763,20 @@
       "currentCode": "Code actuel",
       "showCode": "Afficher le code",
       "hideCode": "Masquer le code",
-      "cannotShow": "Ce code a été défini avant cette fonction : redéfinissez-le une fois ci-dessous pour pouvoir l'afficher."
+      "cannotShow": "Ce code a été défini avant cette fonction : redéfinissez-le une fois ci-dessous pour pouvoir l'afficher.",
+      "qrButton": "QR code Wi-Fi à imprimer",
+      "qrTitle": "QR code du Wi-Fi Spark-Local",
+      "qrIntro": "Saisissez le mot de passe de Spark-Local : le code se met à jour. Collez ensuite la page imprimée sur le boîtier ou au stand, pour que chacun se connecte en un scan.",
+      "qrNetworkLabel": "Nom du Wi-Fi",
+      "qrPasswordLabel": "Mot de passe de Spark-Local",
+      "qrPasswordPlaceholder": "8 caractères minimum",
+      "qrKeptLocal": "Le mot de passe reste dans votre navigateur : il n'est ni envoyé ni enregistré.",
+      "qrPrint": "Imprimer",
+      "sheetTitle": "Wi-Fi du stand",
+      "sheetScan": "Scannez ce code avec l'appareil photo de votre téléphone pour vous connecter.",
+      "sheetNetwork": "Réseau",
+      "sheetPassword": "Mot de passe",
+      "sheetOpen": "Pour l'application hors ligne, ouvrez"
     }
   },
   "nav": {

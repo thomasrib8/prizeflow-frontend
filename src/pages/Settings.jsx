@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import WifiQrSheet from '../components/WifiQrSheet';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { Card, Button, Badge } from '../components/ui';
@@ -942,6 +943,7 @@ function PrivacyModule() {
 
 function OfflineModeModule() {
   const { t } = useTranslation('admin');
+  const [qrOpen, setQrOpen] = useState(false);
   const [codeSet, setCodeSet] = useState(null);
   const [code, setCode] = useState('');
   const [saving, setSaving] = useState(false);
@@ -988,6 +990,10 @@ function OfflineModeModule() {
             <tr><td style={{ padding: '4px 16px 4px 0', color: '#64748B' }}>{t('settings.offlineMode.addressAltLabel')}</td><td>http://192.168.0.250:3001/pwa</td></tr>
           </tbody>
         </table>
+        <div style={{ margin: '0 0 16px' }}>
+          <Button type="button" variant="secondary" onClick={() => setQrOpen(true)}>{t('settings.offlineMode.qrButton')}</Button>
+        </div>
+        {qrOpen && <WifiQrSheet onClose={() => setQrOpen(false)} />}
         <p style={{ ...note, color: codeSet ? '#047857' : '#92400E', fontWeight: 600 }}>
           {codeSet === null ? '' : codeSet ? `✓ ${t('settings.offlineMode.codeIsSet')}` : t('settings.offlineMode.codeNotSet')}
         </p>
