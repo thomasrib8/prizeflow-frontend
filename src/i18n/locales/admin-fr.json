@@ -383,7 +383,8 @@
     "typeToConfirm": "Tapez le nom de la campagne pour confirmer :",
     "deletingBtn": "Suppression…",
     "deletePermanentlyBtn": "Supprimer définitivement",
-    "editSettingsBtn": "Modifier les paramètres"
+    "editSettingsBtn": "Modifier les paramètres",
+    "moreBtn": "Autres"
   },
   "editCampaign": {
     "archivedReadOnlyError": "Les campagnes archivées sont en lecture seule.",
@@ -830,7 +831,8 @@
     "noGift": "Pas de cadeau",
     "noGiftCancelled": "Pas de cadeau · annulé",
     "noGiftSkipped": "Pas de cadeau · passé",
-    "clearAll": "Tout effacer"
+    "clearAll": "Tout effacer",
+    "wheelLocal": "Roue connectée en local"
   },
   "prospectCard": {
     "editTitle": "Modifier",

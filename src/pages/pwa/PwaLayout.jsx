@@ -194,7 +194,7 @@ function PwaShell() {
               : <div className="pw-campaign">{q.campaign === null ? t('pwa.noActiveCampaignLabel') : q.campaign.name}</div>}
             <button type="button" className={`pw-wheel ${agentConnected ? 'on' : 'off'}`} onClick={() => setShowDiagnostics(true)}>
               <i />
-              {agentConnected ? t('pwa.wheelReady') : t('pwa.wheelOffline')}
+              {agentConnected ? (IS_BOX_BUILD ? t('pwa.wheelLocal') : t('pwa.wheelReady')) : t('pwa.wheelOffline')}
             </button>
           </div>
         </header>

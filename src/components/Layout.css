@@ -104,6 +104,7 @@
    nav-badge notification bubble already handles the same problem. */
 .agent-pill.ok { background: #10B981; color: white; }
 .agent-pill.off { background: #EF4444; color: white; }
+.agent-pill.warn { background: #F59E0B; color: white; }
 .agent-pill .dot {
   width: 6px; height: 6px;
   border-radius: 50%;

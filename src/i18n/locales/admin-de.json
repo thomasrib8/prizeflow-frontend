@@ -383,7 +383,8 @@
     "typeToConfirm": "Geben Sie den Kampagnennamen zur Bestätigung ein:",
     "deletingBtn": "Wird gelöscht…",
     "deletePermanentlyBtn": "Endgültig löschen",
-    "editSettingsBtn": "Einstellungen bearbeiten"
+    "editSettingsBtn": "Einstellungen bearbeiten",
+    "moreBtn": "Mehr"
   },
   "editCampaign": {
     "archivedReadOnlyError": "Archivierte Kampagnen sind schreibgeschützt.",
@@ -830,7 +831,8 @@
     "noGift": "Kein Geschenk",
     "noGiftCancelled": "Kein Geschenk · storniert",
     "noGiftSkipped": "Kein Geschenk · übersprungen",
-    "clearAll": "Alle löschen"
+    "clearAll": "Alle löschen",
+    "wheelLocal": "Rad lokal verbunden"
   },
   "prospectCard": {
     "editTitle": "Bearbeiten",

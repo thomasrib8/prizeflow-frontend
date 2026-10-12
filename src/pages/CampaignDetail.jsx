@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
@@ -8,6 +8,36 @@ import { SLOT_COLORS } from '../components/slotColors';
 
 const STATUS_TONE = { draft: 'neutral', active: 'green', paused: 'orange', completed: 'blue', archived: 'neutral' };
 const STATUS_TKEY = { draft: 'statusDraft', active: 'statusActive', paused: 'statusPaused', completed: 'statusCompleted', archived: 'statusArchived' };
+
+function MoreMenu({ label, items }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    if (!open) return undefined;
+    const close = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    const esc = (e) => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('mousedown', close);
+    document.addEventListener('keydown', esc);
+    return () => { document.removeEventListener('mousedown', close); document.removeEventListener('keydown', esc); };
+  }, [open]);
+  const visible = items.filter(Boolean);
+  if (!visible.length) return null;
+  return (
+    <div className="camp-more" ref={ref}>
+      <Button variant="secondary" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
+        {label}<span className="camp-chevron" aria-hidden="true">▾</span>
+      </Button>
+      {open && (
+        <div className="camp-menu" role="menu">
+          {visible.map((it, i) => it.separator ? <div key={`s${i}`} className="camp-menu-sep" /> : (
+            <button key={it.key} type="button" role="menuitem" disabled={it.disabled} className={it.danger ? 'camp-menu-danger' : ''}
+              onClick={() => { setOpen(false); it.onClick(); }}>{it.label}</button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function CampaignDetail() {
   const { t } = useTranslation('admin');
@@ -118,50 +148,30 @@ export default function CampaignDetail() {
             {campaign.event_name && <span>· {campaign.event_name}</span>}
           </p>
         </div>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          {campaign.status === 'draft' && <Button disabled={busy} onClick={() => runAction(() => api.startCampaign(campaign.id))}>{t('campaignDetail.startCampaignBtn')}</Button>}
+        <div className="camp-actions">
+          {campaign.status === 'draft' && <Button variant="success" disabled={busy} onClick={() => runAction(() => api.startCampaign(campaign.id))}>{t('campaignDetail.startCampaignBtn')}</Button>}
           {campaign.status === 'active' && <>
-            <Button variant="secondary" disabled={busy} onClick={() => runAction(() => api.pauseCampaign(campaign.id))}>{t('campaignDetail.pauseBtn')}</Button>
+            <Button variant="warning" disabled={busy} onClick={() => runAction(() => api.pauseCampaign(campaign.id))}>{t('campaignDetail.pauseBtn')}</Button>
             <Button variant="danger" disabled={busy} onClick={() => runAction(() => api.endCampaign(campaign.id))}>{t('campaignDetail.endCampaignBtn')}</Button>
             <Button onClick={() => navigate('/launch')}>{t('campaignDetail.goToLaunchBtn')}</Button>
           </>}
-          {campaign.status === 'paused' && <Button disabled={busy} onClick={() => runAction(() => api.startCampaign(campaign.id))}>{t('campaignDetail.resumeBtn')}</Button>}
+          {campaign.status === 'paused' && <Button variant="success" disabled={busy} onClick={() => runAction(() => api.startCampaign(campaign.id))}>{t('campaignDetail.resumeBtn')}</Button>}
           {campaign.status === 'completed' && <Button variant="secondary" disabled={busy} onClick={() => runAction(() => api.archiveCampaign(campaign.id))}>{t('campaignDetail.archiveBtn')}</Button>}
-          {campaign.status !== 'archived' && (
-            <Button variant="secondary" onClick={() => navigate(`/campaigns/${campaign.id}/edit`)}>{t('campaignDetail.editGiftsBtn')}</Button>
-          )}
-          {campaign.status !== 'archived' && (
-            <Button variant="secondary" onClick={() => navigate(`/campaigns/${campaign.id}/edit-settings`)}>{t('campaignDetail.editSegmentationBtn')}</Button>
-          )}
-          {campaign.status !== 'archived' && (
-            <Button variant="secondary" onClick={() => navigate(`/campaigns/${campaign.id}/settings`)}>{t('campaignDetail.editSettingsBtn')}</Button>
-          )}
-          {campaign.status !== 'archived' && (
-            <Button variant="secondary" onClick={() => navigate(`/campaigns/new?from=${campaign.id}`)}>{t('campaignDetail.duplicateBtn')}</Button>
-          )}
-          {isAdmin && !!campaign.is_test && (
-            <Button variant="secondary" onClick={showSeq ? () => setShowSeq(false) : loadSequence} disabled={seqLoading}>
-              {seqLoading ? t('common.loading') : showSeq ? t('campaignDetail.hideSequenceBtn') : t('campaignDetail.viewSequenceBtn')}
-            </Button>
-          )}
-          <Button variant="secondary" disabled={exportBusy} onClick={handleExportGiftDistribution}>
-            {exportBusy ? t('campaignDetail.exportingBtn') : t('campaignDetail.exportGiftDistBtn')}
-          </Button>
-          <Button variant="secondary" disabled={reportBusy} onClick={handleDownloadReport}>
-            {reportBusy ? t('launchCampaign.generatingBtn') : t('campaignDetail.downloadPdfReportBtn')}
-          </Button>
-          {campaign.status !== 'active' && (
-            <button
-              onClick={() => { setDeleteConfirmText(''); setDeleteOpen(true); }}
-              style={{
-                padding: '8px 16px', borderRadius: 8, border: '1px solid #FCA5A5',
-                background: 'transparent', color: '#DC2626', fontSize: 13, fontWeight: 600,
-                cursor: 'pointer', fontFamily: 'inherit',
-              }}
-            >
-              {t('campaignDetail.deleteCampaignBtn')}
-            </button>
-          )}
+          <MoreMenu
+            label={t('campaignDetail.moreBtn')}
+            items={[
+              campaign.status !== 'archived' && { key: 'gifts', label: t('campaignDetail.editGiftsBtn'), onClick: () => navigate(`/campaigns/${campaign.id}/edit`) },
+              campaign.status !== 'archived' && { key: 'seg', label: t('campaignDetail.editSegmentationBtn'), onClick: () => navigate(`/campaigns/${campaign.id}/edit-settings`) },
+              campaign.status !== 'archived' && { key: 'settings', label: t('campaignDetail.editSettingsBtn'), onClick: () => navigate(`/campaigns/${campaign.id}/settings`) },
+              campaign.status !== 'archived' && { key: 'dup', label: t('campaignDetail.duplicateBtn'), onClick: () => navigate(`/campaigns/new?from=${campaign.id}`) },
+              { separator: true },
+              { key: 'csv', label: exportBusy ? t('campaignDetail.exportingBtn') : t('campaignDetail.exportGiftDistBtn'), disabled: exportBusy, onClick: handleExportGiftDistribution },
+              { key: 'pdf', label: reportBusy ? t('launchCampaign.generatingBtn') : t('campaignDetail.downloadPdfReportBtn'), disabled: reportBusy, onClick: handleDownloadReport },
+              isAdmin && !!campaign.is_test && { key: 'seq', label: seqLoading ? t('common.loading') : showSeq ? t('campaignDetail.hideSequenceBtn') : t('campaignDetail.viewSequenceBtn'), disabled: seqLoading, onClick: showSeq ? () => setShowSeq(false) : loadSequence },
+              campaign.status !== 'active' && { separator: true },
+              campaign.status !== 'active' && { key: 'del', label: t('campaignDetail.deleteCampaignBtn'), danger: true, onClick: () => { setDeleteConfirmText(''); setDeleteOpen(true); } },
+            ]}
+          />
         </div>
       </div>
       {error && <div className="error-banner">{error}</div>}

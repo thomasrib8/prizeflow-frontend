@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useAdmin } from '../hooks/useAdmin';
 import { useWheelSocket } from '../hooks/useWheelSocket';
 import { api } from '../api/client';
+import { OfflineBoxPill, useOfflineBox } from './OfflineBoxStatus';
 import ConnectionDiagnosticsModal from './ConnectionDiagnosticsModal';
 import './Layout.css';
 
@@ -42,6 +43,7 @@ export default function Layout({ children }) {
   const location = useLocation();
   const { t } = useTranslation('admin');
   const { agentConnected, connectedSince, latencyMs } = useWheelSocket();
+  const offlineBox = useOfflineBox();
   const [pendingCount, setPendingCount] = useState(0);
   const [showDiagnostics, setShowDiagnostics] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -140,6 +142,7 @@ export default function Layout({ children }) {
         </nav>
 
         <div className="sidebar-footer">
+          <OfflineBoxPill status={offlineBox.status} />
           <button
             className={`agent-pill ${agentConnected ? 'ok' : 'off'}`}
             onClick={() => setShowDiagnostics(true)}

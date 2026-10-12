@@ -383,7 +383,8 @@
     "typeToConfirm": "Type the campaign name to confirm:",
     "deletingBtn": "Deleting…",
     "deletePermanentlyBtn": "Delete permanently",
-    "editSettingsBtn": "Edit settings"
+    "editSettingsBtn": "Edit settings",
+    "moreBtn": "More"
   },
   "editCampaign": {
     "archivedReadOnlyError": "Archived campaigns are read-only.",
@@ -830,7 +831,8 @@
     "noGift": "No gift",
     "noGiftCancelled": "No gift · cancelled",
     "noGiftSkipped": "No gift · skipped",
-    "clearAll": "Clear all"
+    "clearAll": "Clear all",
+    "wheelLocal": "Wheel connected locally"
   },
   "prospectCard": {
     "editTitle": "Edit",

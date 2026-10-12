@@ -11,7 +11,7 @@ import GuestFlowScreen from '../components/GuestFlowScreen';
 import { boxHotspotKioskUrl, boxKioskUrl, getBoxUrl, setBoxUrl } from '../utils/offlineBox';
 import CloudLostBanner from '../components/CloudLostBanner';
 import { useCloudWatch } from '../hooks/useCloudWatch';
-import { OfflineBoxBadge, OfflineReviews, useOfflineBox } from '../components/OfflineBoxStatus';
+import { OfflineReviews, useOfflineBox } from '../components/OfflineBoxStatus';
 import ProspectCard from '../components/ProspectCard';
 import NewProspectModal from '../components/NewProspectModal';
 import FilterGroup from '../components/FilterGroup';
@@ -136,7 +136,6 @@ export default function LaunchCampaign() {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
           <Badge tone={agentConnected ? 'green' : 'red'}>{agentConnected ? t('pwa.wheelReady') : t('pwa.wheelOffline')}</Badge>
-          <OfflineBoxBadge status={offlineBox.status} />
           {q.campaign && (
             // The tablet's kiosk, served by the offline box (works with no internet, on Spark-Local or the venue Wi-Fi).
             <a className="btn btn-secondary" href={boxKioskUrl(q.campaign.public_token)} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>

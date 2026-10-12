@@ -43,6 +43,18 @@ export function OfflineBoxBadge({ status }) {
   return <Badge tone="orange">{t('offlineBox.behind', { count: status.eventsBehind })}</Badge>;
 }
 
+// Same information as the badge, as a pill of the sidebar (above the wheel's), where staff already look for the wheel's state.
+export function OfflineBoxPill({ status }) {
+  const { t } = useTranslation('admin');
+  if (!status || !status.enabled) return null;
+  let tone = 'ok';
+  let text = t('offlineBox.inSync');
+  if (!status.boxSeen) { tone = 'off'; text = t('offlineBox.notSeen'); }
+  else if (!status.inSync && status.lastPollSecondsAgo > 15) { tone = 'off'; text = t('offlineBox.silent', { seconds: status.lastPollSecondsAgo }); }
+  else if (!status.inSync) { tone = 'warn'; text = t('offlineBox.behind', { count: status.eventsBehind }); }
+  return <div className={`agent-pill ${tone}`} role="status"><span className="dot" />{text}</div>;
+}
+
 export function OfflineReviews({ reviews, onChanged }) {
   const { t } = useTranslation('admin');
   const [busy, setBusy] = useState(null);
