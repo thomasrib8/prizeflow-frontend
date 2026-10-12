@@ -759,7 +759,11 @@
       "removeBtn": "Eliminar el código",
       "saved": "Código guardado. La caja lo recibe en su próxima sincronización.",
       "removed": "Código eliminado.",
-      "wipeNote": "La caja borra su copia de los contactos 12 horas después del fin de la campaña, o si pasa 10 días sin contacto con la nube."
+      "wipeNote": "La caja borra su copia de los contactos 12 horas después del fin de la campaña, o si pasa 10 días sin contacto con la nube.",
+      "currentCode": "Código actual",
+      "showCode": "Mostrar el código",
+      "hideCode": "Ocultar el código",
+      "cannotShow": "Este código se definió antes de esta función: vuelva a definirlo abajo una vez para poder mostrarlo."
     }
   },
   "nav": {

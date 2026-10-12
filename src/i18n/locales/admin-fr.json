@@ -759,7 +759,11 @@
       "removeBtn": "Supprimer le code",
       "saved": "Code enregistré. Le boîtier le reçoit à sa prochaine synchronisation.",
       "removed": "Code supprimé.",
-      "wipeNote": "Le boîtier efface sa copie des contacts 12 heures après la fin de la campagne, ou s'il reste sans contact avec le cloud pendant 10 jours."
+      "wipeNote": "Le boîtier efface sa copie des contacts 12 heures après la fin de la campagne, ou s'il reste sans contact avec le cloud pendant 10 jours.",
+      "currentCode": "Code actuel",
+      "showCode": "Afficher le code",
+      "hideCode": "Masquer le code",
+      "cannotShow": "Ce code a été défini avant cette fonction : redéfinissez-le une fois ci-dessous pour pouvoir l'afficher."
     }
   },
   "nav": {

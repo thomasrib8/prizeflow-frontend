@@ -759,7 +759,11 @@
       "removeBtn": "Remove the code",
       "saved": "Code saved. The box receives it at its next sync.",
       "removed": "Code removed.",
-      "wipeNote": "The box erases its copy of the contacts when the campaign has been over for 12 hours, or if it stays out of contact with the cloud for 10 days."
+      "wipeNote": "The box erases its copy of the contacts when the campaign has been over for 12 hours, or if it stays out of contact with the cloud for 10 days.",
+      "currentCode": "Current code",
+      "showCode": "Show the code",
+      "hideCode": "Hide the code",
+      "cannotShow": "This code was set before this feature existed: set it once more below to be able to show it."
     }
   },
   "nav": {

@@ -947,14 +947,28 @@ function OfflineModeModule() {
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState('');
   const [error, setError] = useState('');
+  // The saved code can be looked up again: shown only when the eye is pressed, hidden again after 30 s
+  const [shown, setShown] = useState(null); // null = hidden, string = the code, '' = could not be shown (set before this existed)
+  const [showBusy, setShowBusy] = useState(false);
 
   useEffect(() => { api.getAccountSettings().then((r) => setCodeSet(!!r.offlineAccessCodeSet)).catch((e) => setError(e.message)); }, []);
+  useEffect(() => {
+    if (shown === null) return undefined;
+    const id = setTimeout(() => setShown(null), 30000);
+    return () => clearTimeout(id);
+  }, [shown]);
+
+  async function toggleReveal() {
+    if (shown !== null) { setShown(null); return; }
+    setShowBusy(true); setError('');
+    try { const r = await api.getOfflineAccessCode(); setShown(r.code || ''); } catch (e) { setError(e.message); } finally { setShowBusy(false); }
+  }
 
   async function save(value) {
     setSaving(true); setError(''); setMsg('');
     try {
       const r = await api.updateAccountSettings({ offlineAccessCode: value });
-      setCodeSet(!!r.offlineAccessCodeSet); setCode('');
+      setCodeSet(!!r.offlineAccessCodeSet); setCode(''); setShown(null);
       setMsg(value ? t('settings.offlineMode.saved') : t('settings.offlineMode.removed'));
       setTimeout(() => setMsg(''), 3000);
     } catch (e) { setError(e.message); } finally { setSaving(false); }
@@ -977,6 +991,21 @@ function OfflineModeModule() {
         <p style={{ ...note, color: codeSet ? '#047857' : '#92400E', fontWeight: 600 }}>
           {codeSet === null ? '' : codeSet ? `✓ ${t('settings.offlineMode.codeIsSet')}` : t('settings.offlineMode.codeNotSet')}
         </p>
+        {codeSet && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '0 0 16px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 13, color: '#64748B' }}>{t('settings.offlineMode.currentCode')}</span>
+            <code style={{ fontSize: 15, fontWeight: 700, letterSpacing: shown ? '0.02em' : '0.15em', background: '#F1F5F9', padding: '6px 12px', borderRadius: 8, userSelect: shown ? 'all' : 'none' }}>
+              {shown ? shown : shown === '' ? '—' : '••••••••••'}
+            </code>
+            <button type="button" onClick={toggleReveal} disabled={showBusy} aria-label={shown !== null ? t('settings.offlineMode.hideCode') : t('settings.offlineMode.showCode')} title={shown !== null ? t('settings.offlineMode.hideCode') : t('settings.offlineMode.showCode')}
+              style={{ border: '1px solid #E2E8F0', background: '#fff', borderRadius: 8, width: 36, height: 36, cursor: 'pointer', display: 'inline-grid', placeItems: 'center' }}>
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                {shown !== null ? (<><path d="M3 3l18 18" /><path d="M10.6 6.2A9.8 9.8 0 0 1 12 6c5 0 8.5 4.2 9.5 6a14 14 0 0 1-2.6 3.2M6.5 7.5A14 14 0 0 0 2.5 12c1 1.8 4.5 6 9.5 6 1.5 0 2.8-.4 4-1" /><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" /></>) : (<><path d="M2.5 12C3.5 10.2 7 6 12 6s8.5 4.2 9.5 6c-1 1.8-4.5 6-9.5 6s-8.5-4.2-9.5-6z" /><circle cx="12" cy="12" r="3" /></>)}
+              </svg>
+            </button>
+            {shown === '' && <span style={{ fontSize: 12, color: '#92400E' }}>{t('settings.offlineMode.cannotShow')}</span>}
+          </div>
+        )}
         <div className="field" style={{ maxWidth: 360 }}>
           <label>{t('settings.offlineMode.codeLabel')}</label>
           <input type="text" autoComplete="off" value={code} onChange={(e) => setCode(e.target.value)} maxLength={64} placeholder={t('settings.offlineMode.codePlaceholder')} />

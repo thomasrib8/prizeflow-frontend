@@ -759,7 +759,11 @@
       "removeBtn": "Code entfernen",
       "saved": "Code gespeichert. Die Box erhält ihn bei der nächsten Synchronisierung.",
       "removed": "Code entfernt.",
-      "wipeNote": "Die Box löscht ihre Kopie der Kontakte 12 Stunden nach Ende der Kampagne oder wenn sie 10 Tage keinen Kontakt zur Cloud hatte."
+      "wipeNote": "Die Box löscht ihre Kopie der Kontakte 12 Stunden nach Ende der Kampagne oder wenn sie 10 Tage keinen Kontakt zur Cloud hatte.",
+      "currentCode": "Aktueller Code",
+      "showCode": "Code anzeigen",
+      "hideCode": "Code verbergen",
+      "cannotShow": "Dieser Code wurde vor dieser Funktion festgelegt: Legen Sie ihn unten einmal neu fest, um ihn anzeigen zu können."
     }
   },
   "nav": {

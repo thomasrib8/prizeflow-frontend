@@ -287,6 +287,7 @@ export const api = {
   getUserLinkedin: (id) => request(`/users/${id}/linkedin`),
   setUserLinkedin: (id, payload) => request(`/users/${id}/linkedin`, { method: 'PATCH', body: payload }),
   getRecentPlayers: (campaignId) => request(`/account/recent-players?campaignId=${encodeURIComponent(campaignId)}`),
+  getOfflineAccessCode: () => request('/account/offline-access-code'),
   getAccountSettings: () => request('/account/settings'),
   updateAccountSettings: (payload) => request('/account/settings', { method: 'PATCH', body: payload }),
 
