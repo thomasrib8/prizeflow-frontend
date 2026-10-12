@@ -7,7 +7,9 @@
     "skipped": "You've been skipped — you can try again right away.",
     "cancelled": "Your turn was cancelled by our team.",
     "timedOut": "Your turn has timed out.",
-    "tryAgain": "Try again"
+    "tryAgain": "Try again",
+    "noGifts": "There are no gifts left to win. Thank you for taking part!",
+    "wheelOffline": "The wheel isn't connected right now. Please ask our team."
   },
   "reviewGate": {
     "title": "Leave us a Google review!",

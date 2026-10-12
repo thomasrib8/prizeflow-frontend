@@ -160,7 +160,12 @@
     "latencySuffix": " · latence {{ms}} ms",
     "cloudAgentTitle": "Cloud ↔ Agent (Pi)",
     "lastDisconnectsLabel": "Dernières déconnexions : {{list}}",
-    "autoRefreshNote": "Actualisation automatique toutes les 5 secondes."
+    "autoRefreshNote": "Actualisation automatique toutes les 5 secondes.",
+    "offlineBoxTitle": "Boîtier offline",
+    "offlineBoxNotSeen": "Pas encore connecté au cloud",
+    "offlineBoxInSync": "Connecté et à jour : prêt à prendre le relais",
+    "offlineBoxSilent": "Plus de nouvelles depuis {{seconds}} s",
+    "offlineBoxBehind": "En retard de {{count}} événement(s)"
   },
   "downloadAppModal": {
     "title": "Télécharger l'app",

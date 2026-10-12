@@ -7,7 +7,9 @@
     "skipped": "Du wurdest übersprungen — du kannst es sofort noch einmal versuchen.",
     "cancelled": "Dein Zug wurde von unserem Team storniert.",
     "timedOut": "Dein Zug ist abgelaufen.",
-    "tryAgain": "Erneut versuchen"
+    "tryAgain": "Erneut versuchen",
+    "noGifts": "Es gibt keine Geschenke mehr zu gewinnen. Danke fürs Mitmachen!",
+    "wheelOffline": "Das Glücksrad ist gerade nicht verbunden. Bitte wenden Sie sich an unser Team."
   },
   "reviewGate": {
     "title": "Hinterlasse uns eine Google-Bewertung!",

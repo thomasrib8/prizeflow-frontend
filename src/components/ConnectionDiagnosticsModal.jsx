@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { Button } from './ui';
+import { IS_BOX_BUILD } from '../utils/boxMode';
 import WheelDiagnosticsRows, { Row, since } from './WheelDiagnosticsRows';
 
 const POLL_MS = 5000;
@@ -16,11 +17,13 @@ function latencyTone(ms) {
 export default function ConnectionDiagnosticsModal({ onClose, agentConnected, connectedSince, latencyMs }) {
   const { t } = useTranslation('admin');
   const [diagnostics, setDiagnostics] = useState(null);
+  const [box, setBox] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
     function load() {
       api.spinStatus().then((res) => { if (!cancelled) setDiagnostics(res.diagnostics); }).catch(() => {});
+      if (!IS_BOX_BUILD) api.getOfflineStatus().then((st) => { if (!cancelled) setBox(st); }).catch(() => {});
     }
     load();
     const id = setInterval(load, POLL_MS);
@@ -58,6 +61,18 @@ export default function ConnectionDiagnosticsModal({ onClose, agentConnected, co
         </Row>
 
         <WheelDiagnosticsRows diagnostics={diagnostics} />
+
+        {box && box.enabled && (
+          <Row
+            tone={!box.boxSeen ? 'red' : box.inSync ? 'green' : box.lastPollSecondsAgo > 15 ? 'red' : 'orange'}
+            title={t('connectionDiagnostics.offlineBoxTitle')}
+          >
+            {!box.boxSeen && t('connectionDiagnostics.offlineBoxNotSeen')}
+            {box.boxSeen && box.inSync && t('connectionDiagnostics.offlineBoxInSync')}
+            {box.boxSeen && !box.inSync && box.lastPollSecondsAgo > 15 && t('connectionDiagnostics.offlineBoxSilent', { seconds: box.lastPollSecondsAgo })}
+            {box.boxSeen && !box.inSync && box.lastPollSecondsAgo <= 15 && t('connectionDiagnostics.offlineBoxBehind', { count: box.eventsBehind })}
+          </Row>
+        )}
 
         <p style={{ fontSize: 11, color: '#94A3B8', marginTop: 12, marginBottom: 0 }}>
           {t('connectionDiagnostics.autoRefreshNote')}

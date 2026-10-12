@@ -227,6 +227,10 @@ export default function GuestFlowScreen({
         ? t('expired.skipped')
         : status?.status === 'cancelled'
         ? t('expired.cancelled')
+        : status?.retryMessage === 'SEQUENCE_EXHAUSTED'
+        ? t('expired.noGifts')
+        : status?.retryMessage === 'Wheel agent is not connected'
+        ? t('expired.wheelOffline')
         : t('expired.timedOut');
     return (
       <div style={fullScreenBase}>

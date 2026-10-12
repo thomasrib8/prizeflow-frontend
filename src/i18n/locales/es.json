@@ -7,7 +7,9 @@
     "skipped": "Te hemos pasado de turno — puedes volver a intentarlo ahora mismo.",
     "cancelled": "Tu turno fue cancelado por nuestro equipo.",
     "timedOut": "Tu turno ha caducado.",
-    "tryAgain": "Reintentar"
+    "tryAgain": "Reintentar",
+    "noGifts": "Ya no quedan regalos por ganar. ¡Gracias por participar!",
+    "wheelOffline": "La rueda no está conectada en este momento. Consulta con nuestro equipo."
   },
   "reviewGate": {
     "title": "¡Déjanos una reseña en Google!",

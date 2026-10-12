@@ -7,7 +7,9 @@
     "skipped": "Vous avez été passé — vous pouvez retenter votre chance tout de suite.",
     "cancelled": "Votre tour a été annulé par notre équipe.",
     "timedOut": "Votre tour a expiré.",
-    "tryAgain": "Réessayer"
+    "tryAgain": "Réessayer",
+    "noGifts": "Il n'y a plus de cadeaux à gagner. Merci d'avoir participé !",
+    "wheelOffline": "La roue n'est pas connectée pour le moment. Merci de vous adresser à notre équipe."
   },
   "reviewGate": {
     "title": "Laissez-nous un avis Google !",
