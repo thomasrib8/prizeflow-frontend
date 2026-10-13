@@ -32,6 +32,10 @@ import UserDetail from './pages/UserDetail';
 import AppHealth from './pages/AppHealth';
 import Magic from './pages/Magic';
 import SequenceBuilder from './pages/SequenceBuilder';
+import Tutorials from './pages/Tutorials';
+import TutorialPlayer from './pages/TutorialPlayer';
+import { IS_DEMO } from './tutorial/demo';
+import TutorialRunner from './tutorial/TutorialRunner';
 
 // Sends a logged-out visitor to /login carrying where they were headed, so
 // signing in lands them back on that exact page instead of always on the
@@ -62,6 +66,7 @@ export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        {IS_DEMO && <TutorialRunner />}
         <Routes>
           <Route path="/login" element={<Login />} />
           {!IS_BOX_BUILD && <>
@@ -105,6 +110,8 @@ export default function App() {
           <Route path="/history" element={<PrivateRoute><History /></PrivateRoute>} />
           <Route path="/rewards" element={<PrivateRoute><Rewards /></PrivateRoute>} />
           <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
+          <Route path="/tutorials" element={<PrivateRoute><Tutorials /></PrivateRoute>} />
+          <Route path="/tutorials/:id" element={<PrivateRoute><TutorialPlayer /></PrivateRoute>} />
           <Route path="/users" element={<AdminRoute><Users /></AdminRoute>} />
           <Route path="/users/:id" element={<AdminRoute><UserDetail /></AdminRoute>} />
           <Route path="/health" element={<AdminRoute><AppHealth /></AdminRoute>} />

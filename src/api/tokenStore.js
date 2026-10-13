@@ -8,16 +8,21 @@
 // a request arrives carrying a 3-day-old token A, and the user is kicked out).
 // With the memory copy, a freshly issued token can't be displaced by an older
 // one written (or left) in storage by another tab.
+import { IS_DEMO, DEMO_USER } from '../tutorial/demo';
+
 const TOKEN_KEY = 'prizeflow_token';
 const USER_KEY = 'prizeflow_user';
 
 function safeGet(key) {
+  if (IS_DEMO) return null; // tutorial mode never reads the real session
   try { return localStorage.getItem(key); } catch { return null; }
 }
 function safeSet(key, value) {
+  if (IS_DEMO) return;
   try { localStorage.setItem(key, value); } catch { /* storage full/blocked — memory copy still works for this tab */ }
 }
 function safeRemove(key) {
+  if (IS_DEMO) return;
   try { localStorage.removeItem(key); } catch { /* ignore */ }
 }
 
@@ -32,7 +37,7 @@ function tokenIat(token) {
   }
 }
 
-let memoryToken = safeGet(TOKEN_KEY);
+let memoryToken = IS_DEMO ? 'demo.session' : safeGet(TOKEN_KEY);
 
 export function getToken() {
   return memoryToken;
@@ -64,6 +69,7 @@ export function dropToken(failedToken) {
 }
 
 export function readStoredUser() {
+  if (IS_DEMO) return DEMO_USER;
   const raw = safeGet(USER_KEY);
   if (!raw) return null;
   try { return JSON.parse(raw); } catch { return null; }
@@ -77,7 +83,7 @@ export function writeStoredUser(user) {
 // Other tabs changing the token in storage: adopt a NEWER token (another tab
 // logged in or refreshed), never an older one, and if storage got wiped or
 // downgraded while this tab still holds a newer session, put ours back.
-if (typeof window !== 'undefined') {
+if (typeof window !== 'undefined' && !IS_DEMO) {
   window.addEventListener('storage', (e) => {
     if (e.key !== TOKEN_KEY) return;
     const incoming = e.newValue;

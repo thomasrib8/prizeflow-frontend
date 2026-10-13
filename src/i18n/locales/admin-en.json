@@ -808,7 +808,8 @@
     "health": "Health",
     "magic": "Magic",
     "sequence": "Sequence",
-    "settings": "Settings"
+    "settings": "Settings",
+    "tutorials": "Tutorials"
   },
   "pwa": {
     "signOut": "Sign out",
@@ -1330,5 +1331,24 @@
     "message": "Connection lost: switch to Spark Offline",
     "open": "Open Spark Offline",
     "viaLocal": "Via the Spark-Local Wi-Fi"
+  },
+  "tutorials": {
+    "pageTitle": "Tutorials and documentation",
+    "pageSubtitle": "Learn SPARK step by step: each tutorial replays the real application with made-up data.",
+    "stepsCount_one": "{{count}} step",
+    "stepsCount_other": "{{count}} steps",
+    "adminOnly": "Administrators",
+    "docsTitle": "Documentation",
+    "backToList": "All tutorials",
+    "stepsLabel": "Tutorial steps",
+    "finished": "Tutorial finished",
+    "play": "Play",
+    "pause": "Pause",
+    "replay": "Replay",
+    "previous": "Previous step",
+    "next": "Next step",
+    "speed": "Speed",
+    "stepOf": "Step {{n}} of {{total}}",
+    "demoNote": "Made-up data: nothing you see here is saved."
   }
 }

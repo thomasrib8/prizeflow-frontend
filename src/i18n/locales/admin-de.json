@@ -808,7 +808,8 @@
     "health": "Zustand",
     "magic": "Magic",
     "sequence": "Sequenz",
-    "settings": "Einstellungen"
+    "settings": "Einstellungen",
+    "tutorials": "Anleitungen"
   },
   "pwa": {
     "signOut": "Abmelden",
@@ -1330,5 +1331,24 @@
     "message": "Verbindung verloren: wechseln Sie zu Spark Offline",
     "open": "Spark Offline öffnen",
     "viaLocal": "Über das WLAN Spark-Local"
+  },
+  "tutorials": {
+    "pageTitle": "Anleitungen und Dokumentation",
+    "pageSubtitle": "Lernen Sie SPARK Schritt für Schritt: Jede Anleitung spielt die echte Anwendung mit erfundenen Daten ab.",
+    "stepsCount_one": "{{count}} Schritt",
+    "stepsCount_other": "{{count}} Schritte",
+    "adminOnly": "Administratoren",
+    "docsTitle": "Dokumentation",
+    "backToList": "Alle Anleitungen",
+    "stepsLabel": "Schritte der Anleitung",
+    "finished": "Anleitung beendet",
+    "play": "Abspielen",
+    "pause": "Pause",
+    "replay": "Wiederholen",
+    "previous": "Vorheriger Schritt",
+    "next": "Nächster Schritt",
+    "speed": "Geschwindigkeit",
+    "stepOf": "Schritt {{n}} von {{total}}",
+    "demoNote": "Erfundene Daten: Nichts von dem, was Sie hier sehen, wird gespeichert."
   }
 }

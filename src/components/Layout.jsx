@@ -25,6 +25,7 @@ const NAV_ITEMS = [
   { to: '/launch', tKey: 'launch', icon: IconWheel },
   { to: '/rewards', tKey: 'redeem', icon: IconGift },
   { to: '/history', tKey: 'crm', icon: IconPeople },
+  { to: '/tutorials', tKey: 'tutorials', icon: IconBook },
 ];
 
 const ADMIN_NAV_ITEMS = [
@@ -205,6 +206,16 @@ function IconBox() {
 function IconWheel() {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><path d="M12 3v6M12 15v6M3 12h6M15 12h6"/></svg>;
 }
+function IconBook() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5v-15z" />
+      <path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5" />
+      <path d="M8.5 8h7M8.5 11.5h5" />
+    </svg>
+  );
+}
+
 function IconPeople() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">

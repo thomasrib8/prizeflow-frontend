@@ -1,5 +1,7 @@
 import { getToken, adoptRefreshedToken, dropToken } from './tokenStore';
 import i18n from '../i18n';
+import { IS_DEMO } from '../tutorial/demo';
+import { createDemoSocket } from '../tutorial/demoSocket';
 // 'same-origin' = this page and the API come from the same server — what the
 // offline event box does (it serves the built app itself, reached by IP).
 const API_BASE = import.meta.env.VITE_API_BASE_URL === 'same-origin'
@@ -17,6 +19,8 @@ async function retryOnce(fn) {
 }
 
 async function request(path, { method = 'GET', body, auth = true } = {}) {
+  // Tutorial mode: answered by the in-browser fake server, never the network (loaded only then)
+  if (IS_DEMO) { const { demoRequest } = await import('../tutorial/fakeBackend'); return demoRequest(path, { method, body }); }
   const headers = { 'Content-Type': 'application/json' };
   // Captured up front so the 401 handler below can tell "this exact token
   // just got rejected" apart from "a newer login already replaced it while
@@ -84,6 +88,7 @@ async function request(path, { method = 'GET', body, auth = true } = {}) {
 // plain navigation/<a href>, so this fetches the file as a blob (with the
 // header attached) and triggers the save via a throwaway object URL instead.
 async function downloadFile(path) {
+  if (IS_DEMO) return; // nothing to download in a tutorial
   const token = getToken();
   const res = await fetch(`${API_BASE}${path}`, {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -376,6 +381,7 @@ export const api = {
 };
 
 export function connectWs() {
+  if (IS_DEMO) return createDemoSocket();
   const token = getToken();
   return new WebSocket(`${WS_BASE}/ws?role=browser&token=${encodeURIComponent(token || '')}`);
 }
