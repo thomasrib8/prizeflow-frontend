@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
+import { rememberBoxName } from '../utils/offlineBox';
 import { Badge, Button } from './ui';
 
 // Staff-facing, on the Launch page: is the offline event box following the
@@ -18,6 +19,7 @@ export function useOfflineBox(enabled = true) {
     if (!enabled) return;
     try {
       const st = await api.getOfflineStatus();
+      if (st && st.boxName) rememberBoxName(st.boxName);
       setStatus(st);
       if (st.pendingReviews > 0) setReviews((await api.getOfflineReviews()).filter((r) => !r.resolvedAt));
       else setReviews([]);

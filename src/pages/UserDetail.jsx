@@ -370,7 +370,7 @@ export default function UserDetail() {
 
               <h4 style={{ fontSize: 13, fontWeight: 700, color: '#03041A', margin: '16px 0 6px' }}>{t('userDetail.setupHelpStep2Title')}</h4>
               <p>{t('userDetail.setupHelpStep2Line1')}</p>
-              <pre style={{ background: '#03041A', color: '#E2E8F0', padding: '10px 12px', borderRadius: 8, fontSize: 12, overflowX: 'auto' }}>ssh pi@&lt;adresse-du-pi&gt;</pre>
+              <pre style={{ background: '#03041A', color: '#E2E8F0', padding: '10px 12px', borderRadius: 8, fontSize: 12, overflowX: 'auto' }}>pbpaste | ssh pi@&lt;adresse-du-pi&gt; 'bash -s'</pre>
               <p>{t('userDetail.setupHelpStep2Line2')}</p>
 
               <h4 style={{ fontSize: 13, fontWeight: 700, color: '#03041A', margin: '16px 0 6px' }}>{t('userDetail.setupHelpStep3Title')}</h4>

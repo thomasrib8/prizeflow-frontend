@@ -7,8 +7,19 @@
 const KEY = 'spark_offline_box_url';
 const DEFAULT_URL = import.meta.env.VITE_OFFLINE_BOX_URL || 'http://sparkoffline-box.local:3001';
 
+// The name the account's box was activated under (spark-box-NNNNNN), learned from the cloud (see useOfflineBox):
+// without it a renamed box would be looked for under the factory name and not found.
+const NAME_KEY = 'spark_box_name';
+export function rememberBoxName(name) {
+  if (!/^spark-box-\d{6}$/.test(String(name || ''))) return;
+  try { localStorage.setItem(NAME_KEY, name); } catch { /* storage unavailable */ }
+}
+function knownBoxUrl() {
+  try { const n = localStorage.getItem(NAME_KEY); return n && /^spark-box-\d{6}$/.test(n) ? `http://${n}.local:3001` : null; } catch { return null; }
+}
+
 export function getBoxUrl() {
-  try { return localStorage.getItem(KEY) || DEFAULT_URL; } catch { return DEFAULT_URL; }
+  try { return localStorage.getItem(KEY) || knownBoxUrl() || DEFAULT_URL; } catch { return knownBoxUrl() || DEFAULT_URL; }
 }
 
 export function setBoxUrl(value) {

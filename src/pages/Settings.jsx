@@ -1,4 +1,5 @@
 import { SocialGlyph } from '../components/SocialIcons';
+import { getBoxUrl } from '../utils/offlineBox';
 import { useEffect, useState } from 'react';
 import WifiQrSheet from '../components/WifiQrSheet';
 import { useTranslation } from 'react-i18next';
@@ -999,7 +1000,7 @@ function OfflineModeModule() {
           <tbody>
             <tr><td style={{ padding: '4px 16px 4px 0', color: '#64748B' }}>{t('settings.offlineMode.wifiLabel')}</td><td><strong>Spark-Local</strong></td></tr>
             <tr><td style={{ padding: '4px 16px 4px 0', color: '#64748B' }}>{t('settings.offlineMode.addressLabel')}</td><td><strong>http://sparkoff.box</strong></td></tr>
-            <tr><td style={{ padding: '4px 16px 4px 0', color: '#64748B' }}>{t('settings.offlineMode.addressAltLabel')}</td><td>http://192.168.0.250:3001/pwa</td></tr>
+            <tr><td style={{ padding: '4px 16px 4px 0', color: '#64748B' }}>{t('settings.offlineMode.addressAltLabel')}</td><td>{getBoxUrl()}/pwa/home</td></tr>
           </tbody>
         </table>
         <div style={{ margin: '0 0 16px' }}>
