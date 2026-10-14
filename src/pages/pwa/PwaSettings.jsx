@@ -118,7 +118,7 @@ export default function PwaSettings() {
       <div className="pw-group-title">{t('pwaApp.switchTitle')}</div>
       <div className="pw-card" style={{ padding: 14 }}>
         <p style={{ margin: '0 0 10px', fontSize: 13, lineHeight: 1.5, color: '#64748B' }}>{IS_BOX_BUILD ? t('pwaApp.switchOnlineHelp') : t('pwaApp.switchOfflineHelp')}</p>
-        <a className="pw-action primary" style={{ textAlign: 'center', textDecoration: 'none', display: 'block', padding: '12px 14px', borderRadius: 14, fontWeight: 800 }}
+        <a className={`pw-switch-btn ${IS_BOX_BUILD ? 'to-online' : 'to-offline'}`}
           href={IS_BOX_BUILD ? `${ONLINE_APP_URL}/pwa/home` : `${getBoxUrl()}/pwa/home`}>
           {IS_BOX_BUILD ? t('pwaApp.switchOnline') : t('pwaApp.switchOffline')}
         </a>
