@@ -31,7 +31,7 @@ const ROUTES = [
   ['GET', /^\/offline\/reviews$/, () => []],
   ['GET', /^\/account\/settings$/, () => settingsPayload()],
   ['PATCH', /^\/account\/settings$/, (m, body) => { if (body && body.language) store.settings.language = body.language; return settingsPayload(); }],
-  ['GET', /^\/spin\/status$/, () => ({ agentConnected: true, wheelStatus: { status: 'Free', currentPos: 3.2 }, diagnostics: { agent: { connectedSince: new Date(Date.now() - 600000).toISOString(), disconnectHistory: [] }, wheelLocal: { connected: true }, wifiSignal: { percent: 77 }, wheelIdentity: { modelNumber: 'PF-ALPHA-V1', serialNumber: 'PF260000152', securityKey: 'K8Q7F3' } } })],
+  ['GET', /^\/spin\/status$/, () => ({ agentConnected: true, wheelStatus: { status: 'Free', currentPos: 3.2 }, diagnostics: { agent: { connectedSince: new Date(Date.now() - 600000).toISOString(), disconnectHistory: [] }, wheelLocal: { connected: true }, wifiSignal: { percent: 77, ssid: 'Wifi-Evenement' }, wheelIdentity: { modelNumber: 'PF-ALPHA-V1', serialNumber: 'PF260000152', securityKey: 'K8Q7F3' } } })],
 
   ['GET', /^\/campaigns$/, () => clone(store.campaigns)],
   ['GET', /^\/campaigns\/([^/]+)$/, (m) => { const c = campaignById(m[1]); if (!c) fail('Campaign not found'); return clone(campaignDetail(c)); }],

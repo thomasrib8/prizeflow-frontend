@@ -63,7 +63,7 @@ export default function WheelDiagnosticsRows({ diagnostics }) {
       <Row tone={wifiTone(wifi?.percent)} title={t('wheelDiagnostics.piWifiSignalTitle')}>
         {wifi?.percent !== null && wifi?.percent !== undefined ? (
           <span>
-            {wifi.percent}%
+            {wifi.percent}%{wifi.ssid ? <> · <strong style={{ color: '#03041A' }}>{wifi.ssid}</strong></> : null}
             <span style={{ marginLeft: 8 }}>
               {[0, 1, 2, 3].map((i) => (
                 <span key={i} style={{
