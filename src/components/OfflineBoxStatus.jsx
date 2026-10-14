@@ -10,11 +10,12 @@ import { Badge, Button } from './ui';
 // box feature is not switched on (status.enabled is false).
 const REFRESH_MS = 10000;
 
-export function useOfflineBox() {
+export function useOfflineBox(enabled = true) {
   const [status, setStatus] = useState(null);
   const [reviews, setReviews] = useState([]);
 
   const load = useCallback(async () => {
+    if (!enabled) return;
     try {
       const st = await api.getOfflineStatus();
       setStatus(st);
@@ -23,7 +24,7 @@ export function useOfflineBox() {
     } catch {
       /* not reachable right now: keep what we last knew */
     }
-  }, []);
+  }, [enabled]);
 
   useEffect(() => {
     load();

@@ -1120,7 +1120,12 @@
     "languageLabel": "Sprache",
     "openFullApp": "Die vollständige SPARK-App öffnen",
     "loadError": "Konnte gerade nicht geladen werden.",
-    "retryBtn": "Erneut versuchen"
+    "retryBtn": "Erneut versuchen",
+    "switchTitle": "Offline- / Online-Version",
+    "switchOffline": "Zu Spark Offline wechseln",
+    "switchOnline": "Zu Spark Online wechseln",
+    "switchOfflineHelp": "Ist das Internet am Stand ausgefallen: Verbinden Sie das Telefon zuerst mit dem WLAN „Spark-Local“ und öffnen Sie dann die Offline-Version.",
+    "switchOnlineHelp": "Ist das Internet zurück, öffnen Sie die Online-Version, um alle Funktionen zu haben (das Telefon braucht Internet)."
   },
   "offlineBox": {
     "notSeen": "Offline-Box: nicht verbunden",
@@ -1148,7 +1153,9 @@
     "pending_other": "{{count}} Änderungen warten",
     "allSent": "Alles gesendet",
     "navAdd": "Hinzufügen",
-    "backOnline": "Internet ist zurück: Ihre Änderungen wurden gesendet"
+    "backOnline": "Internet ist zurück: Ihre Änderungen wurden gesendet",
+    "backOnlineSwitch": "Das Internet ist zurück: wechseln Sie zur Online-Version zurück",
+    "switchOnline": "Zu Spark Online wechseln"
   },
   "prospect": {
     "note": "Notiz",
@@ -1329,8 +1336,10 @@
   },
   "cloudLost": {
     "message": "Verbindung verloren: wechseln Sie zu Spark Offline",
-    "open": "Spark Offline öffnen",
-    "viaLocal": "Über das WLAN Spark-Local"
+    "open": "Zu Spark Offline wechseln",
+    "viaLocal": "Über das WLAN Spark-Local",
+    "wheelMessage": "Das Glücksrad hat die Verbindung verloren. Ist das Internet am Stand ausgefallen, wechseln Sie zu Spark Offline.",
+    "kiosk": "Offline-Kiosk öffnen"
   },
   "tutorials": {
     "pageTitle": "Anleitungen und Dokumentation",

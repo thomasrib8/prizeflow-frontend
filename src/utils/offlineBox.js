@@ -24,3 +24,6 @@ export const boxKioskUrl = (token) => `${getBoxUrl()}/kiosk/${encodeURIComponent
 // gone; on that network it has another, fixed address.
 const HOTSPOT_URL = import.meta.env.VITE_OFFLINE_BOX_HOTSPOT_URL || 'http://10.42.0.1:3001';
 export const boxHotspotKioskUrl = (token) => `${HOTSPOT_URL}/kiosk/${encodeURIComponent(token)}`;
+
+// Where the normal (online) app lives, for the "Switch to Spark Online" button of the offline app.
+export const ONLINE_APP_URL = (import.meta.env.VITE_ONLINE_APP_URL || 'https://app.sparkapp360.com').replace(/\/+$/, '');

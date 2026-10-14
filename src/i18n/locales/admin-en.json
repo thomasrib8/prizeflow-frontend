@@ -1120,7 +1120,12 @@
     "languageLabel": "Language",
     "openFullApp": "Open the full SPARK app",
     "loadError": "Couldn't load this right now.",
-    "retryBtn": "Retry"
+    "retryBtn": "Retry",
+    "switchTitle": "Offline / online version",
+    "switchOffline": "Switch to Spark Offline",
+    "switchOnline": "Switch to Spark Online",
+    "switchOfflineHelp": "If the internet is down at the stand: first connect the phone to the “Spark-Local” Wi-Fi, then open the offline version.",
+    "switchOnlineHelp": "When the internet is back, open the online version to get every feature back (the phone needs internet)."
   },
   "offlineBox": {
     "notSeen": "Offline box: not connected",
@@ -1148,7 +1153,9 @@
     "pending_other": "{{count}} changes waiting",
     "allSent": "All sent",
     "navAdd": "Add",
-    "backOnline": "Internet is back: your changes have been sent"
+    "backOnline": "Internet is back: your changes have been sent",
+    "backOnlineSwitch": "Internet is back: switch back to the online version",
+    "switchOnline": "Switch to Spark Online"
   },
   "prospect": {
     "note": "Note",
@@ -1329,8 +1336,10 @@
   },
   "cloudLost": {
     "message": "Connection lost: switch to Spark Offline",
-    "open": "Open Spark Offline",
-    "viaLocal": "Via the Spark-Local Wi-Fi"
+    "open": "Switch to Spark Offline",
+    "viaLocal": "Via the Spark-Local Wi-Fi",
+    "wheelMessage": "The wheel lost its connection. If the internet is down at the stand, switch to Spark Offline.",
+    "kiosk": "Open the offline kiosk"
   },
   "tutorials": {
     "pageTitle": "Tutorials and documentation",

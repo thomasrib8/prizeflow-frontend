@@ -11,6 +11,7 @@ import GuestFlowScreen from '../components/GuestFlowScreen';
 import { boxHotspotKioskUrl, boxKioskUrl, getBoxUrl, setBoxUrl } from '../utils/offlineBox';
 import CloudLostBanner from '../components/CloudLostBanner';
 import { useCloudWatch } from '../hooks/useCloudWatch';
+import { useWheelLost } from '../hooks/useWheelLost';
 import { OfflineReviews, useOfflineBox } from '../components/OfflineBoxStatus';
 import ProspectCard from '../components/ProspectCard';
 import NewProspectModal from '../components/NewProspectModal';
@@ -87,6 +88,7 @@ export default function LaunchCampaign() {
   const q = useLaunchQueue();
   const offlineBox = useOfflineBox();
   const cloudLost = useCloudWatch(true);
+  const wheelLost = useWheelLost({ agentConnected, hasCampaign: !!q.campaign, boxSeen: !!(offlineBox.status && offlineBox.status.boxSeen) });
   const [qrDataUrl, setQrDataUrl] = useState(null);
   const [guestUrl, setGuestUrl] = useState('');
   const [showKiosk, setShowKiosk] = useState(false);
@@ -128,7 +130,7 @@ export default function LaunchCampaign() {
 
   return (
     <div>
-      {cloudLost && <CloudLostBanner />}
+      {(cloudLost || wheelLost) && <CloudLostBanner reason={cloudLost ? 'cloud' : 'wheel'} kioskUrl={q.campaign ? boxKioskUrl(q.campaign.public_token) : null} />}
       <div className="page-header launch-header">
         <div>
           <h1 className="page-title">{t('launchCampaign.pageTitle')}</h1>

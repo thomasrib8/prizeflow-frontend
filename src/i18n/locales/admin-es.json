@@ -1120,7 +1120,12 @@
     "languageLabel": "Idioma",
     "openFullApp": "Abrir la aplicación SPARK completa",
     "loadError": "No se pudo cargar ahora mismo.",
-    "retryBtn": "Reintentar"
+    "retryBtn": "Reintentar",
+    "switchTitle": "Versión sin conexión / en línea",
+    "switchOffline": "Pasar a Spark Offline",
+    "switchOnline": "Pasar a Spark Online",
+    "switchOfflineHelp": "Si internet está cortado en el stand: conecte primero el teléfono al Wi-Fi «Spark-Local» y abra la versión sin conexión.",
+    "switchOnlineHelp": "Cuando vuelva internet, abra la versión en línea para recuperar todas las funciones (el teléfono necesita internet)."
   },
   "offlineBox": {
     "notSeen": "Caja offline: no conectada",
@@ -1148,7 +1153,9 @@
     "pending_other": "{{count}} cambios pendientes",
     "allSent": "Todo enviado",
     "navAdd": "Añadir",
-    "backOnline": "Internet ha vuelto: sus cambios se han enviado"
+    "backOnline": "Internet ha vuelto: sus cambios se han enviado",
+    "backOnlineSwitch": "Internet ha vuelto: vuelva a la versión en línea",
+    "switchOnline": "Pasar a Spark Online"
   },
   "prospect": {
     "note": "Nota",
@@ -1329,8 +1336,10 @@
   },
   "cloudLost": {
     "message": "Conexión perdida: pase a Spark Offline",
-    "open": "Abrir Spark Offline",
-    "viaLocal": "Por el Wi-Fi Spark-Local"
+    "open": "Pasar a Spark Offline",
+    "viaLocal": "Por el Wi-Fi Spark-Local",
+    "wheelMessage": "La rueda perdió la conexión. Si internet está cortado en el stand, pase a Spark Offline.",
+    "kiosk": "Abrir el quiosco offline"
   },
   "tutorials": {
     "pageTitle": "Tutoriales y documentación",

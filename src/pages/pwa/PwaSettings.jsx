@@ -9,6 +9,7 @@ import { IconGlobe, IconLogout, IconUser, IconWheel } from '../../components/pwa
 import { CampaignLoading, NoCampaign, Skel } from '../../components/pwa/PwaParts';
 import { usePwa } from './PwaContext';
 import { IS_BOX_BUILD } from '../../utils/boxMode';
+import { getBoxUrl, ONLINE_APP_URL } from '../../utils/offlineBox';
 
 // Settings: the active campaign's own settings — the same "Settings" step as
 // campaign creation (Google review, social media, AI assistant), through the
@@ -112,6 +113,15 @@ export default function PwaSettings() {
             {agentConnected ? t('pwaApp.online') : t('pwaApp.offline')}
           </span>
         </button>
+      </div>
+
+      <div className="pw-group-title">{t('pwaApp.switchTitle')}</div>
+      <div className="pw-card" style={{ padding: 14 }}>
+        <p style={{ margin: '0 0 10px', fontSize: 13, lineHeight: 1.5, color: '#64748B' }}>{IS_BOX_BUILD ? t('pwaApp.switchOnlineHelp') : t('pwaApp.switchOfflineHelp')}</p>
+        <a className="pw-action primary" style={{ textAlign: 'center', textDecoration: 'none', display: 'block', padding: '12px 14px', borderRadius: 14, fontWeight: 800 }}
+          href={IS_BOX_BUILD ? `${ONLINE_APP_URL}/pwa/home` : `${getBoxUrl()}/pwa/home`}>
+          {IS_BOX_BUILD ? t('pwaApp.switchOnline') : t('pwaApp.switchOffline')}
+        </a>
       </div>
 
       <div className="pw-group-title">{t('pwaApp.accountTitle')}</div>

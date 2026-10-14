@@ -9,9 +9,12 @@ import ProspectCard from '../../components/ProspectCard';
 import NewProspectModal from '../../components/NewProspectModal';
 import CloudLostBanner from '../../components/CloudLostBanner';
 import { useCloudWatch } from '../../hooks/useCloudWatch';
+import { useWheelLost } from '../../hooks/useWheelLost';
+import { useOfflineBox } from '../../components/OfflineBoxStatus';
 import ConnectionDiagnosticsModal from '../../components/ConnectionDiagnosticsModal';
 import { IconAnalytics, IconHome, IconPlus, IconProspects, IconScan, IconSettings, IconUser } from '../../components/pwa/PwaIcons';
 import { PwaContext } from './PwaContext';
+import { ONLINE_APP_URL } from '../../utils/offlineBox';
 import { IS_BOX_BUILD } from '../../utils/boxMode';
 import { api } from '../../api/client';
 import './pwa.css';
@@ -89,28 +92,31 @@ function useBoxStatus(refreshKey) {
 // about which version of the app this is: amber = the local copy on the box, not the normal app.
 function OfflineBar({ status }) {
   const { t } = useTranslation('admin');
-  // When the cloud is back and everything has gone up (the box hands back to the cloud), say so for a few seconds.
+  // When the cloud is back and everything has gone up (the box hands back to the cloud), say so for a few seconds,
+  // then keep a blue bar that invites to go back to the normal app (the box only follows the cloud now: read only).
   const prev = useRef(null);
-  const [backOnline, setBackOnline] = useState(false);
+  const [sent, setSent] = useState(false);
   useEffect(() => {
     if (!status) return undefined;
     const was = prev.current; prev.current = status.mode;
     if (was === 'primary' && status.mode === 'replica') {
-      setBackOnline(true);
-      const id = setTimeout(() => setBackOnline(false), 12000);
+      setSent(true);
+      const id = setTimeout(() => setSent(false), 12000);
       return () => clearTimeout(id);
     }
     return undefined;
   }, [status]);
   const inCharge = !status || status.mode === 'primary'; // internet down: the box takes changes
+  const cloudBack = !!status && status.mode === 'replica';
   const pending = status ? status.pendingChanges : 0;
   return (
-    <div className="pw-offline-bar" role="status" aria-live="polite">
+    <div className={`pw-offline-bar${cloudBack ? ' online' : ''}`} role="status" aria-live="polite">
       <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <path d="M3 3l18 18" /><path d="M9.5 5.4A6 6 0 0 1 18 10a4 4 0 0 1 1.9 7.5" /><path d="M6.3 7.3A6 6 0 0 0 7 19h9.5" />
+        {cloudBack ? <><path d="M20 17.6A4.5 4.5 0 0 0 18 9h-1.3A7 7 0 1 0 4 15.3" /><path d="M9 17l2 2 4-4" /></> : <><path d="M3 3l18 18" /><path d="M9.5 5.4A6 6 0 0 1 18 10a4 4 0 0 1 1.9 7.5" /><path d="M6.3 7.3A6 6 0 0 0 7 19h9.5" /></>}
       </svg>
-      <strong>{backOnline ? t('boxApp.backOnline') : inCharge ? t('boxApp.barOffline') : t('boxApp.barReadOnly')}</strong>
-      {!backOnline && inCharge && status && (
+      <strong>{sent ? t('boxApp.backOnline') : cloudBack ? t('boxApp.backOnlineSwitch') : inCharge ? t('boxApp.barOffline') : t('boxApp.barReadOnly')}</strong>
+      {cloudBack && <a className="pw-offline-switch" href={`${ONLINE_APP_URL}/pwa/home`}>{t('boxApp.switchOnline')}</a>}
+      {!cloudBack && inCharge && status && (
         <span className={`pw-offline-count${pending ? ' has' : ''}`}>
           {pending ? t('boxApp.pending', { count: pending }) : `${t('boxApp.allSent')} ✓`}
         </span>
@@ -138,8 +144,10 @@ function PwaShell() {
   const fileInputRef = useRef(null);
   const cloudLost = useCloudWatch(!IS_BOX_BUILD);
   const boxStatus = useBoxStatus(dataVersion); // re-read right after a save, so the counter moves at once
+  const cloudBox = useOfflineBox(!IS_BOX_BUILD); // does this account have a box? (the online app only)
 
   const hasCampaign = !!q.campaign;
+  const wheelLost = useWheelLost({ agentConnected, hasCampaign, boxSeen: !IS_BOX_BUILD && !!(cloudBox.status && cloudBox.status.boxSeen) });
   const bump = () => setDataVersion((v) => v + 1);
 
   function openNewProspect() {
@@ -177,7 +185,7 @@ function PwaShell() {
     <PwaContext.Provider value={ctx}>
       <div className={`pw-shell${IS_BOX_BUILD ? ' pw-offline' : ''}`}>
         {IS_BOX_BUILD && <OfflineBar status={boxStatus} />}
-        {cloudLost && <CloudLostBanner />}
+        {!IS_BOX_BUILD && (cloudLost || wheelLost) && <CloudLostBanner reason={cloudLost ? 'cloud' : 'wheel'} />}
         <header className="pw-header">
           <div className="pw-header-top">
             <div className="pw-brand">
