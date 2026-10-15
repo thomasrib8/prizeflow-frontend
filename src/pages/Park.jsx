@@ -112,6 +112,70 @@ function AddWheelModal({ onClose, onCreated }) {
   );
 }
 
+const REASON_KEY = { 'end of rental': 'reasonEnd', reassigned: 'reasonReassigned', 'replaced by another wheel': 'reasonReplaced', 'account deleted': 'reasonDeleted' };
+
+// Machine history: every rental of the wheel, newest first — who had it, for how long, how it ended and the return inspection
+// filled in when it came back (stars, hardware, pack, photos) — then the day the wheel joined the park.
+function WheelHistory({ wheel, navigate }) {
+  const { t } = useTranslation('admin');
+  const rentals = wheel.history || [];
+  const inspections = wheel.inspections || [];
+  const toMs = (v) => (parseDT(v) ? parseDT(v).getTime() : null);
+  const inspectionOf = (h) => {
+    if (!h.released_at) return null;
+    const from = toMs(h.assigned_at); const to = toMs(h.released_at) + 60000;
+    return inspections.find((i) => i.owner && i.owner.id === h.owner_id && toMs(i.createdAt) >= from - 1000 && toMs(i.createdAt) <= to) || null;
+  };
+  const used = new Set();
+  const rows = rentals.map((h) => { const insp = inspectionOf(h); if (insp) used.add(insp.id); return { h, insp }; });
+  const loose = inspections.filter((i) => !used.has(i.id)); // inspections that match no rental (should not happen)
+  const rated = inspections.filter((i) => Number.isInteger(i.visualRating));
+  const avg = rated.length ? (rated.reduce((n, i) => n + i.visualRating, 0) / rated.length).toFixed(1) : null;
+  const days = (h) => { const a = toMs(h.assigned_at); const b = h.released_at ? toMs(h.released_at) : Date.now(); return Math.max(1, Math.round((b - a) / 86400000)); };
+
+  return (
+    <div style={{ marginTop: 12 }}>
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 14 }}>
+        {[[t('wheelOps.statRentals'), rentals.length], [t('wheelOps.statReturns'), inspections.length], [t('wheelOps.statAvg'), avg ? `${avg} / 3` : '—']].map(([k, v]) => (
+          <div key={k} style={{ flex: '1 1 120px', background: '#F4F7FD', borderRadius: 12, padding: '10px 12px' }}>
+            <div style={{ fontSize: 10.5, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{k}</div>
+            <div style={{ fontSize: 20, fontWeight: 800, color: '#0055F8', marginTop: 2 }}>{v}</div>
+          </div>
+        ))}
+      </div>
+
+      {rows.length === 0 && <p style={{ fontSize: 13, color: '#94A3B8', margin: 0 }}>{t('park.noHistory')}</p>}
+      {rows.map(({ h, insp }) => (
+        <div key={h.id} style={{ border: '1px solid #E3E9F7', borderRadius: 14, padding: '12px 14px', marginBottom: 10 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap', alignItems: 'baseline' }}>
+            <button className="link-button" style={{ fontWeight: 800, fontSize: 14 }} onClick={() => navigate(`/users/${h.owner_id}`)}>{h.company || h.name || h.email || h.owner_id}</button>
+            {h.released_at ? <Badge tone="neutral">{t(`wheelOps.${REASON_KEY[h.released_reason] || 'reasonEnd'}`)}</Badge> : <Badge tone="green">{t('park.historyCurrent')}</Badge>}
+          </div>
+          <div style={{ fontSize: 12.5, color: '#64748B', marginTop: 3 }}>
+            {h.released_at ? t('park.historyRange', { from: formatDT(h.assigned_at), to: formatDT(h.released_at) }) : t('park.historySince', { date: formatDT(h.assigned_at) })}
+            {' · '}{t('wheelOps.durationDays', { count: days(h) })}
+          </div>
+          {h.released_at && (
+            <div style={{ marginTop: 10, borderTop: '1px solid #EEF1F8', paddingTop: 10 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#002881', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>{t('wheelOps.returnReport')}</div>
+              {insp ? <InspectionList items={[insp]} /> : <p style={{ fontSize: 13, color: '#94A3B8', margin: 0 }}>{t('wheelOps.noReturnReport')}</p>}
+            </div>
+          )}
+        </div>
+      ))}
+
+      {loose.length > 0 && (
+        <div style={{ border: '1px solid #E3E9F7', borderRadius: 14, padding: '12px 14px', marginBottom: 10 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: '#002881', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>{t('wheelOps.otherReports')}</div>
+          <InspectionList items={loose} />
+        </div>
+      )}
+
+      <div style={{ fontSize: 12.5, color: '#64748B', borderTop: '1px solid #F1F5F9', paddingTop: 10 }}>{t('wheelOps.addedToPark', { date: formatDT(wheel.createdAt) })}</div>
+    </div>
+  );
+}
+
 function WheelDetailModal({ wheelId, wheels, onClose, onChanged }) {
   const { t } = useTranslation('admin');
   const navigate = useNavigate();
@@ -123,6 +187,7 @@ function WheelDetailModal({ wheelId, wheels, onClose, onChanged }) {
   const [busy, setBusy] = useState(false);
   const [users, setUsers] = useState([]);
   const [clientId, setClientId] = useState('');
+  const [tab, setTab] = useState('details');
 
   useEffect(() => { api.listUsers().then((rows) => setUsers(rows.filter((u) => u.status === 'approved'))).catch(() => {}); }, []);
 
@@ -168,7 +233,7 @@ function WheelDetailModal({ wheelId, wheels, onClose, onChanged }) {
 
   return (
     <div className="modal-overlay" onClick={onClose} style={{ zIndex: 300 }}>
-      <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ '--modal-w': '560px' }}>
+      <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ '--modal-w': '620px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
           <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#03041A' }}>{t('park.detailTitle', { serial: w?.serialNumber || '' })}</h3>
           <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 18, color: '#94A3B8', cursor: 'pointer' }}>✕</button>
@@ -184,6 +249,13 @@ function WheelDetailModal({ wheelId, wheels, onClose, onChanged }) {
                 : <span style={{ fontSize: 13, color: '#64748B' }}>{t('park.atDepot')}</span>}
             </div>
 
+            <div className="tabs" style={{ marginBottom: 4 }}>
+              <button type="button" className={`tab${tab === 'details' ? ' active' : ''}`} onClick={() => setTab('details')}>{t('wheelOps.tabDetails')}</button>
+              <button type="button" className={`tab${tab === 'history' ? ' active' : ''}`} onClick={() => setTab('history')}>{t('wheelOps.tabHistory')}</button>
+            </div>
+
+            {tab === 'details' && (
+              <>
             <div style={{ fontSize: 12, fontWeight: 700, color: '#03041A', margin: '14px 0 6px' }}>{t('park.identityTitle')}</div>
             <div style={{ fontSize: 13, color: '#64748B', lineHeight: 1.8 }}>
               <div>{t('park.modelLabel')} : <strong style={{ color: '#03041A' }}>{w.modelNumber}</strong></div>
@@ -238,26 +310,10 @@ function WheelDetailModal({ wheelId, wheels, onClose, onChanged }) {
               </>
             )}
 
-            <div style={{ fontSize: 12, fontWeight: 700, color: '#03041A', margin: '18px 0 6px' }}>{t('wheelOps.inspections')}</div>
-            <InspectionList items={w.inspections} />
-
-            <div style={{ fontSize: 12, fontWeight: 700, color: '#03041A', margin: '18px 0 6px' }}>{t('park.historyTitle')}</div>
-            {w.history.length === 0 ? (
-              <p style={{ fontSize: 13, color: '#94A3B8', margin: 0 }}>{t('park.noHistory')}</p>
-            ) : (
-              <div style={{ display: 'grid', gap: 6 }}>
-                {w.history.map((h) => (
-                  <div key={h.id} style={{ fontSize: 13, display: 'flex', justifyContent: 'space-between', gap: 12, borderBottom: '1px solid #F1F5F9', paddingBottom: 6 }}>
-                    <button className="link-button" onClick={() => navigate(`/users/${h.owner_id}`)}>{h.company || h.name || h.email || h.owner_id}</button>
-                    <span style={{ color: '#64748B', fontSize: 12, textAlign: 'right' }}>
-                      {h.released_at
-                        ? t('park.historyRange', { from: formatDT(h.assigned_at), to: formatDT(h.released_at) })
-                        : `${t('park.historySince', { date: formatDT(h.assigned_at) })} · ${t('park.historyCurrent')}`}
-                    </span>
-                  </div>
-                ))}
-              </div>
+              </>
             )}
+
+            {tab === 'history' && <WheelHistory wheel={w} navigate={navigate} />}
           </>
         )}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 18 }}>

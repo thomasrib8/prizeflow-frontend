@@ -1670,6 +1670,20 @@
     "labelBox": "Caja",
     "labelHint": "Formato 10 × 5 cm (ajuste la impresora a este tamaño). El código QR abre la página de la rueda, solo para administradores, y no contiene la clave de seguridad.",
     "labelColumn": "Etiqueta",
-    "labelShowBtn": "Mostrar"
+    "labelShowBtn": "Mostrar",
+    "tabDetails": "Detalles",
+    "tabHistory": "Historial de la máquina",
+    "statRentals": "Alquileres",
+    "statReturns": "Devoluciones revisadas",
+    "statAvg": "Estado medio al volver",
+    "reasonEnd": "Fin del alquiler",
+    "reasonReassigned": "Reasignada a otro cliente",
+    "reasonReplaced": "Sustituida por otra rueda",
+    "reasonDeleted": "Cuenta eliminada",
+    "durationDays": "{{count}} d",
+    "returnReport": "Informe de devolución",
+    "noReturnReport": "Sin informe de devolución para este alquiler.",
+    "otherReports": "Otros informes",
+    "addedToPark": "Rueda añadida al parque el {{date}}"
   }
 }

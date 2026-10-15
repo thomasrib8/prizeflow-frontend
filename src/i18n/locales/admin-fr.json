@@ -1670,6 +1670,20 @@
     "labelBox": "Boîtier",
     "labelHint": "Format 10 × 5 cm (réglez l'imprimante sur ce format). Le QR code ouvre la page de la roue, réservée aux administrateurs, et ne contient pas la clé de sécurité.",
     "labelColumn": "Étiquette",
-    "labelShowBtn": "Afficher"
+    "labelShowBtn": "Afficher",
+    "tabDetails": "Détails",
+    "tabHistory": "Historique machine",
+    "statRentals": "Locations",
+    "statReturns": "Retours contrôlés",
+    "statAvg": "État moyen au retour",
+    "reasonEnd": "Fin de location",
+    "reasonReassigned": "Réattribuée à un autre client",
+    "reasonReplaced": "Remplacée par une autre roue",
+    "reasonDeleted": "Compte supprimé",
+    "durationDays": "{{count}} j",
+    "returnReport": "Constat de retour",
+    "noReturnReport": "Aucun constat de retour pour cette location.",
+    "otherReports": "Autres constats",
+    "addedToPark": "Roue ajoutée au parc le {{date}}"
   }
 }

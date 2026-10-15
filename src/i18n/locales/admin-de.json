@@ -1670,6 +1670,20 @@
     "labelBox": "Box",
     "labelHint": "Format 10 × 5 cm (Drucker auf diese Größe einstellen). Der QR-Code öffnet die Seite des Rads, nur für Administratoren, und enthält nicht den Sicherheitsschlüssel.",
     "labelColumn": "Etikett",
-    "labelShowBtn": "Anzeigen"
+    "labelShowBtn": "Anzeigen",
+    "tabDetails": "Details",
+    "tabHistory": "Maschinenhistorie",
+    "statRentals": "Mieten",
+    "statReturns": "Geprüfte Rückgaben",
+    "statAvg": "Durchschnittlicher Zustand bei Rückgabe",
+    "reasonEnd": "Mietende",
+    "reasonReassigned": "Einem anderen Kunden neu zugewiesen",
+    "reasonReplaced": "Durch ein anderes Rad ersetzt",
+    "reasonDeleted": "Konto gelöscht",
+    "durationDays": "{{count}} T",
+    "returnReport": "Rückgabeprotokoll",
+    "noReturnReport": "Kein Rückgabeprotokoll für diese Miete.",
+    "otherReports": "Weitere Protokolle",
+    "addedToPark": "Rad am {{date}} in den Park aufgenommen"
   }
 }

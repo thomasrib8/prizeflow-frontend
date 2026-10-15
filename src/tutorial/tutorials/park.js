@@ -25,7 +25,11 @@ export default {
       },
     },
     { // 4
-      async run(c) { await c.point('.modal-card div[style*="display: grid"]', 2800); await c.click(lastBtn); await c.sleep(500); },
+      async run(c) {
+        await c.click('.modal-card .tab:last-child'); await c.sleep(900);
+        await c.point('.modal-card', 3000);
+        await c.click(lastBtn); await c.sleep(500);
+      },
     },
     { // 5
       async run(c) {
@@ -64,7 +68,7 @@ export default {
         { title: 'Votre parc', text: 'Le menu **Parc hardware** (administrateurs) liste chaque roue : **numéro de série**, état (**disponible**, **louée**, **maintenance**), **client**, connexion en direct et **boîtier** (son nom vient du numéro de série et ne change pas d’une location à l’autre).' },
         { title: 'La fiche d’une roue', text: 'Cliquez une ligne : identité complète (modèle, série, clé de sécurité), notes libres, mise en maintenance et **historique des locations**.' },
         { title: 'Attribuer à un client', text: 'Choisissez le client puis **Attribuer** : la roue passe en « louée ». Si le client avait déjà une roue elle retourne au dépôt ; si la roue était chez quelqu’un d’autre, SPARK vous demande de confirmer et lui retire.' },
-        { title: 'L’historique', text: 'Chaque attribution est conservée avec ses dates : vous savez toujours **qui a eu quelle roue et quand**.' },
+        { title: 'L’historique', text: 'L’onglet **Historique machine** garde chaque location avec ses dates : **qui a eu la roue**, combien de temps, comment elle s’est terminée, et le **constat de retour** (étoiles, photos, pack) rempli à chaque retour.' },
         { title: 'Fin de location', text: '**Fin de location** ouvre le **constat de retour** : état visuel de **0 à 3 étoiles**, **photos**, la roue fonctionne-t-elle, le pack est-il complet. Une fois validé, la roue retourne au dépôt (ou en **maintenance** si elle est abîmée, ne fonctionne pas ou si le pack est incomplet). Le client **garde son compte, ses campagnes et son CRM**, mais son boîtier reçoit l’**ordre de s’effacer** dès qu’il rejoint internet.' },
         { title: 'Ajouter une roue', text: '**Ajouter une roue** crée son identité (génération automatique, ou saisie de celle déjà écrite dans le Raspberry Pi) puis affiche son **étiquette 10 × 5 cm** à imprimer : le QR code ouvre la page de la roue, pour déclarer vite une fin de location ou une réattribution depuis un téléphone (administrateurs uniquement).' },
       ],
@@ -76,7 +80,7 @@ export default {
         { title: 'Your park', text: 'The **Hardware park** menu (administrators) lists every wheel: **serial number**, status (**available**, **rented**, **maintenance**), **client**, live connection and **box** (its name comes from the serial number and does not change between rentals).' },
         { title: 'A wheel’s record', text: 'Click a row: full identity (model, serial, security key), free notes, maintenance switch and **rental history**.' },
         { title: 'Assign to a client', text: 'Pick the client then **Assign**: the wheel becomes “rented”. If the client already had a wheel it goes back to the depot; if the wheel was with someone else, SPARK asks you to confirm and takes it from them.' },
-        { title: 'The history', text: 'Every assignment is kept with its dates: you always know **who had which wheel and when**.' },
+        { title: 'The history', text: 'The **Machine history** tab keeps every rental with its dates: **who had the wheel**, for how long, how it ended, and the **return inspection** (stars, photos, pack) filled in at each return.' },
         { title: 'End of rental', text: '**End of rental** opens the **return inspection**: visual condition from **0 to 3 stars**, **photos**, does the wheel work, is the pack complete. Once confirmed, the wheel goes back to the depot (or to **maintenance** if it is damaged, not working or the pack is incomplete). The client **keeps their account, campaigns and CRM**, but their box gets the **order to erase itself** as soon as it reaches the internet.' },
         { title: 'Add a wheel', text: '**Add a wheel** creates its identity (generated automatically, or typed from what is already written in the Raspberry Pi) then shows its **10 × 5 cm label** to print: the QR code opens the wheel’s page, to quickly record an end of rental or a reassignment from a phone (administrators only).' },
       ],
@@ -99,7 +103,7 @@ export default {
         },
         {
           "title": "El historial",
-          "text": "Cada asignación se conserva con sus fechas: siempre sabe **quién tuvo qué rueda y cuándo**."
+          "text": "La pestaña **Historial de la máquina** conserva cada alquiler con sus fechas: **quién tuvo la rueda**, cuánto tiempo, cómo terminó y el **informe de devolución** (estrellas, fotos, pack) rellenado en cada devolución."
         },
         {
           "title": "Fin del alquiler",
@@ -129,7 +133,7 @@ export default {
         },
         {
           "title": "Der Verlauf",
-          "text": "Jede Zuweisung wird mit ihren Daten aufbewahrt: Sie wissen immer, **wer welches Rad wann hatte**."
+          "text": "Der Tab **Maschinenhistorie** bewahrt jede Miete mit ihren Daten auf: **wer das Rad hatte**, wie lange, wie sie endete und das bei jeder Rückgabe ausgefüllte **Rückgabeprotokoll** (Sterne, Fotos, Paket)."
         },
         {
           "title": "Mietende",

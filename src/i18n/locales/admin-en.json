@@ -1670,6 +1670,20 @@
     "labelBox": "Box",
     "labelHint": "10 × 5 cm format (set the printer to this size). The QR code opens the wheel's page, admins only, and does not contain the security key.",
     "labelColumn": "Label",
-    "labelShowBtn": "Show"
+    "labelShowBtn": "Show",
+    "tabDetails": "Details",
+    "tabHistory": "Machine history",
+    "statRentals": "Rentals",
+    "statReturns": "Inspected returns",
+    "statAvg": "Average condition on return",
+    "reasonEnd": "End of rental",
+    "reasonReassigned": "Reassigned to another client",
+    "reasonReplaced": "Replaced by another wheel",
+    "reasonDeleted": "Account deleted",
+    "durationDays": "{{count}} d",
+    "returnReport": "Return inspection",
+    "noReturnReport": "No return inspection for this rental.",
+    "otherReports": "Other inspections",
+    "addedToPark": "Wheel added to the park on {{date}}"
   }
 }
