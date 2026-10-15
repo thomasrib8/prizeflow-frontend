@@ -6,7 +6,9 @@ import { Card, Button, Badge, EmptyState, GiftPill } from '../components/ui';
 import ProspectCard from '../components/ProspectCard';
 import EmailStatusBadge from '../components/EmailStatusBadge';
 import FilterGroup from '../components/FilterGroup';
+import FilterPanel from '../components/crm/FilterPanel';
 import { isPlaceholderEmail } from '../utils/placeholderEmail';
+import './crm.css';
 
 // 'no_gift' (a guest who skipped or cancelled) and 'manual' (a prospect a
 // rep added by hand, never played) aren't real reward statuses — they're
@@ -19,6 +21,19 @@ const REWARD_TONE = { active: 'blue', redeemed: 'green', expired: 'orange', canc
 const STATUS_TKEY = { no_gift: 'rewardStatusNoGift', manual: 'rewardStatusManual', voided: 'rewardStatusVoided', active: 'rewardStatusActive', redeemed: 'rewardStatusRedeemed', expired: 'rewardStatusExpired', cancelled: 'rewardStatusCancelled' };
 // Rows with no reward behind them, or a voided one: nothing to redeem/open.
 const NO_REWARD_STATUSES = ['no_gift', 'manual', 'voided'];
+
+// Left accent of a lead's card, by status; avatar colour from the name (Spark blues and a few warm accents)
+const CRM_ACCENT = { redeemed: '#1AA864', active: '#0055F8', expired: '#F59E0B', cancelled: '#E24B4A', voided: '#E24B4A', no_gift: '#94A3B8', manual: '#94A3B8' };
+const AVATARS = [['#0055F8', '#002881'], ['#00B0FF', '#0055F8'], ['#7AA8FF', '#0055F8'], ['#002881', '#0B1437'], ['#1AA864', '#0D9488'], ['#9333EA', '#4F46E5']];
+function avatarGradient(seed) {
+  let h = 0; for (const ch of String(seed || '')) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  const [a, b] = AVATARS[h % AVATARS.length];
+  return `linear-gradient(135deg, ${a}, ${b})`;
+}
+const initials = (r) => `${(r.first_name || '').trim().charAt(0)}${(r.last_name || '').trim().charAt(0)}` || (r.email || '?').charAt(0);
+
+const ratingKey = (r) => (r.lead_rating >= 1 && r.lead_rating <= 3 ? String(r.lead_rating) : 'none');
+const countBy = (rows, fn) => { const m = new Map(); for (const r of rows) { const k = fn(r); if (k != null && k !== '') m.set(k, (m.get(k) || 0) + 1); } return m; };
 
 // Distinct, non-empty values for a field across the CRM list, used to
 // populate each filter's checkboxes — only ever shows values that actually
@@ -58,6 +73,7 @@ export default function History() {
   const [filterStatuses, setFilterStatuses] = useState([]);
   const [filterSegments, setFilterSegments] = useState([]);
   const [filterNotes, setFilterNotes] = useState([]);
+  const [filterRatings, setFilterRatings] = useState([]); // '3' | '2' | '1' | 'none'
 
   function reloadRewards() {
     api.rewards().then(setRewards).catch(e => setError(e.message));
@@ -80,10 +96,30 @@ export default function History() {
     { value: 'without', label: t('history.noteWithoutOption') },
   ], [t]);
 
-  const activeFilterCount = filterCampaigns.length + filterGifts.length + filterStatuses.length + filterSegments.length + filterNotes.length;
+  const panelSections = useMemo(() => {
+    const rows = rewards || [];
+    const opts = (values, counts, labelOf = (v) => v) => values.map((v) => ({ value: v, label: labelOf(v), count: counts.get(v) || 0 }));
+    const star = (n) => '★'.repeat(n);
+    return [
+      { key: 'status', title: t('history.tableStatus'), options: opts(statusOptions.map((o) => o.value), countBy(rows, (r) => r.status), (v) => (STATUS_TKEY[v] ? t(`history.${STATUS_TKEY[v]}`) : v)), selected: filterStatuses, onToggle: (v) => setFilterStatuses((x) => toggleValue(x, v)) },
+      { key: 'rating', title: t('history.tablePotential'), options: opts(['3', '2', '1', 'none'], countBy(rows, ratingKey), (v) => (v === 'none' ? t('history.notRated') : star(Number(v)))), selected: filterRatings, onToggle: (v) => setFilterRatings((x) => toggleValue(x, v)) },
+      { key: 'campaign', title: t('history.tableCampaign'), options: opts(campaignOptions, countBy(rows, (r) => r.campaign_name)), selected: filterCampaigns, onToggle: (v) => setFilterCampaigns((x) => toggleValue(x, v)) },
+      { key: 'gift', title: t('common.gift'), options: opts(giftOptions, countBy(rows, (r) => r.gift_name)), selected: filterGifts, onToggle: (v) => setFilterGifts((x) => toggleValue(x, v)) },
+      { key: 'segment', title: t('common.segment'), options: opts(segmentOptions, countBy(rows, (r) => r.segment)), selected: filterSegments, onToggle: (v) => setFilterSegments((x) => toggleValue(x, v)) },
+      { key: 'note', title: t('common.noteLabel'), options: noteOptions.map((o) => ({ ...o, count: rows.filter((r) => (o.value === 'with' ? !!r.note : !r.note)).length })), selected: filterNotes, onToggle: (v) => setFilterNotes((x) => toggleValue(x, v)) },
+    ];
+  }, [rewards, t, statusOptions, campaignOptions, giftOptions, segmentOptions, noteOptions, filterStatuses, filterRatings, filterCampaigns, filterGifts, filterSegments, filterNotes]);
+
+  // the removable chips under the search box: one per chosen value
+  const activeChips = useMemo(() => {
+    const labelOf = (key, v) => (panelSections.find((s) => s.key === key).options.find((o) => o.value === v) || { label: v }).label;
+    return panelSections.flatMap((s) => s.selected.map((v) => ({ key: `${s.key}:${v}`, text: `${s.title} : ${labelOf(s.key, v)}`, remove: () => s.onToggle(v) })));
+  }, [panelSections]);
+
+  const activeFilterCount = filterCampaigns.length + filterGifts.length + filterStatuses.length + filterSegments.length + filterNotes.length + filterRatings.length;
 
   function clearFilters() {
-    setFilterCampaigns([]); setFilterGifts([]); setFilterStatuses([]); setFilterSegments([]); setFilterNotes([]);
+    setFilterCampaigns([]); setFilterGifts([]); setFilterStatuses([]); setFilterSegments([]); setFilterNotes([]); setFilterRatings([]);
   }
 
   const filteredRewards = useMemo(() => {
@@ -94,6 +130,7 @@ export default function History() {
       if (filterGifts.length && !filterGifts.includes(r.gift_name)) return false;
       if (filterStatuses.length && !filterStatuses.includes(r.status)) return false;
       if (filterSegments.length && !filterSegments.includes(r.segment)) return false;
+      if (filterRatings.length && !filterRatings.includes(ratingKey(r))) return false;
       if (filterNotes.length) {
         const matchesWith = filterNotes.includes('with') && !!r.note;
         const matchesWithout = filterNotes.includes('without') && !r.note;
@@ -106,7 +143,7 @@ export default function History() {
       }
       return true;
     });
-  }, [rewards, search, filterCampaigns, filterGifts, filterStatuses, filterSegments, filterNotes]);
+  }, [rewards, search, filterCampaigns, filterGifts, filterStatuses, filterSegments, filterNotes, filterRatings]);
 
   async function handleExport(format) {
     setExportBusy(true);
@@ -123,6 +160,7 @@ export default function History() {
       if (filterStatuses.length) params.statuses = filterStatuses;
       if (filterSegments.length) params.segments = filterSegments;
       if (filterNotes.length) params.note = filterNotes;
+      if (filterRatings.length) params.ratings = filterRatings;
     }
     try {
       if (tab === 'distributions') {
@@ -187,9 +225,23 @@ export default function History() {
               style={{ flex: 1, padding: '9px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13 }}
             />
             <Button variant="secondary" onClick={() => setFiltersOpen(true)} style={{ flexShrink: 0, whiteSpace: 'nowrap' }}>
-              {t('pwa.filters')}{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
+              {t('pwa.filters')}{activeFilterCount > 0 ? ` · ${activeFilterCount}` : ''}
             </Button>
           </div>
+          {rewards && rewards.length > 0 && (
+            <div className="crm-quick" style={{ marginTop: 12 }}>
+              <button type="button" className={`crm-qp${filterStatuses.length === 0 ? ' on' : ''}`} onClick={() => setFilterStatuses([])}>{t('history.filterAll')} <b>{rewards.length}</b></button>
+              {panelSections[0].options.map((o) => (
+                <button key={o.value} type="button" className={`crm-qp${filterStatuses.includes(o.value) ? ' on' : ''}`} onClick={() => panelSections[0].onToggle(o.value)}>{o.label} <b>{o.count}</b></button>
+              ))}
+            </div>
+          )}
+          {activeChips.length > 0 && (
+            <div className="crm-chips">
+              {activeChips.map((c) => <button key={c.key} type="button" className="crm-fchip" onClick={c.remove} title={t('history.removeFilter')}>{c.text}<i>×</i></button>)}
+              <button type="button" className="crm-fclear" onClick={clearFilters}>{t('pwa.clearAll')}</button>
+            </div>
+          )}
         </Card>
       )}
 
@@ -217,94 +269,59 @@ export default function History() {
         {tab === 'rewards' && (!rewards ? <p className="page-subtitle">{t('common.loading')}</p> :
           rewards.length === 0 ? <EmptyState title={t('history.noRewardsYet')} /> :
           filteredRewards.length === 0 ? <EmptyState title={t('history.noLeadsMatch')} /> : (
-            <table className="data-table">
-              <thead>
-                <tr><th>{t('history.tableRewardId')}</th><th>{t('history.tableName')}</th><th>{t('history.tableEmail')}</th><th>{t('common.gift')}</th><th>{t('history.tableCampaign')}</th><th>{t('history.tableStatus')}</th><th>{t('common.segment')}</th><th>{t('common.noteLabel')}</th><th></th></tr>
-              </thead>
-              <tbody>
-                {filteredRewards.map(r => (
-                  <tr key={r.id}>
-                    <td style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)' }}>{r.id}</td>
-                    <td>
-                      {r.campaign_id ? (
-                        <button
-                          onClick={() => setProspectGuest({ campaignId: r.campaign_id, email: r.email, firstName: r.first_name, lastName: r.last_name })}
-                          style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, color: 'var(--link)', textDecoration: 'underline' }}
-                        >{r.first_name} {r.last_name}</button>
-                      ) : (
-                        <span style={{ fontWeight: 500 }}>{r.first_name} {r.last_name}</span>
-                      )}
-                    </td>
-                    <td style={{ color: 'var(--text-muted)' }}>
-                      {isPlaceholderEmail(r.email) ? (
-                        <span style={{ fontSize: 11, fontWeight: 700, color: '#B45309', background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: '1px 8px' }}>
-                          {t('history.noEmailLabel')}{r.gift_on_hold ? t('history.giftOnHoldSuffix') : ''}
-                        </span>
-                      ) : (
-                        <EmailStatusBadge email={r.email} status={r.email_status} isCatchAll={r.email_is_catch_all} isDisposable={r.email_is_disposable} isRoleAccount={r.email_is_role_account} />
-                      )}
-                    </td>
-                    <td>{r.gift_name ? <GiftPill slotIndex={0} name={r.gift_name} /> : <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>{t('pwa.noGift')}</span>}</td>
-                    <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{r.campaign_name || '—'}</td>
-                    <td><Badge tone={REWARD_TONE[r.status] || 'neutral'}>{STATUS_TKEY[r.status] ? t(`history.${STATUS_TKEY[r.status]}`) : r.status}</Badge></td>
-                    <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{r.segment || '—'}</td>
-                    <td style={{ maxWidth: 180 }}>
-                      {r.note ? (
-                        <button
-                          onClick={() => setOpenNote(r.note)}
-                          style={{
-                            background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontFamily: 'inherit',
-                            fontSize: 12, color: '#334155', textAlign: 'left',
-                            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block', width: '100%',
-                          }}
-                        >{r.note}</button>
-                      ) : <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>—</span>}
-                    </td>
-                    <td>
+            <div className="crm-list">
+              <div className="crm-head">
+                <span>{t('history.tableName')}</span><span>{t('common.gift')}</span><span>{t('history.tablePotential')}</span><span>{t('history.tableStatus')}</span><span className="h-seg">{t('history.tableSegmentNote')}</span><span />
+              </div>
+              {filteredRewards.map((r) => {
+                const full = `${r.first_name || ''} ${r.last_name || ''}`.trim();
+                const open = r.campaign_id ? () => setProspectGuest({ campaignId: r.campaign_id, email: r.email, firstName: r.first_name, lastName: r.last_name }) : null;
+                const stop = (e) => e.stopPropagation();
+                return (
+                  <div key={r.id} className={`crm-row${open ? ' click' : ''}`} style={{ '--c': CRM_ACCENT[r.status] || '#94A3B8' }} onClick={open || undefined} title={r.id}>
+                    <div className="crm-who">
+                      <div className="crm-av" style={{ background: avatarGradient(full || r.email) }} aria-hidden="true">{initials(r)}</div>
+                      <div className="crm-who-text">
+                        {open
+                          ? <button type="button" className="crm-name" onClick={(e) => { stop(e); open(); }}>{full || '—'}</button>
+                          : <span className="crm-name plain">{full || '—'}</span>}
+                        <div className="crm-mail" onClick={stop}>
+                          {isPlaceholderEmail(r.email) ? (
+                            <span style={{ fontSize: 11, fontWeight: 700, color: '#B45309', background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: '1px 8px' }}>
+                              {t('history.noEmailLabel')}{r.gift_on_hold ? t('history.giftOnHoldSuffix') : ''}
+                            </span>
+                          ) : (
+                            <EmailStatusBadge email={r.email} status={r.email_status} isCatchAll={r.email_is_catch_all} isDisposable={r.email_is_disposable} isRoleAccount={r.email_is_role_account} />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="crm-gift">
+                      {r.gift_name ? <div className="crm-gift-name" title={r.gift_name}>{r.gift_name}</div> : <div className="crm-gift-none">{t('pwa.noGift')}</div>}
+                      <div className="crm-camp" title={r.campaign_name || ''}>{r.campaign_name || '—'}</div>
+                    </div>
+                    <div className="crm-stars" title={r.lead_rating ? `${r.lead_rating}/3` : ''}>
+                      {r.lead_rating >= 1 && r.lead_rating <= 3 ? <>{'★'.repeat(r.lead_rating)}<i>{'★'.repeat(3 - r.lead_rating)}</i></> : <span className="none">—</span>}
+                    </div>
+                    <div className="crm-status"><Badge tone={REWARD_TONE[r.status] || 'neutral'}>{STATUS_TKEY[r.status] ? t(`history.${STATUS_TKEY[r.status]}`) : r.status}</Badge></div>
+                    <div className="crm-seg">
+                      {r.segment ? <span className="crm-chip" title={r.segment}>{r.segment}</span> : null}
+                      {r.note ? <button type="button" className="crm-note" title={r.note} onClick={(e) => { stop(e); setOpenNote(r.note); }}>{r.note}</button> : (!r.segment ? <span style={{ color: '#CBD5E1', fontSize: 12 }}>—</span> : null)}
+                    </div>
+                    <div className="crm-act" onClick={stop}>
                       {!NO_REWARD_STATUSES.includes(r.status) && (
-                        <button
-                          className="btn btn-ghost btn-sm"
-                          disabled={lookupBusy}
-                          onClick={() => openRedeemPage(r.id)}
-                        >{t('history.openLink')}</button>
+                        <button type="button" className="crm-act-btn" disabled={lookupBusy} onClick={() => openRedeemPage(r.id)} title={t('history.openLink')} aria-label={t('history.openLink')}>↗</button>
                       )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           )
         )}
       </Card>
 
-      {filtersOpen && (
-        <div className="modal-overlay">
-          <div className="modal-card">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>{t('pwa.filters')}</h3>
-              {activeFilterCount > 0 && (
-                <button
-                  onClick={clearFilters}
-                  style={{ background: 'none', border: 'none', padding: 0, color: 'var(--link)', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
-                >{t('pwa.clearAll')}</button>
-              )}
-            </div>
-
-            <FilterGroup title={t('history.tableCampaign')} options={campaignOptions} selected={filterCampaigns}
-              onToggle={(v) => setFilterCampaigns(toggleValue(filterCampaigns, v))} />
-            <FilterGroup title={t('common.gift')} options={giftOptions} selected={filterGifts}
-              onToggle={(v) => setFilterGifts(toggleValue(filterGifts, v))} />
-            <FilterGroup title={t('history.tableStatus')} options={statusOptions} selected={filterStatuses}
-              onToggle={(v) => setFilterStatuses(toggleValue(filterStatuses, v))} />
-            <FilterGroup title={t('common.segment')} options={segmentOptions} selected={filterSegments}
-              onToggle={(v) => setFilterSegments(toggleValue(filterSegments, v))} />
-            <FilterGroup title={t('common.noteLabel')} options={noteOptions} selected={filterNotes}
-              onToggle={(v) => setFilterNotes(toggleValue(filterNotes, v))} />
-
-            <Button onClick={() => setFiltersOpen(false)} style={{ marginTop: 4 }}>{t('common.done')}</Button>
-          </div>
-        </div>
-      )}
+      {filtersOpen && <FilterPanel sections={panelSections} resultCount={filteredRewards.length} activeCount={activeFilterCount} onClear={clearFilters} onClose={() => setFiltersOpen(false)} />}
 
       {exportOpen && (
         <div className="modal-overlay">
@@ -328,6 +345,8 @@ export default function History() {
                   onToggle={(v) => setFilterSegments(toggleValue(filterSegments, v))} />
                 <FilterGroup title={t('common.noteLabel')} options={noteOptions} selected={filterNotes}
                   onToggle={(v) => setFilterNotes(toggleValue(filterNotes, v))} />
+                <FilterGroup title={t('history.tablePotential')} options={[{ value: '3', label: '★★★' }, { value: '2', label: '★★' }, { value: '1', label: '★' }, { value: 'none', label: t('history.notRated') }]} selected={filterRatings}
+                  onToggle={(v) => setFilterRatings(toggleValue(filterRatings, v))} />
               </>
             )}
 

@@ -547,7 +547,18 @@
     "rewardStatusCancelled": "Annulée",
     "rewardStatusVoided": "Annulé — pas d'email",
     "rewardStatusNoGift": "Pas de cadeau",
-    "rewardStatusManual": "Ajouté manuellement"
+    "rewardStatusManual": "Ajouté manuellement",
+    "tablePotential": "Potentiel",
+    "tableSegmentNote": "Segment et note",
+    "chosenCount": "{{count}} choisi(s)",
+    "filterSearch": "Rechercher…",
+    "noOptionMatch": "Aucun résultat",
+    "showMore": "Voir les {{count}} autres",
+    "showLess": "Réduire",
+    "seeResults": "Voir {{count}} lead(s)",
+    "filterAll": "Toutes",
+    "notRated": "Non noté",
+    "removeFilter": "Retirer ce filtre"
   },
   "launchCampaign": {
     "pageTitle": "Lancer la campagne",

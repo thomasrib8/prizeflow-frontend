@@ -547,7 +547,18 @@
     "rewardStatusCancelled": "Storniert",
     "rewardStatusVoided": "Storniert — keine E-Mail",
     "rewardStatusNoGift": "Kein Geschenk",
-    "rewardStatusManual": "Manuell hinzugefügt"
+    "rewardStatusManual": "Manuell hinzugefügt",
+    "tablePotential": "Potenzial",
+    "tableSegmentNote": "Segment und Notiz",
+    "chosenCount": "{{count}} gewählt",
+    "filterSearch": "Suchen…",
+    "noOptionMatch": "Kein Ergebnis",
+    "showMore": "Die anderen {{count}} anzeigen",
+    "showLess": "Weniger anzeigen",
+    "seeResults": "{{count}} Lead(s) anzeigen",
+    "filterAll": "Alle",
+    "notRated": "Nicht bewertet",
+    "removeFilter": "Diesen Filter entfernen"
   },
   "launchCampaign": {
     "pageTitle": "Kampagne starten",

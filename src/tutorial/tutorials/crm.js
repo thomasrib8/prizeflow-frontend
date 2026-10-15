@@ -9,26 +9,27 @@ export default {
   start: '/history',
   steps: [
     { // 1
-      async run(c) { await c.waitFor('table.data-table'); await c.sleep(500); await c.point('.tabs', 1600); await c.point('table.data-table', 2400); },
+      async run(c) { await c.waitFor('.crm-list'); await c.sleep(500); await c.point('.tabs', 1600); await c.point('.crm-list', 2400); },
     },
     { // 2
-      async run(c) { await c.type('.card input[placeholder]', 'martin'); await c.sleep(900); await c.point('table.data-table', 1400); await c.type('.card input[placeholder]', ''); },
+      async run(c) { await c.type('.card input[placeholder]', 'martin'); await c.sleep(900); await c.point('.crm-list', 1400); await c.type('.card input[placeholder]', ''); },
     },
     { // 3
       async run(c) {
         await c.click(() => document.querySelector('.card input[placeholder]')?.parentElement.querySelector('button'));
-        await c.waitFor('.modal-card'); await c.sleep(800);
-        await c.point('.modal-card', 2200);
-        await c.click('.modal-card input[type=checkbox]'); await c.sleep(900);
-        await c.click(() => [...document.querySelectorAll('.modal-card button')].pop()); await c.sleep(700);
+        await c.waitFor('.fp-panel'); await c.sleep(900);
+        await c.point('.fp-panel', 2400);
+        await c.click('.fp-panel .fp-pill'); await c.sleep(900);
+        await c.point('.fp-go', 1400);
+        await c.click('.fp-go'); await c.sleep(700);
       },
     },
     { // 4
-      async run(c) { await c.point('table.data-table', 2600); },
+      async run(c) { await c.point('.crm-list', 2600); },
     },
     { // 5
       async run(c) {
-        await c.click('table.data-table tbody tr button');
+        await c.click('.crm-row .crm-name');
         await c.waitFor('.pc'); await c.sleep(1500);
         await c.point('.pc-main', 2200);
       },
@@ -59,7 +60,7 @@ export default {
       steps: [
         { title: 'Tous vos contacts', text: 'Le **CRM** réunit les contacts de **toutes vos campagnes** : joueurs, contacts ajoutés à la main et ceux qui n’ont pas de cadeau. Chaque ligne indique le cadeau, la campagne, l’état de la remise, le segment et la note.' },
         { title: 'Rechercher', text: 'Tapez un nom, un e-mail, un cadeau ou un mot de la note : la liste se **filtre au fur et à mesure**.' },
-        { title: 'Les filtres', text: '**Filtres** combine campagne, cadeau, état, segment et note. Ne sont proposées que les valeurs qui existent dans vos données.' },
+        { title: 'Les filtres', text: 'Sous la recherche, les **pastilles d’état** filtrent d’un clic et chaque filtre actif devient une **étiquette** qu’on retire d’un clic. **Filtres** ouvre le panneau : état, **potentiel (étoiles)**, campagne, cadeau (avec recherche), segment et note, chaque valeur avec son **nombre de leads**, et « **Voir N leads** » en bas.' },
         { title: 'Lire le tableau', text: 'L’**état** dit si le cadeau est à remettre, remis, expiré ou annulé. Un **e-mail** peut porter un indicateur de qualité (valide, risqué…). Les contacts sans e-mail sont signalés.' },
         { title: 'Ouvrir une fiche', text: 'Cliquez sur un **nom** pour ouvrir sa fiche : coordonnées, réponses au formulaire, note de votre commercial. C’est le même écran que sur le téléphone, en plus large.' },
         { title: 'Le potentiel', text: 'Les **étoiles** (1 à 3) mesurent le potentiel commercial du contact. Un clic suffit pour le noter, vous pouvez aussi ajouter des **étiquettes** pour le retrouver.' },
@@ -74,7 +75,7 @@ export default {
       steps: [
         { title: 'All your contacts', text: 'The **CRM** gathers the contacts of **all your campaigns**: players, contacts added by hand and those without a gift. Each row shows the gift, the campaign, the hand-over status, the segment and the note.' },
         { title: 'Search', text: 'Type a name, e-mail, gift or a word from the note: the list **filters as you type**.' },
-        { title: 'Filters', text: '**Filters** combine campaign, gift, status, segment and note. Only values that exist in your data are offered.' },
+        { title: 'Filters', text: 'Under the search box, the **status pills** filter in one click and every active filter becomes a **chip** you remove with a click. **Filters** opens the panel: status, **potential (stars)**, campaign, gift (with search), segment and note, each value with its **number of leads**, and “**See N leads**” at the bottom.' },
         { title: 'Read the table', text: 'The **status** tells if the gift is to hand over, handed over, expired or cancelled. An **e-mail** can carry a quality badge (valid, risky…). Contacts without an e-mail are flagged.' },
         { title: 'Open a record', text: 'Click a **name** to open their record: contact details, answers to the form, your sales rep’s note. It is the same screen as on the phone, only wider.' },
         { title: 'Potential', text: 'The **stars** (1 to 3) measure the contact’s sales potential. One click rates it, and you can add **tags** to find it again.' },
@@ -97,7 +98,7 @@ export default {
         },
         {
           "title": "Los filtros",
-          "text": "**Filtros** combina campaña, regalo, estado, segmento y nota. Solo se ofrecen los valores que existen en sus datos."
+          "text": "Bajo la búsqueda, las **pastillas de estado** filtran con un clic y cada filtro activo se convierte en una **etiqueta** que se quita con un clic. **Filtros** abre el panel: estado, **potencial (estrellas)**, campaña, regalo (con búsqueda), segmento y nota, cada valor con su **número de leads**, y «**Ver N leads**» abajo."
         },
         {
           "title": "Leer la tabla",
@@ -139,7 +140,7 @@ export default {
         },
         {
           "title": "Die Filter",
-          "text": "**Filter** kombiniert Kampagne, Geschenk, Status, Segment und Notiz. Angeboten werden nur Werte, die in Ihren Daten vorkommen."
+          "text": "Unter der Suche filtern die **Status-Pillen** mit einem Klick, und jeder aktive Filter wird zu einem **Etikett**, das Sie mit einem Klick entfernen. **Filter** öffnet das Panel: Status, **Potenzial (Sterne)**, Kampagne, Geschenk (mit Suche), Segment und Notiz, jeder Wert mit seiner **Anzahl an Leads**, und unten „**N Leads anzeigen**“."
         },
         {
           "title": "Die Tabelle lesen",
