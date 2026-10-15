@@ -812,7 +812,16 @@
       "redeemTabVoucher": "Voucher",
       "customBadge": "Custom",
       "subjectLabel": "Subject",
-      "messageLabel": "Message"
+      "messageLabel": "Message",
+      "senderTitle": "Sender",
+      "senderDesc": "The name shown to the winner and the address their replies go to. The e-mail is still sent from SPARK's technical address, which makes sure it reaches the inbox.",
+      "senderNameLabel": "Sender name",
+      "senderNamePh": "E.g. Dupont & Co",
+      "replyToLabel": "Reply-to address",
+      "replyToInvalid": "This e-mail address is not valid.",
+      "senderPreviewFrom": "From:",
+      "senderPreviewReply": "Replies to:",
+      "senderNote": "Leave empty to keep “SPARK”. When the winner replies to the e-mail, the reply goes straight to your inbox."
     },
     "aiAssistant": {
       "title": "AI Assistant",

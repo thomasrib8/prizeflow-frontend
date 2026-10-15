@@ -812,7 +812,16 @@
       "redeemTabVoucher": "Bono",
       "customBadge": "Personalizado",
       "subjectLabel": "Asunto",
-      "messageLabel": "Mensaje"
+      "messageLabel": "Mensaje",
+      "senderTitle": "Remitente",
+      "senderDesc": "El nombre que ve el ganador y la dirección a la que llegan sus respuestas. El correo sale siempre de la dirección técnica de SPARK, lo que garantiza que llegue a la bandeja de entrada.",
+      "senderNameLabel": "Nombre del remitente",
+      "senderNamePh": "P. ej.: Casa Dupont",
+      "replyToLabel": "Dirección de respuesta",
+      "replyToInvalid": "Esta dirección de correo no es válida.",
+      "senderPreviewFrom": "De:",
+      "senderPreviewReply": "Respuestas a:",
+      "senderNote": "Déjelo vacío para mantener «SPARK». Cuando el ganador responde al correo, la respuesta llega directamente a su bandeja."
     },
     "aiAssistant": {
       "title": "Asistente IA",

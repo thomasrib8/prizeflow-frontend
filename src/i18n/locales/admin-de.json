@@ -812,7 +812,16 @@
       "redeemTabVoucher": "Gutschein",
       "customBadge": "Angepasst",
       "subjectLabel": "Betreff",
-      "messageLabel": "Nachricht"
+      "messageLabel": "Nachricht",
+      "senderTitle": "Absender",
+      "senderDesc": "Der Name, den der Gewinner sieht, und die Adresse, an die seine Antworten gehen. Die E-Mail wird weiterhin von der technischen Adresse von SPARK gesendet, damit sie sicher im Posteingang ankommt.",
+      "senderNameLabel": "Name des Absenders",
+      "senderNamePh": "Z. B. Maison Dupont",
+      "replyToLabel": "Antwortadresse",
+      "replyToInvalid": "Diese E-Mail-Adresse ist nicht gültig.",
+      "senderPreviewFrom": "Von:",
+      "senderPreviewReply": "Antworten an:",
+      "senderNote": "Leer lassen, um „SPARK“ beizubehalten. Wenn der Gewinner auf die E-Mail antwortet, landet die Antwort direkt in Ihrem Postfach."
     },
     "aiAssistant": {
       "title": "KI-Assistent",

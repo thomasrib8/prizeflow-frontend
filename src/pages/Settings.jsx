@@ -485,6 +485,11 @@ function EmailTemplatesModule() {
   const [logoSize, setLogoSize] = useState(null);
   const [brandingDefaults, setBrandingDefaults] = useState({ headerColor: '', footerText: '', logoSize: 120, min: 40, max: 220 });
   const [brandingSaving, setBrandingSaving] = useState(false);
+  const [senderName, setSenderName] = useState('');
+  const [replyTo, setReplyTo] = useState('');
+  const [senderAddress, setSenderAddress] = useState('');
+  const [senderSaving, setSenderSaving] = useState(false);
+  const [senderMsg, setSenderMsg] = useState('');
   const [brandingSaveMsg, setBrandingSaveMsg] = useState('');
 
   function loadLogoPreview() {
@@ -502,6 +507,7 @@ function EmailTemplatesModule() {
         setHasCustomLogo(res.hasCustomLogo);
         setGuestFormLogoEnabled(!!res.guestFormLogoEnabled);
         setHeaderColor(res.headerColor || '');
+        setSenderName(res.senderName || ''); setReplyTo(res.replyTo || ''); setSenderAddress(res.senderAddress || '');
         setFooterText(res.footerText || '');
         setLogoSize(res.logoSize || null);
         setBrandingDefaults({
@@ -554,6 +560,19 @@ function EmailTemplatesModule() {
       setError(err.message);
     } finally {
       setBrandingSaving(false);
+    }
+  }
+
+  async function handleSaveSender() {
+    setSenderSaving(true); setError(''); setSenderMsg('');
+    try {
+      await api.updateEmailTemplates({ templates: {}, senderName, replyTo });
+      setSenderMsg(t('common.saved'));
+      setTimeout(() => setSenderMsg(''), 2000);
+    } catch (err) {
+      setError(err.code === 'BAD_REPLY_TO' ? t('settings.emailTemplates.replyToInvalid') : err.message);
+    } finally {
+      setSenderSaving(false);
     }
   }
 
@@ -660,6 +679,31 @@ function EmailTemplatesModule() {
             </span>
           </label>
         )}
+      </Card>
+
+      <Card title={t('settings.emailTemplates.senderTitle')} className="mt-card">
+        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 16px', lineHeight: 1.6 }}>{t('settings.emailTemplates.senderDesc')}</p>
+        <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginBottom: 12 }}>
+          <div className="field" style={{ margin: 0, flex: 1, minWidth: 220 }}>
+            <label>{t('settings.emailTemplates.senderNameLabel')}</label>
+            <input type="text" value={senderName} maxLength={60} placeholder={t('settings.emailTemplates.senderNamePh')} onChange={(e) => setSenderName(e.target.value)}
+              style={{ width: '100%', padding: '10px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 14 }} />
+          </div>
+          <div className="field" style={{ margin: 0, flex: 1, minWidth: 220 }}>
+            <label>{t('settings.emailTemplates.replyToLabel')}</label>
+            <input type="email" value={replyTo} maxLength={120} placeholder="contact@votre-entreprise.fr" onChange={(e) => setReplyTo(e.target.value)}
+              style={{ width: '100%', padding: '10px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 14 }} />
+          </div>
+        </div>
+        <div style={{ background: '#F4F7FD', border: '1px solid #E3E9F7', borderRadius: 12, padding: '10px 14px', fontSize: 12.5, color: '#334155', lineHeight: 1.7, marginBottom: 14 }}>
+          <div><b>{t('settings.emailTemplates.senderPreviewFrom')}</b> {senderName || 'SPARK'} &lt;{senderAddress}&gt;</div>
+          <div><b>{t('settings.emailTemplates.senderPreviewReply')}</b> {replyTo || senderAddress}</div>
+        </div>
+        <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 14px', lineHeight: 1.5 }}>{t('settings.emailTemplates.senderNote')}</p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <Button onClick={handleSaveSender} disabled={senderSaving}>{senderSaving ? t('common.saving') : t('common.save')}</Button>
+          {senderMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{senderMsg}</span>}
+        </div>
       </Card>
 
       <Card title={t('settings.emailTemplates.brandingTitle')} className="mt-card">

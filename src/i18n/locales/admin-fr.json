@@ -812,7 +812,16 @@
       "redeemTabVoucher": "Bon",
       "customBadge": "Personnalisé",
       "subjectLabel": "Sujet",
-      "messageLabel": "Message"
+      "messageLabel": "Message",
+      "senderTitle": "Expéditeur",
+      "senderDesc": "Le nom qui s'affiche chez le gagnant et l'adresse où arrivent ses réponses. Le mail part toujours de l'adresse technique de SPARK, ce qui garantit qu'il arrive bien en boîte de réception.",
+      "senderNameLabel": "Nom de l'expéditeur",
+      "senderNamePh": "Ex. : Maison Dupont",
+      "replyToLabel": "Adresse de réponse",
+      "replyToInvalid": "Cette adresse e-mail n'est pas valide.",
+      "senderPreviewFrom": "De :",
+      "senderPreviewReply": "Réponses à :",
+      "senderNote": "Laissez vide pour garder « SPARK ». Quand le gagnant répond au mail, la réponse arrive directement dans votre boîte."
     },
     "aiAssistant": {
       "title": "Assistant IA",
