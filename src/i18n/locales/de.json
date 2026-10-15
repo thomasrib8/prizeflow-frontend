@@ -62,5 +62,10 @@
     "fieldRequired": "„{{label}}“ ist erforderlich",
     "alreadyPlayed": "Diese E-Mail-Adresse hat bereits an dieser Kampagne teilgenommen. Jeder Gast kann nur einmal spielen.",
     "noActiveCampaign": "Diese Kampagne läuft derzeit nicht."
+  },
+  "field": {
+    "searchPlaceholder": "Tippen zum Suchen…",
+    "searchNoResults": "Keine Ergebnisse",
+    "searchClear": "Löschen"
   }
 }

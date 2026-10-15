@@ -1,3 +1,6 @@
+import { useCallback } from 'react';
+import SearchSelect from './SearchSelect';
+import { deptLabel, norm, searchDepartments, searchRegions } from '../data/frGeo';
 // Renders the input control for one custom field definition (see
 // fieldTypes.js) — shared by the guest-facing pre-spin form
 // (GuestFlowScreen.jsx) and the sales rep's prospect form (ProspectCard.jsx,
@@ -14,6 +17,9 @@
 // and push the text to the far right: they keep their natural size, and the answer labels stay regular weight.
 const CHOICE_INPUT = { width: 'auto', padding: 0, margin: 0, flexShrink: 0, boxShadow: 'none' };
 const CHOICE_LABEL = { display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 400, margin: 0, cursor: 'pointer', color: 'var(--text-primary, #0F172A)' };
+
+const toResult = (o) => ({ value: o, label: o });
+const deptResult = (d) => ({ value: deptLabel(d), label: deptLabel(d), hint: d.region });
 
 export default function DynamicFieldInput({ field, value, onChange, selectPlaceholder = '— Select —' }) {
   const { label, fieldType, options, required } = field;
@@ -35,6 +41,15 @@ export default function DynamicFieldInput({ field, value, onChange, selectPlaceh
           <option value="">{selectPlaceholder}</option>
           {(options || []).map((o) => <option key={o} value={o}>{o}</option>)}
         </select>
+      </div>
+    );
+  }
+
+  if (fieldType === 'search_choice' || fieldType === 'fr_department' || fieldType === 'fr_region') {
+    return (
+      <div className="field">
+        <label>{label}{required ? ' *' : ''}</label>
+        <SearchField fieldType={fieldType} options={options} value={value} onChange={onChange} />
       </div>
     );
   }
@@ -82,4 +97,18 @@ export default function DynamicFieldInput({ field, value, onChange, selectPlaceh
       <input type={inputType} value={value || ''} onChange={(e) => onChange(e.target.value)} required={false} />
     </div>
   );
+}
+
+function SearchField({ fieldType, options, value, onChange }) {
+  const search = useCallback((q) => {
+    if (fieldType === 'fr_department') return searchDepartments(q).map(deptResult);
+    if (fieldType === 'fr_region') return searchRegions(q).map(toResult);
+    const s = norm(q);
+    const all = options || [];
+    if (!s) return all.map(toResult);
+    const starts = []; const inside = [];
+    for (const o of all) { const n = norm(o); if (n.startsWith(s)) starts.push(o); else if (n.includes(s)) inside.push(o); }
+    return [...starts, ...inside].map(toResult);
+  }, [fieldType, options]);
+  return <SearchSelect value={value || ''} onChange={onChange} search={search} />;
 }

@@ -190,6 +190,17 @@ export const api = {
 
   dashboard: (campaignId = 'all') => request(`/dashboard?campaignId=${encodeURIComponent(campaignId)}`),
   dashboardChart: (days = '7', campaignId = 'all') => request(`/dashboard/chart?days=${days}&campaignId=${encodeURIComponent(campaignId)}`),
+  // Custom dashboard of a campaign (modules chosen by the owner)
+  dashboardLayout: (campaignId) => request(`/dashboard/layout?campaignId=${encodeURIComponent(campaignId)}`),
+  saveDashboardLayout: (campaignId, layout) => request('/dashboard/layout', { method: 'PUT', body: { campaignId, layout } }),
+  resetDashboardLayout: (campaignId) => request(`/dashboard/layout?campaignId=${encodeURIComponent(campaignId)}`, { method: 'DELETE' }),
+  suggestDashboard: (campaignId, goal) => request('/dashboard/layout/suggest', { method: 'POST', body: { campaignId, goal } }),
+  dashboardTemplate: (campaignId, name) => request(`/dashboard/layout/template?campaignId=${encodeURIComponent(campaignId)}&name=${encodeURIComponent(name)}`),
+  dashboardModuleData: (campaignId, source) => request(`/dashboard/module-data?campaignId=${encodeURIComponent(campaignId)}&source=${encodeURIComponent(source)}`),
+  downloadDashboardPdf: (campaignId) => downloadFile(`/dashboard/export.pdf?campaignId=${encodeURIComponent(campaignId)}`),
+  dashboardProfitability: (campaignId) => request(`/dashboard/profitability?campaignId=${encodeURIComponent(campaignId)}`),
+  saveProfitability: (campaignId, settings) => request('/dashboard/profitability', { method: 'PUT', body: { campaignId, ...settings } }),
+  createBudgetField: (campaignId) => request('/dashboard/profitability/budget-field', { method: 'POST', body: { campaignId } }),
   dashboardTopRewards: (campaignId = 'all') => request(`/dashboard/top-rewards?campaignId=${encodeURIComponent(campaignId)}`),
   adminSequence: (id) => request(`/admin/campaigns/${id}/sequence`),
   adminTestCampaigns: () => request('/admin/test-campaigns'),

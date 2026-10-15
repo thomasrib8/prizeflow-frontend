@@ -22,7 +22,7 @@ const store = { inspections: [], campaigns: makeCampaignsForTutorial(DEMO_PARAMS
   flags: { guest: 'idle', queue: 'playing', joined: null, wheelLive: 'off', box: 'none' }, players: PLAYERS.map((p) => ({ ...p })),
   rewards: PLAYERS.map((p, i) => ({ id: p.rewardId, first_name: p.first_name, last_name: p.last_name, email: p.email, campaign_id: 'CAM-2026-0007', campaign_name: CAMPAIGN_NAME, segment: p.segment, note: p.note, email_status: 'valid', gift_on_hold: 0, gift_name: p.gift_name, status: i === 0 || i === 2 ? 'active' : i === 4 ? 'no_gift' : 'redeemed', created_at: `2026-10-12 1${i}:0${i}:00`, distributedBy: i > 2 || i === 1 ? 'Camille Martin' : null, launchedAt: `2026-10-12T1${i}:0${i}:00Z` })) };
 // The tutorial steps drive the scene through this (e.g. "the guest is now at the wheel"): window.__demo.set('guest', 'active')
-if (typeof window !== 'undefined') window.__demo = { set: (k, v) => { store.flags[k] = v; }, get: (k) => store.flags[k] };
+if (typeof window !== 'undefined') window.__demo = { set: (k, v) => { store.flags[k] = v; }, get: (k) => store.flags[k], layout: (name) => { store.dashLayout = demoTemplate(name); } };
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 const clone = (v) => JSON.parse(JSON.stringify(v));
 const campaignById = (id) => store.campaigns.find((c) => c.id === id);
@@ -42,6 +42,39 @@ function settingsPayload() {
     linkedinSearch: { enabled: false, total: 0, used: 0, remaining: 0, level: 'empty' },
   };
 }
+
+
+const demoDimensions = () => [
+  { key: `segment:${SEGMENT_CATEGORIES[0].name}`, kind: 'segment', label: SEGMENT_CATEGORIES[0].name, type: 'choice' },
+  { key: `segment:${SEGMENT_CATEGORIES[1].name}`, kind: 'segment', label: SEGMENT_CATEGORIES[1].name, type: 'choice' },
+  { key: 'guest:Département', kind: 'guest', label: 'Département', type: 'choice', fieldType: 'fr_department' }, { key: 'guest:Âge', kind: 'guest', label: 'Âge', type: 'number', fieldType: 'number' },
+  { key: 'rating', kind: 'builtin', label: 'rating', type: 'choice' }, { key: 'gift', kind: 'builtin', label: 'gift', type: 'choice' }, { key: 'day', kind: 'builtin', label: 'day', type: 'time' },
+];
+const demoTemplate = (name) => {
+  const k = (metric) => ({ type: 'kpi', w: 1, config: { metric } });
+  const ch = (source, viz, w = 2) => ({ type: 'chart', w, config: { source, viz } });
+  const seg0 = `segment:${SEGMENT_CATEGORIES[0].name}`;
+  const list = name === 'blank' ? [k('leads'), k('qualified')]
+    : name === 'consumer' ? [k('leads'), k('qualified'), k('gifts_remaining'), k('gifts_distributed'), { type: 'progress', w: 4 }, ch('day', 'line', 4), ch('guest:Âge', 'column'), ch('rating', 'donut'), ch('guest:Département', 'map', 4)]
+    : name === 'b2b' ? [k('leads'), k('qualified'), k('gifts_remaining'), k('gifts_distributed'), { type: 'progress', w: 4 }, ch('rating', 'donut'), ch(seg0, 'bar'), { type: 'profitability', w: 2 }, { type: 'summary', w: 2 }, { type: 'activity', w: 2 }]
+    : [k('leads'), k('qualified'), k('gifts_remaining'), k('gifts_distributed'), { type: 'progress', w: 4 }, { type: 'distribution', w: 2 }, { type: 'summary', w: 2 }, ch(seg0, 'bar', 4), { type: 'topRewards', w: 2 }, { type: 'activity', w: 2 }];
+  return list.map((w, i) => ({ ...w, id: `w_${name}_${i}` }));
+};
+
+const demoProfit = () => {
+  const st = store.profit || { costs: [{ label: '', amount: 8500 }], weighting: { enabled: true, pct: { 3: 60, 2: 30, 1: 10 } }, budgetField: 'Budget' };
+  const raw = 212000; const forecast = st.weighting.enabled ? 74300 : raw; const cost = st.costs.reduce((n, c) => n + (Number(c.amount) || 0), 0);
+  return { settings: { ...st, fields: ['Budget'] }, result: { leads: 218, qualified: 71, withBudget: 47, raw, forecast, cost, roiPct: cost ? Math.round((forecast - cost) / cost * 100) : null, costPerLead: cost ? Math.round(cost / 218) : null, costPerQualified: cost ? Math.round(cost / 71) : null, byStar: {} } };
+};
+const demoModuleData = (source) => {
+  if (source === 'guest:Département') return { total: 218, answered: 190, buckets: [['Rhône (69)', 34], ['Paris (75)', 27], ['Isère (38)', 17], ['Loire (42)', 13], ['Bouches-du-Rhône (13)', 12], ['Haute-Savoie (74)', 11], ['Gironde (33)', 9], ['Nord (59)', 8], ['Haute-Garonne (31)', 7], ['Ain (01)', 6], ['Savoie (73)', 5], ['La Réunion (974)', 4], ['Loire-Atlantique (44)', 5]].map(([label, count]) => ({ label, count })) };
+  if (source === 'guest:Âge') return { total: 218, answered: 205, buckets: [['18–29', 52], ['30–39', 71], ['40–49', 48], ['50–59', 24], ['60–69', 10]].map(([label, count]) => ({ label, count })) };
+  if (source === 'rating') return { total: 218, answered: 94, buckets: [{ label: '3★', count: 47 }, { label: '2★', count: 31 }, { label: '1★', count: 16 }] };
+  if (source === 'gift') return { total: 218, answered: 218, buckets: GIFTS.slice(0, 5).map((g, i) => ({ label: g, count: [60, 48, 40, 38, 32][i] })) };
+  if (source === 'day') return { total: 218, answered: 218, series: [['2026-10-06', 12], ['2026-10-07', 28], ['2026-10-08', 35], ['2026-10-09', 45], ['2026-10-10', 50], ['2026-10-11', 48]].map(([label, count]) => ({ label, count })) };
+  const cat = SEGMENT_CATEGORIES.find((c) => source === `segment:${c.name}`) || SEGMENT_CATEGORIES[0];
+  return { total: 218, answered: 164, buckets: cat.options.map((o, i) => ({ label: o.label, count: [58, 71, 35][i] || 20 })) };
+};
 
 function presentWheel(w) {
   const owner = w.ownerId ? store.clients.find((x) => x.id === w.ownerId) : null;
@@ -168,6 +201,16 @@ const ROUTES = [
       leads: { captured: sent, qualified: Math.round(sent * 0.45), segmented: Math.round(sent * 0.75), segmentBreakdown: SEGMENT_CATEGORIES[0].options.map((o, i) => ({ segment: o.label, count: [58, 71, 35][i] })) },
       recentActivity: store.players.slice(0, 6).map((p, i) => ({ gift_name: p.gift_name, slot_index: i, created_at: `2026-10-12 1${5 - i}:2${i}:00`, room_number: null })) };
   }],
+  // Custom dashboard (modules chosen per campaign): one in-memory layout, a few data sources, made-up numbers
+  ['POST', /^\/dashboard\/layout\/suggest$/, () => { const layout = demoTemplate('consumer'); const reasons = ['Le volume de leads, au premier coup d’œil', 'Ceux que vos commerciaux ont notés 3 étoiles', 'Pour savoir s’il faut réapprovisionner', 'Le rythme de distribution', 'L’avancement du plan de cadeaux', 'Leads par jour : vous voyez les heures fortes', 'Les tranches d’âge de vos visiteurs', 'La température de vos leads', 'D’où viennent vos visiteurs : cible vos prochains salons']; return { layout, notes: Object.fromEntries(layout.map((w, i) => [w.id, reasons[i] || ''])), summary: 'Un tableau de bord orienté visiteurs : volume, rythme, profil (âge, origine) et qualité des leads.' }; }],
+  ['GET', /^\/dashboard\/layout\/template$/, (m, b, q) => ({ layout: demoTemplate(q.get('name')) })],
+  ['GET', /^\/dashboard\/layout$/, () => ({ layout: store.dashLayout || demoTemplate('standard'), saved: !!store.dashLayout, dimensions: demoDimensions(), templates: ['standard', 'b2b', 'consumer', 'blank'], ai: true })],
+  ['PUT', /^\/dashboard\/layout$/, (m, body) => { store.dashLayout = body.layout.map((w, i) => ({ ...w, id: w.id || `w_${i}` })); return { layout: store.dashLayout, saved: true }; }],
+  ['DELETE', /^\/dashboard\/layout$/, () => { store.dashLayout = null; return { layout: demoTemplate('standard'), saved: false }; }],
+  ['GET', /^\/dashboard\/profitability$/, () => demoProfit()],
+  ['PUT', /^\/dashboard\/profitability$/, (m, body) => { store.profit = { costs: body.costs || [], weighting: body.weighting || { enabled: false, pct: { 3: 60, 2: 30, 1: 10 } }, budgetField: body.budgetField || 'Budget' }; return demoProfit(); }],
+  ['POST', /^\/dashboard\/profitability\/budget-field$/, () => demoProfit()],
+  ['GET', /^\/dashboard\/module-data$/, (m, b, q) => demoModuleData(q.get('source'))],
   ['GET', /^\/dashboard\/chart$/, () => [0, 1, 2, 3, 4, 5, 6].map((i) => ({ date: `${6 + i}/10`, planned: 1300, distributed: [0, 12, 40, 75, 120, 170, 218][i], remaining: 1300 - [0, 12, 40, 75, 120, 170, 218][i] }))],
   ['GET', /^\/dashboard\/top-rewards$/, () => makeSlots('x', undefined, 0.12).slice(0, 6).map((s) => ({ slotIndex: s.slot_index, giftName: s.gift_name, planned: s.stock_initial, distributed: s.stock_initial - s.stock_remaining, remaining: s.stock_remaining, pct: Math.round((s.stock_initial - s.stock_remaining) / s.stock_initial * 100) }))],
 

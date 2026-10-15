@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CHOICE_FIELD_TYPES } from './fieldTypes';
+import { CHOICE_FIELD_TYPES, PRESET_FIELD_TYPES } from './fieldTypes';
 import OptionsEditor from './OptionsEditor';
 
 const selectStyle = {
@@ -13,6 +14,23 @@ const selectStyle = {
 // types apply to which). `fields` is a flat array of
 // { label, fieldType, options: string[], required }; options only shown for
 // choice-type fields.
+// Paste a whole list (one value per line, e.g. copied from a spreadsheet column) instead of typing the options one by one
+function PasteList({ onImport }) {
+  const { t } = useTranslation('admin');
+  const [open, setOpen] = useState(false);
+  const [text, setText] = useState('');
+  if (!open) return <button type="button" onClick={() => setOpen(true)} style={{ background: 'none', border: 'none', color: 'var(--link, #002881)', fontSize: 12, fontWeight: 700, cursor: 'pointer', padding: '0 0 8px', fontFamily: 'inherit' }}>{t('builders.pasteListBtn')}</button>;
+  return (
+    <div style={{ marginBottom: 10 }}>
+      <textarea value={text} onChange={(e) => setText(e.target.value)} rows={5} placeholder={t('builders.pasteListPlaceholder')} style={{ width: '100%', boxSizing: 'border-box', padding: '8px 12px', border: '1px solid var(--border, #E2E8F0)', borderRadius: 8, fontSize: 13, fontFamily: 'inherit' }} />
+      <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
+        <button type="button" className="btn btn-sm btn-primary" onClick={() => { onImport([...new Set(text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean))]); setText(''); setOpen(false); }}>{t('builders.pasteListImport')}</button>
+        <button type="button" className="btn btn-sm btn-ghost" onClick={() => setOpen(false)}>{t('wheelOps.cancel')}</button>
+      </div>
+    </div>
+  );
+}
+
 export default function CampaignFieldsBuilder({ fields, onChange, fieldTypes, showRequired = false }) {
   const { t } = useTranslation('admin');
   function updateField(i, patch) {
@@ -67,8 +85,12 @@ export default function CampaignFieldsBuilder({ fields, onChange, fieldTypes, sh
                 <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-light, #94A3B8)', marginBottom: 8 }}>
                   {t('builders.optionsLabel')}
                 </div>
+                {f.fieldType === 'search_choice' && <PasteList onImport={(list) => updateField(i, { options: [...(f.options || []).filter((o) => o.trim()), ...list] })} />}
                 <OptionsEditor options={f.options || []} onChange={(options) => updateField(i, { options })} />
               </>
+            )}
+            {PRESET_FIELD_TYPES.has(f.fieldType) && (
+              <p style={{ margin: '0 0 0', fontSize: 12, color: 'var(--text-light, #64748B)' }}>{t(f.fieldType === 'fr_department' ? 'builders.presetDepartmentHint' : 'builders.presetRegionHint')}</p>
             )}
 
             {showRequired && (

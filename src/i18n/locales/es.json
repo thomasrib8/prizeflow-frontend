@@ -62,5 +62,10 @@
     "fieldRequired": "«{{label}}» es obligatorio",
     "alreadyPlayed": "Este email ya ha jugado en esta campaña. Cada participante solo puede jugar una vez.",
     "noActiveCampaign": "Esta campaña no está activa en este momento."
+  },
+  "field": {
+    "searchPlaceholder": "Escriba para buscar…",
+    "searchNoResults": "Sin resultados",
+    "searchClear": "Borrar"
   }
 }

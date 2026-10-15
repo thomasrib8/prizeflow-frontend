@@ -62,5 +62,10 @@
     "fieldRequired": "« {{label}} » est requis",
     "alreadyPlayed": "Cet email a déjà joué à cette campagne. Chaque participant ne peut jouer qu'une seule fois.",
     "noActiveCampaign": "Cette campagne n'est pas active pour le moment."
+  },
+  "field": {
+    "searchPlaceholder": "Tapez pour rechercher…",
+    "searchNoResults": "Aucun résultat",
+    "searchClear": "Effacer"
   }
 }

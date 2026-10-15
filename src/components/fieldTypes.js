@@ -13,6 +13,12 @@ export const SALES_FIELD_TYPES = [
   // Date + time in one value (an appointment) — the AI assistant can fill it
   // from a note like "mardi à 14h" (routes/campaigns.js SALES_FIELD_TYPES).
   { value: 'datetime', tKey: 'salesDateTime' },
+  // Long list searched by typing (the admin fills the list), and the two predefined French geographic lists
+  // A number the rep notes (e.g. the lead's budget): feeds the dashboard's profitability card
+  { value: 'number', tKey: 'salesNumber' },
+  { value: 'search_choice', tKey: 'salesSearchChoice' },
+  { value: 'fr_department', tKey: 'salesDepartment' },
+  { value: 'fr_region', tKey: 'salesRegion' },
 ];
 
 export const GUEST_FIELD_TYPES = [
@@ -25,6 +31,11 @@ export const GUEST_FIELD_TYPES = [
   { value: 'checkbox', tKey: 'guestCheckbox' },
   { value: 'date', tKey: 'guestDate' },
   { value: 'number', tKey: 'guestNumber' },
+  { value: 'search_choice', tKey: 'guestSearchChoice' },
+  { value: 'fr_department', tKey: 'guestDepartment' },
+  { value: 'fr_region', tKey: 'guestRegion' },
 ];
 
-export const CHOICE_FIELD_TYPES = new Set(['dropdown', 'single_choice', 'multi_choice']);
+export const CHOICE_FIELD_TYPES = new Set(['dropdown', 'single_choice', 'multi_choice', 'search_choice']);
+// Lists that are built in (no options to type): the answer is one of the 101 départements / 18 régions
+export const PRESET_FIELD_TYPES = new Set(['fr_department', 'fr_region']);

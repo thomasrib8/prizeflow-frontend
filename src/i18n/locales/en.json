@@ -62,5 +62,10 @@
     "fieldRequired": "\"{{label}}\" is required",
     "alreadyPlayed": "This email has already played in this campaign. Each guest can only spin once.",
     "noActiveCampaign": "This campaign isn't running right now."
+  },
+  "field": {
+    "searchPlaceholder": "Type to search…",
+    "searchNoResults": "No results",
+    "searchClear": "Clear"
   }
 }
