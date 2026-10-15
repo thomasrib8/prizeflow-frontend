@@ -8,6 +8,7 @@ import DynamicFieldInput from './DynamicFieldInput';
 import { prepareScanImage } from '../utils/scanImage';
 import LinkedInIcon from './linkedin/LinkedInIcon';
 import LinkedInSearchDialog from './linkedin/LinkedInSearchDialog';
+import { transcriptOf, joinNote } from '../utils/speech';
 import { useLinkedInStatus } from '../hooks/useLinkedInStatus';
 import { canSearchLinkedIn, shortLinkedInUrl } from '../utils/linkedin';
 
@@ -52,6 +53,9 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
   const [company, setCompany] = useState('');
   const [guestAnswers, setGuestAnswers] = useState({});
   const [note, setNote] = useState('');
+  const noteRef = useRef('');
+  noteRef.current = note;
+  const speechBaseRef = useRef('');
   const [leadRating, setLeadRating] = useState(null); // 1-3, null = not rated — never a default 1
   const [segments, setSegments] = useState({});
   const [tags, setTags] = useState('');
@@ -118,13 +122,9 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
     rec.lang = 'fr-FR';
     rec.onresult = (e) => {
       armSilenceTimer();
-      let transcript = '';
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        if (e.results[i].isFinal) transcript += e.results[i][0].transcript;
-      }
-      if (transcript.trim()) {
-        setNote((prev) => (prev ? `${prev} ${transcript.trim()}` : transcript.trim()));
-      }
+      // rebuilt from the whole session each time (Chrome on Android re-sends results: see utils/speech.js)
+      const spoken = transcriptOf(e.results);
+      if (spoken) setNote(joinNote(speechBaseRef.current, spoken));
     };
     rec.onspeechstart = armSilenceTimer;
     rec.onerror = () => { clearSilenceTimer(); setRecording(false); };
@@ -137,6 +137,7 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
   function startRecording() {
     if (!recognitionRef.current) return;
     try {
+      speechBaseRef.current = noteRef.current || '';
       recognitionRef.current.start();
       setRecording(true);
       armSilenceTimer();

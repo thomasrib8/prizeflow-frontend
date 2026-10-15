@@ -23,7 +23,9 @@
     "statusActive": "Active",
     "statusPaused": "En pause",
     "statusCompleted": "Terminée",
-    "statusArchived": "Archivée"
+    "statusArchived": "Archivée",
+    "confirm": "Confirmer",
+    "confirmTitle": "Confirmation"
   },
   "campaignForm": {
     "segmentationTitle": "Segmentation client",
@@ -705,7 +707,8 @@
     "aiRun": "Proposer",
     "aiRunning": "Réflexion en cours…",
     "aiSummaryTitle": "Proposition de l’IA :",
-    "aiClose": "Fermer"
+    "aiClose": "Fermer",
+    "tplConfirmBtn": "Confirmer le modèle"
   },
   "campaigns": {
     "pageTitle": "Campagnes",

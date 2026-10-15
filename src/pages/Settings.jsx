@@ -1,3 +1,4 @@
+import { useConfirm } from '../components/ConfirmDialog';
 import { SocialGlyph } from '../components/SocialIcons';
 import { getBoxUrl } from '../utils/offlineBox';
 import { useEffect, useState } from 'react';
@@ -138,6 +139,7 @@ function MfaCard() {
 
 function InformationModule() {
   const { t } = useTranslation('admin');
+  const [confirm, confirmDialog] = useConfirm();
   const { updateStoredUser } = useAuth();
   const [profile, setProfile] = useState(null);
   const [form, setForm] = useState({});
@@ -203,7 +205,7 @@ function InformationModule() {
   }
 
   async function handleRequestDeletion() {
-    if (!confirm(t('settings.information.deletionRequestConfirm'))) return;
+    if (!(await confirm(t('settings.information.deletionRequestConfirm'), { danger: true }))) return;
     setDeletionBusy(true);
     setError('');
     try {
@@ -222,6 +224,7 @@ function InformationModule() {
 
   return (
     <>
+      {confirmDialog}
       {error && <div className="error-banner">{error}</div>}
 
       <Card title={t('settings.information.yourInformationTitle')} className="mt-card">
@@ -810,6 +813,7 @@ const RETENTION_OPTIONS = [6, 12, 24, 36, 60];
 
 function PrivacyModule() {
   const { t } = useTranslation('admin');
+  const [confirm, confirmDialog] = useConfirm();
   const [form, setForm] = useState({ retentionMonths: '', privacyPolicyUrl: '', marketingConsentEnabled: false });
   const [saved, setSaved] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -877,7 +881,7 @@ function PrivacyModule() {
   }
 
   async function handleErase() {
-    if (!confirm(t('settings.privacy.eraseConfirm', { email: personEmail.trim() }))) return;
+    if (!(await confirm(t('settings.privacy.eraseConfirm', { email: personEmail.trim() }), { danger: true }))) return;
     setPersonBusy(true);
     setError('');
     setPersonMsg('');
@@ -897,6 +901,7 @@ function PrivacyModule() {
 
   return (
     <>
+      {confirmDialog}
       {error && <div className="error-banner">{error}</div>}
 
       <Card title={t('settings.privacy.formTitle')} className="mt-card">

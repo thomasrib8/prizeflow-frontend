@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { Card, Button, Badge, EmptyState, Stat } from '../components/ui';
+import { useConfirm } from '../components/ConfirmDialog';
 import ReturnForm from '../components/wheel/ReturnForm';
 import InspectionList from '../components/wheel/InspectionList';
 import WheelLabel from '../components/wheel/WheelLabel';
@@ -114,6 +115,7 @@ function AddWheelModal({ onClose, onCreated }) {
 function WheelDetailModal({ wheelId, wheels, onClose, onChanged }) {
   const { t } = useTranslation('admin');
   const navigate = useNavigate();
+  const [confirm, confirmDialog] = useConfirm();
   const [w, setW] = useState(null);
   const [notes, setNotes] = useState('');
   const [msg, setMsg] = useState('');
@@ -151,7 +153,7 @@ function WheelDetailModal({ wheelId, wheels, onClose, onChanged }) {
 
   async function assign() {
     const text = w.owner ? t('park.confirmReassign', { from: w.owner.company || w.owner.name || w.owner.email }) : null;
-    if (text && !window.confirm(text)) return;
+    if (text && !(await confirm(text, { danger: true, confirmLabel: t('park.reassignBtn') }))) return;
     setBusy(true); setError(''); setMsg('');
     try {
       await api.assignWheel(wheelId, clientId);
@@ -263,6 +265,7 @@ function WheelDetailModal({ wheelId, wheels, onClose, onChanged }) {
           <Button variant="ghost" onClick={onClose}>{t('park.closeBtn')}</Button>
         </div>
       </div>
+      {confirmDialog}
       {label && w && <WheelLabel wheel={w} onClose={() => setLabel(false)} />}
       {returning && w && (
         <div className="modal-overlay" onClick={(e) => e.stopPropagation()} style={{ zIndex: 330 }}>

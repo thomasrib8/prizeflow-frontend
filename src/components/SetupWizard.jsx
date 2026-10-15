@@ -7,6 +7,7 @@ import QRCode from 'qrcode';
 import { api } from '../api/client';
 import { IS_DEMO } from '../tutorial/demo';
 import { Button } from './ui';
+import { useConfirm } from './ConfirmDialog';
 import { SSID, SETUP_PAGE, wifiString } from './WifiQrSheet';
 import './wifi-qr.css';
 import './setup-wizard.css';
@@ -47,6 +48,7 @@ function Check({ ok, label, note }) {
 
 export default function SetupWizard({ userId, onClose, onChanged, inline = false }) {
   const { t } = useTranslation('admin');
+  const [confirm, confirmDialog] = useConfirm();
   const [n, setN] = useState(0);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -136,7 +138,7 @@ export default function SetupWizard({ userId, onClose, onChanged, inline = false
       try {
         if (mode === 'park') {
           if (!picked) { setError(t('setupWizard.pickFirst')); return; }
-          if (picked.owner && !window.confirm(t('park.confirmReassign', { from: owner(picked) }))) return;
+          if (picked.owner && !(await confirm(t('park.confirmReassign', { from: owner(picked) }), { danger: true, confirmLabel: t('park.reassignBtn') }))) { setBusy(false); return; }
           await api.assignWheel(picked.id, userId);
         } else if (mode === 'new') {
           if (newMode === 'gen') await api.generateWheelIdentity(userId, series);
@@ -183,6 +185,8 @@ export default function SetupWizard({ userId, onClose, onChanged, inline = false
   const phone = me && me.phone;
 
   return (
+    <>
+    {confirmDialog}
     <div className={inline ? 'sw-inline-wrap' : 'sw-overlay'} onMouseDown={inline ? undefined : (e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className={inline ? 'sw-card sw-card-inline' : 'sw-card'} role={inline ? undefined : 'dialog'} aria-modal={inline ? undefined : 'true'} aria-label={t('setupWizard.title')}>
         <div className="sw-head">
@@ -396,5 +400,6 @@ export default function SetupWizard({ userId, onClose, onChanged, inline = false
         </div>
       </div>
     </div>
+    </>
   );
 }

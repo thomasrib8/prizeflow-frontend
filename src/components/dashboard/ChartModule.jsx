@@ -8,6 +8,19 @@ import { CHART_COLORS } from './colors';
 import FranceMap from './FranceMap';
 import { recommendViz, allowedViz } from './recommend';
 
+const clip = (v, n) => { const t = String(v); return t.length > n ? `${t.slice(0, n - 1)}…` : t; };
+// Long labels (a gift's whole description) are cut with an ellipsis; the full text stays in the hover tooltip
+const Tick = (n) => function TruncTick({ x, y, payload }) {
+  return <text x={x} y={y} dy={4} textAnchor="end" fontSize={11} fill="#334155"><title>{payload.value}</title>{clip(payload.value, n)}</text>;
+};
+const BarTick = Tick(26);
+// % next to each slice of the donut; skipped on a thin slice (the hover tooltip always gives it)
+const sliceLabel = (cx, cy, midAngle, outerRadius, percent) => {
+  const RAD = Math.PI / 180; const r = outerRadius + 16;
+  const x = cx + r * Math.cos(-midAngle * RAD); const y = cy + r * Math.sin(-midAngle * RAD);
+  return <text x={x} y={y} fill="#334155" fontSize={12} fontWeight={700} textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central">{`${Math.round(percent * 100)}%`}</text>;
+};
+
 export const BUILTIN = { rating: 'dimRating', gift: 'dimGift', day: 'dimDay' };
 
 export function sourceTitle(source, dimensions, t) {
@@ -47,7 +60,7 @@ export default function ChartModule({ campaignId, config, dimensions, title, edi
       <ResponsiveContainer width="100%" height={200}>
         <BarChart data={rows} margin={{ top: 16, right: 8, left: -22, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#EEF1F8" vertical={false} />
-          <XAxis dataKey="label" tick={{ fontSize: 10, fill: '#64748B' }} tickLine={false} axisLine={false} />
+          <XAxis dataKey="label" tick={{ fontSize: 10, fill: '#64748B' }} tickLine={false} axisLine={false} tickFormatter={(v) => clip(v, 12)} />
           <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: '#94A3B8' }} tickLine={false} axisLine={false} />
           <Tooltip cursor={{ fill: '#F4F7FD' }} />
           <Bar dataKey="count" fill="#0055F8" radius={[6, 6, 0, 0]} maxBarSize={44} label={{ position: 'top', fontSize: 11, fill: '#334155' }} />
@@ -55,26 +68,26 @@ export default function ChartModule({ campaignId, config, dimensions, title, edi
       </ResponsiveContainer>
     );
   } else if (kind === 'donut') {
-    const tot = rows.reduce((s, r) => s + r.count, 0);
+    const tot = rows.reduce((q, r) => q + r.count, 0);
+    const few = rows.length <= 6; // too many slices: the % only shows when hovering a slice
     body = (
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-        <div style={{ width: 150, height: 150, flex: 'none' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <div style={{ width: '100%', height: 240 }}>
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
-              <Pie data={rows} dataKey="count" nameKey="label" innerRadius={42} outerRadius={70} paddingAngle={2} stroke="none">
+              <Pie data={rows} dataKey="count" nameKey="label" cx="50%" cy="50%" innerRadius={52} outerRadius={82} paddingAngle={2} stroke="none"
+                labelLine={false} label={few ? ({ cx, cy, midAngle, outerRadius, percent }) => (percent >= 0.04 ? sliceLabel(cx, cy, midAngle, outerRadius, percent) : null) : false}>
                 {rows.map((r, i) => <Cell key={r.label} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
               </Pie>
-              <Tooltip />
+              <Tooltip formatter={(v, name) => [`${v} · ${tot ? Math.round((v / tot) * 100) : 0}%`, name]} />
             </PieChart>
           </ResponsiveContainer>
         </div>
-        <div style={{ flex: 1, minWidth: 120, fontSize: 12, display: 'grid', gap: 5 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '6px 16px', fontSize: 12, marginTop: 2 }}>
           {rows.map((r, i) => (
-            <div key={r.label} style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-              <i style={{ width: 9, height: 9, borderRadius: 3, background: CHART_COLORS[i % CHART_COLORS.length], flex: 'none' }} />
-              <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.label}</span>
-              <b>{tot ? Math.round((r.count / tot) * 100) : 0}%</b>
-            </div>
+            <span key={r.label} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }} title={r.label}>
+              <i style={{ width: 9, height: 9, borderRadius: 3, background: CHART_COLORS[i % CHART_COLORS.length], flex: 'none' }} />{clip(r.label, 26)}
+            </span>
           ))}
         </div>
       </div>
@@ -96,7 +109,7 @@ export default function ChartModule({ campaignId, config, dimensions, title, edi
       <ResponsiveContainer width="100%" height={Math.max(150, rows.length * 30 + 24)}>
         <BarChart data={rows} layout="vertical" margin={{ top: 0, right: 24, left: 0, bottom: 0 }}>
           <XAxis type="number" hide allowDecimals={false} />
-          <YAxis type="category" dataKey="label" width={110} tick={{ fontSize: 11, fill: '#334155' }} tickLine={false} axisLine={false} />
+          <YAxis type="category" dataKey="label" width={170} tick={<BarTick />} tickLine={false} axisLine={false} interval={0} />
           <Tooltip cursor={{ fill: '#F4F7FD' }} />
           <Bar dataKey="count" fill="#0055F8" radius={[0, 6, 6, 0]} barSize={14} label={{ position: 'right', fontSize: 11, fill: '#334155' }} />
         </BarChart>

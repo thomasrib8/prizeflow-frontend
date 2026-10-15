@@ -10,6 +10,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api/client';
+import { transcriptOf, joinNote } from '../../utils/speech';
 import { IS_BOX_BUILD } from '../../utils/boxMode';
 import { isPlaceholderEmail } from '../../utils/placeholderEmail';
 import { canSearchLinkedIn, normalizeLinkedInUrl } from '../../utils/linkedin';
@@ -57,6 +58,7 @@ export function useProspectCard({ campaignId, guest, initialMode, onClose, onSav
   const [recording, setRecording] = useState(false);
   const recognitionRef = useRef(null);
   const silenceTimerRef = useRef(null);
+  const speechBaseRef = useRef(''); // the note as it was when the recording started
 
   const [salesFields, setSalesFields] = useState([]);
   const [guestFields, setGuestFields] = useState([]);
@@ -244,9 +246,9 @@ export function useProspectCard({ campaignId, guest, initialMode, onClose, onSav
     rec.lang = 'fr-FR';
     rec.onresult = (e) => {
       armSilenceTimer();
-      let transcript = '';
-      for (let i = e.resultIndex; i < e.results.length; i++) if (e.results[i].isFinal) transcript += e.results[i][0].transcript;
-      if (transcript.trim()) setNote((prev) => (prev ? `${prev} ${transcript.trim()}` : transcript.trim()));
+      // rebuilt from the whole session each time (Chrome on Android re-sends results: see utils/speech.js)
+      const spoken = transcriptOf(e.results);
+      if (spoken) setNote(joinNote(speechBaseRef.current, spoken));
     };
     rec.onspeechstart = armSilenceTimer;
     rec.onerror = () => { clearSilenceTimer(); setRecording(false); };
@@ -264,6 +266,7 @@ export function useProspectCard({ campaignId, guest, initialMode, onClose, onSav
 
   function startRecording() {
     if (!recognitionRef.current) return;
+    speechBaseRef.current = noteRef.current || '';
     try { recognitionRef.current.start(); setRecording(true); armSilenceTimer(); } catch { /* already started */ }
   }
   function stopRecording() {

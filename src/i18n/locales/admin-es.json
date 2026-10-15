@@ -23,7 +23,9 @@
     "statusActive": "Activa",
     "statusPaused": "Pausada",
     "statusCompleted": "Completada",
-    "statusArchived": "Archivada"
+    "statusArchived": "Archivada",
+    "confirm": "Confirmar",
+    "confirmTitle": "Confirmación"
   },
   "campaignForm": {
     "segmentationTitle": "Segmentación de clientes",
@@ -705,7 +707,8 @@
     "aiRun": "Proponer",
     "aiRunning": "Pensando…",
     "aiSummaryTitle": "Propuesta de la IA:",
-    "aiClose": "Cerrar"
+    "aiClose": "Cerrar",
+    "tplConfirmBtn": "Aplicar plantilla"
   },
   "campaigns": {
     "pageTitle": "Campañas",

@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { Card, Button, Badge, EmptyState } from '../components/ui';
 import WheelDiagnosticsRows from '../components/WheelDiagnosticsRows';
+import { useConfirm } from '../components/ConfirmDialog';
 import SetupWizard from '../components/SetupWizard';
 import ReturnForm from '../components/wheel/ReturnForm';
 import InspectionList from '../components/wheel/InspectionList';
@@ -22,6 +23,7 @@ export default function UserDetail() {
   const { t } = useTranslation('admin');
   const { id } = useParams();
   const navigate = useNavigate();
+  const [confirm, confirmDialog] = useConfirm();
   const MODULES = [
     { key: 'overview', label: t('userDetail.tabOverview') },
     { key: 'profile', label: t('userDetail.tabProfile') },
@@ -44,12 +46,6 @@ export default function UserDetail() {
   const [returnWheel, setReturnWheel] = useState(null);
   const boxNameOf = (serial) => (/(\d{6})$/.test(serial || '') ? `spark-box-${/(\d{6})$/.exec(serial)[1]}` : '');
   const [guideBusy, setGuideBusy] = useState(false);
-  const [series, setSeries] = useState('1');
-  const [wheelBusy, setWheelBusy] = useState(false);
-  const [showManualWheelEntry, setShowManualWheelEntry] = useState(false);
-  const [manualModelNumber, setManualModelNumber] = useState('');
-  const [manualSerialNumber, setManualSerialNumber] = useState('');
-  const [manualSecurityKey, setManualSecurityKey] = useState('');
 
   function load() {
     api.getUserDetail(id).then(setDetail).catch((e) => setError(e.message));
@@ -91,7 +87,7 @@ export default function UserDetail() {
   }
 
   async function handleDelete() {
-    if (!confirm(t('userDetail.deleteConfirmMessage'))) return;
+    if (!(await confirm(t('userDetail.deleteConfirmMessage'), { danger: true }))) return;
     setBusy(true);
     setError('');
     try {
@@ -113,57 +109,6 @@ export default function UserDetail() {
     await navigator.clipboard.writeText(detail.agent_token);
     setTokenCopied(true);
     setTimeout(() => setTokenCopied(false), 2000);
-  }
-
-  async function handleGenerateWheelIdentity() {
-    if (!series.trim()) return;
-    setWheelBusy(true);
-    setError('');
-    try {
-      const identity = await api.generateWheelIdentity(id, series.trim());
-      setDetail((prev) => ({
-        ...prev,
-        wheel_model_number: identity.wheel_model_number,
-        wheel_serial_number: identity.wheel_serial_number,
-        wheel_security_key: identity.wheel_security_key,
-        wheel_identity_generated_at: identity.wheel_identity_generated_at,
-        wheel_first_connected_at: identity.wheel_first_connected_at,
-      }));
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setWheelBusy(false);
-    }
-  }
-
-  async function handleRecordManualWheelIdentity() {
-    if (!manualModelNumber.trim() || !manualSerialNumber.trim() || !manualSecurityKey.trim()) return;
-    setWheelBusy(true);
-    setError('');
-    try {
-      const identity = await api.recordWheelIdentity(
-        id,
-        manualModelNumber.trim(),
-        manualSerialNumber.trim(),
-        manualSecurityKey.trim()
-      );
-      setDetail((prev) => ({
-        ...prev,
-        wheel_model_number: identity.wheel_model_number,
-        wheel_serial_number: identity.wheel_serial_number,
-        wheel_security_key: identity.wheel_security_key,
-        wheel_identity_generated_at: identity.wheel_identity_generated_at,
-        wheel_first_connected_at: identity.wheel_first_connected_at,
-      }));
-      setShowManualWheelEntry(false);
-      setManualModelNumber('');
-      setManualSerialNumber('');
-      setManualSecurityKey('');
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setWheelBusy(false);
-    }
   }
 
   async function handleAddNote(e) {
@@ -207,6 +152,7 @@ export default function UserDetail() {
       </div>
 
       {error && <div className="error-banner">{error}</div>}
+      {confirmDialog}
       {returnWheel && (
         <div className="modal-overlay" style={{ zIndex: 330 }}>
           <div className="modal-card" style={{ '--modal-w': '480px', background: '#F4F7FD' }}>
@@ -228,6 +174,15 @@ export default function UserDetail() {
         <>
           {/* Hardware assignment: what this client has right now, the step-by-step commissioning (inline, resumes where things stand),
               the returns history, and the technical details folded away. */}
+          <div className="ud-guide">
+            <div className="ud-guide-icon" aria-hidden="true">📄</div>
+            <div style={{ flex: 1, minWidth: 220 }}>
+              <div className="ud-guide-title">{t('userDetail.guideTitle')}</div>
+              <div className="ud-guide-desc">{t('userDetail.guideDesc')}</div>
+            </div>
+            <Button disabled={guideBusy} onClick={handleDownloadGuide}>{guideBusy ? t('userDetail.guideDownloading') : t('userDetail.guideBtn')}</Button>
+          </div>
+
           <div className="ud-hw-hero">
             <div>
               <div className="ud-hw-kicker">{t('userDetail.hwKicker')}</div>
@@ -247,7 +202,6 @@ export default function UserDetail() {
               {overview && detail.wheel_serial_number && (
                 <span className={`ud-hw-pill ${overview.wheel.connected ? 'on' : ''}`}>{overview.wheel.connected ? t('userDetail.onlineLabel') : t('userDetail.offlineLabel')}</span>
               )}
-              <button type="button" className="ud-hw-btn" disabled={guideBusy} onClick={handleDownloadGuide}>{guideBusy ? t('userDetail.guideDownloading') : t('userDetail.guideBtn')}</button>
               {detail.wheel_serial_number && <button type="button" className="ud-hw-btn danger" disabled={busy} onClick={handleEndRental}>{t('userDetail.endRentalBtn')}</button>}
             </div>
           </div>
@@ -285,85 +239,12 @@ export default function UserDetail() {
             )}
           </Card>
 
-          <Card title={t('userDetail.guideTitle')} className="mt-card">
-            <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px', lineHeight: 1.55 }}>{t('userDetail.guideDesc')}</p>
-            <Button variant="secondary" disabled={guideBusy} onClick={handleDownloadGuide}>
-              {guideBusy ? t('userDetail.guideDownloading') : t('userDetail.guideBtn')}
-            </Button>
-          </Card>
           </div>
 
           <BoxActivationCard userId={id} />
 
           <Card title={t('userDetail.wheelIdentityTitle')} className="mt-card">
-            <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px' }}>
-              {t('userDetail.wheelIdentityDesc')}
-            </p>
-            <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: detail.wheel_serial_number ? 16 : 0 }}>
-              <label style={{ fontSize: 13, color: '#64748B' }}>{t('userDetail.seriesLabel')}
-                <input
-                  value={series}
-                  onChange={(e) => setSeries(e.target.value)}
-                  style={{ marginLeft: 8, width: 60, padding: '8px 10px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13 }}
-                />
-              </label>
-              <Button variant="ghost" disabled={wheelBusy || !series.trim()} onClick={handleGenerateWheelIdentity}>
-                {wheelBusy ? t('userDetail.generatingLabel') : detail.wheel_serial_number ? t('userDetail.regenerateLabel') : t('userDetail.generateLabel')}
-              </Button>
-            </div>
-
-            {!showManualWheelEntry ? (
-              <button
-                type="button"
-                onClick={() => setShowManualWheelEntry(true)}
-                style={{ background: 'none', border: 'none', padding: 0, marginBottom: detail.wheel_serial_number ? 16 : 0, color: '#002881', textDecoration: 'underline', cursor: 'pointer', fontSize: 12, fontFamily: 'inherit' }}
-              >
-                {t('userDetail.manualEntryLink')}
-              </button>
-            ) : (
-              <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end', flexWrap: 'wrap', marginBottom: 16, padding: '12px', background: '#F8FAFC', borderRadius: 8 }}>
-                <label style={{ fontSize: 12, color: '#64748B' }}>{t('userDetail.modelNumberLabel')}
-                  <input
-                    value={manualModelNumber}
-                    onChange={(e) => setManualModelNumber(e.target.value)}
-                    placeholder="PF-ALPHA-V1"
-                    style={{ display: 'block', marginTop: 4, width: 130, padding: '7px 9px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13 }}
-                  />
-                </label>
-                <label style={{ fontSize: 12, color: '#64748B' }}>{t('userDetail.serialNumberLabel')}
-                  <input
-                    value={manualSerialNumber}
-                    onChange={(e) => setManualSerialNumber(e.target.value)}
-                    placeholder="PF260000152"
-                    style={{ display: 'block', marginTop: 4, width: 130, padding: '7px 9px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13 }}
-                  />
-                </label>
-                <label style={{ fontSize: 12, color: '#64748B' }}>{t('userDetail.securityKeyLabel')}
-                  <input
-                    value={manualSecurityKey}
-                    onChange={(e) => setManualSecurityKey(e.target.value)}
-                    placeholder="K8Q7F3"
-                    style={{ display: 'block', marginTop: 4, width: 100, padding: '7px 9px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13 }}
-                  />
-                </label>
-                <Button
-                  variant="ghost"
-                  disabled={wheelBusy || !manualModelNumber.trim() || !manualSerialNumber.trim() || !manualSecurityKey.trim()}
-                  onClick={handleRecordManualWheelIdentity}
-                >
-                  {wheelBusy ? t('common.saving') : t('common.save')}
-                </Button>
-                <button
-                  type="button"
-                  onClick={() => setShowManualWheelEntry(false)}
-                  style={{ background: 'none', border: 'none', color: '#94A3B8', cursor: 'pointer', fontSize: 12, fontFamily: 'inherit', padding: '8px 0' }}
-                >
-                  {t('common.cancel')}
-                </button>
-              </div>
-            )}
-
-            {detail.wheel_serial_number && (
+            {detail.wheel_serial_number ? (
               <div style={{ fontSize: 13, color: '#03041A', lineHeight: 1.9 }}>
                 <div>{t('userDetail.modelNumberDisplay')}<strong>{detail.wheel_model_number}</strong></div>
                 <div>{t('userDetail.serialNumberDisplay')}<strong>{detail.wheel_serial_number}</strong></div>
@@ -375,7 +256,7 @@ export default function UserDetail() {
                     : t('userDetail.notConfirmedYet')}
                 </div>
               </div>
-            )}
+            ) : <p style={{ fontSize: 13, color: '#64748B', margin: 0 }}>{t('userDetail.noWheelAssigned')}</p>}
           </Card>
           </details>
         </>

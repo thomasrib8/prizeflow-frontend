@@ -4,6 +4,7 @@ import { api } from '../api/client';
 import { Badge, Button, EmptyState, GiftPill, MiniBar } from '../components/ui';
 import DownloadAppModal from '../components/DownloadAppModal';
 import ChartModule from '../components/dashboard/ChartModule';
+import { useConfirm } from '../components/ConfirmDialog';
 import ProfitabilityCard from '../components/dashboard/ProfitabilityCard';
 import AddModuleModal from '../components/dashboard/AddModuleModal';
 import { allowedViz } from '../components/dashboard/recommend';
@@ -110,6 +111,7 @@ const newWidgetId = () => `w_${Math.random().toString(36).slice(2, 8)}`;
 export default function Dashboard() {
   const { t } = useTranslation('admin');
   const { isAdmin } = useAdmin();
+  const [confirm, confirmDialog] = useConfirm();
   const [data, setData] = useState(null);
   const [chart, setChart] = useState([]);
   const [topRewards, setTopRewards] = useState([]);
@@ -191,11 +193,11 @@ export default function Dashboard() {
   }
   async function applyTemplate(name) {
     if (!name) return;
-    if (!window.confirm(t('dashboard.tplConfirm'))) return;
+    if (!(await confirm(t('dashboard.tplConfirm'), { confirmLabel: t('dashboard.tplConfirmBtn') }))) return;
     try { const r = await api.dashboardTemplate(campaignId, name); setDraft(r.layout); } catch (e) { setMsg(e.message); }
   }
   async function resetStandard() {
-    if (!window.confirm(t('dashboard.resetConfirm'))) return;
+    if (!(await confirm(t('dashboard.resetConfirm'), { danger: true, confirmLabel: t('dashboard.resetBtn') }))) return;
     setBusy(true);
     try { const r = await api.resetDashboardLayout(campaignId); setInfo((x) => ({ ...x, layout: r.layout, saved: false })); setDraft(null); setMsg(t('dashboard.savedMsg')); }
     catch (e) { setMsg(e.message); } finally { setBusy(false); }
@@ -347,6 +349,7 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {confirmDialog}
       {showDownloadApp && <DownloadAppModal onClose={() => setShowDownloadApp(false)} />}
       {adding && <AddModuleModal campaignId={campaignId} dimensions={dimensions} isAdmin={isAdmin} onClose={() => setAdding(false)} onAdd={(w) => setDraft((d) => [...d, { ...w, id: newWidgetId() }])} />}
 
