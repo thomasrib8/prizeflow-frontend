@@ -1208,7 +1208,26 @@
     "aiDesc": "Lee la nota que un comercial escribe o dicta sobre un prospecto y rellena a partir de ella los segmentos, campos comerciales, estrellas y etiquetas de esta campaña. Lo que un comercial haya introducido a mano nunca se sobrescribe.",
     "aiToggleLabel": "Activar el asistente de IA para esta campaña",
     "editPageTitle": "Ajustes — {{name}}",
-    "editPageSubtitle": "Invitación a la reseña de Google, invitación a redes sociales y asistente de IA para esta campaña."
+    "editPageSubtitle": "Invitación a la reseña de Google, invitación a redes sociales y asistente de IA para esta campaña.",
+    "resultScreen": {
+      "title": "Pantalla final del juego",
+      "desc": "Personalice la pantalla que ve el jugador al recibir su regalo (teléfono y quiosco). Déjelo vacío para mantener la pantalla por defecto.",
+      "titleLabel": "Título",
+      "titleHint": "Escriba {firstName} para insertar el nombre del jugador (p. ej. «¡Enhorabuena {firstName}!»).",
+      "messageLabel": "Mensaje",
+      "customNoTranslate": "Su texto se muestra tal cual, en el idioma que escriba (no se traduce automáticamente).",
+      "emojiLabel": "Emoji",
+      "emojiNone": "Ninguno",
+      "showGift": "Mostrar el nombre del regalo ganado",
+      "showGiftHint": "Por defecto no se muestra el nombre del regalo: el jugador lo descubre en su correo.",
+      "buttonToggle": "Añadir un botón con un enlace",
+      "buttonLabel": "Texto del botón",
+      "buttonLabelPh": "Visite nuestra web",
+      "buttonUrl": "Enlace del botón",
+      "buttonHint": "El enlace debe empezar por https://. Este botón se suma a la reseña de Google y a las redes sociales si están activadas.",
+      "preview": "Vista previa",
+      "sampleGift": "Su regalo"
+    }
   },
   "pwaApp": {
     "navHome": "Inicio",

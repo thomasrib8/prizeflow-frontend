@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { Card } from './ui';
+import ResultScreenCard, { DEFAULT_RESULT_SCREEN, resultScreenFromCampaign } from './ResultScreenCard';
 import CreditsBar from './linkedin/CreditsBar';
 import LinkedInIcon from './linkedin/LinkedInIcon';
 import { FacebookIcon, InstagramIcon, LinkedinIcon, XIcon } from './SocialIcons';
@@ -21,6 +22,7 @@ export const DEFAULT_CAMPAIGN_SETTINGS = {
   socialMediaRequired: false,
   aiAssistantEnabled: false,
   linkedinSearchEnabled: false,
+  resultScreen: DEFAULT_RESULT_SCREEN,
 };
 
 // Maps a campaigns row (snake_case columns, as returned by the API) to this
@@ -32,6 +34,7 @@ export function settingsFromCampaign(c) {
     socialMediaRequired: !!c.social_media_required,
     aiAssistantEnabled: !!c.ai_assistant_enabled,
     linkedinSearchEnabled: !!c.linkedin_search_enabled,
+    resultScreen: resultScreenFromCampaign(c),
   };
 }
 
@@ -48,7 +51,7 @@ const warnStyle = { background: '#FFFBEB', border: '1px solid #FDE68A', borderRa
 // changed fields so the parent can merge them into its own state.
 // `compact` is the mobile (PWA) presentation: same fields and behaviour, but
 // without the explanatory paragraphs and with line icons instead of emoji.
-export default function CampaignSettingsForm({ value, onChange, compact = false }) {
+export default function CampaignSettingsForm({ value, onChange, compact = false, language = 'fr' }) {
   const { t } = useTranslation('admin');
   const [account, setAccount] = useState(null);
   const [aiConfigured, setAiConfigured] = useState(null);
@@ -165,6 +168,8 @@ export default function CampaignSettingsForm({ value, onChange, compact = false 
           <Link to="/settings" style={{ fontSize: 12, color: '#002881' }}>{t('campaignSettings.manageInSettingsLink')}</Link>
         </div>
       </Card>
+
+      <ResultScreenCard value={value.resultScreen} onChange={(resultScreen) => onChange({ resultScreen })} language={language} compact={compact} />
 
       <Card title={t('campaignSettings.aiTitle')} className="mt-card">
         {!compact && (

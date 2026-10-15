@@ -387,7 +387,7 @@ export default function NewCampaign() {
 
         {step === 4 && (
           <>
-            <CampaignSettingsForm value={settings} onChange={(patch) => setSettings((s) => ({ ...s, ...patch }))} />
+            <CampaignSettingsForm value={settings} language={language} onChange={(patch) => setSettings((s) => ({ ...s, ...patch }))} />
 
             <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
               <Button type="submit" disabled={saving}>{saving ? t('newCampaign.creatingBtn') : t('newCampaign.createCampaignBtn')}</Button>

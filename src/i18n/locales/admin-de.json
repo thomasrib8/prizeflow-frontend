@@ -1208,7 +1208,26 @@
     "aiDesc": "Liest die Notiz, die ein Vertriebsmitarbeiter zu einem Interessenten schreibt oder diktiert, und füllt daraus die Segmente, Vertriebsfelder, Sterne und Tags dieser Kampagne aus. Was ein Mitarbeiter von Hand eingetragen hat, wird nie überschrieben.",
     "aiToggleLabel": "KI-Assistent für diese Kampagne aktivieren",
     "editPageTitle": "Einstellungen — {{name}}",
-    "editPageSubtitle": "Einladung zur Google-Bewertung, Einladung zu sozialen Medien und KI-Assistent für diese Kampagne."
+    "editPageSubtitle": "Einladung zur Google-Bewertung, Einladung zu sozialen Medien und KI-Assistent für diese Kampagne.",
+    "resultScreen": {
+      "title": "Abschlussbildschirm",
+      "desc": "Passen Sie den Bildschirm an, den Spieler beim Erhalt ihres Geschenks sehen (Handy und Kiosk). Leer lassen, um den Standard zu behalten.",
+      "titleLabel": "Titel",
+      "titleHint": "Schreiben Sie {firstName}, um den Vornamen des Spielers einzufügen (z. B. „Glückwunsch {firstName}!“).",
+      "messageLabel": "Nachricht",
+      "customNoTranslate": "Ihr Text wird unverändert in der von Ihnen geschriebenen Sprache angezeigt (keine automatische Übersetzung).",
+      "emojiLabel": "Emoji",
+      "emojiNone": "Keines",
+      "showGift": "Namen des gewonnenen Geschenks anzeigen",
+      "showGiftHint": "Standardmäßig wird der Geschenkname nicht angezeigt: Der Spieler erfährt ihn per E-Mail.",
+      "buttonToggle": "Schaltfläche mit Link hinzufügen",
+      "buttonLabel": "Text der Schaltfläche",
+      "buttonLabelPh": "Unsere Website besuchen",
+      "buttonUrl": "Link der Schaltfläche",
+      "buttonHint": "Der Link muss mit https:// beginnen. Die Schaltfläche kommt zur Google-Bewertung und zu den sozialen Netzwerken hinzu, falls aktiviert.",
+      "preview": "Vorschau",
+      "sampleGift": "Ihr Geschenk"
+    }
   },
   "pwaApp": {
     "navHome": "Start",

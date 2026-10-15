@@ -4,6 +4,7 @@ import WheelSVG from './WheelSVG';
 import DynamicFieldInput from './DynamicFieldInput';
 import { API_BASE } from '../api/client';
 import { SocialGlyph } from './SocialIcons';
+import { resultCopy } from '../utils/resultScreen';
 
 // Brand names — never translated, "Facebook" reads the same in every
 // language this app supports.
@@ -263,6 +264,7 @@ export default function GuestFlowScreen({
         && campaignInfo?.googleReviewPosition !== 'before';
       const activeSocialLinks = SOCIAL_PLATFORMS.filter((p) => campaignInfo?.socialLinks?.[p.key]);
       const showSocialInvite = !!campaignInfo?.socialMediaRequired && activeSocialLinks.length > 0;
+      const copy = resultCopy(campaignInfo?.resultScreen, { firstName: status.firstName, giftName: result.giftName, t });
       return (
         <div style={fullScreenBase} key="done">
           {cornerCloseZone}
@@ -270,21 +272,33 @@ export default function GuestFlowScreen({
             @keyframes fadeIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
             @keyframes confetti { 0%{transform:translateY(0) rotate(0)} 100%{transform:translateY(-20px) rotate(15deg)} }
           `}</style>
-          <div style={{ fontSize: 56, animation: 'confetti 0.6s ease-in-out infinite alternate' }}>🎉</div>
+          <div style={{ fontSize: 56, animation: 'confetti 0.6s ease-in-out infinite alternate' }}>{copy.emoji}</div>
           <div style={{ color: 'white', maxWidth: 480, animation: 'fadeIn 0.4s ease' }}>
             <div style={{ fontSize: 13, fontWeight: 700, color: '#90DCFE', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 12 }}>
-              {status.firstName ? t('result.thankYouWithName', { name: status.firstName }) : t('result.thankYou')}
+              {copy.title}
             </div>
-            <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.01em', lineHeight: 1.4 }}>
-              {t('result.emailNotice')}
+            <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.01em', lineHeight: 1.4, whiteSpace: 'pre-line' }}>
+              {copy.message}
             </div>
-            {!!result.isTest && (
+            {(!!result.isTest || copy.gift) && (
               <div style={{ marginTop: 20, fontSize: 32, fontWeight: 900, letterSpacing: '-0.02em', color: '#90DCFE' }}>
                 {result.giftName}
               </div>
             )}
           </div>
           {!!result.isTest && <WheelSVG positionAngle={0} size={180} />}
+
+          {copy.button && (
+            <a
+              href={copy.button.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                marginTop: 12, background: 'white', color: '#002881', textDecoration: 'none', borderRadius: 10,
+                padding: '12px 24px', fontSize: 15, fontWeight: 700, fontFamily: 'inherit', display: 'inline-block', maxWidth: 420,
+              }}
+            >{copy.button.label}</a>
+          )}
 
           {/* Purely optional — the gift is already won, this never gates or
               delays anything. Google's review policies forbid conditioning

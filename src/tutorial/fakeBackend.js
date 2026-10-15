@@ -120,7 +120,7 @@ const ROUTES = [
   ['GET', /^\/account\/recent-players$/, () => clone(store.players)],
   // ---- What the guest sees (public routes) ----
   ['GET', /^\/guest\/([^/]+)\/campaign$/, () => ({
-    active: true, name: store.campaigns.find((c) => c.status === 'active')?.name || store.campaigns[0].name, isTest: false, googleReviewRequired: false, googleReviewPosition: 'after', socialMediaRequired: false,
+    active: true, name: store.campaigns.find((c) => c.status === 'active')?.name || store.campaigns[0].name, isTest: false, googleReviewRequired: false, googleReviewPosition: 'after', socialMediaRequired: false, resultScreen: store.flags.resultScreen || null,
     language: DEMO_PARAMS.lang, googleReviewUrl: '', privacyPolicyUrl: 'https://maison-dupont.fr/confidentialite', marketingConsentEnabled: true, companyName: COMPANY, guestFormLogoUrl: null, socialLinks: {},
     guestFields: clone(FIELDS.filter((f) => f.scope === 'guest')),
   })],

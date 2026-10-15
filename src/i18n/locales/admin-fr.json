@@ -1208,7 +1208,26 @@
     "aiDesc": "Lit la note qu'un commercial écrit ou dicte sur un prospect et remplit à partir d'elle les segments, champs commerciaux, étoiles et tags de cette campagne. Ce qu'un commercial a saisi à la main n'est jamais écrasé.",
     "aiToggleLabel": "Activer l'assistant IA pour cette campagne",
     "editPageTitle": "Paramètres — {{name}}",
-    "editPageSubtitle": "Invitation à l'avis Google, invitation aux réseaux sociaux et assistant IA pour cette campagne."
+    "editPageSubtitle": "Invitation à l'avis Google, invitation aux réseaux sociaux et assistant IA pour cette campagne.",
+    "resultScreen": {
+      "title": "Écran de fin de jeu",
+      "desc": "Personnalisez l'écran que le joueur voit quand il reçoit son cadeau (téléphone et borne kiosque). Laissez vide pour garder l'écran par défaut.",
+      "titleLabel": "Titre",
+      "titleHint": "Écrivez {firstName} pour insérer le prénom du joueur (ex. « Bravo {firstName} ! »).",
+      "messageLabel": "Message",
+      "customNoTranslate": "Votre texte s'affiche tel quel, dans la langue que vous écrivez (il n'est pas traduit automatiquement).",
+      "emojiLabel": "Emoji",
+      "emojiNone": "Aucun",
+      "showGift": "Afficher le nom du cadeau gagné",
+      "showGiftHint": "Par défaut, le nom du cadeau n'est pas affiché : le joueur le découvre dans son email.",
+      "buttonToggle": "Ajouter un bouton vers un lien",
+      "buttonLabel": "Texte du bouton",
+      "buttonLabelPh": "Découvrir notre site",
+      "buttonUrl": "Lien du bouton",
+      "buttonHint": "Le lien doit commencer par https://. Ce bouton s'ajoute à l'avis Google et aux réseaux sociaux s'ils sont activés.",
+      "preview": "Aperçu",
+      "sampleGift": "Votre cadeau"
+    }
   },
   "pwaApp": {
     "navHome": "Accueil",

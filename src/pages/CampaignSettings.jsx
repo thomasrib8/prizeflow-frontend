@@ -63,7 +63,7 @@ export default function CampaignSettings() {
       </div>
       {error && <div className="error-banner">{error}</div>}
 
-      <CampaignSettingsForm value={settings} onChange={(patch) => setSettings((s) => ({ ...s, ...patch }))} />
+      <CampaignSettingsForm value={settings} language={campaign?.language || "fr"} onChange={(patch) => setSettings((s) => ({ ...s, ...patch }))} />
 
       <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
         <Button disabled={saving} onClick={handleSave}>{saving ? t('common.saving') : t('editCampaignSettings.saveChangesBtn')}</Button>

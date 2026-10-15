@@ -1208,7 +1208,26 @@
     "aiDesc": "Reads the note a sales rep writes or dictates on a prospect and fills in this campaign's segments, sales fields, lead rating and tags from it. Anything a rep entered by hand is never overwritten.",
     "aiToggleLabel": "Enable the AI assistant for this campaign",
     "editPageTitle": "Settings — {{name}}",
-    "editPageSubtitle": "Google review invite, social media invite and AI assistant for this campaign."
+    "editPageSubtitle": "Google review invite, social media invite and AI assistant for this campaign.",
+    "resultScreen": {
+      "title": "End-of-game screen",
+      "desc": "Customize the screen players see when they receive their gift (phone and kiosk). Leave empty to keep the default screen.",
+      "titleLabel": "Title",
+      "titleHint": "Type {firstName} to insert the player's first name (e.g. “Well done {firstName}!”).",
+      "messageLabel": "Message",
+      "customNoTranslate": "Your text is shown as written, in the language you type (it is not translated automatically).",
+      "emojiLabel": "Emoji",
+      "emojiNone": "None",
+      "showGift": "Show the name of the gift won",
+      "showGiftHint": "By default the gift name is not shown: players discover it in their email.",
+      "buttonToggle": "Add a button linking to a page",
+      "buttonLabel": "Button text",
+      "buttonLabelPh": "Visit our website",
+      "buttonUrl": "Button link",
+      "buttonHint": "The link must start with https://. This button is added to the Google review and social networks if they are enabled.",
+      "preview": "Preview",
+      "sampleGift": "Your gift"
+    }
   },
   "pwaApp": {
     "navHome": "Home",
