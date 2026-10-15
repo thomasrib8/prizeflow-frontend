@@ -7,6 +7,8 @@ import ProspectCard from '../components/ProspectCard';
 import EmailStatusBadge from '../components/EmailStatusBadge';
 import FilterGroup from '../components/FilterGroup';
 import FilterPanel from '../components/crm/FilterPanel';
+import { SLOT_COLORS } from '../components/slotColors';
+import { IconGift } from '../components/pwa/PwaIcons';
 import { isPlaceholderEmail } from '../utils/placeholderEmail';
 import './crm.css';
 
@@ -248,21 +250,30 @@ export default function History() {
       <Card className={tab === 'rewards' ? 'mt-card' : ''}>
         {tab === 'distributions' && (!distributions ? <p className="page-subtitle">{t('common.loading')}</p> :
           distributions.length === 0 ? <EmptyState title={t('history.noDistributionsYet')} /> : (
-            <table className="data-table">
-              <thead>
-                <tr><th>{t('history.tableDate')}</th><th>{t('common.gift')}</th><th>{t('history.tableType')}</th><th>{t('history.tableOperator')}</th></tr>
-              </thead>
-              <tbody>
-                {distributions.map(d => (
-                  <tr key={d.id}>
-                    <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{formatDT(d.created_at)}</td>
-                    <td><GiftPill slotIndex={d.slot_index} name={d.gift_name || t('dashboard.caseLabel', { n: d.slot_index + 1 })} /></td>
-                    <td><Badge tone={d.is_demo ? 'neutral' : 'green'}>{d.is_demo ? t('history.demoBadge') : t('history.realBadge')}</Badge></td>
-                    <td style={{ color: 'var(--text-muted)' }}>{d.operator_name || '—'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div className="crm-list">
+              <div className="crm-head dist-grid">
+                <span>{t('history.tableDate')}</span><span>{t('common.gift')}</span><span>{t('history.tableType')}</span><span>{t('history.tableOperator')}</span>
+              </div>
+              {distributions.map((d) => {
+                const color = SLOT_COLORS[(d.slot_index || 0) % SLOT_COLORS.length];
+                const when = new Date(d.created_at.replace(' ', 'T') + 'Z');
+                const gift = d.gift_name || t('dashboard.caseLabel', { n: d.slot_index + 1 });
+                return (
+                  <div key={d.id} className="crm-row dist-grid" style={{ '--c': d.is_demo ? '#94A3B8' : '#1AA864' }}>
+                    <div className="dist-date">
+                      <b>{when.toLocaleDateString([], { day: '2-digit', month: '2-digit', year: 'numeric' })}</b>
+                      <span>{when.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                    <div className="dist-gift">
+                      <span className="dist-icon" style={{ background: `${color}22`, color }} aria-hidden="true"><IconGift width="16" height="16" /></span>
+                      <span className="crm-gift-name" title={gift}>{gift}</span>
+                    </div>
+                    <div className="dist-type"><Badge tone={d.is_demo ? 'neutral' : 'green'}>{d.is_demo ? t('history.demoBadge') : t('history.realBadge')}</Badge></div>
+                    <div className="dist-op" title={d.operator_name || ''}>{d.operator_name || '—'}</div>
+                  </div>
+                );
+              })}
+            </div>
           )
         )}
 

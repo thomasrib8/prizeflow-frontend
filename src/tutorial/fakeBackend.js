@@ -137,7 +137,7 @@ const ROUTES = [
 
   // ---- Redeeming gifts (Retrait) ----
   ['GET', /^\/rewards$/, () => clone(store.rewards.map((r) => ({ ...r, segment: (store.players.find((p) => p.rewardId === r.id) || {}).segment || '', note: (store.players.find((p) => p.rewardId === r.id) || {}).note || '' })))],
-  ['GET', /^\/distributions$/, () => []],
+  ['GET', /^\/distributions$/, () => store.players.slice(0, 8).map((p, i) => ({ id: `dist_${i}`, created_at: `2026-10-12 1${5 - Math.min(i, 5)}:${10 + i * 7}:00`, gift_name: p.gift_name, slot_index: i % 6, is_demo: i === 7 ? 1 : 0, operator_name: i % 3 === 0 ? 'Guest QR' : 'Frontend' }))],
   ['GET', /^\/rewards\/code\/([^/]+)\/redeem-code$/, () => ({ code: `signed-${store.rewards[0].id}` })],
   ['GET', /^\/rewards\/([^/]+)\/redeem-code$/, (m) => ({ code: `signed-${m[1]}` })],
   ['GET', /^\/redeem\/signed-([^/]+)$/, (m) => { const r = store.rewards.find((x) => x.id === m[1]); if (!r) fail('Reward not found'); return { status: r.status, giftName: r.gift_name, firstName: r.first_name, lastName: r.last_name, launchedAt: r.launchedAt, distributedBy: r.distributedBy, distributedAt: r.distributedBy ? '2026-10-12T15:20:00Z' : null }; }],
