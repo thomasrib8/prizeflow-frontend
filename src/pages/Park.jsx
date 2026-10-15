@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { Card, Button, Badge, EmptyState, Stat } from '../components/ui';
+import ReturnForm from '../components/wheel/ReturnForm';
+import InspectionList from '../components/wheel/InspectionList';
+import WheelLabel from '../components/wheel/WheelLabel';
 
 const STATUS_TONE = { available: 'blue', rented: 'green', maintenance: 'orange' };
 const STATUS_TKEY = { available: 'statusAvailable', rented: 'statusRented', maintenance: 'statusMaintenance' };
@@ -158,15 +161,8 @@ function WheelDetailModal({ wheelId, wheels, onClose, onChanged }) {
     } catch (e) { setError(e.message); } finally { setBusy(false); }
   }
 
-  async function release() {
-    if (!window.confirm(t('park.confirmRelease'))) return;
-    setBusy(true); setError(''); setMsg('');
-    try {
-      await api.endWheelRental(wheelId);
-      setMsg(t('park.releasedMsg'));
-      load(); onChanged();
-    } catch (e) { setError(e.message); } finally { setBusy(false); }
-  }
+  const [returning, setReturning] = useState(false);
+  const [label, setLabel] = useState(false);
 
   return (
     <div className="modal-overlay" onClick={onClose} style={{ zIndex: 300 }}>
@@ -234,11 +230,14 @@ function WheelDetailModal({ wheelId, wheels, onClose, onChanged }) {
                 {clientCurrent && <p style={{ fontSize: 12, color: '#B45309', margin: '6px 0 0' }}>{t('park.clientHasWheel', { serial: clientCurrent.serialNumber })}</p>}
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 8, flexWrap: 'wrap' }}>
                   <Button size="sm" disabled={busy || !clientId} onClick={assign}>{w.owner ? t('park.reassignBtn') : t('park.assignBtn')}</Button>
-                  {w.owner && <Button size="sm" variant="ghost" disabled={busy} onClick={release}>{t('park.releaseBtn')}</Button>}
+                  {w.owner && <Button size="sm" variant="ghost" disabled={busy} onClick={() => setReturning(true)}>{t('park.releaseBtn')}</Button>}
                 </div>
                 <p style={{ fontSize: 12, color: '#64748B', margin: '8px 0 0' }}>{t('park.afterAssignHint')}</p>
               </>
             )}
+
+            <div style={{ fontSize: 12, fontWeight: 700, color: '#03041A', margin: '18px 0 6px' }}>{t('wheelOps.inspections')}</div>
+            <InspectionList items={w.inspections} />
 
             <div style={{ fontSize: 12, fontWeight: 700, color: '#03041A', margin: '18px 0 6px' }}>{t('park.historyTitle')}</div>
             {w.history.length === 0 ? (
@@ -259,10 +258,24 @@ function WheelDetailModal({ wheelId, wheels, onClose, onChanged }) {
             )}
           </>
         )}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 18 }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 18 }}>
+          {w && <Button variant="ghost" onClick={() => setLabel(true)}>{t('wheelOps.labelBtn')}</Button>}
           <Button variant="ghost" onClick={onClose}>{t('park.closeBtn')}</Button>
         </div>
       </div>
+      {label && w && <WheelLabel wheel={w} onClose={() => setLabel(false)} />}
+      {returning && w && (
+        <div className="modal-overlay" onClick={(e) => e.stopPropagation()} style={{ zIndex: 330 }}>
+          <div className="modal-card" style={{ '--modal-w': '480px', background: '#F4F7FD' }}>
+            <h3 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 800, color: '#03041A' }}>{t('wheelOps.returnTitle')} · {w.serialNumber}</h3>
+            <ReturnForm
+              wheel={w}
+              onCancel={() => setReturning(false)}
+              onDone={(r) => { setReturning(false); setMsg(r.maintenance ? t('wheelOps.doneMaintenance') : t('park.releasedMsg')); load(); onChanged(); }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -274,6 +287,7 @@ export default function Park() {
   const [error, setError] = useState('');
   const [adding, setAdding] = useState(false);
   const [openId, setOpenId] = useState(null);
+  const [labelOf, setLabelOf] = useState(null);
 
   function load() { api.listWheels().then(setWheels).catch((e) => setError(e.message)); }
   useEffect(() => {
@@ -343,7 +357,8 @@ export default function Park() {
         </Card>
       )}
 
-      {adding && <AddWheelModal onClose={() => setAdding(false)} onCreated={() => { setAdding(false); load(); }} />}
+      {adding && <AddWheelModal onClose={() => setAdding(false)} onCreated={(w) => { setAdding(false); setLabelOf(w); load(); }} />}
+      {labelOf && <WheelLabel wheel={labelOf} onClose={() => setLabelOf(null)} />}
       {openId && <WheelDetailModal wheelId={openId} wheels={wheels} onClose={() => setOpenId(null)} onChanged={load} />}
     </div>
   );

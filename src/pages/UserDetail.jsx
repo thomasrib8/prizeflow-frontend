@@ -7,6 +7,8 @@ import { api } from '../api/client';
 import { Card, Button, Badge, EmptyState } from '../components/ui';
 import WheelDiagnosticsRows from '../components/WheelDiagnosticsRows';
 import SetupWizard from '../components/SetupWizard';
+import ReturnForm from '../components/wheel/ReturnForm';
+import InspectionList from '../components/wheel/InspectionList';
 
 const STATUS_TONE = { pending: 'orange', approved: 'green', deactivated: 'red' };
 const STATUS_TKEY = { pending: 'userStatusPending', approved: 'userStatusApproved', deactivated: 'userStatusDeactivated' };
@@ -38,7 +40,9 @@ export default function UserDetail() {
   const [busy, setBusy] = useState(false);
   const [tokenCopied, setTokenCopied] = useState(false);
   const [showSetupHelp, setShowSetupHelp] = useState(false);
-  const [showWizard, setShowWizard] = useState(false);
+  const [inspections, setInspections] = useState([]);
+  const [returnWheel, setReturnWheel] = useState(null);
+  const boxNameOf = (serial) => (/(\d{6})$/.test(serial || '') ? `spark-box-${/(\d{6})$/.exec(serial)[1]}` : '');
   const [guideBusy, setGuideBusy] = useState(false);
   const [series, setSeries] = useState('1');
   const [wheelBusy, setWheelBusy] = useState(false);
@@ -52,47 +56,20 @@ export default function UserDetail() {
     api.getUserOverview(id).then(setOverview).catch((e) => setError(e.message));
     api.getUserActivity(id).then(setActivity).catch((e) => setError(e.message));
     api.getUserNotes(id).then(setNotes).catch((e) => setError(e.message));
+    api.wheelInspections(id).then(setInspections).catch(() => {});
   }
 
   useEffect(load, [id]);
 
   // End of rental from the client's page: same effect as in the wheel park (wheel back to the depot, box ordered to erase itself).
   async function handleEndRental() {
-    if (!window.confirm(t('userDetail.endRentalConfirm'))) return;
     setBusy(true);
     setError('');
     try {
       const all = await api.listWheels();
       const w = all.find((x) => x.owner && x.owner.id === id);
       if (!w) throw new Error(t('userDetail.noWheelAssigned'));
-      await api.endWheelRental(w.id);
-      load();
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function handleStatus(status) {
-    setBusy(true);
-    setError('');
-    try {
-      await api.setUserStatus(id, status);
-      setDetail((prev) => ({ ...prev, status }));
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function handleRole(role) {
-    setBusy(true);
-    setError('');
-    try {
-      await api.setUserRole(id, role);
-      setDetail((prev) => ({ ...prev, role }));
+      setReturnWheel(w); // the return inspection ends the rental (see components/wheel/ReturnForm)
     } catch (err) {
       setError(err.message);
     } finally {
@@ -223,15 +200,21 @@ export default function UserDetail() {
           <p className="page-subtitle">{detail.company || t('userDetail.noCompanyOnFile')} · {detail.email}</p>
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-          <Button onClick={() => setShowWizard(true)}>{t('userDetail.setupWizardBtn')}</Button>
-          {detail.wheel_serial_number && <Button variant="ghost" disabled={busy} onClick={handleEndRental}>{t('userDetail.endRentalBtn')}</Button>}
+          <Button onClick={() => { setModule('profile'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>{t('userDetail.setupWizardBtn')}</Button>
           <Badge tone={STATUS_TONE[detail.status]}>{t(`users.${STATUS_TKEY[detail.status]}`)}</Badge>
           <Badge tone={detail.role === 'admin' ? 'blue' : 'neutral'}>{detail.role === 'admin' ? t('users.roleAdmin') : t('users.roleOperator')}</Badge>
         </div>
       </div>
 
       {error && <div className="error-banner">{error}</div>}
-      {showWizard && <SetupWizard userId={id} onClose={() => { setShowWizard(false); load(); }} onChanged={load} />}
+      {returnWheel && (
+        <div className="modal-overlay" style={{ zIndex: 330 }}>
+          <div className="modal-card" style={{ '--modal-w': '480px', background: '#F4F7FD' }}>
+            <h3 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 800, color: '#03041A' }}>{t('wheelOps.returnTitle')} · {returnWheel.serialNumber}</h3>
+            <ReturnForm wheel={returnWheel} onCancel={() => setReturnWheel(null)} onDone={() => { setReturnWheel(null); load(); }} />
+          </div>
+        </div>
+      )}
 
       <div className="tabs">
         {MODULES.map((m) => (
@@ -243,15 +226,40 @@ export default function UserDetail() {
 
       {module === 'profile' && (
         <>
-          <Card title={t('userDetail.clientProfileTitle')} className="mt-card">
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, fontSize: 13 }}>
-              <div><span style={{ color: '#94A3B8' }}>{t('userDetail.addressLabel')}</span><div>{detail.address || '—'}</div></div>
-              <div><span style={{ color: '#94A3B8' }}>{t('userDetail.phoneLabel')}</span><div>{detail.phone || '—'}</div></div>
-              <div><span style={{ color: '#94A3B8' }}>{t('userDetail.industryLabel')}</span><div>{detail.industry_sector || '—'}</div></div>
-              <div><span style={{ color: '#94A3B8' }}>{t('userDetail.createdLabel')}</span><div>{formatDT(detail.created_at)}</div></div>
+          {/* Hardware assignment: what this client has right now, the step-by-step commissioning (inline, resumes where things stand),
+              the returns history, and the technical details folded away. */}
+          <div className="ud-hw-hero">
+            <div>
+              <div className="ud-hw-kicker">{t('userDetail.hwKicker')}</div>
+              {detail.wheel_serial_number ? (
+                <>
+                  <div className="ud-hw-serial">{detail.wheel_serial_number}</div>
+                  <div className="ud-hw-sub">{detail.wheel_model_number}{boxNameOf(detail.wheel_serial_number) ? ` · ${boxNameOf(detail.wheel_serial_number)}` : ''}</div>
+                </>
+              ) : (
+                <>
+                  <div className="ud-hw-serial" style={{ fontSize: 18 }}>{t('userDetail.noWheelAssigned')}</div>
+                  <div className="ud-hw-sub">{t('userDetail.hwNoneHint')}</div>
+                </>
+              )}
             </div>
+            <div className="ud-hw-actions">
+              {overview && detail.wheel_serial_number && (
+                <span className={`ud-hw-pill ${overview.wheel.connected ? 'on' : ''}`}>{overview.wheel.connected ? t('userDetail.onlineLabel') : t('userDetail.offlineLabel')}</span>
+              )}
+              <button type="button" className="ud-hw-btn" disabled={guideBusy} onClick={handleDownloadGuide}>{guideBusy ? t('userDetail.guideDownloading') : t('userDetail.guideBtn')}</button>
+              {detail.wheel_serial_number && <button type="button" className="ud-hw-btn danger" disabled={busy} onClick={handleEndRental}>{t('userDetail.endRentalBtn')}</button>}
+            </div>
+          </div>
+
+          <SetupWizard inline userId={id} onClose={load} onChanged={load} />
+
+          <Card title={t('wheelOps.inspections')} className="mt-card">
+            <InspectionList items={inspections} showWheel />
           </Card>
 
+          <details className="ud-adv">
+            <summary>{t('userDetail.hwAdvanced')}</summary>
           <div className="ud-token-row">
           <Card title={t('userDetail.wheelTokenTitle')} className="mt-card">
             <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px' }}>
@@ -369,6 +377,7 @@ export default function UserDetail() {
               </div>
             )}
           </Card>
+          </details>
         </>
       )}
 
@@ -414,6 +423,20 @@ export default function UserDetail() {
       )}
 
       {/* A. Operational overview — no guest personal data, ever. */}
+      {module === 'overview' && (
+        <>
+          <Card title={t('userDetail.clientProfileTitle')} className="mt-card">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, fontSize: 13 }}>
+              <div><span style={{ color: '#94A3B8' }}>{t('userDetail.addressLabel')}</span><div>{detail.address || '—'}</div></div>
+              <div><span style={{ color: '#94A3B8' }}>{t('userDetail.phoneLabel')}</span><div>{detail.phone || '—'}</div></div>
+              <div><span style={{ color: '#94A3B8' }}>{t('userDetail.industryLabel')}</span><div>{detail.industry_sector || '—'}</div></div>
+              <div><span style={{ color: '#94A3B8' }}>{t('userDetail.createdLabel')}</span><div>{formatDT(detail.created_at)}</div></div>
+            </div>
+          </Card>
+
+        </>
+      )}
+
       {module === 'overview' && (
         <Card title={t('userDetail.overviewTitle')} className="mt-card">
           <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 14 }}>

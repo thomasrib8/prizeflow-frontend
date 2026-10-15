@@ -43,7 +43,7 @@ export default {
       summary: 'Le gagnant présente son QR code ou son code : vous confirmez la remise du cadeau en deux clics.',
       steps: [
         { title: 'La page Retrait', text: 'Chaque gagnant reçoit un **e-mail** avec son cadeau, un **QR code** et un **code à 8 caractères**. Au stand, vous le saisissez ici (ou vous scannez le QR code avec un téléphone : la page s’ouvre directement).' },
-        { title: 'Saisir le code', text: 'Tapez le code puis **Ouvrir la récompense**. SPARK retrouve le gagnant et son cadeau.' },
+        { title: 'Saisir le code', text: 'Tapez le code puis **Ouvrir la récompense**. SPARK retrouve le gagnant et son cadeau. Vous pouvez aussi **scanner le QR code avec votre téléphone** lorsque le client vous le présente : la fiche du cadeau s’ouvre directement.' },
         { title: 'Vérifier', text: 'Contrôlez le **cadeau** et le **nom du gagnant**, puis l’état : **À distribuer** signifie que le cadeau n’a pas encore été donné.' },
         { title: 'Confirmer la remise', text: 'Cliquez sur **Distribuer** : SPARK enregistre qui l’a remis et quand. Le même code ne pourra plus servir une seconde fois.' },
         { title: 'Une erreur ?', text: 'Vous pouvez **annuler la distribution** si elle a été validée par erreur : le cadeau repasse à « À distribuer ». Un cadeau peut aussi être **annulé** s’il ne doit pas être donné.' },
@@ -55,7 +55,7 @@ export default {
       summary: 'The winner shows their QR code or code: you confirm the hand-over in two clicks.',
       steps: [
         { title: 'The Redeem page', text: 'Every winner gets an **e-mail** with their gift, a **QR code** and an **8-character code**. At the booth, type it here (or scan the QR code with a phone: the page opens directly).' },
-        { title: 'Enter the code', text: 'Type the code then **Open reward**. SPARK finds the winner and their gift.' },
+        { title: 'Enter the code', text: 'Type the code then **Open reward**. SPARK finds the winner and their gift. You can also **scan the QR code with your phone** when the customer shows it to you: the gift page opens directly.' },
         { title: 'Check', text: 'Check the **gift** and the **winner’s name**, then the status: **To distribute** means the gift has not been given yet.' },
         { title: 'Confirm the hand-over', text: 'Click **Distribute**: SPARK records who handed it over and when. The same code cannot be used a second time.' },
         { title: 'A mistake?', text: 'You can **cancel the distribution** if it was confirmed by mistake: the gift goes back to “To distribute”. A gift can also be **cancelled** if it should not be given.' },
@@ -72,7 +72,7 @@ export default {
         },
         {
           "title": "Introducir el código",
-          "text": "Escriba el código y luego **Abrir recompensa**. SPARK encuentra al ganador y su regalo."
+          "text": "Escriba el código y luego **Abrir recompensa**. SPARK encuentra al ganador y su regalo. También puede **escanear el código QR con su teléfono** cuando el cliente se lo presente: la ficha del regalo se abre directamente."
         },
         {
           "title": "Comprobar",
@@ -102,7 +102,7 @@ export default {
         },
         {
           "title": "Den Code eingeben",
-          "text": "Geben Sie den Code ein, dann **Belohnung öffnen**. SPARK findet den Gewinner und sein Geschenk."
+          "text": "Geben Sie den Code ein, dann **Belohnung öffnen**. SPARK findet den Gewinner und sein Geschenk. Sie können auch **den QR-Code mit Ihrem Telefon scannen**, wenn der Kunde ihn vorzeigt: die Geschenkseite öffnet sich direkt."
         },
         {
           "title": "Prüfen",

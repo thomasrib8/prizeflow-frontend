@@ -157,7 +157,23 @@ export const api = {
   getWheel: (id) => request(`/wheels/${id}`),
   updateWheel: (id, payload) => request(`/wheels/${id}`, { method: 'PATCH', body: payload }),
   assignWheel: (id, userId) => request(`/wheels/${id}/assign`, { method: 'POST', body: { userId } }),
-  endWheelRental: (id) => request(`/wheels/${id}/end-rental`, { method: 'POST' }),
+  endWheelRental: (id, inspection) => request(`/wheels/${id}/end-rental`, { method: 'POST', body: { inspection } }),
+  wheelInspections: (ownerId) => request(`/wheels/inspections?ownerId=${encodeURIComponent(ownerId)}`),
+  // Photos of the return inspection: the browser resizes the picture to a JPEG blob first; sent as a raw body.
+  async uploadWheelPhoto(id, blob) {
+    const res = await fetch(`${API_BASE}/wheels/${id}/photos`, {
+      method: 'POST', headers: { 'Content-Type': blob.type || 'image/jpeg', Authorization: `Bearer ${getToken()}` }, body: blob, cache: 'no-store',
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+    return data.id;
+  },
+  // <img> cannot send the Authorization header: the photo is fetched with it and shown from a blob URL.
+  async wheelPhotoUrl(photoId) {
+    const res = await fetch(`${API_BASE}/wheels/photos/${photoId}`, { headers: { Authorization: `Bearer ${getToken()}` } });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return URL.createObjectURL(await res.blob());
+  },
   setUserStatus: (id, status) => request(`/users/${id}/status`, { method: 'PATCH', body: { status } }),
   setUserRole: (id, role) => request(`/users/${id}/role`, { method: 'PATCH', body: { role } }),
   getUserDetail: (id) => request(`/users/${id}`),

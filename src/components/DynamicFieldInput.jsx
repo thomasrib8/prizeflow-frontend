@@ -10,6 +10,11 @@
 // campaign's language; the admin-side callers don't, so they keep the
 // English default — the admin panel itself isn't translated yet, see the
 // "Multilingue" plan's Phase 2).
+// Radio buttons and checkboxes sit inside a `.field`, whose global input style (full width, padded box) would stretch them across the row
+// and push the text to the far right: they keep their natural size, and the answer labels stay regular weight.
+const CHOICE_INPUT = { width: 'auto', padding: 0, margin: 0, flexShrink: 0, boxShadow: 'none' };
+const CHOICE_LABEL = { display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 400, margin: 0, cursor: 'pointer', color: 'var(--text-primary, #0F172A)' };
+
 export default function DynamicFieldInput({ field, value, onChange, selectPlaceholder = '— Select —' }) {
   const { label, fieldType, options, required } = field;
 
@@ -40,8 +45,8 @@ export default function DynamicFieldInput({ field, value, onChange, selectPlaceh
         <label>{label}{required ? ' *' : ''}</label>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {(options || []).map((o) => (
-            <label key={o} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, cursor: 'pointer' }}>
-              <input type="radio" name={label} checked={value === o} onChange={() => onChange(o)} />
+            <label key={o} style={CHOICE_LABEL}>
+              <input type="radio" name={label} style={CHOICE_INPUT} checked={value === o} onChange={() => onChange(o)} />
               {o}
             </label>
           ))}
@@ -60,8 +65,8 @@ export default function DynamicFieldInput({ field, value, onChange, selectPlaceh
         <label>{label}{required ? ' *' : ''}</label>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {(options || []).map((o) => (
-            <label key={o} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, cursor: 'pointer' }}>
-              <input type="checkbox" checked={selected.includes(o)} onChange={() => toggle(o)} />
+            <label key={o} style={CHOICE_LABEL}>
+              <input type="checkbox" style={CHOICE_INPUT} checked={selected.includes(o)} onChange={() => toggle(o)} />
               {o}
             </label>
           ))}

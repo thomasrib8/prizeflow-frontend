@@ -45,7 +45,7 @@ function Check({ ok, label, note }) {
   );
 }
 
-export default function SetupWizard({ userId, onClose, onChanged }) {
+export default function SetupWizard({ userId, onClose, onChanged, inline = false }) {
   const { t } = useTranslation('admin');
   const [n, setN] = useState(0);
   const [busy, setBusy] = useState(false);
@@ -109,10 +109,11 @@ export default function SetupWizard({ userId, onClose, onChanged }) {
   }, [n, loadInfo, loadOverview]);
 
   useEffect(() => {
+    if (inline) return undefined;
     const onKey = (e) => { if (e.key === 'Escape') onClose(); };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [onClose]);
+  }, [onClose, inline]);
 
   const serial = detail && detail.wheel_serial_number;
   const boxName = (info && info.boxName) || (serial && /(\d{6})$/.test(serial) ? `spark-box-${/(\d{6})$/.exec(serial)[1]}` : '');
@@ -152,7 +153,7 @@ export default function SetupWizard({ userId, onClose, onChanged }) {
       setBusy(true);
       try { await api.setBoxWifiForClient(userId, pw); setPwExisting(true); await loadInfo(); } catch (e) { setError(e.message); return; } finally { setBusy(false); }
     }
-    if (n === 4) { onChanged && onChanged(); onClose(); return; }
+    if (n === 4) { onChanged && onChanged(); if (!inline) onClose(); return; }
     setN((v) => Math.min(4, v + 1));
   }
 
@@ -182,14 +183,14 @@ export default function SetupWizard({ userId, onClose, onChanged }) {
   const phone = me && me.phone;
 
   return (
-    <div className="sw-overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="sw-card" role="dialog" aria-modal="true" aria-label={t('setupWizard.title')}>
+    <div className={inline ? 'sw-inline-wrap' : 'sw-overlay'} onMouseDown={inline ? undefined : (e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className={inline ? 'sw-card sw-card-inline' : 'sw-card'} role={inline ? undefined : 'dialog'} aria-modal={inline ? undefined : 'true'} aria-label={t('setupWizard.title')}>
         <div className="sw-head">
           <div>
             <div className="sw-title">{t('setupWizard.title')}</div>
             <div className="sw-sub">{clientLabel}{detail && detail.email && clientLabel !== detail.email ? ` · ${detail.email}` : ''}</div>
           </div>
-          <button type="button" className="sw-x" onClick={onClose} aria-label={t('park.closeBtn')}>✕</button>
+          {!inline && <button type="button" className="sw-x" onClick={onClose} aria-label={t('park.closeBtn')}>✕</button>}
         </div>
 
         <div className="sw-steps">

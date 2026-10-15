@@ -13,12 +13,15 @@ export default {
       async run(c) { await c.click('.page-header button.btn-secondary'); await c.waitFor('.modal-card img'); await c.sleep(900); await c.point('.modal-card img', 2600); },
     },
     { // 3
-      async run(c) { await c.point(() => document.querySelectorAll('.modal-card ol')[0]?.parentElement, 3600); },
+      async run(c) { await c.point(() => document.querySelectorAll('.modal-card img')[1], 3200); },
     },
     { // 4
-      async run(c) { await c.point(() => document.querySelectorAll('.modal-card ol')[1]?.parentElement, 3600); },
+      async run(c) { await c.point(() => document.querySelectorAll('.modal-card ol')[0]?.parentElement, 3600); },
     },
     { // 5
+      async run(c) { await c.point(() => document.querySelectorAll('.modal-card ol')[1]?.parentElement, 3600); },
+    },
+    { // 6
       async run(c) { await c.click(() => [...document.querySelectorAll('.modal-card button')].pop()); await c.sleep(500); },
     },
   ],
@@ -27,8 +30,9 @@ export default {
       title: 'Installer l’application SPARK sur le téléphone',
       summary: 'Un QR code, deux gestes : l’application de stand s’ajoute à l’écran d’accueil de vos commerciaux, sans passer par un magasin d’applications.',
       steps: [
-        { title: 'Le bouton Télécharger l’app', text: 'Sur le **tableau de bord**, **Télécharger l’app** ouvre la page d’installation. L’application SPARK est une **application web** : rien à chercher dans l’App Store ni Google Play.' },
-        { title: 'Le QR code', text: 'Faites **scanner ce QR code** par le téléphone de votre commercial (appareil photo), ou envoyez-lui le lien. La page de l’application s’ouvre dans le navigateur.' },
+        { title: 'Le bouton Télécharger l’app', text: 'Sur le **tableau de bord**, **Télécharger l’app** ouvre la page d’installation, en **deux colonnes** : **Spark** (en ligne) à gauche, **Spark Offline** à droite. L’application SPARK est une **application web** : rien à chercher dans l’App Store ni Google Play.' },
+        { title: 'Le QR code', text: 'Dans la colonne de gauche, faites **scanner ce QR code** par le téléphone de votre commercial (appareil photo), ou envoyez-lui le lien. La page de l’application s’ouvre dans le navigateur.' },
+        { title: 'Le QR code Spark Offline', text: 'La colonne de droite contient un **second QR code** : celui de **Spark Offline**, l’application servie par le **boîtier**, pour continuer à travailler si internet tombe. Connectez d’abord le téléphone au Wi-Fi **Spark-Local** (ou au réseau du boîtier), puis scannez-le. À faire **une fois, avant l’événement**.' },
         { title: 'Sur iPhone', text: 'Ouvrez le lien dans **Safari**, touchez le bouton **Partager**, choisissez **Sur l’écran d’accueil** puis **Ajouter**. L’icône SPARK apparaît comme une vraie application, en plein écran.' },
         { title: 'Sur Android', text: 'Ouvrez le lien dans **Chrome**, touchez le menu **⋮** puis **Installer l’application** (ou **Ajouter à l’écran d’accueil**) et confirmez.' },
         { title: 'Et ensuite', text: 'Le commercial se connecte avec son compte et retrouve la **campagne active**, la file d’attente, ses contacts et peut **ajouter un prospect** ou **scanner un badge**. Voir le tutoriel sur l’application de stand.' },
@@ -38,8 +42,9 @@ export default {
       title: 'Install the SPARK app on a phone',
       summary: 'One QR code, two taps: the booth app is added to your reps’ home screen, with no app store involved.',
       steps: [
-        { title: 'The Download the app button', text: 'On the **dashboard**, **Download the app** opens the installation page. The SPARK app is a **web app**: nothing to look for in the App Store or Google Play.' },
-        { title: 'The QR code', text: 'Have your rep’s phone **scan this QR code** (camera), or send them the link. The app page opens in the browser.' },
+        { title: 'The Download the app button', text: 'On the **dashboard**, **Download the app** opens the installation page, in **two columns**: **Spark** (online) on the left, **Spark Offline** on the right. The SPARK app is a **web app**: nothing to look for in the App Store or Google Play.' },
+        { title: 'The QR code', text: 'In the left column, have your rep’s phone **scan this QR code** (camera), or send them the link. The app page opens in the browser.' },
+        { title: 'The Spark Offline QR code', text: 'The right-hand column holds a **second QR code**: **Spark Offline**, the app served by the **box**, to keep working if the internet drops. First connect the phone to the **Spark-Local** Wi-Fi (or the box’s network), then scan it. Do this **once, before the event**.' },
         { title: 'On iPhone', text: 'Open the link in **Safari**, tap the **Share** button, choose **Add to Home Screen** then **Add**. The SPARK icon appears like a real app, full screen.' },
         { title: 'On Android', text: 'Open the link in **Chrome**, tap the **⋮** menu then **Install app** (or **Add to Home screen**) and confirm.' },
         { title: 'What next', text: 'The rep signs in with their account and finds the **active campaign**, the queue and their contacts, and can **add a prospect** or **scan a badge**. See the tutorial on the booth app.' },
@@ -51,11 +56,15 @@ export default {
       "steps": [
         {
           "title": "El botón Descargar la app",
-          "text": "En el **panel**, **Descargar la app** abre la página de instalación. La aplicación SPARK es una **aplicación web**: nada que buscar en la App Store ni en Google Play."
+          "text": "En el **panel**, **Descargar la app** abre la página de instalación, en **dos columnas**: **Spark** (en línea) a la izquierda, **Spark Offline** a la derecha. La aplicación SPARK es una **aplicación web**: nada que buscar en la App Store ni en Google Play."
         },
         {
           "title": "El código QR",
           "text": "Haga que el teléfono de su comercial **escanee este código QR** (cámara), o envíele el enlace. La página de la aplicación se abre en el navegador."
+        },
+        {
+          "title": "El código QR de Spark Offline",
+          "text": "La columna de la derecha contiene un **segundo código QR**: el de **Spark Offline**, la aplicación servida por la **caja**, para seguir trabajando si se cae internet. Conecte primero el teléfono al Wi-Fi **Spark-Local** (o a la red de la caja) y escanéelo. Hágalo **una vez, antes del evento**."
         },
         {
           "title": "En iPhone",
@@ -82,6 +91,10 @@ export default {
         {
           "title": "Der QR-Code",
           "text": "Lassen Sie das Telefon Ihres Vertriebsmitarbeiters **diesen QR-Code scannen** (Kamera), oder senden Sie ihm den Link. Die App-Seite öffnet sich im Browser."
+        },
+        {
+          "title": "Der QR-Code von Spark Offline",
+          "text": "Die rechte Spalte enthält einen **zweiten QR-Code**: den von **Spark Offline**, der von der **Box** bereitgestellten App, um bei Internetausfall weiterzuarbeiten. Verbinden Sie das Telefon zuerst mit dem WLAN **Spark-Local** (oder dem Netzwerk der Box) und scannen Sie ihn. **Einmal vor der Veranstaltung** erledigen."
         },
         {
           "title": "Auf dem iPhone",
