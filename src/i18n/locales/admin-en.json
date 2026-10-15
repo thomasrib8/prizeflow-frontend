@@ -655,7 +655,7 @@
     "vizBar": "Bars",
     "vizDonut": "Donut",
     "vizLine": "Line",
-    "srcBuiltin": "SPARK",
+    "srcBuiltin": "Default",
     "srcSegment": "Segmentation",
     "srcSales": "Sales side",
     "srcGuest": "Guest form",

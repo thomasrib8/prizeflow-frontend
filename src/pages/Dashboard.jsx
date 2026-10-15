@@ -351,7 +351,7 @@ export default function Dashboard() {
 
       {confirmDialog}
       {showDownloadApp && <DownloadAppModal onClose={() => setShowDownloadApp(false)} />}
-      {adding && <AddModuleModal campaignId={campaignId} dimensions={dimensions} isAdmin={isAdmin} onClose={() => setAdding(false)} onAdd={(w) => setDraft((d) => [...d, { ...w, id: newWidgetId() }])} />}
+      {adding && <AddModuleModal campaignId={campaignId} dimensions={dimensions} onDimensions={(d) => setInfo((x) => (x ? { ...x, dimensions: d } : x))} isAdmin={isAdmin} onClose={() => setAdding(false)} onAdd={(w) => setDraft((d) => [...d, { ...w, id: newWidgetId() }])} />}
 
       {editing && (
         <div className="dash-bar">

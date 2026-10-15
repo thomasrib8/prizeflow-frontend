@@ -17,13 +17,22 @@ const CARDS = [
   ['profitability', 'profitTitle', 2], ['topRewards', 'topRewardsTitle', 2], ['activity', 'recentActivityTitle', 2], ['emails', 'emailHistoryTitle', 4],
 ];
 
-export default function AddModuleModal({ campaignId, dimensions, isAdmin, onAdd, onClose }) {
+export default function AddModuleModal({ campaignId, dimensions, isAdmin, onAdd, onClose, onDimensions }) {
   const { t } = useTranslation('admin');
   const [tab, setTab] = useState('chart');
   const [source, setSource] = useState('');
   const [viz, setViz] = useState('bar');
   const [reco, setReco] = useState(null);
-  const dim = chartableFind(dimensions, source);
+  // The list is re-read every time the window opens: a segment or a form field added since the dashboard was loaded shows up right away
+  const [fresh, setFresh] = useState(null);
+  useEffect(() => {
+    let alive = true;
+    api.dashboardLayout(campaignId).then((r) => { if (alive && r && r.dimensions) { setFresh(r.dimensions); if (onDimensions) onDimensions(r.dimensions); } }).catch(() => {});
+    return () => { alive = false; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [campaignId]);
+  const dims = fresh || dimensions;
+  const dim = chartableFind(dims, source);
 
   // Once a data source is picked: look at its numbers, suggest the best representation and preselect it
   useEffect(() => {
@@ -40,7 +49,7 @@ export default function AddModuleModal({ campaignId, dimensions, isAdmin, onAdd,
   }, [source]);
 
   const add = (w) => { onAdd(w); onClose(); };
-  const chartable = (dimensions || []);
+  const chartable = (dims || []);
 
   return (
     <div className="modal-overlay" onClick={onClose} style={{ zIndex: 300 }}>
