@@ -1668,6 +1668,8 @@
     "labelSerial": "Serie",
     "labelKey": "Clave",
     "labelBox": "Caja",
-    "labelHint": "Formato 10 × 5 cm (ajuste la impresora a este tamaño). El código QR abre la página de la rueda, solo para administradores, y no contiene la clave de seguridad."
+    "labelHint": "Formato 10 × 5 cm (ajuste la impresora a este tamaño). El código QR abre la página de la rueda, solo para administradores, y no contiene la clave de seguridad.",
+    "labelColumn": "Etiqueta",
+    "labelShowBtn": "Mostrar"
   }
 }

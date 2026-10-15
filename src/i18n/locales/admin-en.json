@@ -1668,6 +1668,8 @@
     "labelSerial": "Serial",
     "labelKey": "Key",
     "labelBox": "Box",
-    "labelHint": "10 × 5 cm format (set the printer to this size). The QR code opens the wheel's page, admins only, and does not contain the security key."
+    "labelHint": "10 × 5 cm format (set the printer to this size). The QR code opens the wheel's page, admins only, and does not contain the security key.",
+    "labelColumn": "Label",
+    "labelShowBtn": "Show"
   }
 }

@@ -1668,6 +1668,8 @@
     "labelSerial": "Série",
     "labelKey": "Clé",
     "labelBox": "Boîtier",
-    "labelHint": "Format 10 × 5 cm (réglez l'imprimante sur ce format). Le QR code ouvre la page de la roue, réservée aux administrateurs, et ne contient pas la clé de sécurité."
+    "labelHint": "Format 10 × 5 cm (réglez l'imprimante sur ce format). Le QR code ouvre la page de la roue, réservée aux administrateurs, et ne contient pas la clé de sécurité.",
+    "labelColumn": "Étiquette",
+    "labelShowBtn": "Afficher"
   }
 }

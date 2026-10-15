@@ -331,7 +331,7 @@ export default function Park() {
               <thead>
                 <tr>
                   <th>{t('park.colSerial')}</th><th>{t('park.colModel')}</th><th>{t('park.colStatus')}</th>
-                  <th>{t('park.colClient')}</th><th>{t('park.colConnection')}</th><th>{t('park.colBox')}</th>
+                  <th>{t('park.colClient')}</th><th>{t('park.colConnection')}</th><th>{t('park.colBox')}</th><th>{t('wheelOps.labelColumn')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -352,6 +352,7 @@ export default function Park() {
                       </div>
                     </td>
                     <td><BoxCell wheel={w} /></td>
+                    <td onClick={(e) => e.stopPropagation()}><Button size="sm" variant="secondary" onClick={() => setLabelOf(w)}>{t('wheelOps.labelShowBtn')}</Button></td>
                   </tr>
                 ))}
               </tbody>
