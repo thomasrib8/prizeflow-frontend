@@ -70,5 +70,81 @@ export default {
         { title: 'End the campaign', text: 'At the end of the event, **End the campaign** closes it: no more spins. Your prospects stay in the CRM, you can export the results, and archive the campaign afterwards.' },
       ],
     },
+    es: {
+      "title": "Activar, pausar y terminar una campaña",
+      "summary": "El ciclo de vida de una campaña: del borrador al final del evento.",
+      "steps": [
+        {
+          "title": "Su lista de campañas",
+          "text": "La página **Campañas** reúne todas sus campañas con su estado: borrador, activa, en pausa, terminada o archivada. Solo una campaña puede estar activa a la vez."
+        },
+        {
+          "title": "Abrir la campaña",
+          "text": "Haga clic en **Ver** para abrir la ficha de una campaña: sus regalos, su stock y su avance."
+        },
+        {
+          "title": "Iniciar la campaña",
+          "text": "Una campaña en borrador no es visible para los jugadores. El botón verde **Iniciar** la activa: el QR del invitado funciona y la rueda puede girar. En el primer inicio, SPARK fija el orden de distribución de los regalos."
+        },
+        {
+          "title": "Los botones de una campaña activa",
+          "text": "**Pausa** (naranja), **Terminar la campaña** (rojo) e **Ir a Lanzar** (azul) para dirigir el evento. Si ya hay otra campaña activa, SPARK le pide terminarla o ponerla en pausa primero."
+        },
+        {
+          "title": "Poner en pausa",
+          "text": "En pausa nadie puede jugar, pero no se pierde nada: los stocks y el orden de los regalos quedan intactos. Útil para una pausa para comer o un cambio de stand."
+        },
+        {
+          "title": "Reanudar",
+          "text": "El botón verde **Reanudar** relanza la campaña exactamente donde se detuvo."
+        },
+        {
+          "title": "El menú «Otros»",
+          "text": "Las acciones menos frecuentes están en **Otros**: modificar los regalos, la segmentación y el formulario, los ajustes, duplicar la campaña, exportar la distribución de regalos (CSV), descargar el informe PDF y eliminar una campaña que no está activa."
+        },
+        {
+          "title": "Terminar la campaña",
+          "text": "Al final del evento, **Terminar la campaña** la cierra: ya no hay más tiradas. Sus prospectos permanecen en el CRM, puede exportar los resultados y archivar la campaña después."
+        }
+      ]
+    },
+    de: {
+      "title": "Eine Kampagne aktivieren, pausieren und beenden",
+      "summary": "Der Lebenszyklus einer Kampagne: vom Entwurf bis zum Ende der Veranstaltung.",
+      "steps": [
+        {
+          "title": "Ihre Kampagnenliste",
+          "text": "Die Seite **Kampagnen** vereint alle Ihre Kampagnen mit ihrem Status: Entwurf, aktiv, pausiert, beendet oder archiviert. Nur eine Kampagne kann gleichzeitig aktiv sein."
+        },
+        {
+          "title": "Die Kampagne öffnen",
+          "text": "Klicken Sie auf **Ansehen**, um die Seite einer Kampagne zu öffnen: ihre Geschenke, ihr Bestand und ihr Fortschritt."
+        },
+        {
+          "title": "Die Kampagne starten",
+          "text": "Eine Entwurfskampagne ist für Spieler nicht sichtbar. Die grüne Schaltfläche **Starten** aktiviert sie: der Gäste-QR-Code funktioniert und das Rad kann sich drehen. Beim ersten Start legt SPARK die Reihenfolge der Geschenkvergabe fest."
+        },
+        {
+          "title": "Die Schaltflächen einer aktiven Kampagne",
+          "text": "**Pause** (orange), **Kampagne beenden** (rot) und **Zu Start** (blau), um die Veranstaltung zu steuern. Ist bereits eine andere Kampagne aktiv, bittet SPARK Sie, sie zuerst zu beenden oder zu pausieren."
+        },
+        {
+          "title": "Pausieren",
+          "text": "Während der Pause kann niemand spielen, aber nichts geht verloren: Bestände und Geschenkreihenfolge bleiben erhalten. Praktisch für eine Mittagspause oder einen Standwechsel."
+        },
+        {
+          "title": "Fortsetzen",
+          "text": "Die grüne Schaltfläche **Fortsetzen** startet die Kampagne genau dort neu, wo sie angehalten wurde."
+        },
+        {
+          "title": "Das Menü „Weitere“",
+          "text": "Seltener genutzte Aktionen sind unter **Weitere** zusammengefasst: Geschenke, Segmentierung und Formular bearbeiten, Einstellungen, Kampagne duplizieren, Geschenkverteilung exportieren (CSV), PDF-Bericht herunterladen und eine nicht aktive Kampagne löschen."
+        },
+        {
+          "title": "Die Kampagne beenden",
+          "text": "Am Ende der Veranstaltung schließt **Kampagne beenden** sie ab: keine Ziehungen mehr. Ihre Interessenten bleiben im CRM, Sie können die Ergebnisse exportieren und die Kampagne danach archivieren."
+        }
+      ]
+    },
   },
 };

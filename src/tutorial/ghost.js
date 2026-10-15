@@ -26,14 +26,16 @@ export function createGhost() {
   return {
     get pos() { return { x, y }; },
     // Moves the pointer tip to (nx, ny). Longer trips take a bit longer, like a hand would.
-    async moveTo(nx, ny, { instant = false, speed = 1 } = {}) {
+    async moveTo(nx, ny, { instant = false, speed = 1, dur: fixed = null } = {}) {
       const dist = Math.hypot(nx - x, ny - y);
-      const dur = instant ? 0 : Math.round(Math.min(1100, 320 + dist * 0.9) / speed);
+      const dur = instant ? 0 : fixed !== null ? Math.round(fixed / speed) : Math.round(Math.min(1100, 320 + dist * 0.9) / speed);
       cursor.style.setProperty('--tuto-dur', `${dur}ms`);
       x = nx; y = ny;
       cursor.style.transform = `translate(${nx - 3}px, ${ny - 2}px)`;
       if (dur) await new Promise((r) => setTimeout(r, dur + 30));
     },
+    // Holds the button down (drag) / lets go
+    press(on) { cursor.classList.toggle('pressed', !!on); },
     async click(instant) {
       if (instant) return;
       cursor.classList.add('pressed');

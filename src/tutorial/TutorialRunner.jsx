@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { DEMO_PARAMS } from './demo';
 import { createGhost } from './ghost';
 import { getTutorial } from './tutorials';
+import { GIFTS, STOCKS } from './fixtures';
 
 const CANCEL = Symbol('cancel');
 const sleepRaw = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -26,6 +27,8 @@ export default function TutorialRunner() {
 
   useEffect(() => {
     const ghost = createGhost();
+    // A tutorial must never stop on a browser dialog ("are you sure?"): the answer is always yes.
+    const realConfirm = window.confirm; window.confirm = () => true;
     let run = 0; let paused = false; let speed = DEMO_PARAMS.speed; let release = null;
     const post = (msg) => { try { window.parent.postMessage(msg, '*'); } catch { /* standalone */ } };
 
@@ -43,14 +46,19 @@ export default function TutorialRunner() {
           await gate(id);
           const el = find(target);
           if (el) return el;
-          if (Date.now() - t0 > timeout) throw new Error(`[tutorial] element not found: ${typeof target === 'function' ? 'fn' : target}`);
+          if (Date.now() - t0 > timeout) throw new Error(`[tutorial] element not found: ${typeof target === 'function' ? `fn ${String(target).replace(/\s+/g, ' ').slice(0, 110)}` : target}`);
           await sleepRaw(60);
         }
       };
       const ctx = {
         fast,
+        lang: DEMO_PARAMS.lang,
+        gifts: GIFTS,
+        stocks: STOCKS,
         sleep,
         waitFor,
+        // Drives the made-up scene (see fakeBackend.js): e.g. c.demo('guest', 'active')
+        demo(key, value) { if (window.__demo) window.__demo.set(key, value); },
         async go(path, settle = 500) { await gate(id); navRef.current(path); await sleep(settle); },
         async move(target, { dx = 0.5, dy = 0.55 } = {}) {
           const el = await waitFor(target);
@@ -73,6 +81,30 @@ export default function TutorialRunner() {
           await sleep(350);
           return el;
         },
+        // Drags `from` onto `to` with pointer events (what the app's own drag and drop listens to): press, glide, release.
+        async drag(from, to, { steps = 16 } = {}) {
+          const src = await ctx.move(from);
+          const a = src.getBoundingClientRect();
+          const sx = a.left + a.width * 0.5; const sy = a.top + a.height * 0.55;
+          const mk = (type, x, y) => new PointerEvent(type, { bubbles: true, cancelable: true, clientX: x, clientY: y, pointerId: 1, pointerType: 'mouse', isPrimary: true, button: 0, buttons: type === 'pointerup' ? 0 : 1 });
+          await gate(id);
+          ghost.press(true);
+          src.dispatchEvent(mk('pointerdown', sx, sy));
+          await sleep(220);
+          const dst = await waitFor(to);
+          const b = dst.getBoundingClientRect();
+          const dx = b.left + b.width * 0.5; const dy = b.top + b.height * 0.5;
+          for (let i = 1; i <= steps; i += 1) {
+            const k = i / steps; const e = k * k * (3 - 2 * k);
+            const x = sx + (dx - sx) * e; const y = sy + (dy - sy) * e;
+            await ghost.moveTo(x, y, { instant: fast, speed, dur: 50 });
+            window.dispatchEvent(mk('pointermove', x, y));
+          }
+          await sleep(260);
+          window.dispatchEvent(mk('pointerup', dx, dy));
+          ghost.press(false);
+          await sleep(450);
+        },
         async type(target, text, perChar = 45) {
           const el = await ctx.move(target);
           el.focus();
@@ -81,6 +113,13 @@ export default function TutorialRunner() {
           for (const ch of text) { await gate(id); cur += ch; nativeSet(el, cur); await sleepRaw(perChar / speed); }
           await sleep(250);
           ghost.highlight(null);
+          return el;
+        },
+        // Fills a field at once, without moving the pointer (for the long, repetitive ones)
+        async fill(target, value) {
+          const el = await waitFor(target);
+          nativeSet(el, value);
+          await sleep(fast ? 0 : 60);
           return el;
         },
         async select(target, value) {
@@ -106,9 +145,10 @@ export default function TutorialRunner() {
           const fast = i < from;
           if (!fast) post({ type: 'tuto:step', index: i });
           const ctx = makeCtx(id, fast);
-          try { await tuto.steps[i].run(ctx); } catch (e) { if (e === CANCEL) throw e; console.error(`[tutorial] step ${i} failed:`, e); }
-          if (!fast) await ctx.sleep(700);
+          try { await tuto.steps[i].run(ctx); (window.__tutoLog = window.__tutoLog || []).push(`${i + 1}: ok`); } catch (e) { if (e === CANCEL) throw e; (window.__tutoLog = window.__tutoLog || []).push(`${i + 1}: FAILED ${e.message}`); console.error(`[tutorial] step ${i} failed:`, e); }
+          if (!fast) { console.info(`[tutorial] step ${i} done`); await ctx.sleep(700); }
         }
+        (window.__tutoLog = window.__tutoLog || []).push('end');
         post({ type: 'tuto:end' });
       } catch (e) { if (e !== CANCEL) throw e; }
     }
@@ -124,7 +164,7 @@ export default function TutorialRunner() {
     if (DEMO_PARAMS.autoplay) play(DEMO_PARAMS.from);
     else post({ type: 'tuto:step', index: DEMO_PARAMS.from });
 
-    return () => { run += 1; window.removeEventListener('message', onMessage); if (release) release(); ghost.destroy(); };
+    return () => { window.confirm = realConfirm; run += 1; window.removeEventListener('message', onMessage); if (release) release(); ghost.destroy(); };
   }, []);
 
   return null;

@@ -14,10 +14,22 @@ import { IS_BOX_BUILD } from '../../utils/boxMode';
 import { isPlaceholderEmail } from '../../utils/placeholderEmail';
 import { canSearchLinkedIn, normalizeLinkedInUrl } from '../../utils/linkedin';
 import { useLinkedInStatus } from '../../hooks/useLinkedInStatus';
+import { IS_DEMO } from '../../tutorial/demo';
+
+// Tutorial mode: a pretend recogniser (no microphone, no permission prompt) that "hears" the sentence the tutorial gives it.
+class DemoSpeech {
+  start() {
+    const said = (window.__demo && window.__demo.get('dictation')) || '';
+    setTimeout(() => { if (this.onspeechstart) this.onspeechstart(); }, 300);
+    setTimeout(() => { if (this.onresult) this.onresult({ resultIndex: 0, results: [{ isFinal: true, 0: { transcript: said } }] }); }, 1500);
+  }
+  stop() { if (this.onend) this.onend(); }
+}
 
 // Chrome/Edge only, HTTPS only, needs the internet (the browser sends the audio to its own service).
-export const SpeechRecognitionCtor =
-  typeof window !== 'undefined' && window.isSecureContext && !IS_BOX_BUILD ? window.SpeechRecognition || window.webkitSpeechRecognition : null;
+export const SpeechRecognitionCtor = IS_DEMO
+  ? DemoSpeech
+  : (typeof window !== 'undefined' && window.isSecureContext && !IS_BOX_BUILD ? window.SpeechRecognition || window.webkitSpeechRecognition : null);
 
 // A voice note stops on its own after this long without any speech.
 const SILENCE_TIMEOUT_MS = 8000;

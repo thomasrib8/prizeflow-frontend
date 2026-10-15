@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { Card, Button, Badge, EmptyState } from '../components/ui';
 import WheelDiagnosticsRows from '../components/WheelDiagnosticsRows';
+import SetupWizard from '../components/SetupWizard';
 
 const STATUS_TONE = { pending: 'orange', approved: 'green', deactivated: 'red' };
 const STATUS_TKEY = { pending: 'userStatusPending', approved: 'userStatusApproved', deactivated: 'userStatusDeactivated' };
@@ -37,6 +38,7 @@ export default function UserDetail() {
   const [busy, setBusy] = useState(false);
   const [tokenCopied, setTokenCopied] = useState(false);
   const [showSetupHelp, setShowSetupHelp] = useState(false);
+  const [showWizard, setShowWizard] = useState(false);
   const [guideBusy, setGuideBusy] = useState(false);
   const [series, setSeries] = useState('1');
   const [wheelBusy, setWheelBusy] = useState(false);
@@ -53,6 +55,24 @@ export default function UserDetail() {
   }
 
   useEffect(load, [id]);
+
+  // End of rental from the client's page: same effect as in the wheel park (wheel back to the depot, box ordered to erase itself).
+  async function handleEndRental() {
+    if (!window.confirm(t('userDetail.endRentalConfirm'))) return;
+    setBusy(true);
+    setError('');
+    try {
+      const all = await api.listWheels();
+      const w = all.find((x) => x.owner && x.owner.id === id);
+      if (!w) throw new Error(t('userDetail.noWheelAssigned'));
+      await api.endWheelRental(w.id);
+      load();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function handleStatus(status) {
     setBusy(true);
@@ -202,13 +222,16 @@ export default function UserDetail() {
           <h1 className="page-title" style={{ marginTop: 6 }}>{detail.name || detail.email}</h1>
           <p className="page-subtitle">{detail.company || t('userDetail.noCompanyOnFile')} · {detail.email}</p>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+          <Button onClick={() => setShowWizard(true)}>{t('userDetail.setupWizardBtn')}</Button>
+          {detail.wheel_serial_number && <Button variant="ghost" disabled={busy} onClick={handleEndRental}>{t('userDetail.endRentalBtn')}</Button>}
           <Badge tone={STATUS_TONE[detail.status]}>{t(`users.${STATUS_TKEY[detail.status]}`)}</Badge>
           <Badge tone={detail.role === 'admin' ? 'blue' : 'neutral'}>{detail.role === 'admin' ? t('users.roleAdmin') : t('users.roleOperator')}</Badge>
         </div>
       </div>
 
       {error && <div className="error-banner">{error}</div>}
+      {showWizard && <SetupWizard userId={id} onClose={() => { setShowWizard(false); load(); }} onChanged={load} />}
 
       <div className="tabs">
         {MODULES.map((m) => (

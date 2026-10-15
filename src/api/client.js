@@ -151,6 +151,13 @@ export const api = {
   generateWheelIdentity: (id, series) => request(`/users/${id}/wheel-identity`, { method: 'POST', body: { series } }),
   recordWheelIdentity: (id, modelNumber, serialNumber, securityKey) =>
     request(`/users/${id}/wheel-identity`, { method: 'POST', body: { modelNumber, serialNumber, securityKey } }),
+  // Wheel park (rental fleet), admin only.
+  listWheels: () => request('/wheels'),
+  createWheel: (payload) => request('/wheels', { method: 'POST', body: payload }),
+  getWheel: (id) => request(`/wheels/${id}`),
+  updateWheel: (id, payload) => request(`/wheels/${id}`, { method: 'PATCH', body: payload }),
+  assignWheel: (id, userId) => request(`/wheels/${id}/assign`, { method: 'POST', body: { userId } }),
+  endWheelRental: (id) => request(`/wheels/${id}/end-rental`, { method: 'POST' }),
   setUserStatus: (id, status) => request(`/users/${id}/status`, { method: 'PATCH', body: { status } }),
   setUserRole: (id, role) => request(`/users/${id}/role`, { method: 'PATCH', body: { role } }),
   getUserDetail: (id) => request(`/users/${id}`),
@@ -208,6 +215,8 @@ export const api = {
   // One-time activation code for an event box (admin, from the client's page)
   prepareBoxActivation: (userId) => request('/box-activation/prepare', { method: 'POST', body: { userId } }),
   getBoxActivation: (userId) => request(`/box-activation/${encodeURIComponent(userId)}`),
+  getBoxWifiForClient: (userId) => request(`/box-activation/${encodeURIComponent(userId)}/wifi`),
+  setBoxWifiForClient: (userId, password) => request(`/box-activation/${encodeURIComponent(userId)}/wifi`, { method: 'PUT', body: { password } }),
   getWheelScript: (userId) => request(`/box-activation/${encodeURIComponent(userId)}/wheel-script`),
   revokeBoxActivation: (userId) => request(`/box-activation/${encodeURIComponent(userId)}`, { method: 'DELETE' }),
   downloadCampaignQrPdf: (id) => downloadFile(`/campaigns/${id}/qr.pdf`),
@@ -278,6 +287,7 @@ export const api = {
   getBadgeScanStatus: () => request('/account/badge-scan'),
   // Multipart (a photo), so it can't go through request(), which always sends JSON.
   scanProspectImage: async (campaignId, blob) => {
+    if (IS_DEMO) { const { demoRequest } = await import('../tutorial/fakeBackend'); return demoRequest('/account/prospects/scan', { method: 'POST', body: {} }); }
     const form = new FormData();
     form.append('campaignId', campaignId);
     form.append('image', blob, 'scan.jpg');
@@ -307,7 +317,11 @@ export const api = {
   getUserLinkedin: (id) => request(`/users/${id}/linkedin`),
   setUserLinkedin: (id, payload) => request(`/users/${id}/linkedin`, { method: 'PATCH', body: payload }),
   // Cheap reachability check of the cloud (no sign-in): throws a TypeError when the network itself fails.
-  pingCloud: async () => { const r = await fetch(`${API_BASE}/health`, { cache: 'no-store' }); return r.ok; },
+  pingCloud: async () => {
+    // tutorial mode: the cloud answers, unless the tutorial pretends the connection was lost (window.__demo 'cloudLost')
+    if (IS_DEMO) { if (window.__demo && window.__demo.get('cloudLost')) throw new TypeError('Failed to fetch'); return true; }
+    const r = await fetch(`${API_BASE}/health`, { cache: 'no-store' }); return r.ok;
+  },
   getRecentPlayers: (campaignId) => request(`/account/recent-players?campaignId=${encodeURIComponent(campaignId)}`),
   getBoxWifiPassword: () => request('/account/box-wifi-password'),
   setBoxWifiPassword: (password) => request('/account/box-wifi-password', { method: 'PUT', body: { password } }),
@@ -355,6 +369,7 @@ export const api = {
   // Returns an object URL for the account's current custom logo, or null if
   // none is set — caller is responsible for revoking it when done.
   getEmailLogoPreviewUrl: async () => {
+    if (IS_DEMO) return null; // tutorial mode: no custom logo, nothing to fetch
     const token = getToken();
     const res = await fetch(`${API_BASE}/account/email-logo`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},

@@ -28,6 +28,7 @@ import Calibration from './pages/Calibration';
 import History from './pages/History';
 import Settings from './pages/Settings';
 import Users from './pages/Users';
+import Park from './pages/Park';
 import UserDetail from './pages/UserDetail';
 import AppHealth from './pages/AppHealth';
 import Magic from './pages/Magic';
@@ -114,6 +115,7 @@ export default function App() {
           <Route path="/tutorials/:id" element={<PrivateRoute><TutorialPlayer /></PrivateRoute>} />
           <Route path="/users" element={<AdminRoute><Users /></AdminRoute>} />
           <Route path="/users/:id" element={<AdminRoute><UserDetail /></AdminRoute>} />
+          <Route path="/park" element={<AdminRoute><Park /></AdminRoute>} />
           <Route path="/health" element={<AdminRoute><AppHealth /></AdminRoute>} />
           <Route path="/magic" element={<AdminRoute><Magic /></AdminRoute>} />
           <Route path="/sequence" element={<AdminRoute><SequenceBuilder /></AdminRoute>} />

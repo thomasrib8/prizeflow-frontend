@@ -25,11 +25,11 @@ const NAV_ITEMS = [
   { to: '/launch', tKey: 'launch', icon: IconWheel },
   { to: '/rewards', tKey: 'redeem', icon: IconGift },
   { to: '/history', tKey: 'crm', icon: IconPeople },
-  { to: '/tutorials', tKey: 'tutorials', icon: IconBook },
 ];
 
 const ADMIN_NAV_ITEMS = [
   { to: '/users', tKey: 'users', icon: IconUsers, badgeKey: 'pendingCount' },
+  { to: '/park', tKey: 'park', icon: IconPark },
   { to: '/health', tKey: 'health', icon: IconHeart },
   { to: '/magic', tKey: 'magic', icon: IconMagic },
   { to: '/sequence', tKey: 'sequence', icon: IconSequence },
@@ -169,6 +169,10 @@ export default function Layout({ children }) {
           >
             {ADMIN_LANGUAGE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
+          <NavLink to="/tutorials" className={({ isActive }) => `nav-item settings-footer-link${isActive ? ' active' : ''}`}>
+            <IconBook />
+            <span>{t('nav.tutorials')}</span>
+          </NavLink>
           <NavLink to="/settings" className={({ isActive }) => `nav-item settings-footer-link${isActive ? ' active' : ''}`}>
             <IconSettings />
             <span>{t('nav.settings')}</span>
@@ -236,6 +240,9 @@ function IconSettings() {
 }
 function IconUsers() {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M17 21v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>;
+}
+function IconPark() {
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/><path d="M7 7h.01M7 17h.01"/></svg>;
 }
 function IconHeart() {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M20.8 8.6c0 4.6-8.8 10.4-8.8 10.4S3.2 13.2 3.2 8.6a4.6 4.6 0 0 1 8.8-1.8 4.6 4.6 0 0 1 8.8 1.8Z"/></svg>;

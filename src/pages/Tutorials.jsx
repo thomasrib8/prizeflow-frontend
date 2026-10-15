@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { Card, Button } from '../components/ui';
 import { useAdmin } from '../hooks/useAdmin';
-import { TUTORIALS, tutorialText } from '../tutorial/tutorials';
+import { TUTORIAL_GROUPS, tutorialText } from '../tutorial/tutorials';
 import TutorialIcon from '../tutorial/icons';
 import './tutorials.css';
 
@@ -16,7 +16,7 @@ export default function Tutorials() {
   const lang = (i18n.language || 'fr').slice(0, 2);
   const [guideBusy, setGuideBusy] = useState(false);
   const [error, setError] = useState('');
-  const visible = TUTORIALS.filter((x) => !x.admin || isAdmin);
+  const groups = TUTORIAL_GROUPS.map((g) => ({ ...g, items: g.items.filter((x) => !x.admin || isAdmin) })).filter((g) => g.items.length > 0);
 
   async function downloadGuide() {
     setGuideBusy(true); setError('');
@@ -33,22 +33,27 @@ export default function Tutorials() {
       </div>
       {error && <div className="error-banner">{error}</div>}
 
-      <div className="tuto-grid">
-        {visible.map((tuto) => {
-          const txt = tutorialText(tuto, lang);
-          return (
-            <Link key={tuto.id} to={`/tutorials/${tuto.id}`} className="tuto-card">
-              <span className="tuto-card-icon"><TutorialIcon name={tuto.icon} /></span>
-              <span className="tuto-card-title">{txt.title}</span>
-              <span className="tuto-card-sum">{txt.summary}</span>
-              <span className="tuto-card-meta">
-                <span>{t('tutorials.stepsCount', { count: tuto.steps.length })}</span>
-                {tuto.admin && <span className="tuto-chip">{t('tutorials.adminOnly')}</span>}
-              </span>
-            </Link>
-          );
-        })}
-      </div>
+      {groups.map((g) => (
+        <section key={g.id} className="tuto-group">
+          <h2 className="tuto-section">{t(`tutorials.group_${g.id}`)}</h2>
+          <div className="tuto-grid">
+            {g.items.map((tuto) => {
+              const txt = tutorialText(tuto, lang);
+              return (
+                <Link key={tuto.id} to={`/tutorials/${tuto.id}`} className="tuto-card">
+                  <span className="tuto-card-icon"><TutorialIcon name={tuto.icon} /></span>
+                  <span className="tuto-card-title">{txt.title}</span>
+                  <span className="tuto-card-sum">{txt.summary}</span>
+                  <span className="tuto-card-meta">
+                    <span>{t('tutorials.stepsCount', { count: tuto.steps.length })}</span>
+                    {tuto.admin && <span className="tuto-chip">{t('tutorials.adminOnly')}</span>}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      ))}
 
       {isAdmin && (
         <>

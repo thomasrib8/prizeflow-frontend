@@ -8,11 +8,11 @@ import { api } from '../api/client';
 import { Button } from './ui';
 import './wifi-qr.css';
 
-const SSID = 'Spark-Local';
+export const SSID = 'Spark-Local';
 // WIFI:T:WPA;S:<name>;P:<password>;;  — \ ; , : " must be escaped for the phone to read the password right
 const esc = (s) => String(s).replace(/([\;,:"])/g, '\\$1');
-const SETUP_PAGE = 'http://sparkoff.box/wifi';
-const wifiString = (ssid, pw) => `WIFI:T:WPA;S:${esc(ssid)};P:${esc(pw)};;`;
+export const SETUP_PAGE = 'http://sparkoff.box/wifi';
+export const wifiString = (ssid, pw) => `WIFI:T:WPA;S:${esc(ssid)};P:${esc(pw)};;`;
 
 export default function WifiQrSheet({ onClose }) {
   const { t } = useTranslation('admin');
@@ -22,19 +22,20 @@ export default function WifiQrSheet({ onClose }) {
   const [img2, setImg2] = useState(''); // second code: opens the box's Wi-Fi setup page once connected
   const [loaded, setLoaded] = useState(false); // the remembered password has been read (nothing is saved before that)
   const [saved, setSaved] = useState(''); // what the server holds
+  const [locked, setLocked] = useState(false); // the box is activated: the real password is on the box, only the administrator changes it
   const ready = pw.length >= 8;
 
   // The password is remembered (encrypted, on the account): prefilled here, saved a moment after you stop typing.
   useEffect(() => {
     let alive = true;
-    api.getBoxWifiPassword().then((r) => { if (alive) { setPw(r.password || ''); setSaved(r.password || ''); } }).catch(() => {}).then(() => { if (alive) setLoaded(true); });
+    api.getBoxWifiPassword().then((r) => { if (alive) { setPw(r.password || ''); setSaved(r.password || ''); setLocked(!!r.locked); } }).catch(() => {}).then(() => { if (alive) setLoaded(true); });
     return () => { alive = false; };
   }, []);
   useEffect(() => {
-    if (!loaded || pw === saved || (pw !== '' && pw.length < 8)) return undefined;
+    if (!loaded || locked || pw === saved || (pw !== '' && pw.length < 8)) return undefined;
     const id = setTimeout(() => { api.setBoxWifiPassword(pw).then(() => setSaved(pw)).catch(() => {}); }, 900);
     return () => clearTimeout(id);
-  }, [pw, saved, loaded]);
+  }, [pw, saved, loaded, locked]);
 
   useEffect(() => {
     QRCode.toDataURL(SETUP_PAGE, { errorCorrectionLevel: 'M', margin: 1, width: 720 }).then(setImg2).catch(() => {});
@@ -66,7 +67,7 @@ export default function WifiQrSheet({ onClose }) {
           <div className="field" style={{ marginBottom: 6 }}>
             <label htmlFor="wq-pw">{t('settings.offlineMode.qrPasswordLabel')}</label>
             <div className="wq-pwwrap">
-              <input id="wq-pw" type={show ? 'text' : 'password'} autoComplete="off" spellCheck={false} value={pw} onChange={(e) => setPw(e.target.value)} placeholder={t('settings.offlineMode.qrPasswordPlaceholder')} />
+              <input id="wq-pw" type={show ? 'text' : 'password'} autoComplete="off" spellCheck={false} value={pw} readOnly={locked} onChange={(e) => setPw(e.target.value)} placeholder={t('settings.offlineMode.qrPasswordPlaceholder')} />
               <button type="button" className="wq-eye" onClick={() => setShow((v) => !v)} aria-label={show ? t('settings.offlineMode.hideCode') : t('settings.offlineMode.showCode')}>
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   {show ? (<><path d="M3 3l18 18" /><path d="M10.6 6.2A9.8 9.8 0 0 1 12 6c5 0 8.5 4.2 9.5 6a14 14 0 0 1-2.6 3.2M6.5 7.5A14 14 0 0 0 2.5 12c1 1.8 4.5 6 9.5 6 1.5 0 2.8-.4 4-1" /><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" /></>) : (<><path d="M2.5 12C3.5 10.2 7 6 12 6s8.5 4.2 9.5 6c-1 1.8-4.5 6-9.5 6s-8.5-4.2-9.5-6z" /><circle cx="12" cy="12" r="3" /></>)}
@@ -74,6 +75,7 @@ export default function WifiQrSheet({ onClose }) {
               </button>
             </div>
           </div>
+          {locked && <p className="wq-note" style={{ color: '#B45309' }}>{t('settings.offlineMode.qrLocked')}</p>}
           <p className="wq-note">{t('settings.offlineMode.qrKeptLocal')}{ready && pw === saved ? ` ✓ ${t('settings.offlineMode.qrRemembered')}` : ''}</p>
           <div className="wq-actions">
             <Button type="button" variant="secondary" onClick={onClose}>{t('common.close')}</Button>
