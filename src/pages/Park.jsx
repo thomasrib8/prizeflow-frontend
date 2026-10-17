@@ -7,6 +7,7 @@ import { useConfirm } from '../components/ConfirmDialog';
 import ReturnForm from '../components/wheel/ReturnForm';
 import InspectionList from '../components/wheel/InspectionList';
 import WheelLabel from '../components/wheel/WheelLabel';
+import PackWizard from '../components/PackWizard';
 
 const STATUS_TONE = { available: 'blue', rented: 'green', maintenance: 'orange' };
 const STATUS_TKEY = { available: 'statusAvailable', rented: 'statusRented', maintenance: 'statusMaintenance' };
@@ -37,77 +38,6 @@ function BoxCell({ wheel }) {
     <div>
       <div style={MONO}>{b.name}</div>
       <div style={{ marginTop: 3 }}>{state}</div>
-    </div>
-  );
-}
-
-function AddWheelModal({ onClose, onCreated }) {
-  const { t } = useTranslation('admin');
-  const [mode, setMode] = useState('generate');
-  const [series, setSeries] = useState('1');
-  const [model, setModel] = useState('PF-ALPHA-V1');
-  const [serial, setSerial] = useState('');
-  const [key, setKey] = useState('');
-  const [notes, setNotes] = useState('');
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
-
-  async function submit() {
-    setBusy(true);
-    setError('');
-    try {
-      const payload = mode === 'generate'
-        ? { series, notes }
-        : { modelNumber: model, serialNumber: serial, securityKey: key, notes };
-      const w = await api.createWheel(payload);
-      onCreated(w);
-    } catch (e) {
-      setError(e.message);
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  const input = { width: '100%', padding: '8px 10px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 14, boxSizing: 'border-box' };
-  const label = { display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', margin: '12px 0 4px' };
-  const tab = (active) => ({ flex: 1, padding: '8px 10px', borderRadius: 8, border: '1px solid ' + (active ? 'var(--blue)' : '#E2E8F0'), background: active ? 'var(--blue-pale)' : '#fff', color: active ? 'var(--blue)' : '#475569', fontWeight: 600, fontSize: 13, cursor: 'pointer' });
-
-  return (
-    <div className="modal-overlay" onClick={onClose} style={{ zIndex: 300 }}>
-      <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ '--modal-w': '480px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#03041A' }}>{t('park.addTitle')}</h3>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 18, color: '#94A3B8', cursor: 'pointer' }}>✕</button>
-        </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button type="button" style={tab(mode === 'generate')} onClick={() => setMode('generate')}>{t('park.addGenerate')}</button>
-          <button type="button" style={tab(mode === 'typed')} onClick={() => setMode('typed')}>{t('park.addTyped')}</button>
-        </div>
-        {mode === 'generate' ? (
-          <>
-            <label style={label}>{t('park.seriesLabel')}</label>
-            <input style={input} value={series} onChange={(e) => setSeries(e.target.value)} inputMode="numeric" />
-            <p style={{ fontSize: 12, color: '#64748B', margin: '6px 0 0' }}>{t('park.seriesHelp')}</p>
-          </>
-        ) : (
-          <>
-            <p style={{ fontSize: 12, color: '#64748B', margin: '10px 0 0' }}>{t('park.typedHelp')}</p>
-            <label style={label}>{t('park.modelLabel')}</label>
-            <input style={input} value={model} onChange={(e) => setModel(e.target.value)} />
-            <label style={label}>{t('park.serialLabel')}</label>
-            <input style={{ ...input, ...MONO }} value={serial} onChange={(e) => setSerial(e.target.value)} placeholder="PF260000152" />
-            <label style={label}>{t('park.keyLabel')}</label>
-            <input style={{ ...input, ...MONO }} value={key} onChange={(e) => setKey(e.target.value)} placeholder="K8Q7F3" />
-          </>
-        )}
-        <label style={label}>{t('park.notesLabel')}</label>
-        <input style={input} value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={500} />
-        {error && <div className="error-banner" style={{ marginTop: 12 }}>{error}</div>}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 18 }}>
-          <Button variant="ghost" onClick={onClose}>{t('park.cancelBtn')}</Button>
-          <Button disabled={busy} onClick={submit}>{t('park.createBtn')}</Button>
-        </div>
-      </div>
     </div>
   );
 }
@@ -176,7 +106,7 @@ function WheelHistory({ wheel, navigate }) {
   );
 }
 
-function WheelDetailModal({ wheelId, wheels, onClose, onChanged }) {
+function WheelDetailModal({ wheelId, wheels, onClose, onChanged, onPrepare }) {
   const { t } = useTranslation('admin');
   const navigate = useNavigate();
   const [confirm, confirmDialog] = useConfirm();
@@ -221,7 +151,13 @@ function WheelDetailModal({ wheelId, wheels, onClose, onChanged }) {
     if (text && !(await confirm(text, { danger: true, confirmLabel: t('park.reassignBtn') }))) return;
     setBusy(true); setError(''); setMsg('');
     try {
-      await api.assignWheel(wheelId, clientId);
+      try {
+        await api.assignWheel(wheelId, clientId);
+      } catch (e) {
+        // the pack's box has not confirmed the erase of the previous client: the admin may insist (the new client's data still waits for the erase)
+        if (e.code !== 'WIPE_PENDING' || !(await confirm(t('park.forceConfirm'), { danger: true, confirmLabel: t('park.forceBtn') }))) throw e;
+        await api.assignWheel(wheelId, clientId, { force: true });
+      }
       setClientId('');
       setMsg(t('park.assignedMsg'));
       load(); onChanged();
@@ -271,6 +207,11 @@ function WheelDetailModal({ wheelId, wheels, onClose, onChanged }) {
                   : t('park.boxResetDoneText', { date: formatDT(w.boxReset.confirmedAt) })}
               </p>
             )}
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', margin: '12px 0 0' }}>
+              <Badge tone={w.packReady ? 'green' : 'orange'}>{w.packReady ? t('park.packReady') : t('park.packToPrepare')}</Badge>
+              <Button size="sm" variant={w.packReady ? 'ghost' : 'secondary'} onClick={() => onPrepare(w.id)}>{w.packReady ? t('park.packReviewBtn') : t('park.packPrepareBtn')}</Button>
+            </div>
 
             <div style={{ fontSize: 12, fontWeight: 700, color: '#03041A', margin: '16px 0 6px' }}>{t('park.notesLabel')}</div>
             <textarea
@@ -344,9 +285,11 @@ export default function Park() {
   const navigate = useNavigate();
   const [wheels, setWheels] = useState(null);
   const [error, setError] = useState('');
-  const [adding, setAdding] = useState(false);
+  const [wizard, setWizard] = useState(null); // null | { wheelId: string | null }
   const [openId, setOpenId] = useState(null);
   const [labelOf, setLabelOf] = useState(null);
+  const [guideBusy, setGuideBusy] = useState(false);
+  async function downloadGuide() { setGuideBusy(true); setError(''); try { await api.downloadCommissioningGuide(); } catch (e) { setError(e.message); } finally { setGuideBusy(false); } }
 
   function load() { api.listWheels().then(setWheels).catch((e) => setError(e.message)); }
   useEffect(() => {
@@ -364,7 +307,10 @@ export default function Park() {
           <h1 className="page-title">{t('nav.park')}</h1>
           <p className="page-subtitle">{t('park.pageSubtitle')}</p>
         </div>
-        <Button onClick={() => setAdding(true)}>{t('park.addBtn')}</Button>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <Button variant="secondary" disabled={guideBusy} onClick={downloadGuide}>{t('park.guideBtn')}</Button>
+          <Button onClick={() => setWizard({ wheelId: null })}>{t('park.addBtn')}</Button>
+        </div>
       </div>
       {error && <div className="error-banner">{error}</div>}
       {!wheels && !error && <p className="page-subtitle">{t('common.loading')}</p>}
@@ -381,7 +327,7 @@ export default function Park() {
       {wheels && (
         <Card className="mt-card">
           {wheels.length === 0 ? (
-            <EmptyState title={t('park.empty')} description={t('park.emptyDesc')} action={<Button onClick={() => setAdding(true)}>{t('park.addBtn')}</Button>} />
+            <EmptyState title={t('park.empty')} description={t('park.emptyDesc')} action={<Button onClick={() => setWizard({ wheelId: null })}>{t('park.addBtn')}</Button>} />
           ) : (
             <table className="data-table">
               <thead>
@@ -393,7 +339,10 @@ export default function Park() {
               <tbody>
                 {wheels.map((w) => (
                   <tr key={w.id} style={{ cursor: 'pointer' }} onClick={() => setOpenId(w.id)}>
-                    <td style={{ fontWeight: 600, ...MONO }}>{w.serialNumber}</td>
+                    <td style={{ fontWeight: 600, ...MONO }}>
+                      {w.serialNumber}
+                      {!w.packReady && <div style={{ marginTop: 3, fontFamily: 'inherit' }}><Badge tone="orange">{t('park.packToPrepare')}</Badge></div>}
+                    </td>
                     <td>{w.modelNumber}</td>
                     <td><Badge tone={STATUS_TONE[w.status]}>{t(`park.${STATUS_TKEY[w.status]}`)}</Badge></td>
                     <td onClick={(e) => e.stopPropagation()}>
@@ -417,9 +366,9 @@ export default function Park() {
         </Card>
       )}
 
-      {adding && <AddWheelModal onClose={() => setAdding(false)} onCreated={(w) => { setAdding(false); setLabelOf(w); load(); }} />}
+      {wizard && <PackWizard wheelId={wizard.wheelId} onClose={() => { setWizard(null); load(); }} onChanged={load} onLabel={(w) => setLabelOf(w)} />}
       {labelOf && <WheelLabel wheel={labelOf} onClose={() => setLabelOf(null)} />}
-      {openId && <WheelDetailModal wheelId={openId} wheels={wheels} onClose={() => setOpenId(null)} onChanged={load} />}
+      {openId && <WheelDetailModal wheelId={openId} wheels={wheels} onClose={() => setOpenId(null)} onChanged={load} onPrepare={(id) => { setOpenId(null); setWizard({ wheelId: id }); }} />}
     </div>
   );
 }

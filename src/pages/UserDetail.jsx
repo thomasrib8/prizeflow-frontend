@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import BoxActivationCard from '../components/BoxActivationCard';
 import LinkedInAdminCard from '../components/LinkedInAdminCard';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -7,7 +6,7 @@ import { api } from '../api/client';
 import { Card, Button, Badge, EmptyState } from '../components/ui';
 import WheelDiagnosticsRows from '../components/WheelDiagnosticsRows';
 import { useConfirm } from '../components/ConfirmDialog';
-import SetupWizard from '../components/SetupWizard';
+import PackAssignment from '../components/PackAssignment';
 import ReturnForm from '../components/wheel/ReturnForm';
 import InspectionList from '../components/wheel/InspectionList';
 
@@ -40,12 +39,8 @@ export default function UserDetail() {
   const [newNote, setNewNote] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
-  const [tokenCopied, setTokenCopied] = useState(false);
-  const [showSetupHelp, setShowSetupHelp] = useState(false);
   const [inspections, setInspections] = useState([]);
   const [returnWheel, setReturnWheel] = useState(null);
-  const boxNameOf = (serial) => (/(\d{6})$/.test(serial || '') ? `spark-box-${/(\d{6})$/.exec(serial)[1]}` : '');
-  const [guideBusy, setGuideBusy] = useState(false);
 
   function load() {
     api.getUserDetail(id).then(setDetail).catch((e) => setError(e.message));
@@ -97,18 +92,6 @@ export default function UserDetail() {
       setError(err.message);
       setBusy(false);
     }
-  }
-
-  async function handleDownloadGuide() {
-    setGuideBusy(true); setError('');
-    try { await api.downloadCommissioningGuide(); } catch (e) { setError(e.message); } finally { setGuideBusy(false); }
-  }
-
-  async function handleCopyAgentToken() {
-    if (!detail.agent_token) return;
-    await navigator.clipboard.writeText(detail.agent_token);
-    setTokenCopied(true);
-    setTimeout(() => setTokenCopied(false), 2000);
   }
 
   async function handleAddNote(e) {
@@ -174,39 +157,7 @@ export default function UserDetail() {
         <>
           {/* Hardware assignment: what this client has right now, the step-by-step commissioning (inline, resumes where things stand),
               the returns history, and the technical details folded away. */}
-          <div className="ud-guide">
-            <div className="ud-guide-icon" aria-hidden="true">📄</div>
-            <div style={{ flex: 1, minWidth: 220 }}>
-              <div className="ud-guide-title">{t('userDetail.guideTitle')}</div>
-              <div className="ud-guide-desc">{t('userDetail.guideDesc')}</div>
-            </div>
-            <Button disabled={guideBusy} onClick={handleDownloadGuide}>{guideBusy ? t('userDetail.guideDownloading') : t('userDetail.guideBtn')}</Button>
-          </div>
-
-          <div className="ud-hw-hero">
-            <div>
-              <div className="ud-hw-kicker">{t('userDetail.hwKicker')}</div>
-              {detail.wheel_serial_number ? (
-                <>
-                  <div className="ud-hw-serial">{detail.wheel_serial_number}</div>
-                  <div className="ud-hw-sub">{detail.wheel_model_number}{boxNameOf(detail.wheel_serial_number) ? ` · ${boxNameOf(detail.wheel_serial_number)}` : ''}</div>
-                </>
-              ) : (
-                <>
-                  <div className="ud-hw-serial" style={{ fontSize: 18 }}>{t('userDetail.noWheelAssigned')}</div>
-                  <div className="ud-hw-sub">{t('userDetail.hwNoneHint')}</div>
-                </>
-              )}
-            </div>
-            <div className="ud-hw-actions">
-              {overview && detail.wheel_serial_number && (
-                <span className={`ud-hw-pill ${overview.wheel.connected ? 'on' : ''}`}>{overview.wheel.connected ? t('userDetail.onlineLabel') : t('userDetail.offlineLabel')}</span>
-              )}
-              {detail.wheel_serial_number && <button type="button" className="ud-hw-btn danger" disabled={busy} onClick={handleEndRental}>{t('userDetail.endRentalBtn')}</button>}
-            </div>
-          </div>
-
-          <SetupWizard inline userId={id} onClose={load} onChanged={load} />
+          <PackAssignment userId={id} clientLabel={detail.company || detail.name || detail.email} onChanged={load} onEndRental={handleEndRental} />
 
           <Card title={t('wheelOps.inspections')} className="mt-card">
             <InspectionList items={inspections} showWheel />
@@ -214,35 +165,6 @@ export default function UserDetail() {
 
           <details className="ud-adv">
             <summary>{t('userDetail.hwAdvanced')}</summary>
-          <div className="ud-token-row">
-          <Card title={t('userDetail.wheelTokenTitle')} className="mt-card">
-            <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px' }}>
-              {t('userDetail.wheelTokenDesc')}{' '}
-              <button
-                type="button"
-                onClick={() => setShowSetupHelp(true)}
-                style={{ background: 'none', border: 'none', padding: 0, color: '#002881', textDecoration: 'underline', cursor: 'pointer', fontSize: 13, fontFamily: 'inherit' }}
-              >
-                {t('userDetail.setupHelpLink')}
-              </button>
-            </p>
-            {detail.agent_token ? (
-              <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                <code style={{
-                  flex: 1, padding: '9px 12px', background: '#F8FAFC', border: '1px solid #E2E8F0',
-                  borderRadius: 8, fontSize: 13, wordBreak: 'break-all',
-                }}>{detail.agent_token}</code>
-                <Button variant="ghost" onClick={handleCopyAgentToken}>{tokenCopied ? t('userDetail.copiedLabel') : t('userDetail.copyLabel')}</Button>
-              </div>
-            ) : (
-              <p className="page-subtitle">{t('userDetail.tokenNotGenerated')}</p>
-            )}
-          </Card>
-
-          </div>
-
-          <BoxActivationCard userId={id} />
-
           <Card title={t('userDetail.wheelIdentityTitle')} className="mt-card">
             {detail.wheel_serial_number ? (
               <div style={{ fontSize: 13, color: '#03041A', lineHeight: 1.9 }}>
@@ -262,46 +184,6 @@ export default function UserDetail() {
         </>
       )}
 
-      {showSetupHelp && (
-        <div
-          onClick={() => setShowSetupHelp(false)}
-          className="modal-overlay"
-          style={{ zIndex: 300 }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="modal-card"
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#03041A' }}>{t('userDetail.setupHelpTitle')}</h3>
-              <button onClick={() => setShowSetupHelp(false)} style={{ background: 'none', border: 'none', fontSize: 18, color: '#94A3B8', cursor: 'pointer' }}>✕</button>
-            </div>
-
-            <div style={{ fontSize: 13, color: '#334155', lineHeight: 1.7 }}>
-              <h4 style={{ fontSize: 13, fontWeight: 700, color: '#03041A', margin: '0 0 6px' }}>{t('userDetail.setupHelpStep1Title')}</h4>
-              <p>{t('userDetail.setupHelpStep1Desc')}</p>
-
-              <h4 style={{ fontSize: 13, fontWeight: 700, color: '#03041A', margin: '16px 0 6px' }}>{t('userDetail.setupHelpStep2Title')}</h4>
-              <p>{t('userDetail.setupHelpStep2Line1')}</p>
-              <pre style={{ background: '#03041A', color: '#E2E8F0', padding: '10px 12px', borderRadius: 8, fontSize: 12, overflowX: 'auto' }}>pbpaste | ssh pi@&lt;adresse-du-pi&gt; 'bash -s'</pre>
-              <p>{t('userDetail.setupHelpStep2Line2')}</p>
-
-              <h4 style={{ fontSize: 13, fontWeight: 700, color: '#03041A', margin: '16px 0 6px' }}>{t('userDetail.setupHelpStep3Title')}</h4>
-              <p>{t('userDetail.setupHelpStep3Line1')}</p>
-              <p>{t('userDetail.setupHelpStep3Line2')}</p>
-
-              <h4 style={{ fontSize: 13, fontWeight: 700, color: '#03041A', margin: '16px 0 6px' }}>{t('userDetail.setupHelpStep4Title')}</h4>
-              <p>{t('userDetail.setupHelpStep4Desc')}</p>
-
-              <p style={{ marginTop: 16 }}>
-                <button type="button" onClick={handleDownloadGuide} disabled={guideBusy} style={{ background: 'none', border: 'none', padding: 0, color: '#002881', textDecoration: 'underline', cursor: 'pointer', fontSize: 13, fontFamily: 'inherit' }}>
-                  {t('userDetail.setupHelpGuideLink')}
-                </button>
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* A. Operational overview — no guest personal data, ever. */}
       {module === 'overview' && (

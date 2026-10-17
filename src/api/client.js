@@ -148,15 +148,13 @@ export const api = {
   listUsers: () => request('/users'),
   getUsersPendingCount: () => request('/users/pending-count'),
   getWheelIdentities: () => request('/users/wheel-identities'),
-  generateWheelIdentity: (id, series) => request(`/users/${id}/wheel-identity`, { method: 'POST', body: { series } }),
-  recordWheelIdentity: (id, modelNumber, serialNumber, securityKey) =>
-    request(`/users/${id}/wheel-identity`, { method: 'POST', body: { modelNumber, serialNumber, securityKey } }),
   // Wheel park (rental fleet), admin only.
   listWheels: () => request('/wheels'),
   createWheel: (payload) => request('/wheels', { method: 'POST', body: payload }),
   getWheel: (id) => request(`/wheels/${id}`),
   updateWheel: (id, payload) => request(`/wheels/${id}`, { method: 'PATCH', body: payload }),
-  assignWheel: (id, userId) => request(`/wheels/${id}/assign`, { method: 'POST', body: { userId } }),
+  assignWheel: (id, userId, params = {}) => request(`/wheels/${id}/assign`, { method: 'POST', body: { userId, ...params } }),
+  updateWheelAssignment: (id, params) => request(`/wheels/${id}/assignment`, { method: 'PATCH', body: params }),
   endWheelRental: (id, inspection) => request(`/wheels/${id}/end-rental`, { method: 'POST', body: { inspection } }),
   wheelInspections: (ownerId) => request(`/wheels/inspections?ownerId=${encodeURIComponent(ownerId)}`),
   // Photos of the return inspection: the browser resizes the picture to a JPEG blob first; sent as a raw body.
@@ -240,12 +238,14 @@ export const api = {
   exportCampaignGiftDistribution: (id) => downloadFile(`/campaigns/${id}/gift-distribution.csv`),
   downloadCommissioningGuide: () => downloadFile('/admin/guides/mise-en-service'),
   // One-time activation code for an event box (admin, from the client's page)
-  prepareBoxActivation: (userId) => request('/box-activation/prepare', { method: 'POST', body: { userId } }),
   getBoxActivation: (userId) => request(`/box-activation/${encodeURIComponent(userId)}`),
-  getBoxWifiForClient: (userId) => request(`/box-activation/${encodeURIComponent(userId)}/wifi`),
-  setBoxWifiForClient: (userId, password) => request(`/box-activation/${encodeURIComponent(userId)}/wifi`, { method: 'PUT', body: { password } }),
-  getWheelScript: (userId) => request(`/box-activation/${encodeURIComponent(userId)}/wheel-script`),
-  revokeBoxActivation: (userId) => request(`/box-activation/${encodeURIComponent(userId)}`, { method: 'DELETE' }),
+  // Pack preparation (Parc hardware wizard): per wheel, not per client.
+  getPackState: (wheelId) => request(`/box-activation/pack/${encodeURIComponent(wheelId)}`),
+  getPackWifi: (wheelId) => request(`/box-activation/pack/${encodeURIComponent(wheelId)}/wifi`),
+  setPackWifi: (wheelId, password) => request(`/box-activation/pack/${encodeURIComponent(wheelId)}/wifi`, { method: 'PUT', body: { password } }),
+  getPackWheelScript: (wheelId) => request(`/box-activation/pack/${encodeURIComponent(wheelId)}/wheel-script`),
+  preparePackBox: (wheelId) => request(`/box-activation/pack/${encodeURIComponent(wheelId)}/prepare`, { method: 'POST', body: {} }),
+  markPackReady: (wheelId, boxAlreadyActivated) => request(`/box-activation/pack/${encodeURIComponent(wheelId)}/ready`, { method: 'POST', body: { boxAlreadyActivated: !!boxAlreadyActivated } }),
   downloadCampaignQrPdf: (id) => downloadFile(`/campaigns/${id}/qr.pdf`),
   // Manual fallback for when scanning the QR fails — an already-logged-in
   // operator looks up a reward by ID and gets back the same signed code
