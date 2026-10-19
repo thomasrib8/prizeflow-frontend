@@ -1,0 +1,31 @@
+/* Launch page: header pill, live queue, last players (same family as the CRM list). */
+.lc-pill { display: inline-flex; align-items: center; gap: 7px; padding: 7px 14px; border-radius: 99px; font-size: 12.5px; font-weight: 700; color: #B91C1C; background: #FEE2E2; border: 1px solid #FCA5A5; }
+.lc-pill::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.lc-pill.on { color: #047857; background: #D1FAE5; border-color: #6EE7B7; }
+.lc-queue { display: flex; flex-direction: column; gap: 18px; }
+.lc-label { font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #94A3B8; margin-bottom: 8px; }
+.lc-empty { margin: 0; font-size: 13px; color: #94A3B8; }
+.lc-now { border: 1px solid #BFD4FF; background: linear-gradient(135deg, #EAF1FF, #F7FAFF); border-radius: 14px; padding: 14px 16px; }
+.lc-now-top { display: flex; align-items: center; gap: 12px; }
+.lc-will { margin-top: 2px; font-size: 12.5px; color: #64748B; } .lc-will strong { color: #0055F8; }
+.lc-state { padding: 4px 11px; border-radius: 99px; font-size: 11.5px; font-weight: 700; background: #FEF3C7; color: #B45309; white-space: nowrap; }
+.lc-state.spin { background: #DBEAFE; color: #0055F8; }
+.lc-retry { margin-top: 8px; font-size: 12px; color: #B91C1C; }
+.lc-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.lc-btn { border: 0; border-radius: 10px; padding: 11px 16px; min-height: 44px; font: inherit; font-size: 13px; font-weight: 700; color: #fff; cursor: pointer; }
+.lc-btn.warn { background: #F59E0B; } .lc-btn.danger { background: #EF4444; }
+.lc-btn:disabled { opacity: .55; cursor: not-allowed; }
+.lc-wait { display: flex; gap: 8px; flex-wrap: wrap; }
+.lc-chip { display: inline-flex; align-items: center; gap: 7px; padding: 5px 12px 5px 6px; border-radius: 99px; background: #F1F4FB; color: #334155; font-size: 13px; font-weight: 600; }
+.lc-chip i { width: 22px; height: 22px; border-radius: 50%; background: #0055F8; color: #fff; font-style: normal; font-size: 11px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; }
+.lc-results { display: flex; flex-direction: column; }
+.lc-result { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-bottom: 1px solid #EEF2FA; font-size: 13px; }
+.lc-result:last-child { border-bottom: 0; } .lc-result b { color: #002881; } .lc-result span { color: #64748B; text-align: right; }
+.lc-search { display: flex; gap: 10px; align-items: center; margin-bottom: 14px; }
+.lc-search input { flex: 1; padding: 9px 14px; border: 1.5px solid #E3E9F7; border-radius: 99px; font: inherit; font-size: 13px; background: #fff; }
+.lc-search input:focus { outline: none; border-color: #0055F8; box-shadow: 0 0 0 3px rgba(0, 85, 248, .12); }
+.lc-list .crm-head, .lc-list .crm-row { grid-template-columns: minmax(0, 2fr) minmax(0, 1.6fr) minmax(0, 1fr) 70px; }
+.lc-list .crm-row { grid-template-areas: "who gift seg stars"; }
+@container (max-width: 700px) {
+  .lc-list .crm-row { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "who stars" "gift seg"; }
+}

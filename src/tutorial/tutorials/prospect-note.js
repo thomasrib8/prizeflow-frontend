@@ -15,8 +15,8 @@ export default {
   steps: [
     { // 1
       async run(c) {
-        await c.waitFor('table.data-table tbody tr'); await c.sleep(400);
-        await c.click('table.data-table tbody tr:nth-child(2)');
+        await c.waitFor('.lc-list .crm-row'); await c.sleep(400);
+        await c.click('.lc-list .crm-row:nth-child(3)');
         await c.waitFor('.pc'); await c.sleep(1200);
         await c.point('.pc-head', 1800);
       },
@@ -52,7 +52,7 @@ export default {
       async run(c) {
         await c.click('.pc-actionbar .btn-primary');
         await c.waitFor(() => (document.querySelector('.pc') ? null : document.body)); await c.sleep(900);
-        await c.point('table.data-table tbody tr:nth-child(2)', 2200);
+        await c.point('.lc-list .crm-row:nth-child(3)', 2200);
       },
     },
   ],

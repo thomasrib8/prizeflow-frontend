@@ -734,7 +734,8 @@
     "emptyTitle": "No campaigns yet",
     "emptyDescription": "Create your first campaign to configure gifts and stock.",
     "emptyFilteredTitle": "No {{status}} campaigns",
-    "emptyFilteredDescription": "Try a different filter."
+    "emptyFilteredDescription": "Try a different filter.",
+    "searchPlaceholder": "Search a campaign…"
   },
   "settings": {
     "pageTitle": "Settings",
@@ -989,7 +990,8 @@
       "addPack": "Add the pack",
       "used": "used"
     },
-    "tabCatalog": "Events catalog"
+    "tabCatalog": "Events catalog",
+    "tabLinks": "Link settings"
   },
   "nav": {
     "openMenuAriaLabel": "Open menu",

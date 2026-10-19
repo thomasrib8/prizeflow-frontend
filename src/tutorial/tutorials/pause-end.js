@@ -7,10 +7,10 @@ export default {
   start: '/campaigns',
   steps: [
     { // 1
-      async run(c) { await c.point('table.data-table', 1800); },
+      async run(c) { await c.point('.cp-list', 1800); },
     },
     { // 2
-      async run(c) { await c.click('tbody tr:first-child a.btn'); await c.waitFor('.camp-actions .btn-success'); await c.sleep(600); },
+      async run(c) { await c.click('.cp-row'); await c.waitFor('.camp-actions .btn-success'); await c.sleep(600); },
     },
     { // 3
       async run(c) { await c.click('.camp-actions .btn-success'); await c.waitFor('.camp-actions .btn-warning'); await c.sleep(500); },

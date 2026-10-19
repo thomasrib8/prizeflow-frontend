@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
-import { Card, Badge, Button, EmptyState } from '../components/ui';
+import { Card, Button, EmptyState } from '../components/ui';
 import { useWheelSocket } from '../hooks/useWheelSocket';
 import { useGuestFlow } from '../hooks/useGuestFlow';
 import { useLaunchQueue, toggleValue } from '../hooks/useLaunchQueue';
@@ -16,6 +16,16 @@ import { OfflineReviews, useOfflineBox } from '../components/OfflineBoxStatus';
 import ProspectCard from '../components/ProspectCard';
 import NewProspectModal from '../components/NewProspectModal';
 import FilterGroup from '../components/FilterGroup';
+import './crm.css';
+import './launch.css';
+
+const AVATARS = [['#0055F8', '#002881'], ['#00B0FF', '#0055F8'], ['#7AA8FF', '#0055F8'], ['#002881', '#0B1437'], ['#1AA864', '#0D9488'], ['#9333EA', '#4F46E5']];
+function avatarGradient(seed) {
+  let h = 0; for (const ch of String(seed || '')) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  const [a, b] = AVATARS[h % AVATARS.length];
+  return `linear-gradient(135deg, ${a}, ${b})`;
+}
+const initialsOf = (p) => `${(p.first_name || '').trim().charAt(0)}${(p.last_name || '').trim().charAt(0)}` || (p.email || '?').charAt(0);
 
 // A shared tablet cycles through walk-up guests one after another, so unlike
 // the personal-phone guest page: never persist the session, and auto-return
@@ -129,7 +139,7 @@ export default function LaunchCampaign() {
   }
 
   return (
-    <div>
+    <div className="ap lc">
       {(cloudLost || wheelLost) && <CloudLostBanner reason={cloudLost ? 'cloud' : 'wheel'} kioskUrl={q.campaign ? boxKioskUrl(q.campaign.public_token) : null} />}
       <div className="page-header launch-header">
         <div>
@@ -137,7 +147,7 @@ export default function LaunchCampaign() {
           <p className="page-subtitle">{t('launchCampaign.pageSubtitle')}</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-          <Badge tone={agentConnected ? 'green' : 'red'}>{agentConnected ? t('pwa.wheelReady') : t('pwa.wheelOffline')}</Badge>
+          <span className={`lc-pill${agentConnected ? ' on' : ''}`}>{agentConnected ? t('pwa.wheelReady') : t('pwa.wheelOffline')}</span>
           {q.campaign && (
             // The tablet's kiosk, served by the offline box (works with no internet, on Spark-Local or the venue Wi-Fi).
             <a className="btn btn-secondary" href={boxKioskUrl(q.campaign.public_token)} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
@@ -216,91 +226,47 @@ export default function LaunchCampaign() {
         <Card title={t('pwa.liveQueueTitle')}>
           {!q.queue && <p className="page-subtitle">{t('common.loading')}</p>}
           {q.queue && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-              <div>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#64748B', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: 8 }}>
-                  {t('pwa.currentlyPlaying')}
-                </div>
+            <div className="lc-queue">
+              <div className="lc-sec">
+                <div className="lc-label">{t('pwa.currentlyPlaying')}</div>
                 {q.queue.active ? (
-                  <div>
-                    <div style={{ fontSize: 15, fontWeight: 600, color: '#03041A' }}>
-                      <button
-                        type="button"
-                        onClick={() => setNoteGuest({ email: q.queue.active.email, firstName: q.queue.active.firstName, lastName: q.queue.active.lastName })}
-                        style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', fontWeight: 600, color: '#002881', textDecoration: 'underline', cursor: 'pointer' }}
-                      >
-                        {q.queue.active.firstName}
-                      </button>
-                      {' '}— {q.queue.active.launched ? t('pwa.spinning') : t('pwa.waitingToSpin')}
-                      {q.queue.active.retryMessage && (
-                        <span style={{ marginLeft: 10, fontSize: 12, color: '#EF4444' }}>({q.queue.active.retryMessage})</span>
-                      )}
-                    </div>
-                    {/* The gift order is predetermined (see sequence.js) — the
-                        wheel only announces it, so staff can see it before the
-                        spin happens. */}
-                    {q.queue.active.giftName && (
-                      <div style={{ fontSize: 13, color: '#64748B', marginTop: 2 }}>
-                        {t('pwa.willWin')} <strong style={{ color: '#0055F8' }}>{q.queue.active.giftName}</strong>
+                  <div className="lc-now">
+                    <div className="lc-now-top">
+                      <div className="crm-av" style={{ background: avatarGradient(q.queue.active.email || q.queue.active.firstName) }} aria-hidden="true">{(q.queue.active.firstName || '?').charAt(0)}</div>
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <button type="button" className="crm-name" onClick={() => setNoteGuest({ email: q.queue.active.email, firstName: q.queue.active.firstName, lastName: q.queue.active.lastName })}>{q.queue.active.firstName}</button>
+                        {q.queue.active.giftName && <div className="lc-will">{t('pwa.willWin')} <strong>{q.queue.active.giftName}</strong></div>}
                       </div>
-                    )}
-                    <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
-                      <button
-                        type="button"
-                        disabled={q.queueActionBusy}
-                        onClick={q.handleSkipPlayer}
-                        style={{
-                          background: '#F59E0B', color: 'white', border: 'none', borderRadius: 8,
-                          padding: '13px 16px', minHeight: 44, fontSize: 13, fontWeight: 700, cursor: q.queueActionBusy ? 'not-allowed' : 'pointer',
-                          fontFamily: 'inherit', opacity: q.queueActionBusy ? 0.6 : 1,
-                        }}
-                      >
-                        {t('pwa.skipPlayer')}
-                      </button>
-                      <button
-                        type="button"
-                        disabled={q.queueActionBusy}
-                        onClick={q.handleCancelPlayer}
-                        style={{
-                          background: '#EF4444', color: 'white', border: 'none', borderRadius: 8,
-                          padding: '13px 16px', minHeight: 44, fontSize: 13, fontWeight: 700, cursor: q.queueActionBusy ? 'not-allowed' : 'pointer',
-                          fontFamily: 'inherit', opacity: q.queueActionBusy ? 0.6 : 1,
-                        }}
-                      >
-                        {t('pwa.cancelPlayer')}
-                      </button>
+                      <span className={`lc-state${q.queue.active.launched ? ' spin' : ''}`}>{q.queue.active.launched ? t('pwa.spinning') : t('pwa.waitingToSpin')}</span>
+                    </div>
+                    {q.queue.active.retryMessage && <div className="lc-retry">{q.queue.active.retryMessage}</div>}
+                    <div className="lc-actions">
+                      <button type="button" className="lc-btn warn" disabled={q.queueActionBusy} onClick={q.handleSkipPlayer}>{t('pwa.skipPlayer')}</button>
+                      <button type="button" className="lc-btn danger" disabled={q.queueActionBusy} onClick={q.handleCancelPlayer}>{t('pwa.cancelPlayer')}</button>
                     </div>
                   </div>
                 ) : (
-                  <p className="page-subtitle" style={{ margin: 0 }}>{t('pwa.nobodyRightNow')}</p>
+                  <p className="lc-empty">{t('pwa.nobodyRightNow')}</p>
                 )}
               </div>
 
-              <div>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#64748B', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: 8 }}>
-                  {t('pwa.waitingLabel', { count: q.queue.waiting.length })}
-                </div>
+              <div className="lc-sec">
+                <div className="lc-label">{t('pwa.waitingLabel', { count: q.queue.waiting.length })}</div>
                 {q.queue.waiting.length === 0 ? (
-                  <p className="page-subtitle" style={{ margin: 0 }}>{t('pwa.noOneInLine')}</p>
+                  <p className="lc-empty">{t('pwa.noOneInLine')}</p>
                 ) : (
-                  <ol style={{ margin: 0, paddingLeft: 20, fontSize: 14, color: '#334155' }}>
-                    {q.queue.waiting.map((w, i) => <li key={i}>{w.firstName}</li>)}
-                  </ol>
+                  <div className="lc-wait">{q.queue.waiting.map((w, i) => <span key={i} className="lc-chip"><i>{i + 1}</i>{w.firstName}</span>)}</div>
                 )}
               </div>
 
-              <div>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#64748B', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: 8 }}>
-                  {t('launchCampaign.recentResultsTitle')}
-                </div>
+              <div className="lc-sec">
+                <div className="lc-label">{t('launchCampaign.recentResultsTitle')}</div>
                 {q.queue.recentCompleted.length === 0 ? (
-                  <p className="page-subtitle" style={{ margin: 0 }}>{t('launchCampaign.noSpinsYet')}</p>
+                  <p className="lc-empty">{t('launchCampaign.noSpinsYet')}</p>
                 ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <div className="lc-results">
                     {q.queue.recentCompleted.map((r, i) => (
-                      <div key={i} style={{ fontSize: 13, color: '#334155' }}>
-                        <strong>{r.firstName}</strong> — {r.isTest ? r.giftName : t('launchCampaign.rewardSentByEmail')}
-                      </div>
+                      <div key={i} className="lc-result"><b>{r.firstName}</b><span>{r.isTest ? r.giftName : t('launchCampaign.rewardSentByEmail')}</span></div>
                     ))}
                   </div>
                 )}
@@ -317,12 +283,11 @@ export default function LaunchCampaign() {
             {t('launchCampaign.clickNameHint')}
           </p>
           {q.recentPlayers && q.recentPlayers.length > 0 && (
-            <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 14 }}>
+            <div className="lc-search">
               <input
                 placeholder={t('launchCampaign.searchPlaceholder')}
                 value={q.playerSearch}
                 onChange={(e) => q.setPlayerSearch(e.target.value)}
-                style={{ flex: 1, padding: '9px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13 }}
               />
               <Button variant="secondary" onClick={() => setPlayerFiltersOpen(true)} style={{ flexShrink: 0, whiteSpace: 'nowrap' }}>
                 {t('pwa.filters')}{q.playerActiveFilterCount > 0 ? ` (${q.playerActiveFilterCount})` : ''}
@@ -335,32 +300,29 @@ export default function LaunchCampaign() {
             <p className="page-subtitle">{t('pwa.noPlayersMatch')}</p>
           )}
           {q.recentPlayers && q.filteredRecentPlayers.length > 0 && (
-            <table className="data-table">
-              <thead>
-                <tr><th>{t('launchCampaign.tableNameHeader')}</th><th>{t('common.gift')}</th><th>{t('common.segment')}</th><th>{t('launchCampaign.tableLeadHeader')}</th><th>{t('common.noteLabel')}</th></tr>
-              </thead>
-              <tbody>
-                {q.filteredRecentPlayers.map((p) => (
-                  <tr key={p.rewardId} style={{ cursor: 'pointer' }} onClick={() => setNoteGuest({
-                    email: p.email, firstName: p.first_name, lastName: p.last_name,
-                  })}>
-                    <td style={{ color: '#002881', fontWeight: 600, textDecoration: 'underline' }}>{p.first_name} {p.last_name}</td>
-                    <td>
-                      {p.gift_name || (
-                        <span style={{ color: '#94A3B8', fontSize: 12 }}>
-                          {p.outcome === 'manual' ? t('pwa.noGift') : p.outcome === 'cancelled' ? t('pwa.noGiftCancelled') : t('pwa.noGiftSkipped')}
-                        </span>
-                      )}
-                    </td>
-                    <td style={{ color: '#64748B' }}>{p.segment || '—'}</td>
-                    <td>{p.lead_rating ? '★'.repeat(p.lead_rating) + '☆'.repeat(3 - p.lead_rating) : '—'}</td>
-                    <td style={{ color: '#64748B', maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {p.note || '—'}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div className="crm-list lc-list">
+              <div className="crm-head"><span>{t('launchCampaign.tableNameHeader')}</span><span>{t('common.gift')}</span><span>{t('common.segment')}</span><span>{t('launchCampaign.tableLeadHeader')}</span></div>
+              {q.filteredRecentPlayers.map((p) => (
+                <div key={p.rewardId} className="crm-row click" style={{ '--c': p.lead_rating === 3 ? '#059669' : p.lead_rating === 2 ? '#F59E0B' : '#0055F8' }} role="button" tabIndex={0}
+                  onClick={() => setNoteGuest({ email: p.email, firstName: p.first_name, lastName: p.last_name })}
+                  onKeyDown={(e) => { if (e.key === 'Enter') setNoteGuest({ email: p.email, firstName: p.first_name, lastName: p.last_name }); }}>
+                  <div className="crm-who">
+                    <div className="crm-av" style={{ background: avatarGradient(`${p.first_name} ${p.last_name} ${p.email}`) }} aria-hidden="true">{initialsOf(p)}</div>
+                    <div className="crm-who-text">
+                      <span className="crm-name plain" style={{ color: '#002881' }}>{p.first_name} {p.last_name}</span>
+                      <div className="crm-mail">{p.note || '—'}</div>
+                    </div>
+                  </div>
+                  <div className="crm-gift">
+                    {p.gift_name ? <div className="crm-gift-name">{p.gift_name}</div> : (
+                      <div className="crm-gift-none">{p.outcome === 'manual' ? t('pwa.noGift') : p.outcome === 'cancelled' ? t('pwa.noGiftCancelled') : t('pwa.noGiftSkipped')}</div>
+                    )}
+                  </div>
+                  <div className="crm-seg">{p.segment ? <span className="crm-chip">{p.segment}</span> : <span className="crm-gift-none">—</span>}</div>
+                  <div className="crm-stars">{p.lead_rating ? <>{'★'.repeat(p.lead_rating)}<i>{'★'.repeat(3 - p.lead_rating)}</i></> : <span className="none">—</span>}</div>
+                </div>
+              ))}
+            </div>
           )}
         </Card>
       )}

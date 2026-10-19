@@ -734,7 +734,8 @@
     "emptyTitle": "Aún no hay campañas",
     "emptyDescription": "Crea tu primera campaña para configurar regalos y stock.",
     "emptyFilteredTitle": "Sin campañas {{status}}",
-    "emptyFilteredDescription": "Prueba con otro filtro."
+    "emptyFilteredDescription": "Prueba con otro filtro.",
+    "searchPlaceholder": "Buscar una campaña…"
   },
   "settings": {
     "pageTitle": "Ajustes",
@@ -989,7 +990,8 @@
       "addPack": "Añadir el paquete",
       "used": "usados"
     },
-    "tabCatalog": "Catálogo de ferias"
+    "tabCatalog": "Catálogo de ferias",
+    "tabLinks": "Ajustes de enlaces"
   },
   "nav": {
     "openMenuAriaLabel": "Abrir menú",

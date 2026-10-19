@@ -66,8 +66,8 @@ export default {
     },
     { // 9  the last players, and a prospect card
       async run(c) {
-        await c.point('table.data-table', 2200);
-        await c.click('table.data-table tbody tr');
+        await c.point('.lc-list', 2200);
+        await c.click('.lc-list .crm-row');
         await c.waitFor('.pc'); await c.sleep(1400);
         await c.point('.pc', 1800);
         await c.click('.pc-topbar .pc-only-desktop');

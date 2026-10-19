@@ -833,31 +833,6 @@ function EmailTemplatesModule() {
   );
 }
 
-function AIAssistantModule() {
-  const { t } = useTranslation('admin');
-  const [configured, setConfigured] = useState(null); // null = loading, then true/false
-
-  useEffect(() => {
-    api.getAiAssistantStatus().then((res) => setConfigured(res.configured)).catch(() => setConfigured(false));
-  }, []);
-
-  // Nothing to set here: the assistant is switched on per campaign (that
-  // campaign's Settings) and fills the CRM record itself — this tab only
-  // explains how it behaves and warns when the deployment has no AI key.
-  return (
-    <Card title={t('settings.aiAssistant.title')} className="mt-card">
-      <p style={{ fontSize: 13, color: '#64748B', margin: 0, lineHeight: 1.6 }}>
-        {t('settings.aiAssistant.description')}
-      </p>
-      {configured === false && (
-        <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: 12, marginTop: 16, fontSize: 13, color: '#92400E' }}>
-          {t('settings.aiAssistant.notConfiguredWarning')}
-        </div>
-      )}
-    </Card>
-  );
-}
-
 const RETENTION_OPTIONS = [6, 12, 24, 36, 60];
 
 function PrivacyModule() {
@@ -1221,10 +1196,8 @@ function AlertThresholdsModule() {
 
 const MODULE_KEYS = [
   { key: 'information', tKey: 'tabInformation' },
-  { key: 'google-review', tKey: 'tabGoogleReview' },
-  { key: 'social-media', tKey: 'tabSocialMedia' },
+  { key: 'links', tKey: 'tabLinks' },
   { key: 'email-templates', tKey: 'tabEmailTemplates' },
-  { key: 'ai-assistant', tKey: 'tabAiAssistant' },
   { key: 'privacy', tKey: 'tabPrivacy' },
   { key: 'offline', tKey: 'tabOffline' },
   { key: 'calibration', tKey: 'tabCalibration' },
@@ -1236,7 +1209,11 @@ const MODULE_KEYS = [
 export default function Settings() {
   const { t } = useTranslation('admin');
   const [searchParams] = useSearchParams();
-  const [module, setModule] = useState(() => (MODULE_KEYS.some((m) => m.key === searchParams.get('tab')) ? searchParams.get('tab') : 'information'));
+  const [module, setModule] = useState(() => {
+    const raw = searchParams.get('tab');
+    const tab = raw === 'google-review' || raw === 'social-media' ? 'links' : raw; // the two used to be separate tabs
+    return MODULE_KEYS.some((m) => m.key === tab) ? tab : 'information';
+  });
   const [catalogPending, setCatalogPending] = useState(0);
   const { isAdmin } = useAdmin();
   useEffect(() => { if (isAdmin) api.getCatalogPending().then((r) => setCatalogPending(r.count)).catch(() => {}); }, [isAdmin, module]);
@@ -1259,10 +1236,8 @@ export default function Settings() {
       </div>
 
       {module === 'information' && <InformationModule />}
-      {module === 'google-review' && <GoogleReviewModule />}
-      {module === 'social-media' && <SocialMediaModule />}
+      {module === 'links' && <><GoogleReviewModule /><SocialMediaModule /></>}
       {module === 'email-templates' && <EmailTemplatesModule />}
-      {module === 'ai-assistant' && <AIAssistantModule />}
       {module === 'privacy' && <PrivacyModule />}
       {module === 'offline' && <OfflineModeModule />}
       {module === 'alerts' && isAdmin && <AlertThresholdsModule />}

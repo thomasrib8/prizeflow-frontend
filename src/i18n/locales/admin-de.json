@@ -734,7 +734,8 @@
     "emptyTitle": "Noch keine Kampagnen",
     "emptyDescription": "Erstellen Sie Ihre erste Kampagne, um Geschenke und Bestand einzurichten.",
     "emptyFilteredTitle": "Keine Kampagnen mit Status {{status}}",
-    "emptyFilteredDescription": "Versuchen Sie einen anderen Filter."
+    "emptyFilteredDescription": "Versuchen Sie einen anderen Filter.",
+    "searchPlaceholder": "Kampagne suchen…"
   },
   "settings": {
     "pageTitle": "Einstellungen",
@@ -989,7 +990,8 @@
       "addPack": "Paket hinzufügen",
       "used": "verbraucht"
     },
-    "tabCatalog": "Messekatalog"
+    "tabCatalog": "Messekatalog",
+    "tabLinks": "Link-Einstellungen"
   },
   "nav": {
     "openMenuAriaLabel": "Menü öffnen",

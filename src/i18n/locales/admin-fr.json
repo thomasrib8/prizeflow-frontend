@@ -734,7 +734,8 @@
     "emptyTitle": "Aucune campagne pour l'instant",
     "emptyDescription": "Créez votre première campagne pour configurer les cadeaux et le stock.",
     "emptyFilteredTitle": "Aucune campagne {{status}}",
-    "emptyFilteredDescription": "Essayez un autre filtre."
+    "emptyFilteredDescription": "Essayez un autre filtre.",
+    "searchPlaceholder": "Rechercher une campagne…"
   },
   "settings": {
     "pageTitle": "Paramètres",
@@ -989,7 +990,8 @@
       "addPack": "Ajouter le paquet",
       "used": "utilisés"
     },
-    "tabCatalog": "Catalogue des salons"
+    "tabCatalog": "Catalogue des salons",
+    "tabLinks": "Paramètres des liens"
   },
   "nav": {
     "openMenuAriaLabel": "Ouvrir le menu",

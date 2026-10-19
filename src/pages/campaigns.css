@@ -1,0 +1,27 @@
+/* Campaigns list: one card per campaign (same family as the CRM list). */
+.cp-bar { display: flex; gap: 14px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-bottom: 14px; }
+.cp-search { min-width: 240px; padding: 8px 14px; border: 1.5px solid #E3E9F7; border-radius: 99px; font: inherit; font-size: 13px; background: #fff; color: #03041A; }
+.cp-search:focus { outline: none; border-color: #0055F8; box-shadow: 0 0 0 3px rgba(0, 85, 248, .12); }
+.cp-list { container-type: inline-size; }
+.cp-head, .cp-row { display: grid; grid-template-columns: minmax(0, 2fr) 110px minmax(0, 1.4fr) 110px 28px; gap: 16px; align-items: center; }
+.cp-head { padding: 0 18px 8px; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #94A3B8; }
+.cp-row { position: relative; background: #fff; border: 1px solid #E7ECF8; border-radius: 14px; padding: 13px 18px; margin-bottom: 8px; cursor: pointer; box-shadow: 0 4px 12px -10px rgba(0, 40, 129, .5); transition: border-color .15s, box-shadow .15s, transform .15s; }
+.cp-row:hover, .cp-row:focus-visible { border-color: #BFD4FF; box-shadow: 0 10px 22px -14px rgba(0, 85, 248, .55); outline: none; }
+.cp-row::before { content: ""; position: absolute; left: 0; top: 12px; bottom: 12px; width: 3px; border-radius: 0 3px 3px 0; background: var(--c); }
+.cp-row > div { min-width: 0; }
+.cp-name b { display: block; font-size: 14px; color: #002881; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cp-name span { display: block; margin-top: 2px; font-family: var(--font-mono); font-size: 10.5px; color: #94A3B8; }
+.cp-prog-top { display: flex; align-items: baseline; gap: 2px; font-size: 13px; }
+.cp-prog-top b { color: #03041A; } .cp-prog-top span { color: #94A3B8; }
+.cp-prog-top em { margin-left: auto; font-style: normal; font-size: 11px; font-weight: 700; color: #64748B; }
+.cp-bar-track { height: 6px; margin-top: 5px; border-radius: 4px; background: #E8EEFB; overflow: hidden; }
+.cp-bar-track i { display: block; height: 100%; border-radius: 4px; background: var(--c); }
+.cp-date { font-size: 12.5px; color: #64748B; }
+.cp-go { width: 28px; height: 28px; border-radius: 9px; display: flex; align-items: center; justify-content: center; color: #002881; font-size: 18px; background: #F1F5FD; transition: background .15s, color .15s; }
+.cp-row:hover .cp-go { background: #0055F8; color: #fff; }
+@container (max-width: 760px) {
+  .cp-head { display: none; }
+  .cp-row { grid-template-columns: minmax(0, 1fr) auto; gap: 8px 12px; }
+  .cp-prog { grid-column: 1 / -1; order: 3; }
+  .cp-date { order: 4; }
+}

@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { Card, Button, Badge, EmptyState } from '../components/ui';
+import './crm.css';
+import './campaigns.css';
 
+const STATUS_COLOR = { draft: '#94A3B8', active: '#059669', paused: '#F59E0B', completed: '#09B2FD', archived: '#CBD5E1' };
 const STATUS_TONE = { draft: 'neutral', active: 'green', paused: 'orange', completed: 'blue', archived: 'neutral' };
 // 'all' plus every real campaign status — each maps to common.status* for
 // both the filter pills and the table's status badge (see statusLabel below).
@@ -15,13 +18,16 @@ export default function Campaigns() {
   const [campaigns, setCampaigns] = useState(null);
   const [error, setError] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [q, setQ] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
     api.listCampaigns().then(setCampaigns).catch(e => setError(e.message));
   }, []);
 
-  const filtered = campaigns?.filter(c => statusFilter === 'all' || c.status === statusFilter) || [];
+  const needle = q.trim().toLowerCase();
+  const filtered = campaigns?.filter(c => (statusFilter === 'all' || c.status === statusFilter) && (!needle || `${c.name} ${c.id}`.toLowerCase().includes(needle))) || [];
+  const countOf = (f) => (campaigns || []).filter(c => f === 'all' || c.status === f).length;
   const statusLabel = (s) => t(`common.${STATUS_TKEY[s] || 'statusDraft'}`);
 
   return (
@@ -36,46 +42,44 @@ export default function Campaigns() {
       {error && <div className="error-banner">{error}</div>}
 
       {campaigns && campaigns.length > 0 && (
-        <div style={{ display: 'flex', gap: 6, marginBottom: 14, flexWrap: 'wrap' }}>
-          {STATUS_FILTERS.map(f => (
-            <button key={f} onClick={() => setStatusFilter(f)} style={{
-              padding: '6px 14px', borderRadius: 20, border: 'none', fontSize: 12, fontWeight: 600,
-              cursor: 'pointer', fontFamily: 'inherit',
-              background: statusFilter === f ? '#09B2FD' : '#F1F5F9',
-              color: statusFilter === f ? '#03041A' : '#64748B',
-            }}>{statusLabel(f)}</button>
-          ))}
+        <div className="cp-bar">
+          <div className="crm-quick">
+            {STATUS_FILTERS.map(f => (
+              <button key={f} className={`crm-qp${statusFilter === f ? ' on' : ''}`} onClick={() => setStatusFilter(f)}>{statusLabel(f)} <b>{countOf(f)}</b></button>
+            ))}
+          </div>
+          <input className="cp-search" type="search" value={q} onChange={e => setQ(e.target.value)} placeholder={t('campaigns.searchPlaceholder')} aria-label={t('campaigns.searchPlaceholder')} />
         </div>
       )}
 
-      <Card>
-        {!campaigns ? (
-          <p className="page-subtitle">{t('common.loading')}</p>
-        ) : campaigns.length === 0 ? (
-          <EmptyState title={t('campaigns.emptyTitle')} description={t('campaigns.emptyDescription')}
-            action={<Button onClick={() => navigate('/campaigns/new')}>{t('campaigns.newCampaignBtn')}</Button>} />
-        ) : filtered.length === 0 ? (
-          <EmptyState title={t('campaigns.emptyFilteredTitle', { status: statusLabel(statusFilter) })} description={t('campaigns.emptyFilteredDescription')} />
-        ) : (
-          <table className="data-table">
-            <thead>
-              <tr><th>{t('campaigns.tableId')}</th><th>{t('campaigns.tableName')}</th><th>{t('campaigns.tableStatus')}</th><th>{t('campaigns.tableDistributedTotal')}</th><th>{t('campaigns.tableCreated')}</th><th></th></tr>
-            </thead>
-            <tbody>
-              {filtered.map(c => (
-                <tr key={c.id}>
-                  <td style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)' }}>{c.id}</td>
-                  <td style={{ fontWeight: 600 }}>{c.name}</td>
-                  <td><Badge tone={STATUS_TONE[c.status] || 'neutral'}>{statusLabel(c.status)}</Badge></td>
-                  <td>{c.total_distributed} / {c.total_stock}</td>
-                  <td style={{ color: 'var(--text-muted)' }}>{new Date(c.created_at.replace(' ', 'T') + 'Z').toLocaleDateString()}</td>
-                  <td><Link to={`/campaigns/${c.id}`} className="btn btn-ghost btn-sm">{t('campaigns.viewLink')}</Link></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </Card>
+      {!campaigns ? (
+        <Card><p className="page-subtitle">{t('common.loading')}</p></Card>
+      ) : campaigns.length === 0 ? (
+        <Card><EmptyState title={t('campaigns.emptyTitle')} description={t('campaigns.emptyDescription')}
+          action={<Button onClick={() => navigate('/campaigns/new')}>{t('campaigns.newCampaignBtn')}</Button>} /></Card>
+      ) : filtered.length === 0 ? (
+        <Card><EmptyState title={t('campaigns.emptyFilteredTitle', { status: statusLabel(statusFilter) })} description={t('campaigns.emptyFilteredDescription')} /></Card>
+      ) : (
+        <div className="cp-list">
+          <div className="cp-head"><span>{t('campaigns.tableName')}</span><span>{t('campaigns.tableStatus')}</span><span>{t('campaigns.tableDistributedTotal')}</span><span>{t('campaigns.tableCreated')}</span><span /></div>
+          {filtered.map(c => {
+            const pct = c.total_stock ? Math.min(100, Math.round((c.total_distributed / c.total_stock) * 100)) : 0;
+            const open = () => navigate(`/campaigns/${c.id}`);
+            return (
+              <div key={c.id} className="cp-row" style={{ '--c': STATUS_COLOR[c.status] || '#0055F8' }} role="link" tabIndex={0} onClick={open} onKeyDown={e => { if (e.key === 'Enter') open(); }}>
+                <div className="cp-name"><b>{c.name}</b><span>{c.id}</span></div>
+                <div><Badge tone={STATUS_TONE[c.status] || 'neutral'}>{statusLabel(c.status)}</Badge></div>
+                <div className="cp-prog">
+                  <div className="cp-prog-top"><b>{c.total_distributed}</b><span> / {c.total_stock}</span><em>{pct} %</em></div>
+                  <div className="cp-bar-track"><i style={{ width: `${pct}%` }} /></div>
+                </div>
+                <div className="cp-date">{new Date(c.created_at.replace(' ', 'T') + 'Z').toLocaleDateString()}</div>
+                <div className="cp-go" aria-hidden="true">›</div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

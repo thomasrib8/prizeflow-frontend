@@ -11,7 +11,7 @@ import './admin-premium.css';
 // reseller holding the wheel): never a GPS. Marker shape says how sure we are (filled = event in progress, hollow = last known position).
 maplibregl.setWorkerUrl('/maplibre/maplibre-gl-worker.mjs'); // published by vite.config.js (the worker is two files that must stay side by side)
 const STATUS_COLORS = { event: '#0055F8', rented: '#09B2FD', upcoming: '#F59E0B', reseller: '#7C3AED', depot: '#64748B', maintenance: '#EF4444' };
-const STATUSES = ['event', 'rented', 'upcoming', 'reseller', 'depot', 'maintenance'];
+const STATUSES = ['event', 'rented', 'reseller', 'depot', 'maintenance'];
 const eur = (c) => (c === null || c === undefined ? '—' : (c / 100).toLocaleString(undefined, { style: 'currency', currency: 'EUR' }));
 const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 const fmt = (d) => (d ? new Date(`${d}T12:00:00`).toLocaleDateString([], { dateStyle: 'medium' }) : '—');
@@ -143,7 +143,6 @@ export default function Live() {
           <Button variant={mode === 'history' ? 'primary' : 'secondary'} onClick={() => setParam('mode', 'history')}>{t('live.modeHistory')}</Button>
         </div>
       </div>
-      <div className="ap-warn">{t('live.notGps')}</div>
       {error && <div className="error-banner">{error}</div>}
 
       <div className="ap-bar" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
@@ -194,7 +193,6 @@ export default function Live() {
                 {detail.holder && <div>{t('live.holder')} : <Link to={`/users/${detail.holder.id}`}>{detail.holder.name}</Link></div>}
                 {detail.event && <div>{t('live.event')} : {detail.event.name}{detail.event.city ? ` · ${detail.event.city}` : ''}{detail.event.addressStatus && detail.event.addressStatus !== 'confirmed' ? <> <Badge tone="orange">{t('live.toConfirm')}</Badge></> : null}</div>}
                 {detail.since && <div>{t('live.since')} {fmt(detail.since)}{detail.expectedReturn ? ` · ${t('live.returnPlanned')} ${fmt(detail.expectedReturn)}` : ''}</div>}
-                {detail.upcoming && <div>{t('live.upcoming')} : {fmt(detail.upcoming.startsOn)} — {detail.upcoming.clientName}</div>}
                 <div>{t('live.rentedDays')} : <b>{detail.rentedDays}</b> · {t('live.revenue')} : <b>{eur(detail.recognizedCents)}</b> · {t('live.apiCosts')} : {eur(detail.apiCostCents)}</div>
               </div>
               <p style={{ margin: '8px 0 0' }}><Link to="/park" onClick={() => {}}>{t('live.seeProfit')}</Link></p>
