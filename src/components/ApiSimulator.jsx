@@ -1,45 +1,115 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
-import { Card, Badge } from './ui';
 
-// Admin › Consommation API › Simulateur: what would N wheel spins cost in external services? A what-if, nothing is stored.
-const money = (v, d = 2) => (v === null || v === undefined ? '—' : v.toLocaleString(undefined, { style: 'currency', currency: 'EUR', minimumFractionDigits: d, maximumFractionDigits: v !== 0 && Math.abs(v) < 0.01 ? 5 : d }));
+// Admin › Consommation API › Simulateur: drag the sliders, see the monthly bill move. A what-if, nothing is stored.
 const NAMES = { anthropic: 'Claude', resend: 'Resend', hunter: 'Hunter', bouncer: 'Bouncer' };
+const COLORS = { bouncer: '#0055F8', hunter: '#7C3AED', resend: '#059669', ai: '#F59E0B', notes: '#EC4899' };
+const money = (v, d = 2) => (v === null || v === undefined ? '—' : v.toLocaleString(undefined, { style: 'currency', currency: 'EUR', minimumFractionDigits: d, maximumFractionDigits: v !== 0 && Math.abs(v) < 0.01 ? 4 : d }));
+const SPIN_STOPS = [100, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000, 250000, 500000, 1000000];
+// Same arithmetic as the server's services/apiUsage/simulator.js, done here so the price follows the slider instantly.
+function compute(opt, spins, f, plans) {
+  const pick = (p) => { const list = (opt.providers && opt.providers[p]) || []; return list.find((x) => x.id === plans[p]) || list.find((x) => x.current) || list[0] || null; };
+  const lines = []; const missing = [];
+  const add = (id, provider, label, quantity, plan) => {
+    const u = plan ? plan.eur : null;
+    if (u === null || u === undefined) { missing.push(provider); lines.push({ id, provider, label, quantity, planLabel: plan ? plan.label : null, unitEur: null, costEur: null }); return; }
+    lines.push({ id, provider, label, quantity, planLabel: plan.label, unitEur: u, costEur: quantity * u, free: plan.free ? { quota: plan.free, exceeded: quantity > plan.free } : null });
+  };
+  add('bouncer', 'bouncer', 'Vérification e-mail (Bouncer)', spins * f.bouncerPct / 100, pick('bouncer'));
+  add('hunter', 'hunter', 'Recherche d’e-mail (Hunter)', spins * f.hunterPct / 100, pick('hunter'));
+  add('resend', 'resend', 'E-mails envoyés (Resend)', spins * f.emailsPerSpin, pick('resend'));
+  const tk = opt.tokens || {};
+  const ai = (id, label, quantity, tin, tout) => {
+    if (tk.inEur == null || tk.outEur == null) { missing.push('anthropic'); lines.push({ id, provider: 'anthropic', label, quantity, planLabel: null, unitEur: null, costEur: null }); return; }
+    const unit = tin * tk.inEur + tout * tk.outEur;
+    lines.push({ id, provider: 'anthropic', label, quantity, planLabel: 'Sonnet 5', unitEur: unit, costEur: quantity * unit });
+  };
+  ai('ai', 'IA (Claude)', spins * f.aiCallsPerSpin, f.aiInTokens, f.aiOutTokens);
+  ai('notes', 'Assistant IA de notes (Claude)', spins * f.notePct / 100, f.noteInTokens, f.noteOutTokens);
+  const totalEur = lines.reduce((a, l) => a + (l.costEur || 0), 0);
+  return { lines, totalEur, perSpinEur: totalEur / spins, per1000Eur: (totalEur / spins) * 1000, incomplete: [...new Set(missing)] };
+}
+const idOf = (l) => l.id || l.provider;
+
+function Slider({ label, hint, value, min = 0, max, step = 1, unit = '', onChange, color, format }) {
+  const pct = ((value - min) / (max - min)) * 100;
+  return (
+    <div className="ap-sl">
+      <div className="ap-sl-top"><span>{label}</span><b style={{ color }}>{format ? format(value) : value.toLocaleString()}{unit}</b></div>
+      <input type="range" min={min} max={max} step={step} value={value} onChange={(e) => onChange(Number(e.target.value))}
+        style={{ '--p': `${pct}%`, '--c': color || '#0055F8' }} aria-label={label} />
+      {hint && <small>{hint}</small>}
+    </div>
+  );
+}
+
+function Group({ icon, title, color, children }) {
+  return (
+    <div className="ap-sim-group" style={{ '--c': color }}>
+      <div className="ap-sim-gh"><span className="ap-sim-dot">{icon}</span><b>{title}</b></div>
+      {children}
+    </div>
+  );
+}
 
 export default function ApiSimulator() {
   const { t } = useTranslation('admin');
   const [opt, setOpt] = useState(null);
-  const [f, setF] = useState({ spins: 1000, bouncerPct: 100, hunterPct: 20, emailsPerSpin: 1, aiCallsPerSpin: 1, aiInTokens: 1500, aiOutTokens: 300, notePct: 30, noteInTokens: 1500, noteOutTokens: 400 });
+  const [spinIdx, setSpinIdx] = useState(2);
+  const [f, setF] = useState({ bouncerPct: 100, hunterPct: 20, emailsPerSpin: 1, aiCallsPerSpin: 1, aiInTokens: 1500, aiOutTokens: 300, notePct: 30, noteInTokens: 1500, noteOutTokens: 400 });
   const [plans, setPlans] = useState({});
-  const [res, setRes] = useState(null);
+  const spins = SPIN_STOPS[spinIdx];
+  const set = (k) => (v) => setF((p) => ({ ...p, [k]: v }));
   useEffect(() => { api.getApiSimulatorOptions().then(setOpt).catch(() => setOpt({ providers: {}, tokens: {} })); }, []);
-  useEffect(() => {
-    const h = setTimeout(() => { api.runApiSimulator({ ...f, plans }).then(setRes).catch(() => {}); }, 250);
-    return () => clearTimeout(h);
-  }, [f, plans, opt]);
-  const num = (k, max) => (e) => setF({ ...f, [k]: Math.max(0, Math.min(max, Number(e.target.value) || 0)) });
-  const field = (k, label, max, step = 1, hint) => (
-    <label className="ap-field">{label}<input type="number" min="0" max={max} step={step} value={f[k]} onChange={num(k, max)} />{hint && <small>{hint}</small>}</label>
-  );
+  const res = opt && opt.providers ? compute(opt, spins, f, plans) : null;
+  const total = res ? res.totalEur : 0;
+  const colorOf = (l) => COLORS[l.id || l.provider === 'anthropic' ? (l.id === 'notes' ? 'notes' : 'ai') : l.provider] || '#94A3B8';
   return (
-    <div className="ap">
-      <p className="ap-info">{t('apiUsage.sim.intro')}</p>
-      <Card title={t('apiUsage.sim.scenario')} className="mt-card">
-        <div className="ap-grid-form">
-          {field('spins', t('apiUsage.sim.spins'), 100000000)}
-          {field('bouncerPct', t('apiUsage.sim.bouncerPct'), 100, 1, t('apiUsage.sim.bouncerHint'))}
-          {field('hunterPct', t('apiUsage.sim.hunterPct'), 100, 1, t('apiUsage.sim.hunterHint'))}
-          {field('emailsPerSpin', t('apiUsage.sim.emails'), 20, 0.1)}
-          {field('aiCallsPerSpin', t('apiUsage.sim.aiCalls'), 20, 0.1)}
-          {field('aiInTokens', t('apiUsage.sim.aiIn'), 1000000, 100)}
-          {field('aiOutTokens', t('apiUsage.sim.aiOut'), 1000000, 50)}
-          {field('notePct', t('apiUsage.sim.notePct'), 100, 1, t('apiUsage.sim.noteHint'))}
-          {field('noteInTokens', t('apiUsage.sim.noteIn'), 1000000, 100)}
-          {field('noteOutTokens', t('apiUsage.sim.noteOut'), 1000000, 50)}
+    <div className="ap ap-sim">
+      <div className="ap-sim-hero">
+        <div className="ap-sim-big">
+          <span>{t('apiUsage.sim.total')}</span>
+          <b>{res ? money(total) : '…'}</b>
+          <em>{t('apiUsage.sim.forSpins', { n: spins.toLocaleString() })}</em>
         </div>
-        {opt && (
-          <div className="ap-grid-form" style={{ marginTop: 14 }}>
+        <div className="ap-sim-mini"><span>{t('apiUsage.sim.perSpin')}</span><b>{res ? money(res.perSpinEur, 4) : '…'}</b></div>
+        <div className="ap-sim-mini"><span>{t('apiUsage.sim.per1000')}</span><b>{res ? money(res.per1000Eur) : '…'}</b></div>
+        {res && total > 0 && (
+          <div className="ap-sim-bar" aria-hidden="true">
+            {res.lines.filter((l) => l.costEur > 0).map((l) => <i key={idOf(l)} style={{ width: `${(l.costEur / total) * 100}%`, background: colorOf(l) }} title={`${l.label} · ${money(l.costEur)}`} />)}
+          </div>
+        )}
+        {res && res.incomplete.length > 0 && <p className="ap-warn" style={{ gridColumn: '1 / -1', margin: 0 }}>{t('apiUsage.sim.incomplete', { list: res.incomplete.map((p) => NAMES[p] || p).join(', ') })}</p>}
+      </div>
+
+      <div className="ap-sim-spins">
+        <Slider label={t('apiUsage.sim.spins')} value={spinIdx} min={0} max={SPIN_STOPS.length - 1} onChange={setSpinIdx} format={() => spins.toLocaleString()} color="#002881" />
+        <div className="ap-sim-chips">{[1000, 5000, 25000, 100000].map((n) => <button key={n} type="button" className={spins === n ? 'on' : ''} onClick={() => setSpinIdx(SPIN_STOPS.indexOf(n))}>{n.toLocaleString()}</button>)}</div>
+      </div>
+
+      <div className="ap-sim-cols">
+        <Group icon="✓" title="Bouncer" color={COLORS.bouncer}>
+          <Slider label={t('apiUsage.sim.bouncerPct')} hint={t('apiUsage.sim.bouncerHint')} value={f.bouncerPct} max={100} unit=" %" color={COLORS.bouncer} onChange={set('bouncerPct')} />
+        </Group>
+        <Group icon="⌕" title="Hunter" color={COLORS.hunter}>
+          <Slider label={t('apiUsage.sim.hunterPct')} hint={t('apiUsage.sim.hunterHint')} value={f.hunterPct} max={100} unit=" %" color={COLORS.hunter} onChange={set('hunterPct')} />
+        </Group>
+        <Group icon="✉" title="Resend" color={COLORS.resend}>
+          <Slider label={t('apiUsage.sim.emails')} value={f.emailsPerSpin} max={5} step={0.5} color={COLORS.resend} onChange={set('emailsPerSpin')} />
+        </Group>
+        <Group icon="✦" title={t('apiUsage.sim.aiGroup')} color={COLORS.ai}>
+          <Slider label={t('apiUsage.sim.aiCalls')} value={f.aiCallsPerSpin} max={5} step={0.5} color={COLORS.ai} onChange={set('aiCallsPerSpin')} />
+          <Slider label={t('apiUsage.sim.aiIn')} value={f.aiInTokens} max={10000} step={100} color={COLORS.ai} onChange={set('aiInTokens')} />
+          <Slider label={t('apiUsage.sim.aiOut')} value={f.aiOutTokens} max={4000} step={50} color={COLORS.ai} onChange={set('aiOutTokens')} />
+        </Group>
+        <Group icon="✎" title={t('apiUsage.sim.noteGroup')} color={COLORS.notes}>
+          <Slider label={t('apiUsage.sim.notePct')} hint={t('apiUsage.sim.noteHint')} value={f.notePct} max={100} unit=" %" color={COLORS.notes} onChange={set('notePct')} />
+          <Slider label={t('apiUsage.sim.noteIn')} value={f.noteInTokens} max={10000} step={100} color={COLORS.notes} onChange={set('noteInTokens')} />
+          <Slider label={t('apiUsage.sim.noteOut')} value={f.noteOutTokens} max={4000} step={50} color={COLORS.notes} onChange={set('noteOutTokens')} />
+        </Group>
+        {opt && ['hunter', 'bouncer', 'resend'].some((p) => (opt.providers[p] || []).length > 1) && (
+          <Group icon="€" title={t('apiUsage.sim.plansGroup')} color="#002881">
             {['hunter', 'bouncer', 'resend'].map((p) => (opt.providers[p] || []).length > 1 && (
               <label key={p} className="ap-field">{t('apiUsage.sim.planOf', { provider: NAMES[p] })}
                 <select value={plans[p] || ''} onChange={(e) => setPlans({ ...plans, [p]: e.target.value ? Number(e.target.value) : undefined })}>
@@ -48,33 +118,25 @@ export default function ApiSimulator() {
                 </select>
               </label>
             ))}
-          </div>
+          </Group>
         )}
-      </Card>
+      </div>
+
       {res && (
-        <Card title={t('apiUsage.sim.result')} className="mt-card">
-          <div className="ap-sim-total">
-            <div><span>{t('apiUsage.sim.total')}</span><b>{money(res.totalEur)}</b></div>
-            <div><span>{t('apiUsage.sim.perSpin')}</span><b>{money(res.perSpinEur, 4)}</b></div>
-            <div><span>{t('apiUsage.sim.per1000')}</span><b>{money(res.per1000Eur)}</b></div>
-          </div>
-          {res.incomplete.length > 0 && <p className="ap-warn">{t('apiUsage.sim.incomplete', { list: res.incomplete.map((p) => NAMES[p] || p).join(', ') })}</p>}
-          <table className="ap-table" style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }}>
-            <thead><tr style={{ textAlign: 'left', color: '#64748B' }}><th>{t('apiUsage.sim.service')}</th><th>{t('apiUsage.sim.quantity')}</th><th>{t('apiUsage.sim.unitPrice')}</th><th style={{ textAlign: 'right' }}>{t('apiUsage.sim.cost')}</th></tr></thead>
-            <tbody>
-              {res.lines.map((l) => (
-                <tr key={l.id || l.provider} style={{ borderTop: '1px solid #EEF2FA' }}>
-                  <td style={{ padding: '8px 0' }}>{l.label}{l.planLabel && <Badge tone="neutral">{l.planLabel}</Badge>}
-                    {l.free && l.free.exceeded && <div className="ap-sub" style={{ color: '#B45309' }}>{t('apiUsage.sim.overFree', { quota: l.free.quota })}</div>}</td>
-                  <td>{Math.round(l.quantity).toLocaleString()}</td>
-                  <td>{money(l.unitEur, 4)}</td>
-                  <td style={{ textAlign: 'right', fontWeight: 700 }}>{money(l.costEur)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <p className="ap-hint" style={{ marginBottom: 0 }}>{t('apiUsage.sim.note')}</p>
-        </Card>
+        <div className="ap-sim-lines">
+          {res.lines.map((l) => (
+            <div key={idOf(l)} className="ap-sim-line">
+              <span className="ap-sim-swatch" style={{ background: colorOf(l) }} />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <b>{l.label}</b>{l.planLabel && <span className="ap-pill" style={{ marginLeft: 8 }}>{l.planLabel}</span>}
+                <div className="ap-sub">{Math.round(l.quantity).toLocaleString()} × {money(l.unitEur, 4)}</div>
+                {l.free && l.free.exceeded && <div className="ap-sub" style={{ color: '#B45309' }}>{t('apiUsage.sim.overFree', { quota: l.free.quota })}</div>}
+              </div>
+              <b className="ap-sim-cost">{money(l.costEur)}</b>
+            </div>
+          ))}
+          <p className="ap-hint" style={{ margin: '4px 0 0' }}>{t('apiUsage.sim.note')}</p>
+        </div>
       )}
     </div>
   );

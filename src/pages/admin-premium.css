@@ -167,3 +167,34 @@
 .ap-month-grid button.on { background: var(--ap-blue); color: #fff; border-color: var(--ap-blue); }
 .ap-month-foot { margin-top: 10px; text-align: center; }
 .ap-month-foot button { border: 0; background: none; color: var(--ap-blue); font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; text-transform: capitalize; }
+
+.ap-sim { display: flex; flex-direction: column; gap: 16px; }
+.ap-sim-hero { display: grid; grid-template-columns: 1.6fr 1fr 1fr; gap: 14px; align-items: stretch; padding: 20px; border-radius: 20px; color: #fff; background: linear-gradient(135deg, #0055F8, #002881); box-shadow: 0 18px 40px -18px rgba(0, 40, 129, .7); }
+.ap-sim-big, .ap-sim-mini { display: flex; flex-direction: column; justify-content: center; }
+.ap-sim-mini { background: rgba(255,255,255,.12); border-radius: 14px; padding: 10px 16px; }
+.ap-sim-hero span { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; opacity: .75; }
+.ap-sim-big b { font-size: 44px; line-height: 1.1; font-weight: 800; }
+.ap-sim-big em { font-style: normal; font-size: 13px; opacity: .8; }
+.ap-sim-mini b { font-size: 22px; font-weight: 800; }
+.ap-sim-bar { grid-column: 1 / -1; display: flex; height: 10px; border-radius: 6px; overflow: hidden; background: rgba(255,255,255,.18); }
+.ap-sim-bar i { display: block; height: 100%; transition: width .25s ease; }
+.ap-sim-spins { background: #fff; border: 1px solid var(--ap-line); border-radius: 16px; padding: 16px 20px; box-shadow: var(--ap-shadow); }
+.ap-sim-chips { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.ap-sim-chips button { border: 1px solid var(--ap-ctl); background: #fff; color: var(--ap-navy); border-radius: 999px; padding: 4px 12px; font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; }
+.ap-sim-chips button.on, .ap-sim-chips button:hover { background: var(--ap-blue); color: #fff; border-color: var(--ap-blue); }
+.ap-sim-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 14px; }
+.ap-sim-group { background: #fff; border: 1px solid var(--ap-line); border-top: 3px solid var(--c); border-radius: 16px; padding: 14px 18px 16px; box-shadow: var(--ap-shadow); display: flex; flex-direction: column; gap: 12px; }
+.ap-sim-gh { display: flex; align-items: center; gap: 10px; color: var(--ap-navy); }
+.ap-sim-dot { width: 26px; height: 26px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; background: var(--c); color: #fff; font-size: 13px; }
+.ap-sl-top { display: flex; justify-content: space-between; gap: 10px; font-size: 12.5px; font-weight: 600; color: #475569; }
+.ap-sl-top b { font-size: 15px; white-space: nowrap; }
+.ap-sl small { display: block; color: #94A3B8; font-size: 11.5px; margin-top: 2px; }
+.ap-sl input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 8px; margin: 8px 0 2px; border-radius: 6px; outline: none; cursor: pointer; background: linear-gradient(90deg, var(--c) var(--p), #E3EAF8 var(--p)); }
+.ap-sl input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 3px solid var(--c); box-shadow: 0 3px 8px rgba(0, 40, 129, .3); transition: transform .12s; }
+.ap-sl input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+.ap-sl input[type=range]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: #fff; border: 3px solid var(--c); box-shadow: 0 3px 8px rgba(0, 40, 129, .3); }
+.ap-sim-lines { background: #fff; border: 1px solid var(--ap-line); border-radius: 16px; padding: 8px 20px 14px; box-shadow: var(--ap-shadow); }
+.ap-sim-line { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #EEF2FA; font-size: 13.5px; }
+.ap-sim-swatch { width: 10px; height: 34px; border-radius: 5px; flex: none; }
+.ap-sim-cost { font-size: 16px; color: var(--ap-navy); }
+@media (max-width: 760px) { .ap-sim-hero { grid-template-columns: 1fr 1fr; } .ap-sim-big { grid-column: 1 / -1; } }

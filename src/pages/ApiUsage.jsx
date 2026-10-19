@@ -229,7 +229,7 @@ export default function ApiUsage() {
     <div className="ap">
       <div className="page-header">
         <div><h1 className="page-title">{t('apiUsage.title')}</h1><p className="page-subtitle">{t('apiUsage.subtitle')}</p></div>
-        <label>{t('apiUsage.month')}<MonthPicker value={month} onChange={(v) => setParam('month', v === thisMonth() ? '' : v)} /></label>
+        <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, textAlign: 'center' }}>{t('apiUsage.month')}<MonthPicker value={month} onChange={(v) => setParam('month', v === thisMonth() ? '' : v)} /></label>
       </div>
       {error && <div className="error-banner">{error}</div>}
       <div className="tabs">{TABS.map((x) => <button key={x} className={`tab${tab === x ? ' active' : ''}`} onClick={() => setParam('tab', x === 'overview' ? '' : x)}>{t(`apiUsage.tabs.${x}`)}{x === 'alerts' && ov && ov.unreadAlerts > 0 ? ` (${ov.unreadAlerts})` : ''}</button>)}</div>

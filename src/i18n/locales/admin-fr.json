@@ -2375,7 +2375,11 @@
       "notePct": "% de lancers avec note analysée par l’IA",
       "noteHint": "Assistant IA qui remplit les segments",
       "noteIn": "Tokens envoyés par analyse de note",
-      "noteOut": "Tokens reçus par analyse de note"
+      "noteOut": "Tokens reçus par analyse de note",
+      "forSpins": "pour {{n}} lancers",
+      "aiGroup": "IA par lancer",
+      "noteGroup": "Assistant IA de notes",
+      "plansGroup": "Forfaits à comparer"
     }
   },
   "myPark": {

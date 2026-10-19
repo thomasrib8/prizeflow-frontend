@@ -2375,7 +2375,11 @@
       "notePct": "% der Drehungen mit KI-analysierter Notiz",
       "noteHint": "KI-Assistent, der die Segmente ausfüllt",
       "noteIn": "Gesendete Tokens pro Notizanalyse",
-      "noteOut": "Empfangene Tokens pro Notizanalyse"
+      "noteOut": "Empfangene Tokens pro Notizanalyse",
+      "forSpins": "für {{n}} Drehungen",
+      "aiGroup": "KI pro Drehung",
+      "noteGroup": "KI-Notizassistent",
+      "plansGroup": "Tarife zum Vergleichen"
     }
   },
   "myPark": {

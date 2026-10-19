@@ -2375,7 +2375,11 @@
       "notePct": "% de giros con nota analizada por la IA",
       "noteHint": "Asistente de IA que rellena los segmentos",
       "noteIn": "Tokens enviados por análisis de nota",
-      "noteOut": "Tokens recibidos por análisis de nota"
+      "noteOut": "Tokens recibidos por análisis de nota",
+      "forSpins": "para {{n}} giros",
+      "aiGroup": "IA por giro",
+      "noteGroup": "Asistente de IA de notas",
+      "plansGroup": "Planes a comparar"
     }
   },
   "myPark": {

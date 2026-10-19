@@ -2375,7 +2375,11 @@
       "notePct": "% of spins with a note analysed by AI",
       "noteHint": "AI assistant that fills the segments",
       "noteIn": "Tokens sent per note analysis",
-      "noteOut": "Tokens received per note analysis"
+      "noteOut": "Tokens received per note analysis",
+      "forSpins": "for {{n}} spins",
+      "aiGroup": "AI per spin",
+      "noteGroup": "AI notes assistant",
+      "plansGroup": "Plans to compare"
     }
   },
   "myPark": {
