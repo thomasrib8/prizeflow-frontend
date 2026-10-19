@@ -988,7 +988,8 @@
       "expiresOn": "Läuft ab am",
       "addPack": "Paket hinzufügen",
       "used": "verbraucht"
-    }
+    },
+    "tabCatalog": "Messekatalog"
   },
   "nav": {
     "openMenuAriaLabel": "Menü öffnen",

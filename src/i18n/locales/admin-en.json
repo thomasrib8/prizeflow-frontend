@@ -988,7 +988,8 @@
       "expiresOn": "Expires on",
       "addPack": "Add the pack",
       "used": "used"
-    }
+    },
+    "tabCatalog": "Events catalog"
   },
   "nav": {
     "openMenuAriaLabel": "Open menu",

@@ -2,6 +2,7 @@ import { useConfirm } from '../components/ConfirmDialog';
 import { SocialGlyph } from '../components/SocialIcons';
 import { getBoxUrl } from '../utils/offlineBox';
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import WifiQrSheet from '../components/WifiQrSheet';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
@@ -10,6 +11,8 @@ import { useAuth } from '../context/AuthContext';
 import { useAdmin } from '../hooks/useAdmin';
 import Calibration from './Calibration';
 import ApiPricingModule from '../components/ApiPricingModule';
+import Catalog from './Catalog';
+import './admin-premium.css';
 
 // Social platform names are proper nouns (Facebook/Instagram/LinkedIn/X) —
 // never translated. Profile field keys map to settings.information.field*.
@@ -1160,20 +1163,20 @@ function AlertThresholdsModule() {
   }
 
   return (
-    <>
+    <div className="ap">
       {error && <div className="error-banner">{error}</div>}
       <Card title={t('settings.alerts.title')} className="mt-card">
-        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 16px', lineHeight: 1.6 }}>{t('settings.alerts.desc')}</p>
+        <p className="ap-hint">{t('settings.alerts.desc')}</p>
         <form onSubmit={handleSave}>
           {ALERT_ROWS.map((r) => {
             const d = draft[r.key];
             return (
-              <div key={r.key} style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 150px', gap: 12, alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #F1F5F9' }}>
-                <label style={{ display: 'flex', gap: 10, alignItems: 'flex-start', fontSize: 13, cursor: 'pointer' }}>
+              <div key={r.key} className="ap-line" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 170px', gap: 14, alignItems: 'center' }}>
+                <label className="ap-check">
                   <input type="checkbox" checked={!!d.enabled} onChange={(e) => set(r.key, { enabled: e.target.checked })} style={{ marginTop: 3 }} />
                   <span>
                     <b>{t(`settings.alerts.${r.key}.label`)}</b>
-                    <span style={{ display: 'block', color: '#64748B', fontSize: 12, lineHeight: 1.5 }}>{t(`settings.alerts.${r.key}.help`)}</span>
+                    <span className="ap-sub" style={{ display: 'block' }}>{t(`settings.alerts.${r.key}.help`)}</span>
                     {r.block && d.enabled && (
                       <span style={{ display: 'flex', gap: 6, alignItems: 'center', marginTop: 6, fontSize: 12, color: '#92400E' }}>
                         <input type="checkbox" checked={!!d.block} onChange={(e) => set(r.key, { block: e.target.checked })} />
@@ -1212,7 +1215,7 @@ function AlertThresholdsModule() {
           </>
         )}
       </Card>
-    </>
+    </div>
   );
 }
 
@@ -1227,12 +1230,16 @@ const MODULE_KEYS = [
   { key: 'calibration', tKey: 'tabCalibration' },
   { key: 'alerts', tKey: 'tabAlerts', adminOnly: true },
   { key: 'pricing', tKey: 'tabPricing', adminOnly: true },
+  { key: 'catalog', tKey: 'tabCatalog', adminOnly: true },
 ];
 
 export default function Settings() {
   const { t } = useTranslation('admin');
-  const [module, setModule] = useState('information');
+  const [searchParams] = useSearchParams();
+  const [module, setModule] = useState(() => (MODULE_KEYS.some((m) => m.key === searchParams.get('tab')) ? searchParams.get('tab') : 'information'));
+  const [catalogPending, setCatalogPending] = useState(0);
   const { isAdmin } = useAdmin();
+  useEffect(() => { if (isAdmin) api.getCatalogPending().then((r) => setCatalogPending(r.count)).catch(() => {}); }, [isAdmin, module]);
 
   return (
     <div>
@@ -1243,10 +1250,10 @@ export default function Settings() {
         </div>
       </div>
 
-      <div className="tabs">
+      <div className="tabs ap-tabs">
         {MODULE_KEYS.filter((m) => !m.adminOnly || isAdmin).map((m) => (
           <button key={m.key} className={`tab${module === m.key ? ' active' : ''}`} onClick={() => setModule(m.key)}>
-            {t(`settings.${m.tKey}`)}
+            {t(`settings.${m.tKey}`)}{m.key === 'catalog' && catalogPending > 0 ? ` (${catalogPending})` : ''}
           </button>
         ))}
       </div>
@@ -1260,6 +1267,7 @@ export default function Settings() {
       {module === 'offline' && <OfflineModeModule />}
       {module === 'alerts' && isAdmin && <AlertThresholdsModule />}
       {module === 'pricing' && isAdmin && <ApiPricingModule />}
+      {module === 'catalog' && isAdmin && <Catalog embedded />}
       {module === 'calibration' && <Calibration onExit={() => setModule('information')} />}
     </div>
   );

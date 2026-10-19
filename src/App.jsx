@@ -31,7 +31,6 @@ import Settings from './pages/Settings';
 import Users from './pages/Users';
 import Park from './pages/Park';
 import AdminDashboard from './pages/AdminDashboard';
-import Catalog from './pages/Catalog';
 import ApiUsage from './pages/ApiUsage';
 import MyPark from './pages/MyPark';
 const Live = lazy(() => import('./pages/Live')); // MapLibre is heavy: loaded only when the page is opened
@@ -127,7 +126,7 @@ export default function App() {
           <Route path="/my-park" element={<PrivateRoute><MyPark /></PrivateRoute>} />
           <Route path="/api-usage" element={<AdminRoute><ApiUsage /></AdminRoute>} />
           <Route path="/live" element={<AdminRoute><Suspense fallback={null}><Live /></Suspense></AdminRoute>} />
-          <Route path="/catalog" element={<AdminRoute><Catalog /></AdminRoute>} />
+          <Route path="/catalog" element={<Navigate to="/settings?tab=catalog" replace />} />
           <Route path="/admin-dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
           <Route path="/health" element={<AdminRoute><AppHealth /></AdminRoute>} />
           <Route path="/magic" element={<AdminRoute><Magic /></AdminRoute>} />

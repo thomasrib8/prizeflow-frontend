@@ -33,7 +33,6 @@ const ADMIN_NAV_ITEMS = [
   { to: '/live', tKey: 'live', icon: IconGlobe },
   { to: '/api-usage', tKey: 'apiUsage', icon: IconGauge },
   { to: '/park', tKey: 'park', icon: IconPark },
-  { to: '/catalog', tKey: 'catalog', icon: IconPin, badgeKey: 'catalogPending' },
   { to: '/health', tKey: 'health', icon: IconHeart },
   { to: '/magic', tKey: 'magic', icon: IconMagic },
   { to: '/sequence', tKey: 'sequence', icon: IconSequence },
@@ -50,7 +49,6 @@ export default function Layout({ children }) {
   const { agentConnected, connectedSince, latencyMs } = useWheelSocket();
   const offlineBox = useOfflineBox();
   const [pendingCount, setPendingCount] = useState(0);
-  const [catalogPending, setCatalogPending] = useState(0);
   const [isReseller, setIsReseller] = useState(false);
   const [showDiagnostics, setShowDiagnostics] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -83,7 +81,6 @@ export default function Layout({ children }) {
     let cancelled = false;
     function poll() {
       api.getUsersPendingCount().then((res) => { if (!cancelled) setPendingCount(res.count); }).catch(() => {});
-      api.getCatalogPending().then((res) => { if (!cancelled) setCatalogPending(res.count); }).catch(() => {});
     }
     poll();
     const id = setInterval(poll, PENDING_COUNT_POLL_MS);
@@ -147,9 +144,6 @@ export default function Layout({ children }) {
                   <span>{t(`nav.${tKey}`)}</span>
                   {badgeKey === 'pendingCount' && pendingCount > 0 && (
                     <span className="nav-badge">{pendingCount}</span>
-                  )}
-                  {badgeKey === 'catalogPending' && catalogPending > 0 && (
-                    <span className="nav-badge">{catalogPending}</span>
                   )}
                 </NavLink>
               ))}
@@ -264,9 +258,6 @@ function IconGauge() {
 }
 function IconGlobe() {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/></svg>;
-}
-function IconPin() {
-  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 21s-7-6.2-7-11.2a7 7 0 0114 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="10" r="2.5"/></svg>;
 }
 function IconHeart() {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M20.8 8.6c0 4.6-8.8 10.4-8.8 10.4S3.2 13.2 3.2 8.6a4.6 4.6 0 0 1 8.8-1.8 4.6 4.6 0 0 1 8.8 1.8Z"/></svg>;

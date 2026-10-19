@@ -4,11 +4,12 @@ import { useTranslation } from 'react-i18next';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, CartesianGrid, PieChart, Pie, Cell, ComposedChart, Line } from 'recharts';
 import { api } from '../api/client';
 import { Card, Button, Badge } from '../components/ui';
+import './admin-premium.css';
 
 // Admin › Dashboard Admin: the SPARK cockpit. Everything follows the chosen period; recognized revenue, forecast and contractual recurring
 // revenue are never added together; every KPI says how reliable it is and can show its formula.
 const PRESETS = ['today', '7d', '30d', 'month', 'prevMonth', 'quarter', '6m', 'year', 'launch', 'custom'];
-const MODEL_COLORS = { rent: '#2E6BFF', short: '#10B981', reseller_rent: '#F59E0B', activation: '#8B5CF6' };
+const MODEL_COLORS = { rent: '#0055F8', short: '#09B2FD', reseller_rent: '#7C3AED', activation: '#F59E0B' };
 const RELIABILITY_TONE = { real: 'green', computed: 'blue', estimated: 'orange', incomplete: 'red' };
 
 const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -47,18 +48,20 @@ function Kpi({ id, label, value, sub, cur, prev, money, reliability }) {
   const { t } = useTranslation('admin');
   const [open, setOpen] = useState(false);
   return (
-    <div className="stat" style={{ position: 'relative' }}>
-      <div className="stat-label" style={{ display: 'flex', gap: 6, alignItems: 'center', justifyContent: 'space-between' }}>
-        <span>{label}</span>
-        <span style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-          {reliability && <Badge tone={RELIABILITY_TONE[reliability]}>{t(`adminDash.rel.${reliability}`)}</Badge>}
-          <button type="button" className="link-button" aria-label={t('adminDash.formulaBtn')} title={t('adminDash.formulaBtn')} onClick={() => setOpen((v) => !v)}>ⓘ</button>
-        </span>
+    <div className="stat">
+      <div className="ap-kpi-top">
+        <span className="stat-label">{label}</span>
+        <button type="button" className="ap-info-btn" aria-label={t('adminDash.formulaBtn')} title={t('adminDash.formulaBtn')} onClick={() => setOpen((v) => !v)}>i</button>
       </div>
       <div className="stat-value">{value}</div>
-      {cur !== undefined && <Delta cur={cur} prev={prev} money={money} />}
-      {sub && <div style={{ fontSize: 12, color: '#64748B', marginTop: 4 }}>{sub}</div>}
-      {open && <div style={{ fontSize: 12, color: '#334155', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 8, padding: 8, marginTop: 8, lineHeight: 1.5 }}>{t(`adminDash.formula.${id}`)}</div>}
+      <div className="ap-kpi-foot">
+        <div>
+          {cur !== undefined && <Delta cur={cur} prev={prev} money={money} />}
+          {sub && <div className="ap-sub">{sub}</div>}
+        </div>
+        {reliability && <Badge tone={RELIABILITY_TONE[reliability]}>{t(`adminDash.rel.${reliability}`)}</Badge>}
+      </div>
+      {open && <div className="ap-formula">{t(`adminDash.formula.${id}`)}</div>}
     </div>
   );
 }
@@ -68,12 +71,12 @@ function Ranking({ title, rows, linkBase }) {
   const max = Math.max(1, ...rows.map((r) => r.cents));
   return (
     <Card title={title} className="mt-card">
-      {rows.length === 0 ? <p style={{ fontSize: 13, color: '#64748B', margin: 0 }}>{t('adminDash.noData')}</p> : rows.map((r) => (
-        <div key={r.id} style={{ marginBottom: 8, fontSize: 13 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+      {rows.length === 0 ? <p className="ap-hint" style={{ margin: 0 }}>{t('adminDash.noData')}</p> : rows.map((r) => (
+        <div key={r.id} className="ap-rank-row">
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
             {linkBase ? <Link to={`${linkBase}${r.id}`}>{r.label}</Link> : <span>{r.label}</span>}<b>{eur(r.cents)}</b>
           </div>
-          <div style={{ height: 5, borderRadius: 4, background: '#E2E8F0', marginTop: 3 }}><div style={{ width: `${(r.cents / max) * 100}%`, height: '100%', borderRadius: 4, background: '#2E6BFF' }} /></div>
+          <div className="bar"><i style={{ width: `${(r.cents / max) * 100}%` }} /></div>
         </div>
       ))}
     </Card>
@@ -119,7 +122,7 @@ export default function AdminDashboard() {
   const days = data ? data.period.days : 0;
 
   return (
-    <div>
+    <div className="ap">
       <div className="page-header">
         <div>
           <h1 className="page-title">{t('adminDash.title')}</h1>
@@ -128,26 +131,24 @@ export default function AdminDashboard() {
         <Button variant="secondary" disabled={busy || !data} onClick={exportCsv}>{t('adminDash.exportCsv')}</Button>
       </div>
 
-      <Card className="mt-card">
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'flex-end' }}>
-          <label style={{ fontSize: 12, color: '#64748B' }}>{t('adminDash.period')}
+      <div className="ap-bar">
+          <label>{t('adminDash.period')}
             <select value={preset} onChange={(e) => setParam('p', e.target.value)} style={{ display: 'block' }}>{PRESETS.map((x) => <option key={x} value={x}>{t(`adminDash.presets.${x}`)}</option>)}</select></label>
           {preset === 'custom' && <>
-            <label style={{ fontSize: 12, color: '#64748B' }}>{t('adminDash.from')}<input type="date" value={sp.get('from') || range.from} onChange={(e) => setParam('from', e.target.value)} style={{ display: 'block' }} /></label>
-            <label style={{ fontSize: 12, color: '#64748B' }}>{t('adminDash.to')}<input type="date" value={sp.get('to') || range.to} onChange={(e) => setParam('to', e.target.value)} style={{ display: 'block' }} /></label>
+            <label>{t('adminDash.from')}<input type="date" value={sp.get('from') || range.from} onChange={(e) => setParam('from', e.target.value)} style={{ display: 'block' }} /></label>
+            <label>{t('adminDash.to')}<input type="date" value={sp.get('to') || range.to} onChange={(e) => setParam('to', e.target.value)} style={{ display: 'block' }} /></label>
           </>}
-          <label style={{ fontSize: 12, color: '#64748B' }}>{t('adminDash.compare')}
+          <label>{t('adminDash.compare')}
             <select value={cmp} onChange={(e) => setParam('cmp', e.target.value === 'prev' ? '' : e.target.value)} style={{ display: 'block' }}>
               <option value="prev">{t('adminDash.comparePrev')}</option><option value="none">{t('adminDash.compareNone')}</option></select></label>
-          <label style={{ fontSize: 12, color: '#64748B' }}>{t('adminDash.model')}
+          <label>{t('adminDash.model')}
             <select value={model} onChange={(e) => setParam('model', e.target.value)} style={{ display: 'block' }}>
               <option value="">{t('adminDash.all')}</option>{Object.keys(MODEL_COLORS).map((k) => <option key={k} value={k}>{t(`adminDash.models.${k}`)}</option>)}</select></label>
-          <label style={{ fontSize: 12, color: '#64748B' }}>{t('adminDash.reseller')}
+          <label>{t('adminDash.reseller')}
             <select value={reseller} onChange={(e) => setParam('reseller', e.target.value)} style={{ display: 'block' }}>
               <option value="">{t('adminDash.all')}</option>{resellers.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}</select></label>
-        </div>
-        {data && <p style={{ fontSize: 12, color: '#64748B', margin: '10px 0 0' }}>{data.period.from} → {data.period.to} ({days} {t('adminDash.days')}){data.compare ? ` · ${t('adminDash.comparedTo')} ${data.compare.from} → ${data.compare.to}` : ''}</p>}
-      </Card>
+        {data && <p className="ap-bar-note">{data.period.from} → {data.period.to} ({days} {t('adminDash.days')}){data.compare ? ` · ${t('adminDash.comparedTo')} ${data.compare.from} → ${data.compare.to}` : ''}</p>}
+      </div>
 
       {error && <div className="error-banner" style={{ marginTop: 12 }}>{error}</div>}
       {!data && !error && <p className="page-subtitle">{t('common.loading')}</p>}
@@ -155,7 +156,7 @@ export default function AdminDashboard() {
       {data && (
         <>
           {data.toComplete.length > 0 && (
-            <div className="error-banner" style={{ background: '#FFFBEB', borderColor: '#FDE68A', color: '#92400E', marginTop: 12 }}>
+            <div className="ap-warn">
               <b>{t('adminDash.toCompleteTitle', { n: data.toComplete.length })}</b>
               <ul style={{ margin: '6px 0 0', paddingLeft: 18 }}>
                 {data.toComplete.map((i, k) => (

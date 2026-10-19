@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { Card, Button, Badge } from '../components/ui';
 import { useConfirm } from '../components/ConfirmDialog';
+import './admin-premium.css';
 
 // Admin › Catalogue des salons: the validation queue of what clients typed, correction, merge of duplicates, coordinates.
 const STATUS_TONE = { imported: 'neutral', proposed: 'orange', verified: 'green', rejected: 'red', merged: 'neutral' };
@@ -52,8 +53,8 @@ function Editor({ id, onClose, onChanged }) {
 
         <div className="sw-label">{t('catalog.coordinates')} <Badge tone={e.geocode_status === 'found' || e.geocode_status === 'manual' ? 'green' : e.geocode_status === 'ambiguous' ? 'orange' : 'neutral'}>{t(`catalog.geo.${e.geocode_status}`)}</Badge></div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-end' }}>
-          <label style={lbl}>lat<input type="number" step="any" value={f.lat} onChange={(ev) => setF({ ...f, lat: ev.target.value })} style={{ display: 'block', width: 120 }} /></label>
-          <label style={lbl}>lng<input type="number" step="any" value={f.lng} onChange={(ev) => setF({ ...f, lng: ev.target.value })} style={{ display: 'block', width: 120 }} /></label>
+          <label>lat<input type="number" step="any" value={f.lat} onChange={(ev) => setF({ ...f, lat: ev.target.value })} style={{ display: 'block', width: 120 }} /></label>
+          <label>lng<input type="number" step="any" value={f.lng} onChange={(ev) => setF({ ...f, lng: ev.target.value })} style={{ display: 'block', width: 120 }} /></label>
           <Button size="sm" variant="secondary" disabled={f.lat === '' || f.lng === ''} onClick={() => run(() => api.editCatalogEntry(id, { lat: Number(f.lat), lng: Number(f.lng) }))}>{t('catalog.setCoords')}</Button>
           <Button size="sm" variant="secondary" onClick={() => run(() => api.regeocodeCatalogEntry(id))}>{t('catalog.regeocode')}</Button>
         </div>
@@ -87,7 +88,7 @@ function Editor({ id, onClose, onChanged }) {
   );
 }
 
-export default function Catalog() {
+export default function Catalog({ embedded = false }) {
   const { t } = useTranslation('admin');
   const [tab, setTab] = useState('proposed');
   const [q, setQ] = useState('');
@@ -101,34 +102,39 @@ export default function Catalog() {
   }, [tab, q]);
   useEffect(() => { const h = setTimeout(load, 200); return () => clearTimeout(h); }, [load]);
   const counts = data ? data.counts : {};
+  const doImport = async () => { setError(''); setMsg(''); try { const r = await api.importCatalog(); setMsg(t('catalog.imported', { added: r.added, total: r.total })); load(); } catch (e) { setError(e.message); } };
 
   return (
-    <div>
-      <div className="page-header">
-        <div><h1 className="page-title">{t('catalog.title')}</h1><p className="page-subtitle">{t('catalog.subtitle')}</p></div>
-        <Button variant="secondary" onClick={async () => { try { const r = await api.importCatalog(); setMsg(t('catalog.imported', { added: r.added, total: r.total })); load(); } catch (e) { setError(e.message); } }}>{t('catalog.importBtn')}</Button>
+    <div className="ap">
+      {!embedded && <div className="page-header"><div><h1 className="page-title">{t('catalog.title')}</h1><p className="page-subtitle">{t('catalog.subtitle')}</p></div></div>}
+      <div className="ap-bar">
+        <div style={{ flex: '1 1 280px' }}>
+          <h3 style={{ margin: '0 0 3px', fontSize: 15, fontWeight: 800, color: '#03041A' }}>{t('catalog.title')}</h3>
+          <p className="ap-hint" style={{ margin: 0 }}>{t('catalog.subtitle')}</p>
+        </div>
+        <Button variant="secondary" onClick={doImport}>{t('catalog.importBtn')}</Button>
       </div>
       {error && <div className="error-banner">{error}</div>}
-      {msg && <div className="error-banner" style={{ background: '#ECFDF5', borderColor: '#A7F3D0', color: '#065F46' }}>{msg}</div>}
-      <div className="tabs">
-        {TABS.map((x) => <button key={x} className={`tab${tab === x ? ' active' : ''}`} onClick={() => setTab(x)}>{t(`catalog.tab.${x}`)}{x !== 'all' && counts[x] !== undefined ? ` (${counts[x]})` : ''}</button>)}
+      {msg && <div className="ap-info">{msg}</div>}
+      <div className="ap-pills" style={{ marginBottom: 14 }}>
+        {TABS.map((x) => <button key={x} className={`ap-pill${tab === x ? ' on' : ''}`} onClick={() => setTab(x)}>{t(`catalog.tab.${x}`)}{x !== 'all' && counts[x] !== undefined ? <b>{counts[x]}</b> : null}</button>)}
       </div>
-      <Card className="mt-card">
-        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('catalog.searchPh')} style={{ width: '100%', maxWidth: 360, marginBottom: 12 }} />
-        {!data ? <p className="page-subtitle">{t('common.loading')}</p> : data.entries.length === 0 ? <p style={{ fontSize: 13, color: '#64748B', margin: 0 }}>{t('catalog.empty')}</p> : (
+      <Card>
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('catalog.searchPh')} style={{ width: '100%', maxWidth: 380, marginBottom: 14 }} />
+        {!data ? <p className="page-subtitle">{t('common.loading')}</p> : data.entries.length === 0 ? <p className="ap-hint" style={{ margin: 0 }}>{t('catalog.empty')}</p> : (
           <table className="data-table">
             <thead><tr><th>{t('catalog.colName')}</th><th>{t('catalog.colVenue')}</th><th>{t('catalog.colCity')}</th><th>{t('catalog.colStatus')}</th><th>{t('catalog.coordinates')}</th><th></th></tr></thead>
             <tbody>{data.entries.map((e) => (
               <tr key={e.id} style={{ cursor: 'pointer' }} onClick={() => setEdit(e.id)}>
-                <td style={{ fontWeight: 600 }}>{e.name}</td><td>{e.venue || '—'}</td><td>{e.city || '—'}</td>
-                <td><Badge tone={STATUS_TONE[e.status]}>{t(`catalog.status.${e.status}`)}</Badge>{e.status === 'proposed' && <div style={{ fontSize: 11, color: '#64748B' }}>{e.submissions} {t('catalog.accounts')}</div>}</td>
-                <td>{t(`catalog.geo.${e.geocode_status}`)}</td>
+                <td>{e.name}</td><td>{e.venue || '—'}</td><td>{e.city || '—'}</td>
+                <td><Badge tone={STATUS_TONE[e.status]}>{t(`catalog.status.${e.status}`)}</Badge>{e.status === 'proposed' && <div className="ap-sub">{e.submissions} {t('catalog.accounts')}</div>}</td>
+                <td><Badge tone={e.geocode_status === 'found' || e.geocode_status === 'manual' ? 'green' : e.geocode_status === 'ambiguous' ? 'orange' : 'neutral'}>{t(`catalog.geo.${e.geocode_status}`)}</Badge></td>
                 <td><Button size="sm" variant="secondary">{t('profit.edit')}</Button></td>
               </tr>
             ))}</tbody>
           </table>
         )}
-        {data && data.total > data.entries.length && <p style={{ fontSize: 12, color: '#64748B' }}>{t('catalog.truncated', { n: data.entries.length, total: data.total })}</p>}
+        {data && data.total > data.entries.length && <p className="ap-hint" style={{ marginTop: 10 }}>{t('catalog.truncated', { n: data.entries.length, total: data.total })}</p>}
       </Card>
       {edit && <Editor id={edit} onClose={() => setEdit(null)} onChanged={load} />}
     </div>

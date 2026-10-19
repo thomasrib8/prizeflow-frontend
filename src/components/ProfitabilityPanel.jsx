@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { Card, Button, Badge, Stat } from './ui';
+import '../pages/admin-premium.css';
 
 // Admin › Parc hardware › Rentabilité. Contribution is PARTIAL (revenue − API costs of the rentals − direct costs), never a net margin;
 // a cost of the lot that was not entered is "à renseigner" (never 0). Amounts typed in euros, stored in cents.
@@ -17,8 +18,8 @@ function Coverage({ pct }) {
   const w = Math.max(0, Math.min(100, pct));
   return (
     <div style={{ minWidth: 110 }}>
-      <div style={{ height: 6, borderRadius: 4, background: '#E2E8F0', overflow: 'hidden' }}><div style={{ width: `${w}%`, height: '100%', background: pct >= 100 ? '#10B981' : '#2E6BFF' }} /></div>
-      <div style={{ fontSize: 12, marginTop: 2, color: pct < 0 ? '#B91C1C' : undefined }}>{pct.toLocaleString(undefined, { maximumFractionDigits: 1 })} %</div>
+      <div className={`ap-progress${pct >= 100 ? '' : ''}`}><i style={{ width: `${w}%`, background: pct >= 100 ? 'linear-gradient(90deg,#10B981,#34D399)' : undefined }} /></div>
+      <div className="ap-sub" style={{ marginTop: 3, color: pct < 0 ? '#B91C1C' : undefined }}>{pct.toLocaleString(undefined, { maximumFractionDigits: 1 })} %</div>
     </div>
   );
 }
@@ -45,10 +46,10 @@ function CostEditor({ row, onClose, onChanged }) {
         {d && (
           <>
             <div className="sw-label">{t('profit.lotCost')}</div>
-            <p style={{ ...lbl, margin: '0 0 8px' }}>{t('profit.lotHelp')}</p>
+            <p className="ap-hint">{t('profit.lotHelp')}</p>
             <form onSubmit={(e) => { e.preventDefault(); run(() => api.setWheelCost(row.wheelId, { costCents: toCents(cost), acquiredOn: acq || undefined })); }} style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-end' }}>
-              <label style={lbl}>{t('profit.lotCostEur')}<input type="number" min="0" step="0.01" required value={cost} onChange={(e) => setCost(e.target.value)} style={{ display: 'block', width: 130 }} /></label>
-              <label style={lbl}>{t('profit.acquiredOn')}<input type="date" value={acq} onChange={(e) => setAcq(e.target.value)} style={{ display: 'block' }} /></label>
+              <label>{t('profit.lotCostEur')}<input type="number" min="0" step="0.01" required value={cost} onChange={(e) => setCost(e.target.value)} style={{ display: 'block', width: 130 }} /></label>
+              <label>{t('profit.acquiredOn')}<input type="date" value={acq} onChange={(e) => setAcq(e.target.value)} style={{ display: 'block' }} /></label>
               <Button type="submit" size="sm">{t('common.save')}</Button>
             </form>
             {d.costHistory.length > 1 && <p style={{ ...lbl, margin: '8px 0 0' }}>{t('profit.history')} : {d.costHistory.map((h) => `${eur(h.cost_cents)} (${h.valid_from})`).join(' · ')}</p>}
@@ -56,10 +57,10 @@ function CostEditor({ row, onClose, onChanged }) {
             <div className="sw-label" style={{ marginTop: 16 }}>{t('profit.directTitle')}</div>
             <form onSubmit={(e) => { e.preventDefault(); run(() => api.addWheelDirectCost(row.wheelId, { kind: dc.kind, amountCents: toCents(dc.amount), incurredOn: dc.incurredOn, note: dc.note || undefined }).then(() => setDc({ ...dc, amount: '', note: '' }))); }}
               style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-end' }}>
-              <label style={lbl}>{t('profit.kind')}<select value={dc.kind} onChange={(e) => setDc({ ...dc, kind: e.target.value })} style={{ display: 'block' }}>{KINDS.map((k) => <option key={k} value={k}>{t(`profit.kinds.${k}`)}</option>)}</select></label>
-              <label style={lbl}>{t('profit.amountEur')}<input type="number" min="0.01" step="0.01" required value={dc.amount} onChange={(e) => setDc({ ...dc, amount: e.target.value })} style={{ display: 'block', width: 100 }} /></label>
-              <label style={lbl}>{t('profit.date')}<input type="date" required value={dc.incurredOn} onChange={(e) => setDc({ ...dc, incurredOn: e.target.value })} style={{ display: 'block' }} /></label>
-              <label style={lbl}>{t('profit.note')}<input value={dc.note} maxLength={200} onChange={(e) => setDc({ ...dc, note: e.target.value })} style={{ display: 'block', width: 150 }} /></label>
+              <label>{t('profit.kind')}<select value={dc.kind} onChange={(e) => setDc({ ...dc, kind: e.target.value })} style={{ display: 'block' }}>{KINDS.map((k) => <option key={k} value={k}>{t(`profit.kinds.${k}`)}</option>)}</select></label>
+              <label>{t('profit.amountEur')}<input type="number" min="0.01" step="0.01" required value={dc.amount} onChange={(e) => setDc({ ...dc, amount: e.target.value })} style={{ display: 'block', width: 100 }} /></label>
+              <label>{t('profit.date')}<input type="date" required value={dc.incurredOn} onChange={(e) => setDc({ ...dc, incurredOn: e.target.value })} style={{ display: 'block' }} /></label>
+              <label>{t('profit.note')}<input value={dc.note} maxLength={200} onChange={(e) => setDc({ ...dc, note: e.target.value })} style={{ display: 'block', width: 150 }} /></label>
               <Button type="submit" size="sm">{t('profit.add')}</Button>
             </form>
             {d.directCosts.map((c) => (
@@ -86,15 +87,16 @@ export default function ProfitabilityPanel() {
   const tot = data.totals;
   return (
     <>
+      <div className="ap">
       <div className="grid-stats">
         <Stat label={t('profit.statCost')} value={eur(tot.initialCostCents)} />
         <Stat label={t('profit.statRevenue')} value={eur(tot.revenueCents)} accent="blue" />
         <Stat label={t('profit.statContribution')} value={eur(tot.contributionCents)} accent="green" />
         <Stat label={t('profit.statCovered')} value={`${tot.coveredWheels} / ${tot.wheels - tot.withoutCost}`} accent="orange" />
       </div>
-      {tot.withoutCost > 0 && <div className="error-banner" style={{ background: '#FFFBEB', borderColor: '#FDE68A', color: '#92400E', marginTop: 12 }}>{t('profit.missingCosts', { n: tot.withoutCost })}</div>}
+      {tot.withoutCost > 0 && <div className="ap-warn">{t('profit.missingCosts', { n: tot.withoutCost })}</div>}
       <Card className="mt-card">
-        <p style={{ ...lbl, margin: '0 0 12px', lineHeight: 1.6 }}>{t('profit.disclaimer')}</p>
+        <p className="ap-hint">{t('profit.disclaimer')}</p>
         <table className="data-table">
           <thead><tr><th>{t('park.colSerial')}</th><th>{t('profit.colCost')}</th><th>{t('profit.colRevenue')}</th><th>{t('profit.colApi')}</th><th>{t('profit.colDirect')}</th><th>{t('profit.colContribution')}</th><th>{t('profit.colCoverage')}</th><th>{t('profit.colDays')}</th><th></th></tr></thead>
           <tbody>{data.wheels.map((w) => (
@@ -113,6 +115,7 @@ export default function ProfitabilityPanel() {
         </table>
       </Card>
       {edit && <CostEditor row={edit} onClose={() => setEdit(null)} onChanged={load} />}
+      </div>
     </>
   );
 }

@@ -5,11 +5,12 @@ import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { api } from '../api/client';
 import { Card, Button, Badge } from '../components/ui';
+import './admin-premium.css';
 
 // Admin › Locations Live. Positions are DECLARED (event of the client's campaign, place typed on the rental, last known event, address of the
 // reseller holding the wheel): never a GPS. Marker shape says how sure we are (filled = event in progress, hollow = last known position).
 maplibregl.setWorkerUrl('/maplibre/maplibre-gl-worker.mjs'); // published by vite.config.js (the worker is two files that must stay side by side)
-const STATUS_COLORS = { event: '#2E6BFF', rented: '#0EA5E9', upcoming: '#F59E0B', reseller: '#8B5CF6', depot: '#64748B', maintenance: '#EF4444' };
+const STATUS_COLORS = { event: '#0055F8', rented: '#09B2FD', upcoming: '#F59E0B', reseller: '#7C3AED', depot: '#64748B', maintenance: '#EF4444' };
 const STATUSES = ['event', 'rented', 'upcoming', 'reseller', 'depot', 'maintenance'];
 const eur = (c) => (c === null || c === undefined ? '—' : (c / 100).toLocaleString(undefined, { style: 'currency', currency: 'EUR' }));
 const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -134,7 +135,7 @@ export default function Live() {
   const wheels = data ? data.wheels : [];
 
   return (
-    <div>
+    <div className="ap">
       <div className="page-header">
         <div><h1 className="page-title">{t('live.title')}</h1><p className="page-subtitle">{t('live.subtitle')}</p></div>
         <div style={{ display: 'flex', gap: 8 }}>
@@ -142,40 +143,40 @@ export default function Live() {
           <Button variant={mode === 'history' ? 'primary' : 'secondary'} onClick={() => setParam('mode', 'history')}>{t('live.modeHistory')}</Button>
         </div>
       </div>
-      <div className="error-banner" style={{ background: '#FFFBEB', borderColor: '#FDE68A', color: '#92400E' }}>{t('live.notGps')}</div>
+      <div className="ap-warn">{t('live.notGps')}</div>
       {error && <div className="error-banner">{error}</div>}
 
-      <Card className="mt-card">
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-          <button className={`tab${!status ? ' active' : ''}`} onClick={() => setParam('status', '')}>{t('live.all')}{data ? ` (${data.total})` : ''}</button>
-          {STATUSES.map((s) => (
-            <button key={s} className={`tab${status === s ? ' active' : ''}`} onClick={() => setParam('status', s)}>
-              <span style={{ display: 'inline-block', width: 9, height: 9, borderRadius: '50%', background: STATUS_COLORS[s], marginRight: 6 }} />{t(`live.status.${s}`)}{data && data.counts[s] !== undefined && !status ? ` (${data.counts[s]})` : ''}
+      <div className="ap-bar" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
+        <div className="ap-pills">
+          <button className={`ap-pill${!status ? ' on' : ''}`} onClick={() => setParam('status', '')}>{t('live.all')}{data ? <b>{data.total}</b> : null}</button>
+          {STATUSES.map((s2) => (
+            <button key={s2} className={`ap-pill${status === s2 ? ' on' : ''}`} onClick={() => setParam('status', s2)}>
+              <i style={{ background: STATUS_COLORS[s2] }} />{t(`live.status.${s2}`)}{data && data.counts[s2] !== undefined && !status ? <b>{data.counts[s2]}</b> : null}
             </button>
           ))}
         </div>
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'flex-end', marginTop: 12 }}>
-          <label style={{ fontSize: 12, color: '#64748B' }}>{t('live.reseller')}
+        <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+          <label>{t('live.reseller')}
             <select value={reseller} onChange={(e) => setParam('reseller', e.target.value)} style={{ display: 'block' }}><option value="">{t('live.allM')}</option>{resellers.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}</select></label>
-          <label style={{ fontSize: 12, color: '#64748B' }}>{t('live.country')}<input value={country} onChange={(e) => setParam('country', e.target.value)} placeholder="France" style={{ display: 'block', width: 120 }} /></label>
-          <label style={{ fontSize: 12, color: '#64748B' }}>{t('live.search')}<input value={q} onChange={(e) => setParam('q', e.target.value)} placeholder={t('live.searchPh')} style={{ display: 'block', width: 200 }} /></label>
+          <label>{t('live.country')}<input value={country} onChange={(e) => setParam('country', e.target.value)} placeholder="France" style={{ display: 'block', width: 130 }} /></label>
+          <label>{t('live.search')}<input value={q} onChange={(e) => setParam('q', e.target.value)} placeholder={t('live.searchPh')} style={{ display: 'block', width: 220 }} /></label>
           {mode === 'history' && <>
-            <label style={{ fontSize: 12, color: '#64748B' }}>{t('live.period')}
+            <label>{t('live.period')}
               <select value={period} onChange={(e) => setParam('period', e.target.value)} style={{ display: 'block' }}>
                 <option value="month">{t('live.periodMonth')}</option><option value="prevMonth">{t('live.periodPrevMonth')}</option><option value="year">{t('live.periodYear')}</option><option value="all">{t('live.periodAll')}</option></select></label>
-            <label style={{ fontSize: 12, color: '#64748B' }}>{t('live.route')}
+            <label>{t('live.route')}
               <select value={histWheel} onChange={(e) => setParam('wheel', e.target.value)} style={{ display: 'block' }}><option value="">{t('live.routeNone')}</option>{wheels.map((w) => <option key={w.id} value={w.id}>{w.serial}</option>)}</select></label>
           </>}
         </div>
-      </Card>
+      </div>
 
       <div className="live-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(300px, 1fr)', gap: 16, marginTop: 16 }}>
         <div style={{ position: 'relative', minHeight: 460 }}>
-          <div ref={box} style={{ position: 'absolute', inset: 0, borderRadius: 14, overflow: 'hidden', border: '1px solid #E2E8F0', background: '#EEF3FF' }} />
-          {mapError && <div style={{ position: 'absolute', left: 12, right: 12, top: 12, background: '#FEF3C7', color: '#92400E', borderRadius: 8, padding: 8, fontSize: 12 }}>{mapError}</div>}
-          <div style={{ position: 'absolute', left: 12, bottom: 12, background: 'rgba(255,255,255,.94)', borderRadius: 10, padding: '8px 10px', fontSize: 11.5, lineHeight: 1.7, boxShadow: '0 4px 14px rgba(11,20,55,.15)' }}>
-            <div><span style={{ display: 'inline-block', width: 11, height: 11, borderRadius: '50%', background: '#2E6BFF', marginRight: 6 }} />{t('live.legendFilled')}</div>
-            <div><span style={{ display: 'inline-block', width: 11, height: 11, borderRadius: '50%', border: '3px solid #2E6BFF', background: '#fff', boxSizing: 'border-box', marginRight: 6 }} />{t('live.legendHollow')}</div>
+          <div ref={box} className="ap-map" style={{ position: 'absolute', inset: 0 }} />
+          {mapError && <div className="ap-warn" style={{ position: 'absolute', left: 12, right: 12, top: 12, margin: 0 }}>{mapError}</div>}
+          <div className="ap-legend">
+            <div><span style={{ display: 'inline-block', width: 11, height: 11, borderRadius: '50%', background: '#0055F8', marginRight: 6 }} />{t('live.legendFilled')}</div>
+            <div><span style={{ display: 'inline-block', width: 11, height: 11, borderRadius: '50%', border: '3px solid #0055F8', background: '#fff', boxSizing: 'border-box', marginRight: 6 }} />{t('live.legendHollow')}</div>
             {mode === 'history' && <div><span style={{ display: 'inline-block', width: 11, height: 11, borderRadius: '50%', background: '#7C3AED', marginRight: 6 }} />{t('live.legendEvent')}</div>}
           </div>
         </div>
@@ -213,15 +214,15 @@ export default function Live() {
 
           <Card title={`${t('live.wheels')}${data ? ` (${data.shown})` : ''}`} className="mt-card" style={!selected ? { marginTop: 0 } : undefined}>
             <button type="button" className="link-button live-drawer-toggle" style={{ display: 'none', marginBottom: 8 }} onClick={() => setListOpen((v) => !v)}>{listOpen ? t('live.hideList') : t('live.showList')}</button>
-            <div className={`live-list${listOpen ? ' open' : ''}`} style={{ maxHeight: 520, overflowY: 'auto' }}>
+            <div className={`live-list${listOpen ? ' open' : ''}`} style={{ maxHeight: 540, overflowY: 'auto', padding: '2px 2px 2px 0' }}>
               {!data ? <p className="page-subtitle">{t('common.loading')}</p> : wheels.length === 0 ? <p style={{ fontSize: 13, color: '#64748B' }}>{t('live.empty')}</p> : wheels.map((w) => (
-                <button key={w.id} type="button" onClick={() => setSelected(w.id)} style={{ display: 'block', width: '100%', textAlign: 'left', background: selected === w.id ? '#EEF3FF' : 'none', border: 0, borderBottom: '1px solid #F1F5F9', padding: '9px 6px', cursor: 'pointer', fontFamily: 'inherit' }}>
+                <button key={w.id} type="button" className={`ap-wheel${selected === w.id ? ' on' : ''}`} style={{ '--c': STATUS_COLORS[w.status] }} onClick={() => setSelected(w.id)}>
                   <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                    <span style={{ width: 10, height: 10, borderRadius: '50%', background: w.position.level === 2 ? '#fff' : STATUS_COLORS[w.status], border: `3px solid ${STATUS_COLORS[w.status]}`, boxSizing: 'border-box', flexShrink: 0 }} />
-                    <b style={{ fontSize: 13 }}>{w.serial}</b><span style={{ fontSize: 12, color: '#64748B' }}>{t(`live.status.${w.status}`)}</span>
+                    <span style={{ width: 11, height: 11, borderRadius: '50%', background: w.position.level === 2 ? '#fff' : STATUS_COLORS[w.status], border: `3px solid ${STATUS_COLORS[w.status]}`, boxSizing: 'border-box', flexShrink: 0 }} />
+                    <span className="t">{w.serial}</span><span style={{ fontSize: 12, color: STATUS_COLORS[w.status], fontWeight: 700 }}>{t(`live.status.${w.status}`)}</span>
                     {w.position.level === 3 && <Badge tone="neutral">{t('live.noPosition')}</Badge>}
                   </div>
-                  <div style={{ fontSize: 12, color: '#475569', marginLeft: 18 }}>
+                  <div className="s" style={{ marginLeft: 19 }}>
                     {[w.client && w.client.name, w.holder && !w.client ? w.holder.name : null, (w.event && w.event.name) || (w.position.level === 2 && w.position.label)].filter(Boolean).join(' · ') || '—'}
                     {(w.event ? w.event.city : w.position.city) ? ` · ${w.event ? w.event.city : w.position.city}` : ''}
                   </div>
@@ -232,13 +233,16 @@ export default function Live() {
         </div>
       </div>
 
-      <Card title={t('live.mapSettings')} className="mt-card">
-        <p style={{ fontSize: 12, color: '#64748B', margin: '0 0 8px' }}>{t('live.styleHelp')}</p>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <input value={styleInput} onChange={(e) => setStyleInput(e.target.value)} placeholder="https://tiles.openfreemap.org/styles/liberty" style={{ flex: '1 1 320px' }} />
-          <Button size="sm" variant="secondary" onClick={saveStyle}>{t('common.save')}</Button>
+      <details className="ap-fold">
+        <summary>{t('live.mapSettings')}</summary>
+        <div>
+          <p className="ap-hint">{t('live.styleHelp')}</p>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <input value={styleInput} onChange={(e) => setStyleInput(e.target.value)} placeholder="https://tiles.openfreemap.org/styles/liberty" style={{ flex: '1 1 320px' }} />
+            <Button size="sm" variant="secondary" onClick={saveStyle}>{t('common.save')}</Button>
+          </div>
         </div>
-      </Card>
+      </details>
       <style>{`@media (max-width: 900px) { .live-grid { grid-template-columns: 1fr !important; } .live-drawer-toggle { display: inline-block !important; } .live-list { display: none; } .live-list.open { display: block; } }`}</style>
     </div>
   );

@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { api } from '../api/client';
 import { Card, Button, Badge } from './ui';
 import { useConfirm } from './ConfirmDialog';
+import '../pages/admin-premium.css';
 
 // Admin, client page › "Contrat & revenus": the commercial conditions (versioned), the wheels held when the account is a reseller,
 // planned rentals, and the revenue ledger of the account. Amounts are typed in euros and stored in cents.
@@ -51,12 +52,12 @@ export default function ContractTab({ userId }) {
   const cur = data.inForce;
 
   return (
-    <>
+    <div className="ap">
       {confirmDialog}
       {error && <div className="error-banner" style={{ marginBottom: 12 }}>{error}</div>}
 
       <Card title={t('contract.typeTitle')} className="mt-card">
-        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 12px', lineHeight: 1.6 }}>{t('contract.intro')}</p>
+        <p className="ap-hint">{t('contract.intro')}</p>
         {cur ? (
           <div style={{ marginBottom: 12, fontSize: 14 }}>
             <Badge tone="blue">{t(`contract.types.${cur.type}`)}</Badge>{' '}
@@ -68,26 +69,26 @@ export default function ContractTab({ userId }) {
           </div>
         ) : <p style={{ fontSize: 13, color: '#B45309' }}>{t('contract.none')}</p>}
 
-        <form onSubmit={saveTerms} style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'flex-end' }}>
-          <label style={label}>{t('contract.type')}
+        <form onSubmit={saveTerms} className="ap-bar">
+          <label>{t('contract.type')}
             <select value={f.type} onChange={(e) => setF({ ...f, type: e.target.value })} style={{ display: 'block' }}>{TYPES.map((x) => <option key={x} value={x}>{t(`contract.types.${x}`)}</option>)}</select></label>
-          {(f.type === 'long' || f.type === 'reseller') && <label style={label}>{f.type === 'long' ? t('contract.rent') : t('contract.rentPerWheel')} (€)
+          {(f.type === 'long' || f.type === 'reseller') && <label>{f.type === 'long' ? t('contract.rent') : t('contract.rentPerWheel')} (€)
             <input type="number" min="0" step="0.01" required value={f.rent} onChange={(e) => setF({ ...f, rent: e.target.value })} style={{ display: 'block', width: 120 }} /></label>}
-          {f.type === 'short' && <label style={label}>{t('contract.eventPrice')} (€)
+          {f.type === 'short' && <label>{t('contract.eventPrice')} (€)
             <input type="number" min="0" step="0.01" required value={f.price} onChange={(e) => setF({ ...f, price: e.target.value })} style={{ display: 'block', width: 120 }} /></label>}
-          {f.type === 'reseller' && <label style={label}>{t('contract.activation')} (€)
+          {f.type === 'reseller' && <label>{t('contract.activation')} (€)
             <input type="number" min="0" step="0.01" required value={f.activation} onChange={(e) => setF({ ...f, activation: e.target.value })} style={{ display: 'block', width: 120 }} /></label>}
-          {f.type === 'sub' && <label style={label}>{t('contract.parent')}
+          {f.type === 'sub' && <label>{t('contract.parent')}
             <select required value={f.parent} onChange={(e) => setF({ ...f, parent: e.target.value })} style={{ display: 'block' }}>
               <option value="">—</option>{resellers.filter((r) => r.id !== userId).map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}</select></label>}
-          <label style={label}>{t('contract.validFrom')}<input type="date" required value={f.validFrom} onChange={(e) => setF({ ...f, validFrom: e.target.value })} style={{ display: 'block' }} /></label>
+          <label>{t('contract.validFrom')}<input type="date" required value={f.validFrom} onChange={(e) => setF({ ...f, validFrom: e.target.value })} style={{ display: 'block' }} /></label>
           {f.type === 'long' && <>
-            <label style={label}>{t('contract.contractStart')}<input type="date" value={f.contractStart} onChange={(e) => setF({ ...f, contractStart: e.target.value })} style={{ display: 'block' }} /></label>
-            <label style={label}>{t('contract.contractEnd')}<input type="date" value={f.contractEnd} onChange={(e) => setF({ ...f, contractEnd: e.target.value })} style={{ display: 'block' }} /></label>
+            <label>{t('contract.contractStart')}<input type="date" value={f.contractStart} onChange={(e) => setF({ ...f, contractStart: e.target.value })} style={{ display: 'block' }} /></label>
+            <label>{t('contract.contractEnd')}<input type="date" value={f.contractEnd} onChange={(e) => setF({ ...f, contractEnd: e.target.value })} style={{ display: 'block' }} /></label>
           </>}
           <Button type="submit" size="sm">{t('contract.saveTerms')}</Button>
         </form>
-        <p style={{ fontSize: 12, color: '#64748B', margin: '8px 0 0' }}>{t(`contract.help.${f.type}`)} {t('contract.versionHint')}</p>
+        <p className="ap-hint" style={{ marginTop: 8 }}>{t(`contract.help.${f.type}`)} {t('contract.versionHint')}</p>
 
         {data.history.length > 1 && (
           <table className="data-table" style={{ marginTop: 12 }}>
@@ -102,11 +103,11 @@ export default function ContractTab({ userId }) {
 
       {cur && cur.type === 'reseller' && (
         <Card title={t('contract.holdingsTitle')} className="mt-card">
-          <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 12px', lineHeight: 1.6 }}>{t('contract.holdingsDesc')}</p>
+          <p className="ap-hint">{t('contract.holdingsDesc')}</p>
           <form onSubmit={(e) => { e.preventDefault(); run(() => api.startHolding({ wheelId: hold.wheelId, resellerId: userId, startedOn: hold.startedOn })); }} style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'flex-end' }}>
-            <label style={label}>{t('contract.wheel')}<select required value={hold.wheelId} onChange={(e) => setHold({ ...hold, wheelId: e.target.value })} style={{ display: 'block' }}>
+            <label>{t('contract.wheel')}<select required value={hold.wheelId} onChange={(e) => setHold({ ...hold, wheelId: e.target.value })} style={{ display: 'block' }}>
               <option value="">—</option>{free.map((w) => <option key={w.id} value={w.id}>{w.serialNumber}</option>)}</select></label>
-            <label style={label}>{t('contract.startedOn')}<input type="date" required value={hold.startedOn} onChange={(e) => setHold({ ...hold, startedOn: e.target.value })} style={{ display: 'block' }} /></label>
+            <label>{t('contract.startedOn')}<input type="date" required value={hold.startedOn} onChange={(e) => setHold({ ...hold, startedOn: e.target.value })} style={{ display: 'block' }} /></label>
             <Button type="submit" size="sm">{t('contract.addHolding')}</Button>
           </form>
           {data.holdings.map((h) => (
@@ -116,7 +117,7 @@ export default function ContractTab({ userId }) {
             </div>
           ))}
           {requests.length > 0 && (
-            <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: 12, margin: '14px 0 0' }}>
+            <div className="ap-warn" style={{ marginTop: 14 }}>
               <div style={{ fontWeight: 700, fontSize: 13, color: '#92400E', marginBottom: 6 }}>{t('contract.requestsTitle')}</div>
               {requests.map((r) => (
                 <div key={r.id} style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', fontSize: 13, padding: '4px 0' }}>
@@ -135,12 +136,12 @@ export default function ContractTab({ userId }) {
       )}
 
       <Card title={t('contract.plannedTitle')} className="mt-card">
-        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 12px', lineHeight: 1.6 }}>{t('contract.plannedDesc')}</p>
+        <p className="ap-hint">{t('contract.plannedDesc')}</p>
         <form onSubmit={(e) => { e.preventDefault(); run(() => api.addPlannedRental({ userId, startsOn: plan.startsOn, endsOn: plan.endsOn || undefined, wheelId: plan.wheelId || undefined, note: plan.note || undefined })); }} style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'flex-end' }}>
-          <label style={label}>{t('contract.startsOn')}<input type="date" required value={plan.startsOn} onChange={(e) => setPlan({ ...plan, startsOn: e.target.value })} style={{ display: 'block' }} /></label>
-          <label style={label}>{t('contract.endsOn')}<input type="date" value={plan.endsOn} onChange={(e) => setPlan({ ...plan, endsOn: e.target.value })} style={{ display: 'block' }} /></label>
-          <label style={label}>{t('contract.wheel')}<select value={plan.wheelId} onChange={(e) => setPlan({ ...plan, wheelId: e.target.value })} style={{ display: 'block' }}><option value="">—</option>{wheels.map((w) => <option key={w.id} value={w.id}>{w.serialNumber}</option>)}</select></label>
-          <label style={label}>{t('contract.note')}<input value={plan.note} maxLength={300} onChange={(e) => setPlan({ ...plan, note: e.target.value })} style={{ display: 'block', width: 200 }} /></label>
+          <label>{t('contract.startsOn')}<input type="date" required value={plan.startsOn} onChange={(e) => setPlan({ ...plan, startsOn: e.target.value })} style={{ display: 'block' }} /></label>
+          <label>{t('contract.endsOn')}<input type="date" value={plan.endsOn} onChange={(e) => setPlan({ ...plan, endsOn: e.target.value })} style={{ display: 'block' }} /></label>
+          <label>{t('contract.wheel')}<select value={plan.wheelId} onChange={(e) => setPlan({ ...plan, wheelId: e.target.value })} style={{ display: 'block' }}><option value="">—</option>{wheels.map((w) => <option key={w.id} value={w.id}>{w.serialNumber}</option>)}</select></label>
+          <label>{t('contract.note')}<input value={plan.note} maxLength={300} onChange={(e) => setPlan({ ...plan, note: e.target.value })} style={{ display: 'block', width: 200 }} /></label>
           <Button type="submit" size="sm" disabled={!cur}>{t('contract.addPlanned')}</Button>
         </form>
         {data.planned.map((p) => (
@@ -174,6 +175,6 @@ export default function ContractTab({ userId }) {
           </table>
         )}
       </Card>
-    </>
+    </div>
   );
 }

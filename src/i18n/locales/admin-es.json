@@ -988,7 +988,8 @@
       "expiresOn": "Caduca el",
       "addPack": "Añadir el paquete",
       "used": "usados"
-    }
+    },
+    "tabCatalog": "Catálogo de ferias"
   },
   "nav": {
     "openMenuAriaLabel": "Abrir menú",

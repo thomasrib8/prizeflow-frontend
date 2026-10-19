@@ -5,6 +5,7 @@ import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, Tooltip, L
 import { api } from '../api/client';
 import { Card, Button, Badge } from '../components/ui';
 import ApiPricingModule from '../components/ApiPricingModule';
+import './admin-premium.css';
 
 // Admin › Consommation API. Three costs, never mixed: real (what providers charge), imputed (attributed to the accounts that caused it),
 // unallocated (the rest). Contribution of a reseller = its income − its own API cost − the API cost of the clients under it.
@@ -27,12 +28,12 @@ function Delta({ cur, prev }) {
 function Bar100({ value }) {
   if (value === null || value === undefined) return null;
   const w = Math.max(0, Math.min(100, value));
-  return <div style={{ height: 6, borderRadius: 4, background: '#E2E8F0', minWidth: 90 }}><div style={{ width: `${w}%`, height: '100%', borderRadius: 4, background: value >= 100 ? '#EF4444' : value >= 80 ? '#F59E0B' : '#2E6BFF' }} /></div>;
+  return <div className={`ap-progress${value >= 100 ? ' over' : value >= 80 ? ' warn' : ''}`}><i style={{ width: `${w}%` }} /></div>;
 }
 
 function Chart({ data }) {
   const { t } = useTranslation('admin');
-  if (!data.length) return <p style={{ fontSize: 13, color: '#64748B', margin: 0 }}>{t('apiUsage.noData')}</p>;
+  if (!data.length) return <p className="ap-hint" style={{ margin: 0 }}>{t('apiUsage.noData')}</p>;
   const rows = data.map((d) => ({ ...d, cost: d.costCents / 100 }));
   return (
     <div style={{ height: 240 }}>
@@ -40,7 +41,7 @@ function Chart({ data }) {
         <ComposedChart data={rows}>
           <CartesianGrid strokeDasharray="3 3" vertical={false} /><XAxis dataKey="day" tick={{ fontSize: 11 }} /><YAxis yAxisId="l" tick={{ fontSize: 11 }} /><YAxis yAxisId="r" orientation="right" tick={{ fontSize: 11 }} />
           <Tooltip /><Legend />
-          <Bar yAxisId="l" dataKey="calls" name={t('apiUsage.calls')} fill="#93C5FD" /><Line yAxisId="r" dataKey="cost" name={t('apiUsage.costEur')} stroke="#EF4444" strokeWidth={2} dot={false} />
+          <Bar yAxisId="l" dataKey="calls" name={t('apiUsage.calls')} fill="#BFD4FF" radius={[6, 6, 0, 0]} /><Line yAxisId="r" dataKey="cost" name={t('apiUsage.costEur')} stroke="#0055F8" strokeWidth={2.5} dot={false} />
         </ComposedChart>
       </ResponsiveContainer>
     </div>
@@ -51,11 +52,11 @@ function Reconciliations({ rows, onRun, busy }) {
   const { t } = useTranslation('admin');
   return (
     <Card title={t('apiUsage.reconTitle')} className="mt-card">
-      <p style={{ fontSize: 12.5, color: '#64748B', margin: '0 0 10px', lineHeight: 1.6 }}>{t('apiUsage.reconHelp')}</p>
+      <p className="ap-hint">{t('apiUsage.reconHelp')}</p>
       {rows.map((r) => {
         const l = r.last; const st = l ? l.status : null;
         return (
-          <div key={r.provider} style={{ display: 'flex', gap: 10, alignItems: 'baseline', flexWrap: 'wrap', padding: '7px 0', borderBottom: '1px solid #F1F5F9', fontSize: 13 }}>
+          <div key={r.provider} className="ap-line">
             <b style={{ minWidth: 130 }}>{nameOf(r.provider)}</b>
             {l ? <Badge tone={REC_TONE[st]}>{t(`apiUsage.recon.${st}`)}</Badge> : <Badge tone="neutral">{t('apiUsage.recon.never')}</Badge>}
             {l && l.our_quantity !== null && l.provider_quantity !== null && <span>{t('apiUsage.reconOurs')} {Math.round(l.our_quantity).toLocaleString()} · {t('apiUsage.reconTheirs')} {Math.round(l.provider_quantity).toLocaleString()}{l.gap_pct !== null ? ` · ${pct(l.gap_pct)}` : ''}</span>}
@@ -79,13 +80,13 @@ function Overview({ d, onProvider, reload }) {
   return (
     <>
       <div className="grid-stats">
-        <div className="stat"><div className="stat-label">{t('apiUsage.real')}</div><div className="stat-value">{eur(tot.realCents)}</div><Delta cur={tot.realCents} prev={tot.previousRealCents} /><div style={{ fontSize: 12, color: '#64748B' }}>{t('apiUsage.realHelp')}</div></div>
-        <div className="stat"><div className="stat-label">{t('apiUsage.imputed')}</div><div className="stat-value">{eur(tot.imputedCents)}</div><div style={{ fontSize: 12, color: '#64748B' }}>{t('apiUsage.imputedHelp')}</div></div>
-        <div className="stat"><div className="stat-label">{t('apiUsage.unallocated')}</div><div className="stat-value">{eur(tot.unallocatedCents)}</div><div style={{ fontSize: 12, color: '#64748B' }}>{t('apiUsage.unallocatedHelp')}</div></div>
-        <div className="stat"><div className="stat-label">{t('apiUsage.ratio')}</div><div className="stat-value">{pct(d.apiRatioPct)}</div><div style={{ fontSize: 12, color: '#64748B' }}>{t('apiUsage.revenue')} {eur(d.revenueCents)}</div></div>
+        <div className="stat"><div className="stat-label">{t('apiUsage.real')}</div><div className="stat-value">{eur(tot.realCents)}</div><Delta cur={tot.realCents} prev={tot.previousRealCents} /><div className="ap-sub">{t('apiUsage.realHelp')}</div></div>
+        <div className="stat"><div className="stat-label">{t('apiUsage.imputed')}</div><div className="stat-value">{eur(tot.imputedCents)}</div><div className="ap-sub">{t('apiUsage.imputedHelp')}</div></div>
+        <div className="stat"><div className="stat-label">{t('apiUsage.unallocated')}</div><div className="stat-value">{eur(tot.unallocatedCents)}</div><div className="ap-sub">{t('apiUsage.unallocatedHelp')}</div></div>
+        <div className="stat"><div className="stat-label">{t('apiUsage.ratio')}</div><div className="stat-value">{pct(d.apiRatioPct)}</div><div className="ap-sub">{t('apiUsage.revenue')} {eur(d.revenueCents)}</div></div>
       </div>
       {(d.unlogged.withoutTariff > 0 || d.unlogged.withoutRate > 0 || d.fx.stale || !d.fx.known) && (
-        <div className="error-banner" style={{ background: '#FFFBEB', borderColor: '#FDE68A', color: '#92400E', marginTop: 12 }}>
+        <div className="ap-warn">
           {d.unlogged.withoutTariff > 0 && <div>{t('apiUsage.warnNoTariff', { n: d.unlogged.withoutTariff })}</div>}
           {d.unlogged.withoutRate > 0 && <div>{t('apiUsage.warnNoRate', { n: d.unlogged.withoutRate })}</div>}
           {(!d.fx.known || d.fx.stale) && <div>{t('apiUsage.warnFx')}</div>}
@@ -107,7 +108,7 @@ function Overview({ d, onProvider, reload }) {
       <Card title={t('apiUsage.dailyTitle')} className="mt-card"><Chart data={d.series} /></Card>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
         <Card title={t('apiUsage.topAccounts')} className="mt-card">
-          {d.topAccounts.length === 0 ? <p style={{ fontSize: 13, color: '#64748B', margin: 0 }}>{t('apiUsage.noData')}</p> : d.topAccounts.map((a) => (
+          {d.topAccounts.length === 0 ? <p className="ap-hint" style={{ margin: 0 }}>{t('apiUsage.noData')}</p> : d.topAccounts.map((a) => (
             <div key={a.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, padding: '4px 0' }}><Link to={`/users/${a.id}`}>{a.name}</Link><b>{eur(a.costCents, 2)}</b></div>
           ))}
         </Card>
@@ -125,7 +126,7 @@ function ProviderSheet({ provider, month, setProvider, providers }) {
   return (
     <>
       <Card className="mt-card">
-        <label style={{ fontSize: 12, color: '#64748B' }}>{t('apiUsage.provider')}
+        <label>{t('apiUsage.provider')}
           <select value={provider} onChange={(e) => setProvider(e.target.value)} style={{ display: 'block' }}>{providers.map((p) => <option key={p} value={p}>{nameOf(p)}</option>)}</select></label>
       </Card>
       {error && <div className="error-banner">{error}</div>}
@@ -135,19 +136,19 @@ function ProviderSheet({ provider, month, setProvider, providers }) {
             <div className="stat"><div className="stat-label">{t('apiUsage.real')}</div><div className="stat-value">{d.summary ? eur(d.summary.realCents, 2) : '—'}</div></div>
             <div className="stat"><div className="stat-label">{t('apiUsage.imputed')}</div><div className="stat-value">{d.summary ? eur(d.summary.imputedCents, 2) : '—'}</div></div>
             <div className="stat"><div className="stat-label">{t('apiUsage.unallocated')}</div><div className="stat-value">{d.summary ? eur(d.summary.unallocatedCents, 2) : '—'}</div></div>
-            <div className="stat"><div className="stat-label">{t('apiUsage.general')}</div><div className="stat-value">{eur(d.generalCostCents, 2)}</div><div style={{ fontSize: 12, color: '#64748B' }}>{t('apiUsage.generalHelp')}</div></div>
+            <div className="stat"><div className="stat-label">{t('apiUsage.general')}</div><div className="stat-value">{eur(d.generalCostCents, 2)}</div><div className="ap-sub">{t('apiUsage.generalHelp')}</div></div>
           </div>
           {d.plan && <Card title={t('apiUsage.planTitle')} className="mt-card"><div style={{ fontSize: 13 }}>{d.plan.label} · {d.plan.used.toLocaleString()}{d.plan.quota ? ` / ${d.plan.quota.toLocaleString()} (${pct(d.plan.usedPct)})` : ''}</div><Bar100 value={d.plan.usedPct} /></Card>}
           <Card title={t('apiUsage.featuresTitle')} className="mt-card">
-            {d.features.length === 0 ? <p style={{ fontSize: 13, color: '#64748B', margin: 0 }}>{t('apiUsage.noData')}</p> : (
+            {d.features.length === 0 ? <p className="ap-hint" style={{ margin: 0 }}>{t('apiUsage.noData')}</p> : (
               <table className="data-table"><thead><tr><th>{t('apiUsage.feature')}</th><th>{t('apiUsage.calls')}</th><th>{t('apiUsage.quantity')}</th>{provider === 'anthropic' && <th>{t('apiUsage.tokens')}</th>}<th>{t('apiUsage.costEur')}</th></tr></thead>
                 <tbody>{d.features.map((f) => <tr key={`${f.feature}|${f.service}`}><td>{f.feature}{f.service ? <div style={{ fontSize: 11, color: '#64748B' }}>{f.service}</div> : null}</td><td>{f.calls}</td><td>{f.quantity}</td>{provider === 'anthropic' && <td>{f.inputTokens.toLocaleString()} / {f.outputTokens.toLocaleString()}</td>}<td>{eur(f.costCents, 2)}</td></tr>)}</tbody></table>
             )}
           </Card>
           <Card title={t('apiUsage.dailyTitle')} className="mt-card"><Chart data={d.series} /></Card>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
-            <Card title={t('apiUsage.topAccounts')} className="mt-card">{d.topAccounts.length === 0 ? <p style={{ fontSize: 13, color: '#64748B', margin: 0 }}>{t('apiUsage.noData')}</p> : d.topAccounts.map((a) => <div key={a.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, padding: '4px 0' }}><Link to={`/users/${a.id}`}>{a.name}</Link><span>{a.quantity} · <b>{eur(a.costCents, 2)}</b></span></div>)}</Card>
-            <Card title={t('apiUsage.reconHistory')} className="mt-card">{d.reconciliations.length === 0 ? <p style={{ fontSize: 13, color: '#64748B', margin: 0 }}>{t('apiUsage.noData')}</p> : d.reconciliations.slice(0, 10).map((r) => <div key={r.id} style={{ fontSize: 12.5, padding: '3px 0' }}>{r.day} · <Badge tone={REC_TONE[r.status]}>{t(`apiUsage.recon.${r.status}`)}</Badge>{r.gap_pct !== null ? ` ${pct(r.gap_pct)}` : ''}</div>)}</Card>
+            <Card title={t('apiUsage.topAccounts')} className="mt-card">{d.topAccounts.length === 0 ? <p className="ap-hint" style={{ margin: 0 }}>{t('apiUsage.noData')}</p> : d.topAccounts.map((a) => <div key={a.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, padding: '4px 0' }}><Link to={`/users/${a.id}`}>{a.name}</Link><span>{a.quantity} · <b>{eur(a.costCents, 2)}</b></span></div>)}</Card>
+            <Card title={t('apiUsage.reconHistory')} className="mt-card">{d.reconciliations.length === 0 ? <p className="ap-hint" style={{ margin: 0 }}>{t('apiUsage.noData')}</p> : d.reconciliations.slice(0, 10).map((r) => <div key={r.id} style={{ fontSize: 12.5, padding: '3px 0' }}>{r.day} · <Badge tone={REC_TONE[r.status]}>{t(`apiUsage.recon.${r.status}`)}</Badge>{r.gap_pct !== null ? ` ${pct(r.gap_pct)}` : ''}</div>)}</Card>
           </div>
           {(d.packs.length > 0 || d.costLines.length > 0) && (
             <Card title={t('apiUsage.packsLines')} className="mt-card">
@@ -170,9 +171,9 @@ function Clients({ month }) {
   if (!d) return <p className="page-subtitle">{t('common.loading')}</p>;
   return (
     <Card title={t('apiUsage.clientsTitle')} className="mt-card">
-      <p style={{ fontSize: 12.5, color: '#64748B', margin: '0 0 10px', lineHeight: 1.6 }}>{t('apiUsage.clientsHelp')}</p>
+      <p className="ap-hint">{t('apiUsage.clientsHelp')}</p>
       <div style={{ marginBottom: 10 }}><Button size="sm" variant="secondary" onClick={() => api.downloadApiClientsCsv(month)}>{t('apiUsage.exportCsv')}</Button></div>
-      {d.accounts.length === 0 ? <p style={{ fontSize: 13, color: '#64748B', margin: 0 }}>{t('apiUsage.noData')}</p> : (
+      {d.accounts.length === 0 ? <p className="ap-hint" style={{ margin: 0 }}>{t('apiUsage.noData')}</p> : (
         <table className="data-table">
           <thead><tr><th>{t('apiUsage.account')}</th><th>{t('apiUsage.type')}</th><th>{t('apiUsage.calls')}</th><th>{t('apiUsage.ownCost')}</th><th>{t('apiUsage.subCost')}</th><th>{t('apiUsage.revenue')}</th><th>{t('apiUsage.contribution')}</th><th>{t('apiUsage.ratio')}</th></tr></thead>
           <tbody>{d.accounts.map((a) => (
@@ -199,8 +200,8 @@ function Alerts({ reload }) {
   return (
     <Card title={t('apiUsage.alertsTitle')} className="mt-card">
       <p style={{ fontSize: 12.5, color: '#64748B', margin: '0 0 10px' }}>{t('apiUsage.alertsHelp')} <Link to="/settings">{t('apiUsage.alertsSettings')}</Link></p>
-      {!list ? <p className="page-subtitle">{t('common.loading')}</p> : list.length === 0 ? <p style={{ fontSize: 13, color: '#64748B', margin: 0 }}>{t('settings.alerts.none')}</p> : list.map((a) => (
-        <div key={a.id} style={{ display: 'flex', gap: 10, padding: '8px 0', borderBottom: '1px solid #F1F5F9', fontSize: 13, opacity: a.readAt ? 0.6 : 1 }}>
+      {!list ? <p className="page-subtitle">{t('common.loading')}</p> : list.length === 0 ? <p className="ap-hint" style={{ margin: 0 }}>{t('settings.alerts.none')}</p> : list.map((a) => (
+        <div key={a.id} className="ap-line" style={{ opacity: a.readAt ? 0.55 : 1 }}>
           <Badge tone={a.level === 'critical' ? 'red' : a.level === 'warning' ? 'orange' : 'neutral'}>{a.level}</Badge><span style={{ flex: 1 }}>{a.message}</span><span style={{ color: '#94A3B8', fontSize: 12 }}>{String(a.createdAt).slice(0, 10)}</span>
         </div>
       ))}
@@ -223,10 +224,10 @@ export default function ApiUsage() {
   const providers = ov ? ov.providers.map((p) => p.provider) : [];
 
   return (
-    <div>
+    <div className="ap">
       <div className="page-header">
         <div><h1 className="page-title">{t('apiUsage.title')}</h1><p className="page-subtitle">{t('apiUsage.subtitle')}</p></div>
-        <label style={{ fontSize: 12, color: '#64748B' }}>{t('apiUsage.month')}<input type="month" value={month} onChange={(e) => setParam('month', e.target.value === thisMonth() ? '' : e.target.value)} style={{ display: 'block' }} /></label>
+        <label>{t('apiUsage.month')}<input type="month" value={month} onChange={(e) => setParam('month', e.target.value === thisMonth() ? '' : e.target.value)} style={{ display: 'block' }} /></label>
       </div>
       {error && <div className="error-banner">{error}</div>}
       <div className="tabs">{TABS.map((x) => <button key={x} className={`tab${tab === x ? ' active' : ''}`} onClick={() => setParam('tab', x === 'overview' ? '' : x)}>{t(`apiUsage.tabs.${x}`)}{x === 'alerts' && ov && ov.unreadAlerts > 0 ? ` (${ov.unreadAlerts})` : ''}</button>)}</div>

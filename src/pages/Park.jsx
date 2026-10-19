@@ -9,6 +9,7 @@ import InspectionList from '../components/wheel/InspectionList';
 import WheelLabel from '../components/wheel/WheelLabel';
 import PackWizard from '../components/PackWizard';
 import ProfitabilityPanel from '../components/ProfitabilityPanel';
+import './admin-premium.css';
 
 const STATUS_TONE = { available: 'blue', rented: 'green', maintenance: 'orange' };
 const STATUS_TKEY = { available: 'statusAvailable', rented: 'statusRented', maintenance: 'statusMaintenance' };
@@ -319,7 +320,7 @@ export default function Park() {
         </div>
       </div>
       {error && <div className="error-banner">{error}</div>}
-      <div className="tabs">
+      <div className="tabs ap-tabs">
         <button className={`tab${tab === 'park' ? ' active' : ''}`} onClick={() => setTab('park')}>{t('profit.tabPark')}</button>
         <button className={`tab${tab === 'profit' ? ' active' : ''}`} onClick={() => setTab('profit')}>{t('profit.tabProfit')}</button>
       </div>

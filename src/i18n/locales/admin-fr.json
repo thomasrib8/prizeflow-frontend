@@ -988,7 +988,8 @@
       "expiresOn": "Expire le",
       "addPack": "Ajouter le paquet",
       "used": "utilisés"
-    }
+    },
+    "tabCatalog": "Catalogue des salons"
   },
   "nav": {
     "openMenuAriaLabel": "Ouvrir le menu",
