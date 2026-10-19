@@ -2030,7 +2030,8 @@
     "colDays": "Jours loués",
     "forecast": "prévu",
     "apiIncomplete": "{{n}} appel(s) non chiffré(s)",
-    "edit": "Modifier"
+    "edit": "Modifier",
+    "toFillHint": "Saisissez le coût du lot ci-dessus : la couverture se calcule alors toute seule."
   },
   "adminDash": {
     "title": "Dashboard Admin",

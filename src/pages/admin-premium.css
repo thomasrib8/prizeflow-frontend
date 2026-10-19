@@ -208,3 +208,19 @@
 .ap-sim-num:focus { outline: none; border-color: var(--ap-blue); box-shadow: 0 0 0 3px rgba(0, 85, 248, .12); }
 .ap .grid-stats.ap-kpi-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 @media (max-width: 900px) { .ap .grid-stats.ap-kpi-3 { grid-template-columns: 1fr; } }
+
+/* Premium rows: a plain data-table rendered as one card per row (opt-in with .ap-rows, keeps the markup and the tutorials' selectors). */
+.ap table.data-table.ap-rows { border-collapse: separate; border-spacing: 0 8px; margin-top: -8px; }
+.ap table.data-table.ap-rows th { background: transparent; border-bottom: 0; padding: 8px 14px 4px; font-size: 10px; }
+.ap table.data-table.ap-rows td { background: #fff; border-top: 1px solid var(--ap-line); border-bottom: 1px solid var(--ap-line); padding: 14px; transition: background .12s, border-color .12s; }
+.ap table.data-table.ap-rows td:first-child { border-left: 1px solid var(--ap-line); border-radius: 14px 0 0 14px; box-shadow: inset 3px 0 0 var(--ap-blue); font-weight: 700; padding-left: 18px; }
+.ap table.data-table.ap-rows td:last-child { border-right: 1px solid var(--ap-line); border-radius: 0 14px 14px 0; }
+.ap table.data-table.ap-rows tbody tr:hover td { background: #F6F9FF; border-color: #BFD4FF; }
+.ap table.data-table.ap-rows tbody tr:last-child td { border-bottom: 1px solid var(--ap-line); }
+.ap table.data-table.ap-rows tbody tr:last-child:hover td { border-bottom-color: #BFD4FF; }
+.ap-who { display: inline-flex; align-items: center; gap: 10px; }
+.ap-av { width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: #fff; font-size: 11px; font-weight: 800; flex: none; }
+.ap-select { padding: 7px 28px 7px 12px; border: 1.5px solid var(--ap-ctl); border-radius: 10px; font: inherit; font-size: 13px; font-weight: 600; color: var(--ap-navy); background-color: #fff; }
+.ap-select:focus { outline: none; border-color: var(--ap-blue); box-shadow: 0 0 0 3px rgba(0, 85, 248, .12); }
+.ap .link-button { color: var(--ap-navy); font-weight: 700; text-decoration: none; }
+.ap .link-button:hover { color: var(--ap-blue); text-decoration: underline; }

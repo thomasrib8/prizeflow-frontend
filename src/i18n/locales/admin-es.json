@@ -2030,7 +2030,8 @@
     "colDays": "Días alquilados",
     "forecast": "previsto",
     "apiIncomplete": "{{n}} llamada(s) sin valorar",
-    "edit": "Modificar"
+    "edit": "Modificar",
+    "toFillHint": "Introduzca el coste del lote arriba: la cobertura se calcula entonces sola."
   },
   "adminDash": {
     "title": "Dashboard Admin",

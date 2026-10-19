@@ -1,0 +1,14 @@
+/* Rewards page: code entry hero + history as cards (same family as the CRM list). */
+.rw-hero { background: linear-gradient(135deg, #0055F8, #002881); border-radius: 20px; padding: 22px; margin-bottom: 16px; box-shadow: 0 18px 40px -18px rgba(0, 40, 129, .7); }
+.rw-form { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.rw-code { flex: 1 1 220px; min-width: 0; padding: 16px 20px; border: 2px solid transparent; border-radius: 14px; font-family: var(--font-mono, monospace); font-size: 24px; font-weight: 700; letter-spacing: .28em; text-transform: uppercase; color: #002881; background: #fff; }
+.rw-code::placeholder { color: #B6C2DD; font-weight: 500; }
+.rw-code:focus { outline: none; border-color: #09B2FD; box-shadow: 0 0 0 4px rgba(9, 178, 253, .3); }
+.rw-hero .btn { min-height: 56px; padding: 0 26px; font-size: 14px; }
+.rw-list .crm-head, .rw-list .crm-row { grid-template-columns: minmax(0, 1.6fr) minmax(0, 2fr) 120px 130px; }
+.rw-list .crm-row { grid-template-areas: "who gift st date"; }
+.rw-st { grid-area: st; }
+.rw-date { grid-area: date; font-size: 12px; color: #64748B; text-align: right; }
+@container (max-width: 700px) {
+  .rw-list .crm-row { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "who st" "gift date"; }
+}

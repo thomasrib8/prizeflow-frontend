@@ -2030,7 +2030,8 @@
     "colDays": "Days rented",
     "forecast": "forecast",
     "apiIncomplete": "{{n}} call(s) not costed",
-    "edit": "Edit"
+    "edit": "Edit",
+    "toFillHint": "Enter the lot cost above: coverage is then calculated automatically."
   },
   "adminDash": {
     "title": "Admin Dashboard",

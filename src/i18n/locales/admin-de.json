@@ -2030,7 +2030,8 @@
     "colDays": "Miettage",
     "forecast": "Prognose",
     "apiIncomplete": "{{n}} Aufruf(e) ohne Bewertung",
-    "edit": "Ändern"
+    "edit": "Ändern",
+    "toFillHint": "Geben Sie oben die Kosten des Postens ein: die Deckung wird dann automatisch berechnet."
   },
   "adminDash": {
     "title": "Admin-Dashboard",

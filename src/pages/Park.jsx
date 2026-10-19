@@ -310,7 +310,7 @@ export default function Park() {
   const count = (s) => (wheels || []).filter((w) => w.status === s).length;
 
   return (
-    <div>
+    <div className="ap">
       <div className="page-header">
         <div>
           <h1 className="page-title">{t('nav.park')}</h1>
@@ -343,7 +343,7 @@ export default function Park() {
           {wheels.length === 0 ? (
             <EmptyState title={t('park.empty')} description={t('park.emptyDesc')} action={<Button onClick={() => setWizard({ wheelId: null })}>{t('park.addBtn')}</Button>} />
           ) : (
-            <table className="data-table">
+            <table className="data-table ap-rows">
               <thead>
                 <tr>
                   <th>{t('park.colSerial')}</th><th>{t('park.colModel')}</th><th>{t('park.colStatus')}</th>

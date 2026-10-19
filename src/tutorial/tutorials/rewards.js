@@ -31,8 +31,8 @@ export default {
     },
     { // 6
       async run(c) {
-        await c.point('table.data-table', 2400);
-        await c.click('table.data-table tbody tr:nth-child(3)');
+        await c.point('.rw-list', 2400);
+        await c.click('.rw-list .crm-row:nth-child(4)');
         await c.waitFor('.card h1'); await c.sleep(1600);
       },
     },

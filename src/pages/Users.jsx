@@ -4,6 +4,12 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../api/client';
 import { Card, Button, Badge, EmptyState } from '../components/ui';
+import './admin-premium.css';
+
+const AVATARS = [['#0055F8', '#002881'], ['#00B0FF', '#0055F8'], ['#7AA8FF', '#0055F8'], ['#002881', '#0B1437'], ['#1AA864', '#0D9488'], ['#9333EA', '#4F46E5']];
+const avatarGradient = (seed) => { let h = 0; for (const ch of String(seed || '')) h = (h * 31 + ch.charCodeAt(0)) >>> 0; const [a, b] = AVATARS[h % AVATARS.length]; return `linear-gradient(135deg, ${a}, ${b})`; };
+const initialsOf = (n, e) => { const w = String(n || e || '?').trim().split(/\s+/); return ((w[0] || '?').charAt(0) + (w.length > 1 ? w[w.length - 1].charAt(0) : '')).toUpperCase(); };
+function Who({ name, email, children }) { return <span className="ap-who"><span className="ap-av" style={{ background: avatarGradient(email || name) }} aria-hidden="true">{initialsOf(name, email)}</span>{children}</span>; }
 
 const STATUS_TONE = { pending: 'orange', approved: 'green', deactivated: 'red' };
 const STATUS_TKEY = { pending: 'userStatusPending', approved: 'userStatusApproved', deactivated: 'userStatusDeactivated' };
@@ -61,7 +67,7 @@ export default function Users() {
   const others = users?.filter((u) => u.status !== 'pending') || [];
 
   return (
-    <div>
+    <div className="ap">
       <div className="page-header">
         <div>
           <h1 className="page-title">{t('nav.users')}</h1>
@@ -74,13 +80,13 @@ export default function Users() {
 
       {users && pending.length > 0 && (
         <Card title={t('users.pendingApprovalTitle')} className="mt-card">
-          <table className="data-table">
+          <table className="data-table ap-rows">
             <thead><tr><th>{t('history.tableName')}</th><th>{t('history.tableEmail')}</th><th>{t('users.tableRequested')}</th><th></th></tr></thead>
             <tbody>
               {pending.map((u) => (
                 <tr key={u.id}>
                   <td style={{ fontWeight: 500 }}>
-                    <button className="link-button" onClick={() => navigate(`/users/${u.id}`)}>{u.name || '—'}</button>
+                    <Who name={u.name} email={u.email}><button className="link-button" onClick={() => navigate(`/users/${u.id}`)}>{u.name || '—'}</button></Who>
                   </td>
                   <td style={{ color: 'var(--text-muted)' }}>{u.email}</td>
                   <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{u.created_at}</td>
@@ -98,7 +104,7 @@ export default function Users() {
       {users && (
         <Card title={t('users.allAccountsTitle')} className="mt-card">
           {others.length === 0 ? <EmptyState title={t('users.noAccountsYet')} /> : (
-            <table className="data-table">
+            <table className="data-table ap-rows">
               <thead><tr><th>{t('history.tableName')}</th><th>{t('history.tableEmail')}</th><th>{t('users.tableRole')}</th><th>{t('contract.colType')}</th><th>{t('contract.colReseller')}</th><th>{t('history.tableStatus')}</th><th></th></tr></thead>
               <tbody>
                 {others.map((u) => {
@@ -106,8 +112,8 @@ export default function Users() {
                   return (
                     <tr key={u.id}>
                       <td style={{ fontWeight: 500 }}>
-                        <button className="link-button" onClick={() => navigate(`/users/${u.id}`)}>{u.name || '—'}</button>
-                        {isSelf ? t('users.youSuffix') : ''}
+                        <Who name={u.name} email={u.email}><button className="link-button" onClick={() => navigate(`/users/${u.id}`)}>{u.name || '—'}</button>
+                        {isSelf ? t('users.youSuffix') : ''}</Who>
                       </td>
                       <td style={{ color: 'var(--text-muted)' }}>{u.email}</td>
                       <td>
@@ -115,7 +121,7 @@ export default function Users() {
                           value={u.role}
                           disabled={busyId === u.id || isSelf}
                           onChange={(e) => setRole(u.id, e.target.value)}
-                          style={{ padding: '5px 8px', border: '1px solid #E2E8F0', borderRadius: 6, fontSize: 13 }}
+                          className="ap-select"
                         >
                           <option value="operator">{t('users.roleOperator')}</option>
                           <option value="admin">{t('users.roleAdmin')}</option>
@@ -145,13 +151,13 @@ export default function Users() {
       {wheels && (
         <Card title={t('users.wheelsInServiceTitle')} className="mt-card">
           {wheels.length === 0 ? <EmptyState title={t('users.noWheelsYet')} /> : (
-            <table className="data-table">
+            <table className="data-table ap-rows">
               <thead><tr><th>{t('history.tableName')}</th><th>{t('users.tableModelNumber')}</th><th>{t('users.tableSerialNumber')}</th><th>{t('users.tableSecurityKey')}</th><th>{t('users.tablePutIntoService')}</th></tr></thead>
               <tbody>
                 {wheels.map((w) => (
                   <tr key={w.id}>
                     <td style={{ fontWeight: 500 }}>
-                      <button className="link-button" onClick={() => navigate(`/users/${w.id}`)}>{w.name || w.email}</button>
+                      <Who name={w.name} email={w.email}><button className="link-button" onClick={() => navigate(`/users/${w.id}`)}>{w.name || w.email}</button></Who>
                     </td>
                     <td>{w.wheel_model_number}</td>
                     <td style={{ fontFamily: 'var(--font-mono)', fontSize: 12 }}>{w.wheel_serial_number}</td>

@@ -54,7 +54,7 @@ export function WheelCostForm({ wheelId, onChanged = () => {} }) {
         <div className="stat"><div className="stat-label">{t('profit.colRevenue')}</div><div className="stat-value">{eur(d.revenueCents)}</div>{d.forecastCents > 0 && <div className="ap-sub">+ {eur(d.forecastCents)} {t('profit.forecast')}</div>}</div>
         <div className="stat"><div className="stat-label">{t('profit.colApi')}</div><div className="stat-value">{eur(d.apiCostCents)}</div>{d.incomplete.apiWithoutCost > 0 && <div className="ap-sub" style={{ color: '#B45309' }}>{t('profit.apiIncomplete', { n: d.incomplete.apiWithoutCost })}</div>}</div>
         <div className="stat"><div className="stat-label">{t('profit.colContribution')}</div><div className="stat-value" style={{ color: d.contributionCents < 0 ? '#B91C1C' : undefined }}>{eur(d.contributionCents)}</div></div>
-        <div className="stat"><div className="stat-label">{t('profit.colCoverage')}</div><div style={{ marginTop: 4 }}><Coverage pct={d.coveragePct} /></div><div className="ap-sub">{d.rentedDays} {t('profit.colDays').toLowerCase()}</div></div>
+        <div className="stat"><div className="stat-label">{t('profit.colCoverage')}</div><div style={{ marginTop: 4 }}><Coverage pct={d.coveragePct} /></div><div className="ap-sub">{d.rentedDays} {t('profit.colDays').toLowerCase()}</div>{d.coveragePct === null && <div className="ap-sub" style={{ color: '#B45309' }}>{t('profit.toFillHint')}</div>}</div>
       </div>
     </div>
   );
@@ -96,7 +96,7 @@ export default function ProfitabilityPanel() {
       {tot.withoutCost > 0 && <div className="ap-warn">{t('profit.missingCosts', { n: tot.withoutCost })}</div>}
       <Card className="mt-card">
         <p className="ap-hint">{t('profit.disclaimer')}</p>
-        <table className="data-table">
+        <table className="data-table ap-rows">
           <thead><tr><th>{t('park.colSerial')}</th><th>{t('profit.colCost')}</th><th>{t('profit.colRevenue')}</th><th>{t('profit.colApi')}</th><th>{t('profit.colContribution')}</th><th>{t('profit.colCoverage')}</th><th>{t('profit.colDays')}</th><th></th></tr></thead>
           <tbody>{data.wheels.map((w) => (
             <tr key={w.wheelId}>
