@@ -2437,5 +2437,47 @@
     "requestHelp": "Solo SPARK asigna una rueda. Indique cuál, para qué cliente y para cuándo: se atenderá lo antes posible.",
     "wantedOn": "Para el",
     "note": "Mensaje"
+  },
+  "shipr": {
+    "kicker": "Envío",
+    "notSent": "Aún no enviado a Shipr.",
+    "notConfigured": "Shipr no está configurado en este servidor.",
+    "sendBtn": "Enviar a Shipr",
+    "sending": "Enviando…",
+    "openBtn": "Abrir en Shipr",
+    "refreshBtn": "Actualizar",
+    "eta": "llegada prevista el {{date}}",
+    "badgeTitle": "Estado de la entrega (Shipr)",
+    "dialogTitle": "Enviar el pack a Shipr",
+    "dialogHelp": "Se crea en Shipr un borrador de envío «PACK SPARK» con esta dirección. Podrá completarlo allí.",
+    "intlHint": "Envío internacional o caso especial: se crea el borrador, finalícelo en Shipr.",
+    "src": {
+      "client": "Dirección del cliente",
+      "place": "Lugar del evento",
+      "free": "Otra dirección"
+    },
+    "f": {
+      "company": "Empresa",
+      "contact": "Contacto",
+      "email": "Correo",
+      "phone": "Teléfono",
+      "address1": "Dirección",
+      "address2": "Complemento",
+      "postalCode": "Código postal",
+      "city": "Ciudad",
+      "country": "País (FR, BE…)",
+      "pickup": "Recogida deseada el",
+      "notes": "Nota para el envío"
+    },
+    "status": {
+      "DRAFT": "Borrador",
+      "READY": "Listo",
+      "SCHEDULED": "Planificado",
+      "PICKED_UP": "Recogido",
+      "IN_TRANSIT": "En tránsito",
+      "CUSTOMS": "En aduana",
+      "DELIVERED": "Entregado",
+      "CANCELLED": "Cancelado"
+    }
   }
 }

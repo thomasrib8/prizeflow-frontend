@@ -2437,5 +2437,47 @@
     "requestHelp": "Only SPARK attributes a wheel. Say which one, for which client and for when: you will be served as soon as possible.",
     "wantedOn": "For",
     "note": "Message"
+  },
+  "shipr": {
+    "kicker": "Shipping",
+    "notSent": "Not sent to Shipr yet.",
+    "notConfigured": "Shipr is not configured on this server.",
+    "sendBtn": "Send to Shipr",
+    "sending": "Sending…",
+    "openBtn": "Open in Shipr",
+    "refreshBtn": "Refresh",
+    "eta": "expected on {{date}}",
+    "badgeTitle": "Delivery status (Shipr)",
+    "dialogTitle": "Send the pack to Shipr",
+    "dialogHelp": "A “PACK SPARK” shipment draft is created in Shipr with this address. You can complete it there.",
+    "intlHint": "International or special case: the draft is created, finish it in Shipr.",
+    "src": {
+      "client": "Client address",
+      "place": "Event venue",
+      "free": "Other address"
+    },
+    "f": {
+      "company": "Company",
+      "contact": "Contact",
+      "email": "E-mail",
+      "phone": "Phone",
+      "address1": "Address",
+      "address2": "Address line 2",
+      "postalCode": "Postal code",
+      "city": "City",
+      "country": "Country (FR, BE…)",
+      "pickup": "Requested pickup on",
+      "notes": "Note for the shipment"
+    },
+    "status": {
+      "DRAFT": "Draft",
+      "READY": "Ready",
+      "SCHEDULED": "Scheduled",
+      "PICKED_UP": "Picked up",
+      "IN_TRANSIT": "In transit",
+      "CUSTOMS": "In customs",
+      "DELIVERED": "Delivered",
+      "CANCELLED": "Cancelled"
+    }
   }
 }

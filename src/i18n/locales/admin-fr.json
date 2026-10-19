@@ -2437,5 +2437,47 @@
     "requestHelp": "Seul SPARK attribue une roue. Dites laquelle, pour quel client et pour quand : vous serez servi dès que possible.",
     "wantedOn": "Pour le",
     "note": "Message"
+  },
+  "shipr": {
+    "kicker": "Expédition",
+    "notSent": "Pas encore envoyé à Shipr.",
+    "notConfigured": "Shipr n’est pas configuré sur ce serveur.",
+    "sendBtn": "Envoyer à Shipr",
+    "sending": "Envoi…",
+    "openBtn": "Ouvrir dans Shipr",
+    "refreshBtn": "Actualiser",
+    "eta": "arrivée prévue le {{date}}",
+    "badgeTitle": "Statut de la livraison (Shipr)",
+    "dialogTitle": "Envoyer le pack à Shipr",
+    "dialogHelp": "Un brouillon d’expédition « PACK SPARK » est créé dans Shipr avec cette adresse. Vous pourrez le compléter là-bas.",
+    "intlHint": "Envoi international ou cas particulier : le brouillon est créé, finalisez-le dans Shipr.",
+    "src": {
+      "client": "Adresse du client",
+      "place": "Lieu de l’événement",
+      "free": "Autre adresse"
+    },
+    "f": {
+      "company": "Société",
+      "contact": "Contact",
+      "email": "E-mail",
+      "phone": "Téléphone",
+      "address1": "Adresse",
+      "address2": "Complément",
+      "postalCode": "Code postal",
+      "city": "Ville",
+      "country": "Pays (FR, BE…)",
+      "pickup": "Enlèvement souhaité le",
+      "notes": "Note pour l’expédition"
+    },
+    "status": {
+      "DRAFT": "Brouillon",
+      "READY": "Prête",
+      "SCHEDULED": "Planifiée",
+      "PICKED_UP": "Enlevée",
+      "IN_TRANSIT": "En transit",
+      "CUSTOMS": "En douane",
+      "DELIVERED": "Livrée",
+      "CANCELLED": "Annulée"
+    }
   }
 }

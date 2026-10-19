@@ -1,5 +1,6 @@
 // Admin, on a client's page ("Attribution du matériel"): give this client a pack that was prepared once in the Parc hardware,
 // and follow it. Nothing is configured on the hardware here: the pack follows its client by itself as soon as it is on and online.
+import ShiprShipping from './ShiprShipping';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -117,6 +118,8 @@ export default function PackAssignment({ userId, clientLabel, onChanged, onEndRe
           </div>
         </div>
       )}
+
+      {wheels && current && <ShiprShipping wheel={current} onChanged={load} />}
 
       {wheels && !current && (
         <div className="ud-hw-hero">

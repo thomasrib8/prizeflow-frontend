@@ -224,3 +224,11 @@
 .ap-select:focus { outline: none; border-color: var(--ap-blue); box-shadow: 0 0 0 3px rgba(0, 85, 248, .12); }
 .ap .link-button { color: var(--ap-navy); font-weight: 700; text-decoration: none; }
 .ap .link-button:hover { color: var(--ap-blue); text-decoration: underline; }
+
+.shipr-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 11px; border-radius: 99px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.shipr-badge i { width: 7px; height: 7px; border-radius: 50%; }
+.shipr-card { margin-top: 14px; background: #fff; border: 1px solid var(--ap-line); border-left: 3px solid var(--ap-blue); border-radius: 14px; padding: 14px 18px; box-shadow: var(--ap-shadow); }
+.shipr-head { display: flex; gap: 14px; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+.shipr-line { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 6px; font-size: 13px; color: #475569; }
+.shipr-line b { color: var(--ap-navy); }
+.shipr-actions { display: flex; gap: 8px; align-items: center; }
