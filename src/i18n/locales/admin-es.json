@@ -2454,7 +2454,8 @@
     "src": {
       "client": "Dirección del cliente",
       "place": "Lugar del evento",
-      "free": "Otra dirección"
+      "free": "Otra dirección",
+      "dest": "Dirección de entrega"
     },
     "f": {
       "company": "Empresa",
@@ -2478,6 +2479,23 @@
       "CUSTOMS": "En aduana",
       "DELIVERED": "Entregado",
       "CANCELLED": "Cancelado"
-    }
+    },
+    "tab": "Envío",
+    "panelTitle": "Envío del pack",
+    "panelSub": "Seguimiento del paquete de la ruleta {{serial}}, del envío a la devolución.",
+    "journeyOut": "Ida · hacia el cliente",
+    "journeyBack": "Vuelta · hacia el depósito",
+    "depot": "Depósito",
+    "depotBack": "De vuelta al depósito",
+    "venue": "Dirección de entrega",
+    "noDepotName": "Falta la dirección del depósito",
+    "noDepotHint": "Rellene la dirección de su empresa en su perfil.",
+    "returnSendBtn": "Organizar la devolución",
+    "returnDialogTitle": "Organizar la devolución del pack",
+    "returnDialogHelp": "Se crea en Shipr un borrador de envío de vuelta: recogida en esta dirección, entrega en su depósito.",
+    "cancelled": "Este envío se canceló en Shipr.",
+    "deliveredOn": "entregado el {{date}}",
+    "noWheel": "Ningún pack asignado a este cliente: el envío aparecerá aquí cuando lo tenga.",
+    "viaReseller": "Este cliente depende de un revendedor: él gestiona el envío."
   }
 }

@@ -2454,7 +2454,8 @@
     "src": {
       "client": "Client address",
       "place": "Event venue",
-      "free": "Other address"
+      "free": "Other address",
+      "dest": "Delivery address"
     },
     "f": {
       "company": "Company",
@@ -2478,6 +2479,23 @@
       "CUSTOMS": "In customs",
       "DELIVERED": "Delivered",
       "CANCELLED": "Cancelled"
-    }
+    },
+    "tab": "Shipping",
+    "panelTitle": "Pack shipping",
+    "panelSub": "Parcel tracking for wheel {{serial}}, from dispatch to return.",
+    "journeyOut": "Outbound · to the client",
+    "journeyBack": "Return · to the depot",
+    "depot": "Depot",
+    "depotBack": "Back at the depot",
+    "venue": "Delivery address",
+    "noDepotName": "Depot address missing",
+    "noDepotHint": "Fill in your company address in your profile.",
+    "returnSendBtn": "Arrange the return",
+    "returnDialogTitle": "Arrange the pack return",
+    "returnDialogHelp": "A return shipment draft is created in Shipr: pickup at this address, delivery to your depot.",
+    "cancelled": "This shipment was cancelled in Shipr.",
+    "deliveredOn": "delivered on {{date}}",
+    "noWheel": "No pack is assigned to this client: shipping will appear here once there is one.",
+    "viaReseller": "This client belongs to a reseller: they handle the shipping."
   }
 }

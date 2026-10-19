@@ -2454,7 +2454,8 @@
     "src": {
       "client": "Adresse du client",
       "place": "Lieu de l’événement",
-      "free": "Autre adresse"
+      "free": "Autre adresse",
+      "dest": "Lieu de livraison"
     },
     "f": {
       "company": "Société",
@@ -2478,6 +2479,23 @@
       "CUSTOMS": "En douane",
       "DELIVERED": "Livrée",
       "CANCELLED": "Annulée"
-    }
+    },
+    "tab": "Expédition",
+    "panelTitle": "Expédition du pack",
+    "panelSub": "Suivi du colis de la roue {{serial}}, de l’envoi jusqu’au retour.",
+    "journeyOut": "Aller · vers le client",
+    "journeyBack": "Retour · vers le dépôt",
+    "depot": "Dépôt",
+    "depotBack": "Retour au dépôt",
+    "venue": "Lieu de livraison",
+    "noDepotName": "Adresse du dépôt manquante",
+    "noDepotHint": "Renseignez l’adresse de votre société dans votre profil.",
+    "returnSendBtn": "Organiser le retour",
+    "returnDialogTitle": "Organiser le retour du pack",
+    "returnDialogHelp": "Un brouillon d’expédition retour est créé dans Shipr : enlèvement à cette adresse, livraison à votre dépôt.",
+    "cancelled": "Cette expédition a été annulée dans Shipr.",
+    "deliveredOn": "livré le {{date}}",
+    "noWheel": "Aucun pack n’est attribué à ce client : l’expédition apparaîtra ici dès qu’il en aura un.",
+    "viaReseller": "Ce client dépend d’un revendeur : c’est lui qui gère l’expédition."
   }
 }

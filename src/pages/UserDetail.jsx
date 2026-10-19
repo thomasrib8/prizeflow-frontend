@@ -7,6 +7,7 @@ import { Card, Button, Badge, EmptyState } from '../components/ui';
 import WheelDiagnosticsRows from '../components/WheelDiagnosticsRows';
 import { useConfirm } from '../components/ConfirmDialog';
 import PackAssignment from '../components/PackAssignment';
+import ShiprShipping from '../components/ShiprShipping';
 import ReturnForm from '../components/wheel/ReturnForm';
 import InspectionList from '../components/wheel/InspectionList';
 import ContractTab from '../components/ContractTab';
@@ -27,6 +28,7 @@ export default function UserDetail() {
   const MODULES = [
     { key: 'overview', label: t('userDetail.tabOverview') },
     { key: 'profile', label: t('userDetail.tabProfile') },
+    { key: 'shipping', label: t('shipr.tab') },
     { key: 'activity', label: t('userDetail.tabActivity') },
     { key: 'linkedin', label: t('linkedin.tabLabel') },
     { key: 'actions', label: t('userDetail.tabActions') },
@@ -241,6 +243,7 @@ export default function UserDetail() {
       )}
 
       {/* B. Activity log — metadata only, never the content of what was configured. */}
+      {module === 'shipping' && <ShiprShipping userId={id} />}
       {module === 'linkedin' && <LinkedInAdminCard userId={id} />}
 
       {module === 'activity' && (

@@ -2454,7 +2454,8 @@
     "src": {
       "client": "Kundenadresse",
       "place": "Veranstaltungsort",
-      "free": "Andere Adresse"
+      "free": "Andere Adresse",
+      "dest": "Lieferadresse"
     },
     "f": {
       "company": "Firma",
@@ -2478,6 +2479,23 @@
       "CUSTOMS": "Im Zoll",
       "DELIVERED": "Zugestellt",
       "CANCELLED": "Storniert"
-    }
+    },
+    "tab": "Versand",
+    "panelTitle": "Paketversand",
+    "panelSub": "Sendungsverfolgung des Glücksrads {{serial}}, vom Versand bis zur Rückgabe.",
+    "journeyOut": "Hinweg · zum Kunden",
+    "journeyBack": "Rückweg · zum Lager",
+    "depot": "Lager",
+    "depotBack": "Zurück im Lager",
+    "venue": "Lieferadresse",
+    "noDepotName": "Lageradresse fehlt",
+    "noDepotHint": "Tragen Sie die Adresse Ihrer Firma in Ihrem Profil ein.",
+    "returnSendBtn": "Rückgabe organisieren",
+    "returnDialogTitle": "Rückgabe des Pakets organisieren",
+    "returnDialogHelp": "In Shipr wird ein Rückversand-Entwurf erstellt: Abholung an dieser Adresse, Lieferung an Ihr Lager.",
+    "cancelled": "Diese Sendung wurde in Shipr storniert.",
+    "deliveredOn": "zugestellt am {{date}}",
+    "noWheel": "Diesem Kunden ist kein Paket zugewiesen: der Versand erscheint hier, sobald es eines gibt.",
+    "viaReseller": "Dieser Kunde gehört zu einem Wiederverkäufer: dieser kümmert sich um den Versand."
   }
 }
