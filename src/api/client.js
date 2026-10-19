@@ -202,6 +202,7 @@ export const api = {
   reverseRevenueEntry: (id, note) => request(`/admin/commercial/revenue/${id}/reverse`, { method: 'POST', body: { note } }),
   getWheelShipping: (id) => request(`/wheels/${id}/shipping`),
   sendWheelToShipr: (id, body, leg = 'out') => request(`/wheels/${id}/shipping${leg === 'return' ? '?leg=return' : ''}`, { method: 'POST', body }),
+  resetWheelShipping: (id, leg = 'out') => request(`/wheels/${id}/shipping/reset${leg === 'return' ? '?leg=return' : ''}`, { method: 'POST' }),
   refreshWheelShipping: (id, leg = 'out') => request(`/wheels/${id}/shipping/refresh${leg === 'return' ? '?leg=return' : ''}`, { method: 'POST' }),
   assignWheel: (id, userId, params = {}) => request(`/wheels/${id}/assign`, { method: 'POST', body: { userId, ...params } }),
   updateWheelAssignment: (id, params) => request(`/wheels/${id}/assignment`, { method: 'PATCH', body: params }),

@@ -2496,6 +2496,8 @@
     "cancelled": "Este envío se canceló en Shipr.",
     "deliveredOn": "entregado el {{date}}",
     "noWheel": "Ningún pack asignado a este cliente: el envío aparecerá aquí cuando lo tenga.",
-    "viaReseller": "Este cliente depende de un revendedor: él gestiona el envío."
+    "viaReseller": "Este cliente depende de un revendedor: él gestiona el envío.",
+    "recreateBtn": "Volver a crear el envío",
+    "recreateHelp": "Puede volver a crearlo aquí."
   }
 }

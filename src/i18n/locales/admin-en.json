@@ -2496,6 +2496,8 @@
     "cancelled": "This shipment was cancelled in Shipr.",
     "deliveredOn": "delivered on {{date}}",
     "noWheel": "No pack is assigned to this client: shipping will appear here once there is one.",
-    "viaReseller": "This client belongs to a reseller: they handle the shipping."
+    "viaReseller": "This client belongs to a reseller: they handle the shipping.",
+    "recreateBtn": "Recreate the shipment",
+    "recreateHelp": "You can recreate it here."
   }
 }

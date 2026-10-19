@@ -89,7 +89,7 @@ function Node({ kind, title, name, address, done }) {
 }
 
 // One journey: a node, an animated lane carrying the status, a node. `reverse` = the way back (the lane flows the other way).
-function Journey({ title, reverse, left, right, shipping, onSend, sendLabel, canSend, onRefresh, busy }) {
+function Journey({ title, reverse, left, right, shipping, onSend, sendLabel, canSend, onRefresh, onRecreate, busy }) {
   const { t } = useTranslation('admin');
   const st = shipping && shipping.status;
   const moving = !!st && MOVING.includes(st);
@@ -112,7 +112,7 @@ function Journey({ title, reverse, left, right, shipping, onSend, sendLabel, can
       {shipping && (
         <>
           {st === 'CANCELLED'
-            ? <div className="ap-warn" style={{ margin: '14px 0 0' }}>{t('shipr.cancelled')}</div>
+            ? <div className="ap-warn" style={{ margin: '14px 0 0' }}>{t('shipr.cancelled')} {t('shipr.recreateHelp')}</div>
             : <ol className="jr-steps">{FLOW.map((k, i) => <li key={k} className={i < idx ? 'past' : i === idx ? 'now' : ''}><i />{k === 'IN_TRANSIT' && st === 'CUSTOMS' ? t('shipr.status.CUSTOMS') : t(`shipr.status.${k}`)}</li>)}</ol>}
           <div className="jr-meta">
             <b>{shipping.reference}</b>
@@ -120,6 +120,7 @@ function Journey({ title, reverse, left, right, shipping, onSend, sendLabel, can
             {shipping.eta && !delivered && <span>{t('shipr.eta', { date: shipping.eta })}</span>}
             {delivered && shipping.deliveredAt && <span>{t('shipr.deliveredOn', { date: new Date(shipping.deliveredAt).toLocaleDateString() })}</span>}
             <span style={{ flex: 1 }} />
+            {st === 'CANCELLED' && <Button size="sm" disabled={busy} onClick={onRecreate}>{t('shipr.recreateBtn')}</Button>}
             {shipping.url && <a className="btn btn-secondary btn-sm" href={shipping.url} target="_blank" rel="noopener noreferrer">{t('shipr.openBtn')}</a>}
             <Button size="sm" variant="secondary" disabled={busy} onClick={onRefresh}>{t('shipr.refreshBtn')}</Button>
           </div>
@@ -153,6 +154,10 @@ export default function ShiprShipping({ userId }) {
     setBusy(true); setError('');
     try { await api.refreshWheelShipping(wheel.id, leg); await load(); } catch (e) { setError(e.message); } finally { setBusy(false); }
   }
+  async function recreate(leg) {
+    setBusy(true); setError('');
+    try { await api.resetWheelShipping(wheel.id, leg); await load(); setDialog(leg); } catch (e) { setError(e.message); } finally { setBusy(false); }
+  }
   if (!loaded) return <p className="page-subtitle">{t('common.loading')}</p>;
   if (!wheel) return <div className="jr-empty ap">{t('shipr.noWheel')}</div>;
   if (info && info.viaReseller) return <div className="jr-empty ap">{t('shipr.viaReseller')}</div>;
@@ -179,8 +184,8 @@ export default function ShiprShipping({ userId }) {
       {info && !info.configured && <div className="ap-warn">{t('shipr.notConfigured')}</div>}
       {error && <div className="error-banner">{error}</div>}
 
-      <Journey title={t('shipr.journeyOut')} left={depotNode} right={venueNode} shipping={info && info.shipping} canSend={!!ready} sendLabel={t('shipr.sendBtn')} onSend={() => setDialog('out')} onRefresh={() => refresh('out')} busy={busy} />
-      <Journey reverse title={t('shipr.journeyBack')} left={{ ...depotNode, title: t('shipr.depotBack') }} right={venueNode} shipping={info && info.returnShipping} canSend={!!ready && !!dep} sendLabel={t('shipr.returnSendBtn')} onSend={() => setDialog('return')} onRefresh={() => refresh('return')} busy={busy} />
+      <Journey title={t('shipr.journeyOut')} left={depotNode} right={venueNode} shipping={info && info.shipping} canSend={!!ready} sendLabel={t('shipr.sendBtn')} onSend={() => setDialog('out')} onRefresh={() => refresh('out')} onRecreate={() => recreate('out')} busy={busy} />
+      <Journey reverse title={t('shipr.journeyBack')} left={{ ...depotNode, title: t('shipr.depotBack') }} right={venueNode} shipping={info && info.returnShipping} canSend={!!ready && !!dep} sendLabel={t('shipr.returnSendBtn')} onSend={() => setDialog('return')} onRefresh={() => refresh('return')} onRecreate={() => recreate('return')} busy={busy} />
 
       {dialog && o && <SendDialog wheelId={wheel.id} mode={dialog} sources={dialog === 'return' ? sourcesBack : sourcesOut} onClose={() => setDialog(null)} onSent={() => { setDialog(null); load(); }} />}
     </div>

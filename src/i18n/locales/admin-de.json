@@ -2496,6 +2496,8 @@
     "cancelled": "Diese Sendung wurde in Shipr storniert.",
     "deliveredOn": "zugestellt am {{date}}",
     "noWheel": "Diesem Kunden ist kein Paket zugewiesen: der Versand erscheint hier, sobald es eines gibt.",
-    "viaReseller": "Dieser Kunde gehört zu einem Wiederverkäufer: dieser kümmert sich um den Versand."
+    "viaReseller": "Dieser Kunde gehört zu einem Wiederverkäufer: dieser kümmert sich um den Versand.",
+    "recreateBtn": "Sendung neu erstellen",
+    "recreateHelp": "Sie können sie hier neu erstellen."
   }
 }

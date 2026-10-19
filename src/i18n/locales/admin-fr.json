@@ -2496,6 +2496,8 @@
     "cancelled": "Cette expédition a été annulée dans Shipr.",
     "deliveredOn": "livré le {{date}}",
     "noWheel": "Aucun pack n’est attribué à ce client : l’expédition apparaîtra ici dès qu’il en aura un.",
-    "viaReseller": "Ce client dépend d’un revendeur : c’est lui qui gère l’expédition."
+    "viaReseller": "Ce client dépend d’un revendeur : c’est lui qui gère l’expédition.",
+    "recreateBtn": "Recréer l’expédition",
+    "recreateHelp": "Vous pouvez la recréer ici."
   }
 }
