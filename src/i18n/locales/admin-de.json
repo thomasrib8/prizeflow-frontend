@@ -2277,7 +2277,8 @@
       "providers": "Anbieter",
       "clients": "Kunden & Wiederverkäufer",
       "pricing": "Preise & Kontingente",
-      "alerts": "Warnungen"
+      "alerts": "Warnungen",
+      "simulator": "Simulator"
     },
     "na": "k. A.",
     "vsPrev": "ggü. Vormonat",
@@ -2345,7 +2346,37 @@
     "generalCost": "Kosten ohne Konto",
     "alertsTitle": "Warnungen",
     "alertsHelp": "Schwellenwerte stellen Sie ein unter",
-    "alertsSettings": "Einstellungen › Warnungen und Schwellen"
+    "alertsSettings": "Einstellungen › Warnungen und Schwellen",
+    "sim": {
+      "intro": "Simulieren Sie, was externe Dienste für eine Anzahl Glücksraddrehungen kosten würden. Jede Drehung führt eine Bouncer-Prüfung aus; Hunter, E-Mails und KI stellen Sie unten ein. Nichts wird gespeichert.",
+      "scenario": "Szenario",
+      "spins": "Anzahl Drehungen",
+      "bouncerPct": "% der Drehungen mit Bouncer",
+      "bouncerHint": "Prüfung der Spieler-E-Mail",
+      "hunterPct": "% der Drehungen mit Hunter",
+      "hunterHint": "E-Mail-Suche des Interessenten",
+      "emails": "Gesendete E-Mails pro Drehung",
+      "aiCalls": "KI-Aufrufe pro Drehung",
+      "aiIn": "Gesendete Tokens pro KI-Aufruf",
+      "aiOut": "Empfangene Tokens pro KI-Aufruf",
+      "planOf": "{{provider}}-Tarif",
+      "planCurrent": "Aktueller Tarif",
+      "result": "Geschätzte Kosten",
+      "total": "Gesamt",
+      "perSpin": "Pro Drehung",
+      "per1000": "Pro 1.000 Drehungen",
+      "service": "Dienst",
+      "quantity": "Menge",
+      "unitPrice": "Stückpreis",
+      "cost": "Kosten",
+      "incomplete": "Tarif fehlt für: {{list}} (nicht gezählt).",
+      "overFree": "Überschreitet die {{quota}} kostenlosen: ein bezahlter Tarif wäre nötig.",
+      "note": "Abonnements werden auf ihr Kontingent umgelegt, um Tarife zu vergleichen. Dollar werden zum Tageskurs umgerechnet.",
+      "notePct": "% der Drehungen mit KI-analysierter Notiz",
+      "noteHint": "KI-Assistent, der die Segmente ausfüllt",
+      "noteIn": "Gesendete Tokens pro Notizanalyse",
+      "noteOut": "Empfangene Tokens pro Notizanalyse"
+    }
   },
   "myPark": {
     "title": "Mein Park",

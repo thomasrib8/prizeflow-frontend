@@ -2277,7 +2277,8 @@
       "providers": "Providers",
       "clients": "Clients & resellers",
       "pricing": "Prices & quotas",
-      "alerts": "Alerts"
+      "alerts": "Alerts",
+      "simulator": "Simulator"
     },
     "na": "n/a",
     "vsPrev": "vs previous month",
@@ -2345,7 +2346,37 @@
     "generalCost": "Costs without an account",
     "alertsTitle": "Alerts",
     "alertsHelp": "Thresholds are set in",
-    "alertsSettings": "Settings › Alerts and thresholds"
+    "alertsSettings": "Settings › Alerts and thresholds",
+    "sim": {
+      "intro": "Simulate what external services would cost for a number of wheel spins. Each spin runs a Bouncer check; Hunter, e-mails and AI are set below. Nothing is saved.",
+      "scenario": "Scenario",
+      "spins": "Number of spins",
+      "bouncerPct": "% of spins using Bouncer",
+      "bouncerHint": "Player e-mail check",
+      "hunterPct": "% of spins using Hunter",
+      "hunterHint": "Prospect e-mail lookup",
+      "emails": "E-mails sent per spin",
+      "aiCalls": "AI calls per spin",
+      "aiIn": "Tokens sent per AI call",
+      "aiOut": "Tokens received per AI call",
+      "planOf": "{{provider}} plan",
+      "planCurrent": "Current plan",
+      "result": "Estimated cost",
+      "total": "Total",
+      "perSpin": "Per spin",
+      "per1000": "Per 1,000 spins",
+      "service": "Service",
+      "quantity": "Quantity",
+      "unitPrice": "Unit price",
+      "cost": "Cost",
+      "incomplete": "Missing tariff for: {{list}} (not counted).",
+      "overFree": "Exceeds the {{quota}} free: a paid plan would be needed.",
+      "note": "Subscriptions are spread over their quota so plans can be compared. Dollars are converted at today’s rate.",
+      "notePct": "% of spins with a note analysed by AI",
+      "noteHint": "AI assistant that fills the segments",
+      "noteIn": "Tokens sent per note analysis",
+      "noteOut": "Tokens received per note analysis"
+    }
   },
   "myPark": {
     "title": "My park",

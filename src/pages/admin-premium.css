@@ -141,3 +141,29 @@
 .ap-place-grid label { display: block; min-width: 0; } .ap-place-grid .w3 { grid-column: span 3; } .ap-place-grid .w2 { grid-column: span 2; }
 .ap-place-grid input { width: 100%; display: block; }
 @media (max-width: 720px) { .ap-place-grid .w3, .ap-place-grid .w2 { grid-column: span 6; } }
+
+.ap-formula-tip { position: fixed; z-index: 9999; transform: translateX(-100%); width: 280px; max-width: calc(100vw - 32px); font-size: 12px; line-height: 1.55; color: #fff; background: #0F1B4D; border-radius: 10px; padding: 10px 12px; box-shadow: 0 10px 30px rgba(15,27,77,.35); pointer-events: none; }
+
+.ap-grid-form { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; }
+.ap-field { display: flex; flex-direction: column; gap: 5px; font-size: 12px; font-weight: 600; color: #475569; }
+.ap-field input, .ap-field select { font-size: 14px; padding: 8px 10px; border: 1px solid #D4DEF5; border-radius: 10px; background: #fff; }
+.ap-field small { font-weight: 400; color: #94A3B8; }
+.ap-sim-total { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 14px; }
+.ap-sim-total > div { background: linear-gradient(135deg, #EAF1FF, #F4F8FF); border: 1px solid #BFD4FF; border-radius: 14px; padding: 12px 16px; display: flex; flex-direction: column; }
+.ap-sim-total span { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: #64748B; font-weight: 700; }
+.ap-sim-total b { font-size: 24px; color: #002881; }
+
+.ap-month { position: relative; display: block; }
+.ap-month-btn { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-width: 170px; padding: 9px 12px; font: inherit; font-weight: 700; font-size: 14px; color: var(--ap-navy); background: #fff; border: 1px solid var(--ap-ctl); border-radius: 10px; cursor: pointer; }
+.ap-month-btn:hover, .ap-month-btn[aria-expanded="true"] { border-color: var(--ap-blue); box-shadow: 0 0 0 3px rgba(0, 85, 248, .12); }
+.ap-month-pop { position: absolute; z-index: 50; right: 0; top: calc(100% + 8px); width: 260px; background: #fff; border: 1px solid var(--ap-line); border-radius: 16px; padding: 14px; box-shadow: 0 18px 40px -12px rgba(0, 40, 129, .35); }
+.ap-month-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; color: var(--ap-navy); }
+.ap-month-head button { width: 30px; height: 30px; border-radius: 50%; border: 0; background: var(--ap-pale); color: var(--ap-blue); font-size: 18px; cursor: pointer; line-height: 1; }
+.ap-month-head button:hover { background: #DCE8FF; }
+.ap-month-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.ap-month-grid button { padding: 9px 0; border: 1px solid transparent; border-radius: 10px; background: transparent; font: inherit; font-size: 13px; font-weight: 600; color: #334155; cursor: pointer; }
+.ap-month-grid button:hover { background: var(--ap-pale); color: var(--ap-blue); }
+.ap-month-grid button.now { border-color: var(--ap-ctl); }
+.ap-month-grid button.on { background: var(--ap-blue); color: #fff; border-color: var(--ap-blue); }
+.ap-month-foot { margin-top: 10px; text-align: center; }
+.ap-month-foot button { border: 0; background: none; color: var(--ap-blue); font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; text-transform: capitalize; }

@@ -2277,7 +2277,8 @@
       "providers": "Fournisseurs",
       "clients": "Clients & revendeurs",
       "pricing": "Tarifs & quotas",
-      "alerts": "Alertes"
+      "alerts": "Alertes",
+      "simulator": "Simulateur"
     },
     "na": "n/a",
     "vsPrev": "vs mois précédent",
@@ -2345,7 +2346,37 @@
     "generalCost": "Coûts sans compte",
     "alertsTitle": "Alertes",
     "alertsHelp": "Les seuils se règlent dans",
-    "alertsSettings": "Paramètres › Alertes et seuils"
+    "alertsSettings": "Paramètres › Alertes et seuils",
+    "sim": {
+      "intro": "Simulez ce que coûteraient les services externes pour un nombre de lancers de roue. Chaque lancer fait une vérification Bouncer ; Hunter, les e-mails et l’IA se règlent ci-dessous. Rien n’est enregistré.",
+      "scenario": "Scénario",
+      "spins": "Nombre de lancers",
+      "bouncerPct": "% de lancers avec Bouncer",
+      "bouncerHint": "Vérification de l’e-mail du joueur",
+      "hunterPct": "% de lancers avec Hunter",
+      "hunterHint": "Recherche d’e-mail du prospect",
+      "emails": "E-mails envoyés par lancer",
+      "aiCalls": "Appels IA par lancer",
+      "aiIn": "Tokens envoyés par appel IA",
+      "aiOut": "Tokens reçus par appel IA",
+      "planOf": "Forfait {{provider}}",
+      "planCurrent": "Forfait en cours",
+      "result": "Coût estimé",
+      "total": "Total",
+      "perSpin": "Par lancer",
+      "per1000": "Pour 1 000 lancers",
+      "service": "Service",
+      "quantity": "Quantité",
+      "unitPrice": "Prix unitaire",
+      "cost": "Coût",
+      "incomplete": "Tarif manquant pour : {{list}} (non compté).",
+      "overFree": "Dépasse les {{quota}} gratuits : un forfait payant serait nécessaire.",
+      "note": "Les abonnements sont répartis sur leur quota pour comparer les forfaits. Les dollars sont convertis au taux du jour.",
+      "notePct": "% de lancers avec note analysée par l’IA",
+      "noteHint": "Assistant IA qui remplit les segments",
+      "noteIn": "Tokens envoyés par analyse de note",
+      "noteOut": "Tokens reçus par analyse de note"
+    }
   },
   "myPark": {
     "title": "Mon parc",

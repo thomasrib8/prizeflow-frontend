@@ -29,7 +29,6 @@ export default function UserDetail() {
     { key: 'profile', label: t('userDetail.tabProfile') },
     { key: 'activity', label: t('userDetail.tabActivity') },
     { key: 'linkedin', label: t('linkedin.tabLabel') },
-    { key: 'contract', label: t('contract.tab') },
     { key: 'actions', label: t('userDetail.tabActions') },
     { key: 'notes', label: t('userDetail.tabNotes') },
   ];
@@ -155,7 +154,7 @@ export default function UserDetail() {
         ))}
       </div>
 
-      {module === 'contract' && <ContractTab userId={id} />}
+      {module === 'overview' && <ContractTab userId={id} />}
 
       {module === 'profile' && (
         <>

@@ -24,7 +24,6 @@ export default function ContractTab({ userId }) {
   const [f, setF] = useState({ type: 'long', rent: '', price: '', activation: '', parent: '', validFrom: today(), contractStart: '', contractEnd: '' });
   const [hold, setHold] = useState({ wheelId: '', startedOn: today() });
   const [requests, setRequests] = useState([]);
-  const [plan, setPlan] = useState({ startsOn: today(), endsOn: '', wheelId: '', note: '' });
 
   const load = useCallback(() => {
     api.getCommercialUser(userId).then((d) => {
@@ -134,25 +133,6 @@ export default function ContractTab({ userId }) {
             : data.subClients.map((c) => <div key={c.id} style={{ fontSize: 13, padding: '4px 0' }}><Link to={`/users/${c.id}`}>{c.name}</Link></div>)}
         </Card>
       )}
-
-      <Card title={t('contract.plannedTitle')} className="mt-card">
-        <p className="ap-hint">{t('contract.plannedDesc')}</p>
-        <form onSubmit={(e) => { e.preventDefault(); run(() => api.addPlannedRental({ userId, startsOn: plan.startsOn, endsOn: plan.endsOn || undefined, wheelId: plan.wheelId || undefined, note: plan.note || undefined })); }} style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'flex-end' }}>
-          <label>{t('contract.startsOn')}<input type="date" required value={plan.startsOn} onChange={(e) => setPlan({ ...plan, startsOn: e.target.value })} style={{ display: 'block' }} /></label>
-          <label>{t('contract.endsOn')}<input type="date" value={plan.endsOn} onChange={(e) => setPlan({ ...plan, endsOn: e.target.value })} style={{ display: 'block' }} /></label>
-          <label>{t('contract.wheel')}<select value={plan.wheelId} onChange={(e) => setPlan({ ...plan, wheelId: e.target.value })} style={{ display: 'block' }}><option value="">—</option>{wheels.map((w) => <option key={w.id} value={w.id}>{w.serialNumber}</option>)}</select></label>
-          <label>{t('contract.note')}<input value={plan.note} maxLength={300} onChange={(e) => setPlan({ ...plan, note: e.target.value })} style={{ display: 'block', width: 200 }} /></label>
-          <Button type="submit" size="sm" disabled={!cur}>{t('contract.addPlanned')}</Button>
-        </form>
-        {data.planned.map((p) => (
-          <div key={p.id} style={{ display: 'flex', gap: 10, alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #F1F5F9', fontSize: 13 }}>
-            <span>{p.starts_on}{p.ends_on ? ` → ${p.ends_on}` : ''}</span>{p.serial_number && <b>{p.serial_number}</b>}
-            <Badge tone={p.status === 'planned' ? 'blue' : p.status === 'started' ? 'green' : 'neutral'}>{t(`contract.plannedStatus.${p.status}`)}</Badge>
-            {p.note && <span style={{ color: '#64748B' }}>{p.note}</span>}<span style={{ flex: 1 }} />
-            {p.status === 'planned' && <Button size="sm" variant="secondary" onClick={() => run(() => api.cancelPlannedRental(p.id))}>{t('contract.cancel')}</Button>}
-          </div>
-        ))}
-      </Card>
 
       <Card title={t('contract.revenueTitle')} className="mt-card">
         <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', marginBottom: 10, fontSize: 14 }}>

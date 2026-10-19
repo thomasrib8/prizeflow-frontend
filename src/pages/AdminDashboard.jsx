@@ -46,12 +46,13 @@ function Delta({ cur, prev, money }) {
 
 function Kpi({ id, label, value, sub, cur, prev, money, reliability }) {
   const { t } = useTranslation('admin');
-  const [open, setOpen] = useState(false);
+  const [tip, setTip] = useState(null);
+  const show = (e) => { const r = e.currentTarget.getBoundingClientRect(); setTip({ x: Math.min(r.right, window.innerWidth - 16), y: r.bottom + 8 }); };
   return (
     <div className="stat">
       <div className="ap-kpi-top">
         <span className="stat-label">{label}</span>
-        <button type="button" className="ap-info-btn" aria-label={t('adminDash.formulaBtn')} title={t('adminDash.formulaBtn')} onClick={() => setOpen((v) => !v)}>i</button>
+        <button type="button" className="ap-info-btn" aria-label={t('adminDash.formulaBtn')} onMouseEnter={show} onMouseLeave={() => setTip(null)} onFocus={show} onBlur={() => setTip(null)}>i</button>
       </div>
       <div className="stat-value">{value}</div>
       <div className="ap-kpi-foot">
@@ -61,7 +62,7 @@ function Kpi({ id, label, value, sub, cur, prev, money, reliability }) {
         </div>
         {reliability && <Badge tone={RELIABILITY_TONE[reliability]}>{t(`adminDash.rel.${reliability}`)}</Badge>}
       </div>
-      {open && <div className="ap-formula">{t(`adminDash.formula.${id}`)}</div>}
+      {tip && <div className="ap-formula-tip" role="tooltip" style={{ left: tip.x, top: tip.y }}>{t(`adminDash.formula.${id}`)}</div>}
     </div>
   );
 }

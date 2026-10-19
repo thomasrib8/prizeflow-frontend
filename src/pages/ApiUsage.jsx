@@ -5,12 +5,14 @@ import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, Tooltip, L
 import { api } from '../api/client';
 import { Card, Button, Badge } from '../components/ui';
 import ApiPricingModule from '../components/ApiPricingModule';
+import MonthPicker from '../components/MonthPicker';
+import ApiSimulator from '../components/ApiSimulator';
 import './admin-premium.css';
 
 // Admin › Consommation API. Three costs, never mixed: real (what providers charge), imputed (attributed to the accounts that caused it),
 // unallocated (the rest). Contribution of a reseller = its income − its own API cost − the API cost of the clients under it.
 const NAMES = { anthropic: 'Claude (Anthropic)', resend: 'Resend', hunter: 'Hunter', bouncer: 'Bouncer', apollo: 'Apollo', render: 'Render' };
-const TABS = ['overview', 'providers', 'clients', 'pricing', 'alerts'];
+const TABS = ['overview', 'providers', 'clients', 'pricing', 'alerts', 'simulator'];
 const eur = (c, d = 0) => (c === null || c === undefined ? '—' : (c / 100).toLocaleString(undefined, { style: 'currency', currency: 'EUR', minimumFractionDigits: d, maximumFractionDigits: d }));
 const pct = (v) => (v === null || v === undefined ? '—' : `${Number(v).toLocaleString(undefined, { maximumFractionDigits: 1 })} %`);
 const nameOf = (p) => NAMES[p] || p;
@@ -227,7 +229,7 @@ export default function ApiUsage() {
     <div className="ap">
       <div className="page-header">
         <div><h1 className="page-title">{t('apiUsage.title')}</h1><p className="page-subtitle">{t('apiUsage.subtitle')}</p></div>
-        <label>{t('apiUsage.month')}<input type="month" value={month} onChange={(e) => setParam('month', e.target.value === thisMonth() ? '' : e.target.value)} style={{ display: 'block' }} /></label>
+        <label>{t('apiUsage.month')}<MonthPicker value={month} onChange={(v) => setParam('month', v === thisMonth() ? '' : v)} /></label>
       </div>
       {error && <div className="error-banner">{error}</div>}
       <div className="tabs">{TABS.map((x) => <button key={x} className={`tab${tab === x ? ' active' : ''}`} onClick={() => setParam('tab', x === 'overview' ? '' : x)}>{t(`apiUsage.tabs.${x}`)}{x === 'alerts' && ov && ov.unreadAlerts > 0 ? ` (${ov.unreadAlerts})` : ''}</button>)}</div>
@@ -236,6 +238,7 @@ export default function ApiUsage() {
       {tab === 'clients' && <Clients month={month} />}
       {tab === 'pricing' && <ApiPricingModule />}
       {tab === 'alerts' && <Alerts reload={load} />}
+      {tab === 'simulator' && <ApiSimulator />}
     </div>
   );
 }

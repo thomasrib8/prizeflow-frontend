@@ -2277,7 +2277,8 @@
       "providers": "Proveedores",
       "clients": "Clientes y revendedores",
       "pricing": "Tarifas y cuotas",
-      "alerts": "Alertas"
+      "alerts": "Alertas",
+      "simulator": "Simulador"
     },
     "na": "n/d",
     "vsPrev": "vs mes anterior",
@@ -2345,7 +2346,37 @@
     "generalCost": "Costes sin cuenta",
     "alertsTitle": "Alertas",
     "alertsHelp": "Los umbrales se ajustan en",
-    "alertsSettings": "Ajustes › Alertas y umbrales"
+    "alertsSettings": "Ajustes › Alertas y umbrales",
+    "sim": {
+      "intro": "Simule cuánto costarían los servicios externos para un número de giros de la ruleta. Cada giro hace una verificación de Bouncer; Hunter, los correos y la IA se ajustan abajo. No se guarda nada.",
+      "scenario": "Escenario",
+      "spins": "Número de giros",
+      "bouncerPct": "% de giros con Bouncer",
+      "bouncerHint": "Verificación del correo del jugador",
+      "hunterPct": "% de giros con Hunter",
+      "hunterHint": "Búsqueda del correo del prospecto",
+      "emails": "Correos enviados por giro",
+      "aiCalls": "Llamadas de IA por giro",
+      "aiIn": "Tokens enviados por llamada de IA",
+      "aiOut": "Tokens recibidos por llamada de IA",
+      "planOf": "Plan de {{provider}}",
+      "planCurrent": "Plan actual",
+      "result": "Coste estimado",
+      "total": "Total",
+      "perSpin": "Por giro",
+      "per1000": "Por 1.000 giros",
+      "service": "Servicio",
+      "quantity": "Cantidad",
+      "unitPrice": "Precio unitario",
+      "cost": "Coste",
+      "incomplete": "Falta la tarifa de: {{list}} (no contado).",
+      "overFree": "Supera los {{quota}} gratuitos: haría falta un plan de pago.",
+      "note": "Las suscripciones se reparten según su cuota para comparar planes. Los dólares se convierten al cambio del día.",
+      "notePct": "% de giros con nota analizada por la IA",
+      "noteHint": "Asistente de IA que rellena los segmentos",
+      "noteIn": "Tokens enviados por análisis de nota",
+      "noteOut": "Tokens recibidos por análisis de nota"
+    }
   },
   "myPark": {
     "title": "Mi parque",
