@@ -2195,7 +2195,17 @@
     "mergePh": "Buscar la ficha que se conserva…",
     "merge": "Fusionar",
     "confirmMerge": "¿Fusionar «{{from}}» con «{{into}}»? «{{from}}» pasa a ser otro nombre de «{{into}}».",
-    "historyTitle": "Historial"
+    "historyTitle": "Historial",
+    "geoPending": "{{n}} evento(s) a la espera de coordenadas: la búsqueda funciona sola en segundo plano (dirección exacta y luego nombre del recinto).",
+    "geoNow": "Lanzar ahora",
+    "placeSearch": "Buscar un recinto o una dirección",
+    "placeSearchHelp": "Escriba el nombre del recinto («Lille Grand Palais») o una dirección; elija el resultado correcto para fijar las coordenadas.",
+    "placeSearchPh": "p. ej. Lille Grand Palais",
+    "searchBtn": "Buscar",
+    "noResult": "Sin resultados: pruebe con el nombre del recinto y la ciudad.",
+    "srcAddress": "Dirección",
+    "srcPlace": "Recinto",
+    "geoFailed": "{{n}} evento(s) sin coordenadas fiables: relance la búsqueda (dirección exacta y luego nombre del recinto) o elija a mano."
   },
   "live": {
     "title": "Locations Live",

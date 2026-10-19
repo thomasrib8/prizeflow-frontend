@@ -16,6 +16,9 @@ function Editor({ id, onClose, onChanged }) {
   const [d, setD] = useState(null);
   const [f, setF] = useState({});
   const [mergeQ, setMergeQ] = useState('');
+  const [placeQ, setPlaceQ] = useState('');
+  const [placeHits, setPlaceHits] = useState(null);
+  const [placeBusy, setPlaceBusy] = useState(false);
   const [mergeList, setMergeList] = useState([]);
   const [error, setError] = useState('');
   const load = useCallback(() => api.getCatalogEntry(id).then((x) => { setD(x); const e = x.entry; setF({ name: e.name || '', venue: e.venue || '', address: e.address || '', postalCode: e.postal_code || '', city: e.city || '', country: e.country || '', lat: e.lat ?? '', lng: e.lng ?? '' }); }).catch((e) => setError(e.message)), [id]);
@@ -56,14 +59,24 @@ function Editor({ id, onClose, onChanged }) {
           <label>lat<input type="number" step="any" value={f.lat} onChange={(ev) => setF({ ...f, lat: ev.target.value })} style={{ display: 'block', width: 120 }} /></label>
           <label>lng<input type="number" step="any" value={f.lng} onChange={(ev) => setF({ ...f, lng: ev.target.value })} style={{ display: 'block', width: 120 }} /></label>
           <Button size="sm" variant="secondary" disabled={f.lat === '' || f.lng === ''} onClick={() => run(() => api.editCatalogEntry(id, { lat: Number(f.lat), lng: Number(f.lng) }))}>{t('catalog.setCoords')}</Button>
-          <Button size="sm" variant="secondary" onClick={() => run(() => api.regeocodeCatalogEntry(id))}>{t('catalog.regeocode')}</Button>
+          <Button size="sm" variant="secondary" onClick={() => run(async () => { await api.editCatalogEntry(id, place()); await api.regeocodeCatalogEntry(id); })}>{t('catalog.regeocode')}</Button>
         </div>
         {d.candidates.length > 0 && e.geocode_status === 'ambiguous' && (
           <div style={{ marginTop: 8 }}>
             <div style={lbl}>{t('catalog.candidates')}</div>
-            {d.candidates.map((c, i) => <div key={i} style={{ fontSize: 13, display: 'flex', gap: 8, alignItems: 'center', padding: '4px 0' }}><span style={{ flex: 1 }}>{c.label} ({Math.round(c.score * 100)} %)</span><Button size="sm" variant="ghost" onClick={() => run(() => api.editCatalogEntry(id, { lat: c.lat, lng: c.lng }))}>{t('catalog.useThis')}</Button></div>)}
+            {d.candidates.map((c, i) => <div key={i} style={{ fontSize: 13, display: 'flex', gap: 8, alignItems: 'center', padding: '4px 0' }}><span style={{ flex: 1 }}>{c.source === 'place' ? `📍 ${c.label}` : `${c.label} (${Math.round(c.score * 100)} %)`}</span><Button size="sm" variant="ghost" onClick={() => run(() => api.editCatalogEntry(id, { lat: c.lat, lng: c.lng }))}>{t('catalog.useThis')}</Button></div>)}
           </div>
         )}
+
+        <div className="ap-section-title">{t('catalog.placeSearch')}</div>
+        <p className="ap-hint" style={{ marginBottom: 8 }}>{t('catalog.placeSearchHelp')}</p>
+        <form style={{ display: 'flex', gap: 8 }} onSubmit={async (ev) => { ev.preventDefault(); setPlaceBusy(true); setError(''); try { setPlaceHits(await api.searchCatalogPlaces(placeQ || `${f.venue} ${f.city}`)); } catch (er) { setError(er.message); } finally { setPlaceBusy(false); } }}>
+          <input value={placeQ} onChange={(ev) => setPlaceQ(ev.target.value)} placeholder={`${f.venue || ''} ${f.city || ''}`.trim() || t('catalog.placeSearchPh')} style={{ flex: 1 }} />
+          <Button size="sm" type="submit" disabled={placeBusy}>{t('catalog.searchBtn')}</Button>
+        </form>
+        {placeHits && (placeHits.length === 0 ? <p className="ap-hint" style={{ marginTop: 8 }}>{t('catalog.noResult')}</p> : placeHits.map((c, i) => (
+          <div key={i} className="ap-line"><Badge tone={c.source === 'place' ? 'purple' : 'blue'}>{t(c.source === 'place' ? 'catalog.srcPlace' : 'catalog.srcAddress')}</Badge><span style={{ flex: 1, fontSize: 12.5 }}>{c.label}</span><Button size="sm" variant="secondary" onClick={() => run(() => api.editCatalogEntry(id, { lat: c.lat, lng: c.lng }))}>{t('catalog.useThis')}</Button></div>
+        )))}
 
         {['proposed', 'imported', 'verified'].includes(e.status) && (
           <>
@@ -102,6 +115,8 @@ export default function Catalog({ embedded = false }) {
   }, [tab, q]);
   useEffect(() => { const h = setTimeout(load, 200); return () => clearTimeout(h); }, [load]);
   const counts = data ? data.counts : {};
+  useEffect(() => { if (!data || !data.geocodePending) return undefined; const h = setInterval(load, 6000); return () => clearInterval(h); }, [data, load]); // coordinates arrive in the background
+  const doGeocode = async () => { setError(''); try { await api.startCatalogGeocode(true); load(); } catch (e) { setError(e.message); } };
   const doImport = async () => { setError(''); setMsg(''); try { const r = await api.importCatalog(); setMsg(t('catalog.imported', { added: r.added, total: r.total })); load(); } catch (e) { setError(e.message); } };
 
   return (
@@ -116,6 +131,12 @@ export default function Catalog({ embedded = false }) {
       </div>
       {error && <div className="error-banner">{error}</div>}
       {msg && <div className="ap-info">{msg}</div>}
+      {data && (data.geocodePending > 0 || data.geocodeFailed > 0) && (
+        <div className="ap-info" style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+          <span style={{ flex: 1 }}>{data.geocodePending > 0 ? t('catalog.geoPending', { n: data.geocodePending }) : t('catalog.geoFailed', { n: data.geocodeFailed })}</span>
+          <Button size="sm" variant="secondary" onClick={doGeocode}>{t('catalog.geoNow')}</Button>
+        </div>
+      )}
       <div className="ap-pills" style={{ marginBottom: 14 }}>
         {TABS.map((x) => <button key={x} className={`ap-pill${tab === x ? ' on' : ''}`} onClick={() => setTab(x)}>{t(`catalog.tab.${x}`)}{x !== 'all' && counts[x] !== undefined ? <b>{counts[x]}</b> : null}</button>)}
       </div>

@@ -74,7 +74,7 @@ export default function PackAssignment({ userId, clientLabel, onChanged, onEndRe
     if (current && !(await confirm(t('packAssign.confirmChange', { from: current.serialNumber }), { danger: true, confirmLabel: t('packAssign.confirmChangeBtn') }))) return;
     setBusy(true); setError(''); setMsg('');
     try {
-      await api.assignWheel(pick, userId, { note, expectedReturnAt: back, priceOverrideCents: euroToCents(price), plannedRentalId: plannedId || undefined, declaredPlace: declaredPayload(placeName, place) || undefined });
+      await api.assignWheel(pick, userId, { note: placeName.trim() || note, expectedReturnAt: back, priceOverrideCents: euroToCents(price), plannedRentalId: plannedId || undefined, declaredPlace: declaredPayload(placeName, place) || undefined });
       setPick(''); setChanging(false); setMsg(t('packAssign.assignedMsg'));
       await load(); onChanged && onChanged();
     } catch (e) { setError(e.message); } finally { setBusy(false); }
@@ -82,7 +82,7 @@ export default function PackAssignment({ userId, clientLabel, onChanged, onEndRe
 
   async function saveParams() {
     setBusy(true); setError(''); setMsg('');
-    try { await api.updateWheelAssignment(current.id, { note, expectedReturnAt: back, priceOverrideCents: euroToCents(price), declaredPlace: declaredPayload(placeName, place) }); setMsg(t('packAssign.savedMsg')); await load(); } catch (e) { setError(e.message); } finally { setBusy(false); }
+    try { await api.updateWheelAssignment(current.id, { note: placeName.trim() || note, expectedReturnAt: back, priceOverrideCents: euroToCents(price), declaredPlace: declaredPayload(placeName, place) }); setMsg(t('packAssign.savedMsg')); await load(); } catch (e) { setError(e.message); } finally { setBusy(false); }
   }
 
   async function showSheet() {
@@ -93,7 +93,7 @@ export default function PackAssignment({ userId, clientLabel, onChanged, onEndRe
 
   const wheelConnected = !!(overview && overview.wheel && overview.wheel.connected);
   const hasActive = !!(overview && (overview.campaigns || []).some((c) => c.status === 'active'));
-  const dirty = current && current.assignment && (note !== (current.assignment.note || '') || back !== (current.assignment.expectedReturnAt || '') || euroToCents(price) !== (current.assignment.priceOverrideCents ?? null) || placeName !== ((current.assignment.declaredPlace && current.assignment.declaredPlace.name) || ''));
+  const dirty = current && current.assignment && (back !== (current.assignment.expectedReturnAt || '') || euroToCents(price) !== (current.assignment.priceOverrideCents ?? null) || placeName !== ((current.assignment.declaredPlace && current.assignment.declaredPlace.name) || ''));
   const showPicker = wheels && (!current || changing);
 
   return (
@@ -140,10 +140,6 @@ export default function PackAssignment({ userId, clientLabel, onChanged, onEndRe
           <div className="sw-label" style={{ marginTop: 16 }}>{t('packAssign.paramsTitle')}</div>
           <div className="sw-two">
             <div>
-              <div className="sw-sub">{t('packAssign.noteLabel')}</div>
-              <input className="sw-input" value={note} maxLength={300} placeholder={t('packAssign.notePh')} onChange={(e) => setNote(e.target.value)} />
-            </div>
-            <div>
               <div className="sw-sub">{t('packAssign.returnLabel')}</div>
               <input className="sw-input" type="date" value={back} onChange={(e) => setBack(e.target.value)} />
             </div>
@@ -153,7 +149,6 @@ export default function PackAssignment({ userId, clientLabel, onChanged, onEndRe
             <input className="sw-input" type="number" min="0" step="0.01" value={price} placeholder={t('packAssign.pricePh')} onChange={(e) => setPrice(e.target.value)} style={{ maxWidth: 200 }} />
           </div>
           <div style={{ marginTop: 10 }}>
-            <div className="sw-sub">{t('packAssign.placeLabel')}</div>
             <EventNameField value={placeName} onChange={setPlaceName} place={place} onPlace={setPlace} />
           </div>
           <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginTop: 10, flexWrap: 'wrap' }}>
@@ -194,10 +189,6 @@ export default function PackAssignment({ userId, clientLabel, onChanged, onEndRe
           <div className="sw-label" style={{ marginTop: 14 }}>{t('packAssign.paramsTitle')}</div>
           <div className="sw-two">
             <div>
-              <div className="sw-sub">{t('packAssign.noteLabel')}</div>
-              <input className="sw-input" value={note} maxLength={300} placeholder={t('packAssign.notePh')} onChange={(e) => setNote(e.target.value)} />
-            </div>
-            <div>
               <div className="sw-sub">{t('packAssign.returnLabel')}</div>
               <input className="sw-input" type="date" value={back} onChange={(e) => setBack(e.target.value)} />
             </div>
@@ -216,7 +207,6 @@ export default function PackAssignment({ userId, clientLabel, onChanged, onEndRe
             </div>
           )}
           <div style={{ marginTop: 10 }}>
-            <div className="sw-sub">{t('packAssign.placeLabel')}</div>
             <EventNameField value={placeName} onChange={setPlaceName} place={place} onPlace={setPlace} />
           </div>
           <div className="sw-foot">

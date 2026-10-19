@@ -2195,7 +2195,17 @@
     "mergePh": "Search the entry to keep…",
     "merge": "Merge",
     "confirmMerge": "Merge \"{{from}}\" into \"{{into}}\"? \"{{from}}\" becomes another name of \"{{into}}\".",
-    "historyTitle": "History"
+    "historyTitle": "History",
+    "geoPending": "{{n}} event(s) waiting for coordinates: the search runs by itself in the background (exact address, then venue name).",
+    "geoNow": "Run now",
+    "placeSearch": "Search a venue or an address",
+    "placeSearchHelp": "Type the venue name (\"Lille Grand Palais\") or an address; pick the right result to set the coordinates.",
+    "placeSearchPh": "e.g. Lille Grand Palais",
+    "searchBtn": "Search",
+    "noResult": "No result: try the venue name and the city.",
+    "srcAddress": "Address",
+    "srcPlace": "Venue",
+    "geoFailed": "{{n}} event(s) without reliable coordinates: run the search again (exact address, then venue name) or choose by hand."
   },
   "live": {
     "title": "Locations Live",

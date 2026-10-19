@@ -162,6 +162,8 @@ export const api = {
   downloadAdminDashboardCsv: (query) => downloadFile(`/admin/dashboard/export.csv?${query}`),
   searchEvents: (q) => request(`/events/search?q=${encodeURIComponent(q)}`),
   listCatalog: (query = '') => request(`/admin/catalog${query ? `?${query}` : ''}`),
+  searchCatalogPlaces: (q) => request(`/admin/catalog/place-search?q=${encodeURIComponent(q)}`),
+  startCatalogGeocode: (retry = false) => request('/admin/catalog/geocode', { method: 'POST', body: { retry } }),
   getCatalogPending: () => request('/admin/catalog/pending-count'),
   getCatalogEntry: (id) => request(`/admin/catalog/${id}`),
   editCatalogEntry: (id, payload) => request(`/admin/catalog/${id}`, { method: 'PATCH', body: payload }),

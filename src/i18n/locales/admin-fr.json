@@ -2195,7 +2195,17 @@
     "mergePh": "Rechercher la fiche à conserver…",
     "merge": "Fusionner",
     "confirmMerge": "Fusionner « {{from}} » dans « {{into}} » ? « {{from}} » devient un autre nom de « {{into}} ».",
-    "historyTitle": "Historique"
+    "historyTitle": "Historique",
+    "geoPending": "{{n}} salon(s) en attente de coordonnées : la recherche tourne toute seule en arrière-plan (adresse exacte, puis nom du lieu).",
+    "geoNow": "Relancer maintenant",
+    "placeSearch": "Chercher un lieu ou une adresse",
+    "placeSearchHelp": "Tapez le nom du lieu (« Lille Grand Palais ») ou une adresse ; choisissez le bon résultat pour fixer les coordonnées.",
+    "placeSearchPh": "ex. Lille Grand Palais",
+    "searchBtn": "Chercher",
+    "noResult": "Aucun résultat : essayez avec le nom du lieu et la ville.",
+    "srcAddress": "Adresse",
+    "srcPlace": "Lieu",
+    "geoFailed": "{{n}} salon(s) sans coordonnées sûres : relancez la recherche (adresse exacte, puis nom du lieu) ou choisissez à la main."
   },
   "live": {
     "title": "Locations Live",

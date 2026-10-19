@@ -74,8 +74,9 @@
 .ud-hw-serial { font-size: 28px; font-weight: 800; letter-spacing: -0.01em; margin-top: 4px; font-family: var(--font-mono, ui-monospace, monospace); }
 .ud-hw-sub { font-size: 13px; opacity: 0.85; margin-top: 2px; }
 .ud-hw-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.ud-hw-pill { font-size: 12px; font-weight: 700; padding: 5px 12px; border-radius: 99px; background: rgba(255, 255, 255, 0.16); }
-.ud-hw-pill.on { background: #1AA864; }
+.ud-hw-pill { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 700; padding: 5px 13px; border-radius: 99px; background: #EF4444; color: #fff; box-shadow: 0 6px 14px -8px rgba(239, 68, 68, 0.8); }
+.ud-hw-pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #fff; opacity: .9; }
+.ud-hw-pill.on { background: #10B981; box-shadow: 0 6px 14px -8px rgba(16, 185, 129, 0.8); }
 .ud-hw-btn { background: rgba(255, 255, 255, 0.14); color: #fff; border: 1px solid rgba(255, 255, 255, 0.35); border-radius: 10px; padding: 9px 14px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
 .ud-hw-btn:hover { background: rgba(255, 255, 255, 0.24); }
 .ud-hw-btn.danger { background: #fff; color: #B42323; border-color: #fff; }

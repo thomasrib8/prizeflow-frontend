@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
+import '../pages/admin-premium.css';
 
 // "Nom de l'événement" with autocomplete over the shared catalogue (plus the account's own proposals). Choosing a suggestion pre-fills the
 // place, which stays editable; free typing is never blocked. The place is saved with the campaign (copied: the catalogue can change later).
@@ -64,20 +65,21 @@ export default function EventNameField({ value, onChange, place, onPlace }) {
           </div>
         )}
       </div>
-      <button type="button" className="link-button" style={{ fontSize: 12, marginBottom: 8 }} onClick={() => setShowPlace((v) => !v)}>
+      <button type="button" className="ap-toggle" aria-expanded={showPlace} onClick={() => setShowPlace((v) => !v)}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21s-7-6.2-7-11.2a7 7 0 0114 0C19 14.8 12 21 12 21z" /><circle cx="12" cy="10" r="2.5" /></svg>
         {showPlace ? t('eventField.hidePlace') : t('eventField.showPlace')}
       </button>
       {showPlace && (
-        <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 10, padding: 12, marginBottom: 12 }}>
-          {unconfirmed && <div style={{ fontSize: 12, color: '#B45309', marginBottom: 8 }}>{t('eventField.toConfirm')}</div>}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 10 }}>
-            <label style={{ fontSize: 12, color: '#64748B' }}>{t('eventField.venue')}<input value={place.venue} onChange={(e) => set('venue', e.target.value)} style={{ display: 'block', width: '100%' }} /></label>
-            <label style={{ fontSize: 12, color: '#64748B' }}>{t('eventField.address')}<input value={place.address} onChange={(e) => set('address', e.target.value)} style={{ display: 'block', width: '100%' }} /></label>
-            <label style={{ fontSize: 12, color: '#64748B' }}>{t('eventField.postalCode')}<input value={place.postalCode} onChange={(e) => set('postalCode', e.target.value)} style={{ display: 'block', width: '100%' }} /></label>
-            <label style={{ fontSize: 12, color: '#64748B' }}>{t('eventField.city')}<input value={place.city} onChange={(e) => set('city', e.target.value)} style={{ display: 'block', width: '100%' }} /></label>
-            <label style={{ fontSize: 12, color: '#64748B' }}>{t('eventField.country')}<input value={place.country} onChange={(e) => set('country', e.target.value)} style={{ display: 'block', width: '100%' }} /></label>
+        <div className="ap ap-place">
+          {unconfirmed && <div className="ap-warn" style={{ margin: '0 0 12px' }}>{t('eventField.toConfirm')}</div>}
+          <div className="ap-place-grid">
+            <label className="w3">{t('eventField.venue')}<input value={place.venue} onChange={(e) => set('venue', e.target.value)} placeholder="Lille Grand Palais" /></label>
+            <label className="w3">{t('eventField.address')}<input value={place.address} onChange={(e) => set('address', e.target.value)} placeholder="1 boulevard des Cités Unies" /></label>
+            <label className="w2">{t('eventField.postalCode')}<input value={place.postalCode} onChange={(e) => set('postalCode', e.target.value)} placeholder="59777" /></label>
+            <label className="w2">{t('eventField.city')}<input value={place.city} onChange={(e) => set('city', e.target.value)} placeholder="Lille" /></label>
+            <label className="w2">{t('eventField.country')}<input value={place.country} onChange={(e) => set('country', e.target.value)} /></label>
           </div>
-          <div style={{ fontSize: 12, color: '#94A3B8', marginTop: 8 }}>{t('eventField.help')}</div>
+          <p className="ap-hint" style={{ margin: '12px 0 0' }}>{t('eventField.help')}</p>
         </div>
       )}
     </div>

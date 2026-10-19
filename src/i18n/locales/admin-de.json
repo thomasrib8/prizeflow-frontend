@@ -2195,7 +2195,17 @@
     "mergePh": "Beizubehaltenden Eintrag suchen…",
     "merge": "Zusammenführen",
     "confirmMerge": "„{{from}}“ mit „{{into}}“ zusammenführen? „{{from}}“ wird ein weiterer Name von „{{into}}“.",
-    "historyTitle": "Verlauf"
+    "historyTitle": "Verlauf",
+    "geoPending": "{{n}} Veranstaltung(en) warten auf Koordinaten: die Suche läuft selbstständig im Hintergrund (genaue Adresse, dann Name des Ortes).",
+    "geoNow": "Jetzt starten",
+    "placeSearch": "Ort oder Adresse suchen",
+    "placeSearchHelp": "Geben Sie den Namen des Ortes („Lille Grand Palais“) oder eine Adresse ein; wählen Sie das richtige Ergebnis, um die Koordinaten festzulegen.",
+    "placeSearchPh": "z. B. Lille Grand Palais",
+    "searchBtn": "Suchen",
+    "noResult": "Kein Ergebnis: versuchen Sie Ortsname und Stadt.",
+    "srcAddress": "Adresse",
+    "srcPlace": "Ort",
+    "geoFailed": "{{n}} Veranstaltung(en) ohne verlässliche Koordinaten: Suche erneut starten (genaue Adresse, dann Ortsname) oder von Hand wählen."
   },
   "live": {
     "title": "Locations Live",

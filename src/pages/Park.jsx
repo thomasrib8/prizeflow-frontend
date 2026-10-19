@@ -8,7 +8,7 @@ import ReturnForm from '../components/wheel/ReturnForm';
 import InspectionList from '../components/wheel/InspectionList';
 import WheelLabel from '../components/wheel/WheelLabel';
 import PackWizard from '../components/PackWizard';
-import ProfitabilityPanel from '../components/ProfitabilityPanel';
+import ProfitabilityPanel, { WheelCostForm } from '../components/ProfitabilityPanel';
 import './admin-premium.css';
 
 const STATUS_TONE = { available: 'blue', rented: 'green', maintenance: 'orange' };
@@ -190,6 +190,7 @@ function WheelDetailModal({ wheelId, wheels, onClose, onChanged, onPrepare }) {
             <div className="tabs" style={{ marginBottom: 4 }}>
               <button type="button" className={`tab${tab === 'details' ? ' active' : ''}`} onClick={() => setTab('details')}>{t('wheelOps.tabDetails')}</button>
               <button type="button" className={`tab${tab === 'history' ? ' active' : ''}`} onClick={() => setTab('history')}>{t('wheelOps.tabHistory')}</button>
+              <button type="button" className={`tab${tab === 'profit' ? ' active' : ''}`} onClick={() => setTab('profit')}>{t('profit.tabProfit')}</button>
             </div>
 
             {tab === 'details' && (
@@ -257,6 +258,7 @@ function WheelDetailModal({ wheelId, wheels, onClose, onChanged, onPrepare }) {
             )}
 
             {tab === 'history' && <WheelHistory wheel={w} navigate={navigate} />}
+            {tab === 'profit' && <WheelCostForm wheelId={w.id} onChanged={onChanged} />}
           </>
         )}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 18 }}>
