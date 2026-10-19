@@ -182,7 +182,9 @@
 .ap-sim-chips { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
 .ap-sim-chips button { border: 1px solid var(--ap-ctl); background: #fff; color: var(--ap-navy); border-radius: 999px; padding: 4px 12px; font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; }
 .ap-sim-chips button.on, .ap-sim-chips button:hover { background: var(--ap-blue); color: #fff; border-color: var(--ap-blue); }
-.ap-sim-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 14px; }
+.ap-sim-cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 1000px) { .ap-sim-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .ap-sim-cols { grid-template-columns: 1fr; } }
 .ap-sim-group { background: #fff; border: 1px solid var(--ap-line); border-top: 3px solid var(--c); border-radius: 16px; padding: 14px 18px 16px; box-shadow: var(--ap-shadow); display: flex; flex-direction: column; gap: 12px; }
 .ap-sim-gh { display: flex; align-items: center; gap: 10px; color: var(--ap-navy); }
 .ap-sim-dot { width: 26px; height: 26px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; background: var(--c); color: #fff; font-size: 13px; }
@@ -198,3 +200,11 @@
 .ap-sim-swatch { width: 10px; height: 34px; border-radius: 5px; flex: none; }
 .ap-sim-cost { font-size: 16px; color: var(--ap-navy); }
 @media (max-width: 760px) { .ap-sim-hero { grid-template-columns: 1fr 1fr; } .ap-sim-big { grid-column: 1 / -1; } }
+
+.ap-sim-spins input[type=range] { -webkit-appearance: none; appearance: none; height: 10px; margin: 10px 0 2px; border-radius: 6px; outline: none; cursor: pointer; background: linear-gradient(90deg, var(--c) var(--p), #E3EAF8 var(--p)); }
+.ap-sim-spins input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; border-radius: 50%; background: #fff; border: 3px solid var(--c); box-shadow: 0 3px 8px rgba(0, 40, 129, .3); }
+.ap-sim-spins input[type=range]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: #fff; border: 3px solid var(--c); }
+.ap-sim-num { width: 120px; text-align: right; font: inherit; font-size: 16px; font-weight: 800; color: var(--ap-navy); border: 1px solid var(--ap-ctl); border-radius: 10px; padding: 5px 10px; }
+.ap-sim-num:focus { outline: none; border-color: var(--ap-blue); box-shadow: 0 0 0 3px rgba(0, 85, 248, .12); }
+.ap .grid-stats.ap-kpi-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 900px) { .ap .grid-stats.ap-kpi-3 { grid-template-columns: 1fr; } }

@@ -14,7 +14,7 @@ const RELIABILITY_TONE = { real: 'green', computed: 'blue', estimated: 'orange',
 
 const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
-const eur = (c, d = 0) => (c === null || c === undefined ? '—' : (c / 100).toLocaleString(undefined, { style: 'currency', currency: 'EUR', maximumFractionDigits: d, minimumFractionDigits: d }));
+const eur = (c, d = 2) => (c === null || c === undefined ? '—' : (c / 100).toLocaleString(undefined, { style: 'currency', currency: 'EUR', maximumFractionDigits: d, minimumFractionDigits: d }));
 const num = (v, suffix = '') => (v === null || v === undefined ? '—' : `${Number(v).toLocaleString(undefined, { maximumFractionDigits: 1 })}${suffix}`);
 
 // period + explicit comparison for each preset (the month-to-date one compares with the same number of days of the previous month)
@@ -172,23 +172,20 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          <div className="grid-stats" style={{ marginTop: 12 }}>
+          <div className="grid-stats ap-kpi-3" style={{ marginTop: 12 }}>
             <Kpi id="recognized" label={t('adminDash.kpi.recognized')} value={eur(c.recognized)} cur={c.recognized} prev={p && p.recognized} reliability={rel.recognized} />
-            <Kpi id="forecast" label={t('adminDash.kpi.forecast')} value={eur(data.forecastCents)} sub={t('adminDash.kpi.forecastSub')} reliability={rel.forecast} />
             <Kpi id="mrr" label={t('adminDash.kpi.mrr')} value={eur(data.mrrCents)} cur={data.mrrCents} prev={data.mrrPreviousCents} reliability={rel.mrr} />
             <Kpi id="contribution" label={t('adminDash.kpi.contribution')} value={eur(c.contribution)} cur={c.contribution} prev={p && p.contribution}
               sub={`${t('adminDash.kpi.apiCosts')} ${eur(c.apiCents)}${c.apiMissing ? ` · ${t('adminDash.kpi.apiMissing', { n: c.apiMissing })}` : ''}`} reliability={rel.contribution} />
           </div>
-          <div className="grid-stats" style={{ marginTop: 12 }}>
+          <div className="grid-stats ap-kpi-3" style={{ marginTop: 12 }}>
             <Kpi id="rentals" label={t('adminDash.kpi.rentals')} value={num(c.rentals)} cur={c.rentals} prev={p && p.rentals} reliability="real" />
-            <Kpi id="active" label={t('adminDash.kpi.activeUpcoming')} value={`${c.activeRentals} / ${c.upcomingRentals}`} sub={t('adminDash.kpi.now')} reliability="real" />
             <Kpi id="utilization" label={t('adminDash.kpi.utilization')} value={num(c.park.utilization, ' %')} cur={c.park.utilization} prev={p && p.park.utilization}
               sub={`${t('adminDash.kpi.realUse')} ${num(c.park.realUtilization, ' %')}`} reliability={rel.utilization} />
             <Kpi id="clients" label={t('adminDash.kpi.clients')} value={`${c.clientsActive} / ${c.resellers}`} sub={`+${c.newClients} ${t('adminDash.kpi.newClients')} · ${c.underResellers} ${t('adminDash.kpi.underResellers')}`} reliability="computed" />
           </div>
-          <div className="grid-stats" style={{ marginTop: 12 }}>
+          <div className="grid-stats ap-kpi-3" style={{ marginTop: 12 }}>
             <Kpi id="avgShort" label={t('adminDash.kpi.avgShort')} value={eur(c.avgPerShortRental)} reliability="computed" />
-            <Kpi id="activations" label={t('adminDash.kpi.activations')} value={num(c.activationsCount)} sub={eur(c.activationsCents)} cur={c.activationsCount} prev={p && p.activationsCount} reliability="real" />
             <Kpi id="apiRatio" label={t('adminDash.kpi.apiRatio')} value={num(c.apiRatio, ' %')} sub={`${t('adminDash.kpi.apiPerRental')} ${eur(c.apiPerRental, 2)}`} reliability={rel.api} />
             <Kpi id="coverage" label={t('adminDash.kpi.coverage')} value={`${data.parkProfit.coveredWheels} / ${data.parkProfit.wheelsWithCost}`} sub={data.parkProfit.withoutCost ? t('adminDash.kpi.noLotCost', { n: data.parkProfit.withoutCost }) : `${t('adminDash.kpi.initialCost')} ${eur(data.parkProfit.initialCostCents)}`} reliability={data.parkProfit.withoutCost ? 'incomplete' : 'computed'} />
           </div>

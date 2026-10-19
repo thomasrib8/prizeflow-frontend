@@ -6,7 +6,6 @@ import { api } from '../api/client';
 const NAMES = { anthropic: 'Claude', resend: 'Resend', hunter: 'Hunter', bouncer: 'Bouncer' };
 const COLORS = { bouncer: '#0055F8', hunter: '#7C3AED', resend: '#059669', ai: '#F59E0B', notes: '#EC4899' };
 const money = (v, d = 2) => (v === null || v === undefined ? '—' : v.toLocaleString(undefined, { style: 'currency', currency: 'EUR', minimumFractionDigits: d, maximumFractionDigits: v !== 0 && Math.abs(v) < 0.01 ? 4 : d }));
-const SPIN_STOPS = [100, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000, 250000, 500000, 1000000];
 // Same arithmetic as the server's services/apiUsage/simulator.js, done here so the price follows the slider instantly.
 function compute(opt, spins, f, plans) {
   const pick = (p) => { const list = (opt.providers && opt.providers[p]) || []; return list.find((x) => x.id === plans[p]) || list.find((x) => x.current) || list[0] || null; };
@@ -56,10 +55,9 @@ function Group({ icon, title, color, children }) {
 export default function ApiSimulator() {
   const { t } = useTranslation('admin');
   const [opt, setOpt] = useState(null);
-  const [spinIdx, setSpinIdx] = useState(2);
+  const [spins, setSpins] = useState(1000);
   const [f, setF] = useState({ bouncerPct: 100, hunterPct: 20, emailsPerSpin: 1, aiCallsPerSpin: 1, aiInTokens: 1500, aiOutTokens: 300, notePct: 30, noteInTokens: 1500, noteOutTokens: 400 });
   const [plans, setPlans] = useState({});
-  const spins = SPIN_STOPS[spinIdx];
   const set = (k) => (v) => setF((p) => ({ ...p, [k]: v }));
   useEffect(() => { api.getApiSimulatorOptions().then(setOpt).catch(() => setOpt({ providers: {}, tokens: {} })); }, []);
   const res = opt && opt.providers ? compute(opt, spins, f, plans) : null;
@@ -84,8 +82,14 @@ export default function ApiSimulator() {
       </div>
 
       <div className="ap-sim-spins">
-        <Slider label={t('apiUsage.sim.spins')} value={spinIdx} min={0} max={SPIN_STOPS.length - 1} onChange={setSpinIdx} format={() => spins.toLocaleString()} color="#002881" />
-        <div className="ap-sim-chips">{[1000, 5000, 25000, 100000].map((n) => <button key={n} type="button" className={spins === n ? 'on' : ''} onClick={() => setSpinIdx(SPIN_STOPS.indexOf(n))}>{n.toLocaleString()}</button>)}</div>
+        <div className="ap-sl-top">
+          <span>{t('apiUsage.sim.spins')}</span>
+          <input type="number" className="ap-sim-num" min={1} max={100000} value={spins} aria-label={t('apiUsage.sim.spins')}
+            onChange={(e) => setSpins(Math.max(1, Math.min(100000, Math.round(Number(e.target.value) || 1))))} />
+        </div>
+        <input type="range" className="ap-sim-range" min={1} max={100000} step={1} value={spins} aria-label={t('apiUsage.sim.spins')}
+          onChange={(e) => setSpins(Number(e.target.value))} style={{ '--p': `${((spins - 1) / 99999) * 100}%`, '--c': '#002881', width: '100%' }} />
+        <div className="ap-sim-chips">{[100, 1000, 5000, 25000, 100000].map((n) => <button key={n} type="button" className={spins === n ? 'on' : ''} onClick={() => setSpins(n)}>{n.toLocaleString()}</button>)}</div>
       </div>
 
       <div className="ap-sim-cols">
