@@ -1,10 +1,11 @@
 /* Rewards page: code entry hero + history as cards (same family as the CRM list). */
-.rw-hero { background: linear-gradient(135deg, #0055F8, #002881); border-radius: 20px; padding: 22px; margin-bottom: 16px; box-shadow: 0 18px 40px -18px rgba(0, 40, 129, .7); }
+/* light card: white, thin blue outline */
+.rw-hero { background: #fff; border: 1.5px solid #BFD4FF; border-radius: 16px; padding: 14px 16px; margin-bottom: 16px; box-shadow: var(--ap-shadow); }
 .rw-form { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-.rw-code { flex: 1 1 220px; min-width: 0; padding: 16px 20px; border: 2px solid transparent; border-radius: 14px; font-family: var(--font-mono, monospace); font-size: 24px; font-weight: 700; letter-spacing: .28em; text-transform: uppercase; color: #002881; background: #fff; }
+.rw-code { flex: 1 1 220px; min-width: 0; padding: 12px 16px; border: 1.5px solid var(--ap-ctl); border-radius: 12px; font-family: var(--font-mono, monospace); font-size: 20px; font-weight: 700; letter-spacing: .24em; text-transform: uppercase; color: #002881; background: #F8FAFF; }
 .rw-code::placeholder { color: #B6C2DD; font-weight: 500; }
-.rw-code:focus { outline: none; border-color: #09B2FD; box-shadow: 0 0 0 4px rgba(9, 178, 253, .3); }
-.rw-hero .btn { min-height: 56px; padding: 0 26px; font-size: 14px; }
+.rw-code:focus { outline: none; border-color: #0055F8; background: #fff; box-shadow: 0 0 0 3px rgba(0, 85, 248, .12); }
+.rw-hero .btn { min-height: 48px; padding: 0 22px; }
 .rw-list .crm-head, .rw-list .crm-row { grid-template-columns: minmax(0, 1.6fr) minmax(0, 2fr) 120px 130px; }
 .rw-list .crm-row { grid-template-areas: "who gift st date"; }
 .rw-st { grid-area: st; }
