@@ -4,6 +4,7 @@
 // empty object and says so in the console, so a new tutorial shows quickly what it still needs.
 import { DEMO_PARAMS, DEMO_USER } from './demo';
 import { T } from './fixtures';
+import { ADMIN_DEMO_ROUTES } from './adminDemo';
 import { makeCampaignsForTutorial, makeSlots, makeCampaigns, GIFTS, STOCKS, TEMPLATE_NAME, SEGMENT_CATEGORIES, FIELDS, PLAYERS, QUEUE, COMPANY } from './fixtures';
 
 const CAMPAIGN_NAME = makeCampaigns()[0].name;
@@ -12,7 +13,7 @@ const CLIENTS = [
   { id: 'usr_c2', name: 'Marc Vidal', email: 'marc@salon-auto-lyon.fr', company: 'Salon Auto Lyon', role: 'operator', status: 'approved', created_at: '2026-09-20 14:00:00' },
   { id: 'usr_c3', name: 'Sonia Haddad', email: 'sonia@bio-expo.fr', company: 'Bio Expo', role: 'operator', status: 'approved', created_at: '2026-10-08 09:30:00' },
 ];
-const store = { packs: {}, inspections: [], campaigns: makeCampaignsForTutorial(DEMO_PARAMS.tuto), settings: { language: DEMO_PARAMS.lang }, wheels: [
+const store = { terms: { usr_c2: { id: 1, user_id: 'usr_c2', type: 'long', rent_cents: 90000, event_price_cents: null, activation_cents: null, parent_reseller_id: null, valid_from: '2026-09-10' } }, packs: {}, inspections: [], campaigns: makeCampaignsForTutorial(DEMO_PARAMS.tuto), settings: { language: DEMO_PARAMS.lang }, wheels: [
     { id: 'whl_1', packReady: true, serialNumber: 'PF260000152', modelNumber: 'PF-ALPHA-V1', securityKey: 'K8Q7F3', status: 'rented', ownerId: 'usr_c1', notes: '', assignedAt: '2026-10-10 09:00:00', lastSeenAt: '2026-10-14 17:42:00', history: [{ id: 1, owner_id: 'usr_c1', assigned_at: '2026-10-10 09:00:00', released_at: null }] },
     { id: 'whl_2', packReady: true, serialNumber: 'PF260000153', modelNumber: 'PF-ALPHA-V1', securityKey: 'X9M2P8', status: 'available', ownerId: null, notes: '', assignedAt: null, lastSeenAt: '2026-10-02 18:20:00', history: [{ id: 2, owner_id: 'usr_c2', assigned_at: '2026-09-25 09:00:00', released_at: '2026-10-02 18:30:00' }] },
     { id: 'whl_3', serialNumber: 'PF260000154', modelNumber: 'PF-ALPHA-V1', securityKey: 'Q4T7NB', status: 'maintenance', ownerId: null, notes: '', assignedAt: null, lastSeenAt: null, history: [] },
@@ -255,6 +256,8 @@ const ROUTES = [
   ['POST', /^\/box-activation\/prepare$/, (m, body) => { store.flags.box = 'pending'; const w = store.wheels.find((x) => x.ownerId === body.userId); return { code: 'K7QM2-X9TRB', boxName: `spark-box-${(w ? w.serialNumber : 'PF260000152').slice(-6)}`, expiresAt: '2026-10-16 10:00:00', fallbackLine: '' }; }],
   ['GET', /^\/box-activation\/([^/]+)$/, (m) => { const w = store.wheels.find((x) => x.ownerId === m[1]); const st = store.flags.box; const name = `spark-box-${(w ? w.serialNumber : 'PF260000152').slice(-6)}`; return { state: st === 'none' ? 'none' : st === 'pending' ? 'pending' : st === 'delivered' ? 'delivered' : 'activated', boxName: name, expiresAt: '2026-10-16 10:00:00', createdAt: '2026-10-15 10:00:00', deliveredAt: null, activatedAt: st === 'activated' ? '2026-10-15 10:20:00' : null, fallbackLine: null, hasSerial: !!w, wifiSet: !!store.flags.wifiPassword, box: { seen: st === 'activated', lastPollAt: null, ageSeconds: 2, inSync: st === 'activated' } }; }],
 ];
+
+ROUTES.push(...ADMIN_DEMO_ROUTES(store));
 
 export async function demoRequest(rawPath, { method = 'GET', body } = {}) {
   const path = rawPath.split('?')[0];

@@ -11,6 +11,7 @@ import { CASE_COUNT, isGiftReady } from '../components/giftPlanning';
 import SegmentationBuilder from '../components/SegmentationBuilder';
 import CampaignFieldsBuilder from '../components/CampaignFieldsBuilder';
 import { SALES_FIELD_TYPES, GUEST_FIELD_TYPES } from '../components/fieldTypes';
+import EventNameField, { EMPTY_PLACE, placePayload } from '../components/EventNameField';
 import CampaignSettingsForm, { DEFAULT_CAMPAIGN_SETTINGS, settingsFromCampaign } from '../components/CampaignSettingsForm';
 
 // The 12 gifts are defined first and only afterwards dragged onto a case of
@@ -51,6 +52,7 @@ export default function NewCampaign() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [eventName, setEventName] = useState('');
+  const [eventPlace, setEventPlace] = useState(EMPTY_PLACE);
   const [language, setLanguage] = useState('en');
   const [gifts, setGifts] = useState(EMPTY_GIFTS);
   const [error, setError] = useState('');
@@ -205,7 +207,7 @@ export default function NewCampaign() {
     const active = gifts.filter((g) => g.caseIndex !== null);
     try {
       const created = await api.createCampaign({
-        name, description, eventName, language, isTest,
+        name, description, eventName, eventPlace: placePayload(eventPlace), language, isTest,
         ...settings, googleReviewUrl: settings.googleReviewUrl.trim(),
         slots: active.map(g => ({
           slotIndex: g.caseIndex,
@@ -263,10 +265,7 @@ export default function NewCampaign() {
                 <label>{t('newCampaign.descriptionLabel')}</label>
                 <textarea value={description} onChange={e => setDescription(e.target.value)} rows={2} placeholder={t('newCampaign.descriptionPlaceholder')} />
               </div>
-              <div className="field">
-                <label>{t('newCampaign.eventNameLabel')}</label>
-                <input value={eventName} onChange={e => setEventName(e.target.value)} placeholder={t('newCampaign.eventNamePlaceholder')} />
-              </div>
+              <EventNameField value={eventName} onChange={setEventName} place={eventPlace} onPlace={setEventPlace} />
               <div className="field">
                 <label>{t('newCampaign.guestLanguageLabel')}</label>
                 <select value={language} onChange={e => setLanguage(e.target.value)} style={{ width: '100%', padding: '10px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 14, fontFamily: 'inherit' }}>

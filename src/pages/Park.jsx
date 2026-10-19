@@ -8,6 +8,7 @@ import ReturnForm from '../components/wheel/ReturnForm';
 import InspectionList from '../components/wheel/InspectionList';
 import WheelLabel from '../components/wheel/WheelLabel';
 import PackWizard from '../components/PackWizard';
+import ProfitabilityPanel from '../components/ProfitabilityPanel';
 
 const STATUS_TONE = { available: 'blue', rented: 'green', maintenance: 'orange' };
 const STATUS_TKEY = { available: 'statusAvailable', rented: 'statusRented', maintenance: 'statusMaintenance' };
@@ -287,11 +288,16 @@ export default function Park() {
   const [error, setError] = useState('');
   const [wizard, setWizard] = useState(null); // null | { wheelId: string | null }
   const [openId, setOpenId] = useState(null);
+  const [tab, setTab] = useState('park'); // 'park' | 'profit'
+  const [profit, setProfit] = useState({}); // wheelId -> { costCents, coveragePct }
   const [labelOf, setLabelOf] = useState(null);
   const [guideBusy, setGuideBusy] = useState(false);
   async function downloadGuide() { setGuideBusy(true); setError(''); try { await api.downloadCommissioningGuide(); } catch (e) { setError(e.message); } finally { setGuideBusy(false); } }
 
-  function load() { api.listWheels().then(setWheels).catch((e) => setError(e.message)); }
+  function load() {
+    api.listWheels().then(setWheels).catch((e) => setError(e.message));
+    api.getParkProfitability().then((p) => setProfit(Object.fromEntries(p.wheels.map((w) => [w.wheelId, w])))).catch(() => {});
+  }
   useEffect(() => {
     load();
     const timer = setInterval(load, 15000); // connection / box state stays fresh
@@ -313,9 +319,14 @@ export default function Park() {
         </div>
       </div>
       {error && <div className="error-banner">{error}</div>}
+      <div className="tabs">
+        <button className={`tab${tab === 'park' ? ' active' : ''}`} onClick={() => setTab('park')}>{t('profit.tabPark')}</button>
+        <button className={`tab${tab === 'profit' ? ' active' : ''}`} onClick={() => setTab('profit')}>{t('profit.tabProfit')}</button>
+      </div>
+      {tab === 'profit' && <ProfitabilityPanel />}
       {!wheels && !error && <p className="page-subtitle">{t('common.loading')}</p>}
 
-      {wheels && (
+      {tab === 'park' && wheels && (
         <div className="grid-stats">
           <Stat label={t('park.statTotal')} value={wheels.length} />
           <Stat label={t('park.statAvailable')} value={count('available')} accent="blue" />
@@ -324,7 +335,7 @@ export default function Park() {
         </div>
       )}
 
-      {wheels && (
+      {tab === 'park' && wheels && (
         <Card className="mt-card">
           {wheels.length === 0 ? (
             <EmptyState title={t('park.empty')} description={t('park.emptyDesc')} action={<Button onClick={() => setWizard({ wheelId: null })}>{t('park.addBtn')}</Button>} />
@@ -333,7 +344,7 @@ export default function Park() {
               <thead>
                 <tr>
                   <th>{t('park.colSerial')}</th><th>{t('park.colModel')}</th><th>{t('park.colStatus')}</th>
-                  <th>{t('park.colClient')}</th><th>{t('park.colConnection')}</th><th>{t('park.colBox')}</th><th>{t('wheelOps.labelColumn')}</th>
+                  <th>{t('park.colClient')}</th><th>{t('park.colConnection')}</th><th>{t('park.colBox')}</th><th>{t('profit.colCost')}</th><th>{t('profit.colCoverage')}</th><th>{t('wheelOps.labelColumn')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -357,6 +368,8 @@ export default function Park() {
                       </div>
                     </td>
                     <td><BoxCell wheel={w} /></td>
+                    <td>{profit[w.id] ? (profit[w.id].costCents === null ? <Badge tone="orange">{t('profit.toFill')}</Badge> : (profit[w.id].costCents / 100).toLocaleString(undefined, { style: 'currency', currency: 'EUR' })) : '—'}</td>
+                    <td>{profit[w.id] && profit[w.id].coveragePct !== null ? `${profit[w.id].coveragePct.toLocaleString(undefined, { maximumFractionDigits: 1 })} %` : '—'}</td>
                     <td onClick={(e) => e.stopPropagation()}><Button size="sm" variant="secondary" onClick={() => setLabelOf(w)}>{t('wheelOps.labelShowBtn')}</Button></td>
                   </tr>
                 ))}

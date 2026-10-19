@@ -19,12 +19,14 @@ export default function Users() {
   const navigate = useNavigate();
   const [users, setUsers] = useState(null);
   const [wheels, setWheels] = useState(null);
+  const [types, setTypes] = useState({});
   const [error, setError] = useState('');
   const [busyId, setBusyId] = useState(null);
 
   function load() {
     api.listUsers().then(setUsers).catch((e) => setError(e.message));
     api.getWheelIdentities().then(setWheels).catch((e) => setError(e.message));
+    api.getCommercialTypes().then(setTypes).catch(() => {});
   }
 
   useEffect(load, []);
@@ -97,7 +99,7 @@ export default function Users() {
         <Card title={t('users.allAccountsTitle')} className="mt-card">
           {others.length === 0 ? <EmptyState title={t('users.noAccountsYet')} /> : (
             <table className="data-table">
-              <thead><tr><th>{t('history.tableName')}</th><th>{t('history.tableEmail')}</th><th>{t('users.tableRole')}</th><th>{t('history.tableStatus')}</th><th></th></tr></thead>
+              <thead><tr><th>{t('history.tableName')}</th><th>{t('history.tableEmail')}</th><th>{t('users.tableRole')}</th><th>{t('contract.colType')}</th><th>{t('contract.colReseller')}</th><th>{t('history.tableStatus')}</th><th></th></tr></thead>
               <tbody>
                 {others.map((u) => {
                   const isSelf = u.id === me?.id;
@@ -119,6 +121,8 @@ export default function Users() {
                           <option value="admin">{t('users.roleAdmin')}</option>
                         </select>
                       </td>
+                      <td>{types[u.id] ? t(`contract.types.${types[u.id].type}`) : <span style={{ color: '#94A3B8' }}>—</span>}</td>
+                      <td>{types[u.id] && types[u.id].parentResellerName ? types[u.id].parentResellerName : <span style={{ color: '#94A3B8' }}>—</span>}</td>
                       <td><Badge tone={STATUS_TONE[u.status]}>{t(`users.${STATUS_TKEY[u.status]}`)}</Badge></td>
                       <td>
                         {!isSelf && (

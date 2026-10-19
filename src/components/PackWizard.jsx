@@ -43,6 +43,8 @@ export default function PackWizard({ wheelId: initialWheelId = null, onClose, on
   const [newMode, setNewMode] = useState('gen');
   const [series, setSeries] = useState('1');
   const [typed, setTyped] = useState({ model: 'PF-ALPHA-V1', serial: '', key: '' });
+  const [lotCost, setLotCost] = useState(''); // cost of the lot (wheel + box + TP-Link), euros excl. VAT
+  const [acquiredOn, setAcquiredOn] = useState('');
   // step 2 — Spark-Local
   const [pw, setPw] = useState('');
   const [pw2, setPw2] = useState('');
@@ -119,7 +121,8 @@ export default function PackWizard({ wheelId: initialWheelId = null, onClose, on
       if (!wheelId) {
         setBusy(true);
         try {
-          const w = await api.createWheel(newMode === 'gen' ? { series } : { modelNumber: typed.model, serialNumber: typed.serial, securityKey: typed.key });
+          const extra = { acquisitionCostCents: lotCost === '' ? undefined : Math.round(Number(lotCost) * 100), acquiredOn: acquiredOn || undefined };
+          const w = await api.createWheel({ ...(newMode === 'gen' ? { series } : { modelNumber: typed.model, serialNumber: typed.serial, securityKey: typed.key }), ...extra });
           const fullWheel = await api.getWheel(w.id);
           setWheelId(w.id); setWheel(fullWheel);
           const s = suggestPassword(); setPw(s); setPw2(s);
@@ -229,6 +232,12 @@ export default function PackWizard({ wheelId: initialWheelId = null, onClose, on
                     <input className="sw-input sw-mono" value={typed.key} placeholder="K8Q7F3" onChange={(e) => setTyped({ ...typed, key: e.target.value })} />
                   </>
                 )}
+                <div className="sw-label" style={{ marginTop: 16 }}>{t('profit.lotCostEur')}</div>
+                <div className="sw-sub" style={{ marginBottom: 6 }}>{t('profit.wizardHelp')}</div>
+                <div className="sw-two">
+                  <input className="sw-input" type="number" min="0" step="0.01" value={lotCost} placeholder={t('profit.lotPh')} onChange={(e) => setLotCost(e.target.value)} />
+                  <input className="sw-input" type="date" value={acquiredOn} title={t('profit.acquiredOn')} onChange={(e) => setAcquiredOn(e.target.value)} />
+                </div>
               </>
             )
           )}

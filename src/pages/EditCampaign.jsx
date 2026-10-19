@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
+import EventNameField, { EMPTY_PLACE, placeFromCampaign, placePayload } from '../components/EventNameField';
 import { Card, Button } from '../components/ui';
 
 // The language guests see throughout the play flow — see NewCampaign.jsx's
@@ -25,6 +26,7 @@ export default function EditCampaign() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [eventName, setEventName] = useState('');
+  const [eventPlace, setEventPlace] = useState(EMPTY_PLACE);
   const [language, setLanguage] = useState('en');
   const [slots, setSlots] = useState([]);
   const [error, setError] = useState('');
@@ -35,6 +37,7 @@ export default function EditCampaign() {
       setName(source.name || '');
       setDescription(source.description || '');
       setEventName(source.event_name || '');
+      setEventPlace(placeFromCampaign(source));
       setLanguage(source.language || 'en');
       if (source.status === 'archived') {
         setError(t('editCampaign.archivedReadOnlyError'));
@@ -72,7 +75,7 @@ export default function EditCampaign() {
     }
     setSaving(true);
     try {
-      await api.updateCampaignDetails(id, { name, description, eventName, language });
+      await api.updateCampaignDetails(id, { name, description, eventName, eventPlace: placePayload(eventPlace), language });
       await api.updateCampaignSlots(id, {
         slots: slots.map((s) => ({
           slotIndex: s.slotIndex,
@@ -113,10 +116,7 @@ export default function EditCampaign() {
               <label>{t('newCampaign.descriptionLabel')}</label>
               <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} />
             </div>
-            <div className="field">
-              <label>{t('newCampaign.eventNameLabel')}</label>
-              <input value={eventName} onChange={(e) => setEventName(e.target.value)} placeholder={t('newCampaign.eventNamePlaceholder')} />
-            </div>
+            <EventNameField value={eventName} onChange={setEventName} place={eventPlace} onPlace={setEventPlace} />
             <div className="field">
               <label>{t('newCampaign.guestLanguageLabel')}</label>
               <select value={language} onChange={(e) => setLanguage(e.target.value)} style={{ width: '100%', padding: '10px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 14, fontFamily: 'inherit' }}>

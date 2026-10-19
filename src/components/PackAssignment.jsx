@@ -8,9 +8,12 @@ import { Button } from './ui';
 import { useConfirm } from './ConfirmDialog';
 import { Row, Check } from './wizardParts';
 import HandoverSheet from './HandoverSheet';
+import EventNameField, { EMPTY_PLACE, placePayload } from './EventNameField';
 import './setup-wizard.css';
 
 const clientName = (w) => (w.owner ? (w.owner.company || w.owner.name || w.owner.email) : '');
+const declaredPayload = (name, place) => (name.trim() ? { name: name.trim(), ...placePayload(place) } : null);
+const euroToCents = (v) => (v === '' || v === null || v === undefined ? null : Math.round(Number(v) * 100));
 const fmtDay = (s) => (s ? new Date(`${s}T12:00:00`).toLocaleDateString([], { dateStyle: 'medium' }) : '');
 
 export default function PackAssignment({ userId, clientLabel, onChanged, onEndRental }) {
@@ -27,6 +30,11 @@ export default function PackAssignment({ userId, clientLabel, onChanged, onEndRe
   const [pick, setPick] = useState('');
   const [note, setNote] = useState('');
   const [back, setBack] = useState('');
+  const [price, setPrice] = useState(''); // own amount of this rental, in euros (optional)
+  const [plannedId, setPlannedId] = useState('');
+  const [placeName, setPlaceName] = useState(''); // place of a rental WITHOUT campaign (declared by the admin): feeds Locations Live
+  const [place, setPlace] = useState(EMPTY_PLACE);
+  const [planned, setPlanned] = useState([]);
   const [sheet, setSheet] = useState(null); // { password } once loaded
   const alive = useRef(true);
   useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
@@ -43,6 +51,7 @@ export default function PackAssignment({ userId, clientLabel, onChanged, onEndRe
 
   useEffect(() => {
     load();
+    api.listPlannedRentals().then((l) => alive.current && setPlanned(l.filter((p) => p.user_id === userId))).catch(() => {});
     api.getProfile().then((p) => alive.current && setMe(p && p.user ? p.user : p)).catch(() => {});
     const id = setInterval(load, 5000);
     return () => clearInterval(id);
@@ -50,7 +59,7 @@ export default function PackAssignment({ userId, clientLabel, onChanged, onEndRe
 
   const current = wheels ? wheels.find((w) => w.owner && w.owner.id === userId) || null : null;
   // keep the editable parameters in step with the saved ones when the pack changes
-  useEffect(() => { setNote(current && current.assignment ? current.assignment.note || '' : ''); setBack(current && current.assignment ? current.assignment.expectedReturnAt || '' : ''); }, [current && current.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { setNote(current && current.assignment ? current.assignment.note || '' : ''); setBack(current && current.assignment ? current.assignment.expectedReturnAt || '' : ''); setPrice(current && current.assignment && current.assignment.priceOverrideCents !== null && current.assignment.priceOverrideCents !== undefined ? String(current.assignment.priceOverrideCents / 100) : ''); const dp = current && current.assignment && current.assignment.declaredPlace; setPlaceName(dp ? dp.name || '' : ''); setPlace(dp ? { catalogId: dp.catalogId || null, venue: dp.venue || '', address: dp.address || '', postalCode: dp.postalCode || '', city: dp.city || '', country: dp.country || 'France', status: null } : EMPTY_PLACE); }, [current && current.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const candidates = wheels ? wheels.filter((w) => !(w.owner && w.owner.id === userId)) : [];
   const pending = (w) => !w.owner && w.boxReset && w.boxReset.state === 'pending'; // its box has not confirmed the erase of the previous client
@@ -65,7 +74,7 @@ export default function PackAssignment({ userId, clientLabel, onChanged, onEndRe
     if (current && !(await confirm(t('packAssign.confirmChange', { from: current.serialNumber }), { danger: true, confirmLabel: t('packAssign.confirmChangeBtn') }))) return;
     setBusy(true); setError(''); setMsg('');
     try {
-      await api.assignWheel(pick, userId, { note, expectedReturnAt: back });
+      await api.assignWheel(pick, userId, { note, expectedReturnAt: back, priceOverrideCents: euroToCents(price), plannedRentalId: plannedId || undefined, declaredPlace: declaredPayload(placeName, place) || undefined });
       setPick(''); setChanging(false); setMsg(t('packAssign.assignedMsg'));
       await load(); onChanged && onChanged();
     } catch (e) { setError(e.message); } finally { setBusy(false); }
@@ -73,7 +82,7 @@ export default function PackAssignment({ userId, clientLabel, onChanged, onEndRe
 
   async function saveParams() {
     setBusy(true); setError(''); setMsg('');
-    try { await api.updateWheelAssignment(current.id, { note, expectedReturnAt: back }); setMsg(t('packAssign.savedMsg')); await load(); } catch (e) { setError(e.message); } finally { setBusy(false); }
+    try { await api.updateWheelAssignment(current.id, { note, expectedReturnAt: back, priceOverrideCents: euroToCents(price), declaredPlace: declaredPayload(placeName, place) }); setMsg(t('packAssign.savedMsg')); await load(); } catch (e) { setError(e.message); } finally { setBusy(false); }
   }
 
   async function showSheet() {
@@ -84,7 +93,7 @@ export default function PackAssignment({ userId, clientLabel, onChanged, onEndRe
 
   const wheelConnected = !!(overview && overview.wheel && overview.wheel.connected);
   const hasActive = !!(overview && (overview.campaigns || []).some((c) => c.status === 'active'));
-  const dirty = current && current.assignment && (note !== (current.assignment.note || '') || back !== (current.assignment.expectedReturnAt || ''));
+  const dirty = current && current.assignment && (note !== (current.assignment.note || '') || back !== (current.assignment.expectedReturnAt || '') || euroToCents(price) !== (current.assignment.priceOverrideCents ?? null) || placeName !== ((current.assignment.declaredPlace && current.assignment.declaredPlace.name) || ''));
   const showPicker = wheels && (!current || changing);
 
   return (
@@ -139,6 +148,14 @@ export default function PackAssignment({ userId, clientLabel, onChanged, onEndRe
               <input className="sw-input" type="date" value={back} onChange={(e) => setBack(e.target.value)} />
             </div>
           </div>
+          <div style={{ marginTop: 8 }}>
+            <div className="sw-sub">{t('packAssign.priceLabel')}</div>
+            <input className="sw-input" type="number" min="0" step="0.01" value={price} placeholder={t('packAssign.pricePh')} onChange={(e) => setPrice(e.target.value)} style={{ maxWidth: 200 }} />
+          </div>
+          <div style={{ marginTop: 10 }}>
+            <div className="sw-sub">{t('packAssign.placeLabel')}</div>
+            <EventNameField value={placeName} onChange={setPlaceName} place={place} onPlace={setPlace} />
+          </div>
           <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginTop: 10, flexWrap: 'wrap' }}>
             <Button size="sm" disabled={busy || !dirty} onClick={saveParams}>{t('packAssign.saveBtn')}</Button>
             <Button size="sm" variant="secondary" onClick={showSheet}>{sheet ? t('packAssign.hideSheetBtn') : t('packAssign.sheetBtn')}</Button>
@@ -184,6 +201,23 @@ export default function PackAssignment({ userId, clientLabel, onChanged, onEndRe
               <div className="sw-sub">{t('packAssign.returnLabel')}</div>
               <input className="sw-input" type="date" value={back} onChange={(e) => setBack(e.target.value)} />
             </div>
+          </div>
+          <div style={{ marginTop: 8 }}>
+            <div className="sw-sub">{t('packAssign.priceLabel')}</div>
+            <input className="sw-input" type="number" min="0" step="0.01" value={price} placeholder={t('packAssign.pricePh')} onChange={(e) => setPrice(e.target.value)} style={{ maxWidth: 200 }} />
+          </div>
+          {planned.length > 0 && (
+            <div style={{ marginTop: 8 }}>
+              <div className="sw-sub">{t('packAssign.plannedLabel')}</div>
+              <select className="sw-input" value={plannedId} onChange={(e) => setPlannedId(e.target.value)} style={{ maxWidth: 320 }}>
+                <option value="">—</option>
+                {planned.map((pl) => <option key={pl.id} value={pl.id}>{fmtDay(pl.starts_on)}{pl.ends_on ? ` → ${fmtDay(pl.ends_on)}` : ''}</option>)}
+              </select>
+            </div>
+          )}
+          <div style={{ marginTop: 10 }}>
+            <div className="sw-sub">{t('packAssign.placeLabel')}</div>
+            <EventNameField value={placeName} onChange={setPlaceName} place={place} onPlace={setPlace} />
           </div>
           <div className="sw-foot">
             {current ? <Button variant="ghost" type="button" onClick={() => { setChanging(false); setPick(''); }}>{t('packAssign.cancelBtn')}</Button> : <span />}

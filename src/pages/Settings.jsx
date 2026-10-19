@@ -7,7 +7,9 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { Card, Button, Badge } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
+import { useAdmin } from '../hooks/useAdmin';
 import Calibration from './Calibration';
+import ApiPricingModule from '../components/ApiPricingModule';
 
 // Social platform names are proper nouns (Facebook/Instagram/LinkedIn/X) —
 // never translated. Profile field keys map to settings.information.field*.
@@ -1105,6 +1107,115 @@ function OfflineModeModule() {
   );
 }
 
+// Admin only: when the control center should warn, and the optional cap on Hunter lookups per account.
+const ALERT_ROWS = [
+  { key: 'quota_percent', unit: '%', step: 1 },
+  { key: 'budget_month_eur', unit: '€', step: 1 },
+  { key: 'spike_percent', unit: '%', step: 1 },
+  { key: 'heavy_account_eur', unit: '€', step: 1 },
+  { key: 'hunter_cap_per_account', unit: 'lookups', step: 1, block: true },
+  { key: 'ratio_api_ca_percent', unit: '%', step: 0.1 },
+  { key: 'reconcile_gap_percent', unit: '%', step: 0.1 },
+  { key: 'sync_failures', unit: 'x', step: 1 },
+];
+
+function AlertThresholdsModule() {
+  const { t } = useTranslation('admin');
+  const [saved, setSaved] = useState(null);
+  const [draft, setDraft] = useState(null);
+  const [alertsList, setAlertsList] = useState([]);
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState('');
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    api.getAdminAlertSettings().then((s) => { setSaved(s); setDraft(s); }).catch((e) => setError(e.message));
+    api.getAdminAlerts().then(setAlertsList).catch(() => {});
+  }, []);
+
+  if (!draft) return error ? <div className="error-banner">{error}</div> : null;
+
+  const set = (key, patch) => setDraft((d) => ({ ...d, [key]: { ...d[key], ...patch } }));
+  const dirty = JSON.stringify(draft) !== JSON.stringify(saved);
+
+  async function handleSave(e) {
+    e.preventDefault();
+    setSaving(true); setError(''); setMsg('');
+    try {
+      const patch = {};
+      for (const r of ALERT_ROWS) {
+        const d = draft[r.key]; const p = { enabled: d.enabled, value: d.value === null || d.value === '' ? null : Number(d.value) };
+        if (r.block) p.block = !!d.block;
+        patch[r.key] = p;
+      }
+      const next = await api.updateAdminAlertSettings(patch);
+      setSaved(next); setDraft(next); setMsg(t('common.saved'));
+      setTimeout(() => setMsg(''), 2000);
+    } catch (err) { setError(err.message); } finally { setSaving(false); }
+  }
+
+  async function markRead() {
+    await api.markAdminAlertsRead().catch(() => {});
+    setAlertsList((l) => l.map((a) => ({ ...a, readAt: a.readAt || new Date().toISOString() })));
+  }
+
+  return (
+    <>
+      {error && <div className="error-banner">{error}</div>}
+      <Card title={t('settings.alerts.title')} className="mt-card">
+        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 16px', lineHeight: 1.6 }}>{t('settings.alerts.desc')}</p>
+        <form onSubmit={handleSave}>
+          {ALERT_ROWS.map((r) => {
+            const d = draft[r.key];
+            return (
+              <div key={r.key} style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 150px', gap: 12, alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #F1F5F9' }}>
+                <label style={{ display: 'flex', gap: 10, alignItems: 'flex-start', fontSize: 13, cursor: 'pointer' }}>
+                  <input type="checkbox" checked={!!d.enabled} onChange={(e) => set(r.key, { enabled: e.target.checked })} style={{ marginTop: 3 }} />
+                  <span>
+                    <b>{t(`settings.alerts.${r.key}.label`)}</b>
+                    <span style={{ display: 'block', color: '#64748B', fontSize: 12, lineHeight: 1.5 }}>{t(`settings.alerts.${r.key}.help`)}</span>
+                    {r.block && d.enabled && (
+                      <span style={{ display: 'flex', gap: 6, alignItems: 'center', marginTop: 6, fontSize: 12, color: '#92400E' }}>
+                        <input type="checkbox" checked={!!d.block} onChange={(e) => set(r.key, { block: e.target.checked })} />
+                        {t('settings.alerts.hunterBlock')}
+                      </span>
+                    )}
+                  </span>
+                </label>
+                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                  <input type="number" min="0" step={r.step} value={d.value ?? ''} onChange={(e) => set(r.key, { value: e.target.value })} style={{ width: 90 }} />
+                  <span style={{ fontSize: 12, color: '#64748B' }}>{r.unit === 'lookups' ? t('settings.alerts.unitLookups') : r.unit === 'x' ? t('settings.alerts.unitTimes') : r.unit}</span>
+                </div>
+              </div>
+            );
+          })}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14 }}>
+            <Button type="submit" disabled={saving || !dirty}>{saving ? t('common.saving') : t('common.save')}</Button>
+            {msg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{msg}</span>}
+          </div>
+        </form>
+      </Card>
+
+      <Card title={t('settings.alerts.recentTitle')} className="mt-card">
+        {alertsList.length === 0 ? (
+          <p style={{ fontSize: 13, color: '#64748B', margin: 0 }}>{t('settings.alerts.none')}</p>
+        ) : (
+          <>
+            {alertsList.slice(0, 15).map((a) => (
+              <div key={a.id} style={{ display: 'flex', gap: 10, padding: '8px 0', borderBottom: '1px solid #F1F5F9', fontSize: 13, opacity: a.readAt ? 0.6 : 1 }}>
+                <Badge tone={a.level === 'critical' ? 'red' : 'orange'}>{a.level}</Badge>
+                <span style={{ flex: 1 }}>{a.message}</span>
+                <span style={{ color: '#94A3B8', fontSize: 12 }}>{String(a.createdAt).slice(0, 10)}</span>
+              </div>
+            ))}
+            {alertsList.some((a) => !a.readAt) && <div style={{ marginTop: 12 }}><Button variant="secondary" onClick={markRead}>{t('settings.alerts.markRead')}</Button></div>}
+          </>
+        )}
+      </Card>
+    </>
+  );
+}
+
 const MODULE_KEYS = [
   { key: 'information', tKey: 'tabInformation' },
   { key: 'google-review', tKey: 'tabGoogleReview' },
@@ -1114,11 +1225,14 @@ const MODULE_KEYS = [
   { key: 'privacy', tKey: 'tabPrivacy' },
   { key: 'offline', tKey: 'tabOffline' },
   { key: 'calibration', tKey: 'tabCalibration' },
+  { key: 'alerts', tKey: 'tabAlerts', adminOnly: true },
+  { key: 'pricing', tKey: 'tabPricing', adminOnly: true },
 ];
 
 export default function Settings() {
   const { t } = useTranslation('admin');
   const [module, setModule] = useState('information');
+  const { isAdmin } = useAdmin();
 
   return (
     <div>
@@ -1130,7 +1244,7 @@ export default function Settings() {
       </div>
 
       <div className="tabs">
-        {MODULE_KEYS.map((m) => (
+        {MODULE_KEYS.filter((m) => !m.adminOnly || isAdmin).map((m) => (
           <button key={m.key} className={`tab${module === m.key ? ' active' : ''}`} onClick={() => setModule(m.key)}>
             {t(`settings.${m.tKey}`)}
           </button>
@@ -1144,6 +1258,8 @@ export default function Settings() {
       {module === 'ai-assistant' && <AIAssistantModule />}
       {module === 'privacy' && <PrivacyModule />}
       {module === 'offline' && <OfflineModeModule />}
+      {module === 'alerts' && isAdmin && <AlertThresholdsModule />}
+      {module === 'pricing' && isAdmin && <ApiPricingModule />}
       {module === 'calibration' && <Calibration onExit={() => setModule('information')} />}
     </div>
   );

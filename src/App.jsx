@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { useAdmin } from './hooks/useAdmin';
@@ -29,6 +30,11 @@ import History from './pages/History';
 import Settings from './pages/Settings';
 import Users from './pages/Users';
 import Park from './pages/Park';
+import AdminDashboard from './pages/AdminDashboard';
+import Catalog from './pages/Catalog';
+import ApiUsage from './pages/ApiUsage';
+import MyPark from './pages/MyPark';
+const Live = lazy(() => import('./pages/Live')); // MapLibre is heavy: loaded only when the page is opened
 import WheelScan from './pages/WheelScan';
 import UserDetail from './pages/UserDetail';
 import AppHealth from './pages/AppHealth';
@@ -118,6 +124,11 @@ export default function App() {
           <Route path="/users/:id" element={<AdminRoute><UserDetail /></AdminRoute>} />
           <Route path="/wheel/:id" element={<WheelScan />} />
           <Route path="/park" element={<AdminRoute><Park /></AdminRoute>} />
+          <Route path="/my-park" element={<PrivateRoute><MyPark /></PrivateRoute>} />
+          <Route path="/api-usage" element={<AdminRoute><ApiUsage /></AdminRoute>} />
+          <Route path="/live" element={<AdminRoute><Suspense fallback={null}><Live /></Suspense></AdminRoute>} />
+          <Route path="/catalog" element={<AdminRoute><Catalog /></AdminRoute>} />
+          <Route path="/admin-dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
           <Route path="/health" element={<AdminRoute><AppHealth /></AdminRoute>} />
           <Route path="/magic" element={<AdminRoute><Magic /></AdminRoute>} />
           <Route path="/sequence" element={<AdminRoute><SequenceBuilder /></AdminRoute>} />

@@ -9,6 +9,7 @@ import { useConfirm } from '../components/ConfirmDialog';
 import PackAssignment from '../components/PackAssignment';
 import ReturnForm from '../components/wheel/ReturnForm';
 import InspectionList from '../components/wheel/InspectionList';
+import ContractTab from '../components/ContractTab';
 
 const STATUS_TONE = { pending: 'orange', approved: 'green', deactivated: 'red' };
 const STATUS_TKEY = { pending: 'userStatusPending', approved: 'userStatusApproved', deactivated: 'userStatusDeactivated' };
@@ -28,6 +29,7 @@ export default function UserDetail() {
     { key: 'profile', label: t('userDetail.tabProfile') },
     { key: 'activity', label: t('userDetail.tabActivity') },
     { key: 'linkedin', label: t('linkedin.tabLabel') },
+    { key: 'contract', label: t('contract.tab') },
     { key: 'actions', label: t('userDetail.tabActions') },
     { key: 'notes', label: t('userDetail.tabNotes') },
   ];
@@ -152,6 +154,8 @@ export default function UserDetail() {
           </button>
         ))}
       </div>
+
+      {module === 'contract' && <ContractTab userId={id} />}
 
       {module === 'profile' && (
         <>

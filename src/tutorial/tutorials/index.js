@@ -17,6 +17,9 @@ import offlineOutage from './offline-outage';
 import lifecycle from './pause-end';
 import park from './park';
 import setupWizard from './setup-wizard';
+import adminDashboard from './admin-dashboard';
+import contract from './contract';
+import apiUsage from './api-usage';
 
 // Order in the list = order here; the groups give the page its sections.
 export const TUTORIAL_GROUPS = [
@@ -25,7 +28,7 @@ export const TUTORIAL_GROUPS = [
   { id: 'contacts', items: [crm, prospectNote, enrichment] },
   { id: 'field', items: [pwaInstall, pwaApp, offlineSetup, offlineOutage] },
   { id: 'account', items: [settings] },
-  { id: 'admin', items: [park, setupWizard] },
+  { id: 'admin', items: [park, setupWizard, adminDashboard, contract, apiUsage] },
 ];
 export const TUTORIALS = TUTORIAL_GROUPS.flatMap((g) => g.items);
 

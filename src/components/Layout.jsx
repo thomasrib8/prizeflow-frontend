@@ -28,8 +28,12 @@ const NAV_ITEMS = [
 ];
 
 const ADMIN_NAV_ITEMS = [
+  { to: '/admin-dashboard', tKey: 'adminDashboard', icon: IconGrid },
   { to: '/users', tKey: 'users', icon: IconUsers, badgeKey: 'pendingCount' },
+  { to: '/live', tKey: 'live', icon: IconGlobe },
+  { to: '/api-usage', tKey: 'apiUsage', icon: IconGauge },
   { to: '/park', tKey: 'park', icon: IconPark },
+  { to: '/catalog', tKey: 'catalog', icon: IconPin, badgeKey: 'catalogPending' },
   { to: '/health', tKey: 'health', icon: IconHeart },
   { to: '/magic', tKey: 'magic', icon: IconMagic },
   { to: '/sequence', tKey: 'sequence', icon: IconSequence },
@@ -46,6 +50,8 @@ export default function Layout({ children }) {
   const { agentConnected, connectedSince, latencyMs } = useWheelSocket();
   const offlineBox = useOfflineBox();
   const [pendingCount, setPendingCount] = useState(0);
+  const [catalogPending, setCatalogPending] = useState(0);
+  const [isReseller, setIsReseller] = useState(false);
   const [showDiagnostics, setShowDiagnostics] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [changingLanguage, setChangingLanguage] = useState(false);
@@ -67,11 +73,17 @@ export default function Layout({ children }) {
     setMobileMenuOpen(false);
   }, [location.pathname]);
 
+  useEffect(() => { // the "Mon parc" entry only exists for reseller accounts
+    if (isAdmin) return;
+    api.getResellerStatus().then((r) => setIsReseller(!!r.reseller)).catch(() => {});
+  }, [isAdmin]);
+
   useEffect(() => {
     if (!isAdmin) return;
     let cancelled = false;
     function poll() {
       api.getUsersPendingCount().then((res) => { if (!cancelled) setPendingCount(res.count); }).catch(() => {});
+      api.getCatalogPending().then((res) => { if (!cancelled) setCatalogPending(res.count); }).catch(() => {});
     }
     poll();
     const id = setInterval(poll, PENDING_COUNT_POLL_MS);
@@ -106,7 +118,7 @@ export default function Layout({ children }) {
         </div>
 
         <nav className="nav">
-          {NAV_ITEMS.map(({ to, tKey, icon: Icon, badgeKey }) => (
+          {(isReseller ? [...NAV_ITEMS, { to: '/my-park', tKey: 'myPark', icon: IconPark }] : NAV_ITEMS).map(({ to, tKey, icon: Icon, badgeKey }) => (
             <NavLink
               key={to}
               to={to}
@@ -135,6 +147,9 @@ export default function Layout({ children }) {
                   <span>{t(`nav.${tKey}`)}</span>
                   {badgeKey === 'pendingCount' && pendingCount > 0 && (
                     <span className="nav-badge">{pendingCount}</span>
+                  )}
+                  {badgeKey === 'catalogPending' && catalogPending > 0 && (
+                    <span className="nav-badge">{catalogPending}</span>
                   )}
                 </NavLink>
               ))}
@@ -243,6 +258,15 @@ function IconUsers() {
 }
 function IconPark() {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/><path d="M7 7h.01M7 17h.01"/></svg>;
+}
+function IconGauge() {
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M4 18a8 8 0 1116 0"/><path d="M12 18l4-6"/><circle cx="12" cy="18" r="1"/></svg>;
+}
+function IconGlobe() {
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/></svg>;
+}
+function IconPin() {
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 21s-7-6.2-7-11.2a7 7 0 0114 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="10" r="2.5"/></svg>;
 }
 function IconHeart() {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M20.8 8.6c0 4.6-8.8 10.4-8.8 10.4S3.2 13.2 3.2 8.6a4.6 4.6 0 0 1 8.8-1.8 4.6 4.6 0 0 1 8.8 1.8Z"/></svg>;
