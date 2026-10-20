@@ -2382,7 +2382,23 @@
       "forSpins": "para {{n}} giros",
       "aiGroup": "IA por giro",
       "noteGroup": "Asistente de IA de notas",
-      "plansGroup": "Planes a comparar"
+      "plansGroup": "Planes a comparar",
+      "users": "Usuarios simultáneos",
+      "usersHint": "Jugadores jugando a la vez (pico)",
+      "seconds": "Duración de un paso",
+      "secondsHint": "Del formulario al resultado",
+      "peak": "Pico de pasos",
+      "peakUnit": "por minuto",
+      "gQuota": "Cuota mensual del plan",
+      "gDaily": "Tope diario (media)",
+      "gRate": "Caudal máximo (llamadas / min)",
+      "upgradeTo": "Pasar al plan {{plan}} {{fee}}",
+      "noPlan": "Ningún plan guardado es suficiente: contacte al proveedor.",
+      "rateAdvice": "Se alcanza el caudal del proveedor: cambiar de plan no basta, pida un aumento del límite.",
+      "limitsReached_one": "{{n}} límite alcanzado",
+      "limitsReached_other": "{{n}} límites alcanzados",
+      "limitsNear": "Límites a punto de alcanzarse",
+      "perMonth": " /mes"
     }
   },
   "myPark": {

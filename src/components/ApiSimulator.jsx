@@ -7,7 +7,7 @@ const NAMES = { anthropic: 'Claude', resend: 'Resend', hunter: 'Hunter', bouncer
 const COLORS = { bouncer: '#0055F8', hunter: '#7C3AED', resend: '#059669', ai: '#F59E0B', notes: '#EC4899' };
 const money = (v, d = 2) => (v === null || v === undefined ? '—' : v.toLocaleString(undefined, { style: 'currency', currency: 'EUR', minimumFractionDigits: d, maximumFractionDigits: v !== 0 && Math.abs(v) < 0.01 ? 4 : d }));
 // Same arithmetic as the server's services/apiUsage/simulator.js, done here so the price follows the slider instantly.
-function compute(opt, spins, f, plans) {
+function compute(opt, spins, f, plans, load) {
   const pick = (p) => { const list = (opt.providers && opt.providers[p]) || []; return list.find((x) => x.id === plans[p]) || list.find((x) => x.current) || list[0] || null; };
   const lines = []; const missing = [];
   const add = (id, provider, label, quantity, plan) => {
@@ -27,7 +27,38 @@ function compute(opt, spins, f, plans) {
   ai('ai', 'IA (Claude)', spins * f.aiCallsPerSpin, f.aiInTokens, f.aiOutTokens);
   ai('notes', 'Assistant IA de notes (Claude)', spins * f.notePct / 100, f.noteInTokens, f.noteOutTokens);
   const totalEur = lines.reduce((a, l) => a + (l.costEur || 0), 0);
-  return { lines, totalEur, perSpinEur: totalEur / spins, per1000Eur: (totalEur / spins) * 1000, incomplete: [...new Set(missing)] };
+
+  // Limits of the chosen plans: monthly quota, daily cap, calls per minute at the busiest moment (concurrent players / length of a pass).
+  const spinsPerMin = (load.users * 60) / Math.max(1, load.seconds);
+  const perSpin = { bouncer: f.bouncerPct / 100, hunter: f.hunterPct / 100, resend: f.emailsPerSpin };
+  const checks = {};
+  for (const p of ['bouncer', 'hunter', 'resend']) {
+    const plan = pick(p); if (!plan) continue;
+    const q = spins * perSpin[p];
+    const rate = opt.rates && opt.rates[p] && opt.rates[p].perMin;
+    const peak = spinsPerMin * perSpin[p];
+    const need = (pl) => {
+      const items = [];
+      if (pl.quota) {
+        const monthly = pl.quotaPeriod === 'year' ? pl.quota / 12 : pl.quotaPeriod === 'day' ? pl.quota * 30 : pl.quota;
+        items.push({ kind: 'quota', used: q, limit: monthly, ratio: q / monthly });
+      }
+      if (pl.quotaDaily) items.push({ kind: 'daily', used: q / 30, limit: pl.quotaDaily, ratio: q / 30 / pl.quotaDaily });
+      return items;
+    };
+    const items = need(plan);
+    if (rate) items.push({ kind: 'rate', used: peak, limit: rate, ratio: peak / rate });
+    const worst = items.reduce((m, i) => Math.max(m, i.ratio), 0);
+    const level = worst >= 1 ? 'reached' : worst >= 0.8 ? 'near' : 'ok';
+    let upgrade = null;
+    if (items.some((i) => i.kind !== 'rate' && i.ratio >= 0.8)) {
+      const monthly = (c) => c.feeMonthlyEur + (c.quota ? 0 : c.eur == null ? Infinity : q * c.eur); // what that plan would cost this month
+      upgrade = (opt.providers[p] || []).filter((c) => c.id !== plan.id && Number.isFinite(monthly(c)) && monthly(c) >= monthly(plan) && need(c).every((i) => i.ratio < 0.8))
+        .map((c) => ({ ...c, monthlyEur: monthly(c) })).sort((a, b) => a.monthlyEur - b.monthlyEur)[0] || null;
+    }
+    checks[p] = { plan, items, level, worst, upgrade, rate: !!rate && items.some((i) => i.kind === 'rate' && i.ratio >= 0.8) };
+  }
+  return { checks, lines, totalEur, perSpinEur: totalEur / spins, per1000Eur: (totalEur / spins) * 1000, incomplete: [...new Set(missing)] };
 }
 const idOf = (l) => l.id || l.provider;
 
@@ -52,15 +83,42 @@ function Group({ icon, title, color, children }) {
   );
 }
 
+function Gauge({ check }) {
+  const { t } = useTranslation('admin');
+  if (!check) return null;
+  const kinds = { quota: t('apiUsage.sim.gQuota'), daily: t('apiUsage.sim.gDaily'), rate: t('apiUsage.sim.gRate') };
+  return (
+    <div className={`ap-gauge ${check.level}`}>
+      {check.items.map((i) => {
+        const lvl = i.ratio >= 1 ? 'reached' : i.ratio >= 0.8 ? 'near' : 'ok';
+        return (
+          <div key={i.kind} className={`ap-g ${lvl}`}>
+            <div className="ap-g-top"><span>{kinds[i.kind]}</span><b>{Math.round(i.ratio * 100).toLocaleString()} %</b></div>
+            <div className="ap-g-bar"><i style={{ width: `${Math.min(100, i.ratio * 100)}%` }} /></div>
+            <small>{Math.round(i.used).toLocaleString()} / {Math.round(i.limit).toLocaleString()}</small>
+          </div>
+        );
+      })}
+      {check.level !== 'ok' && check.upgrade && <div className="ap-g-up">{t('apiUsage.sim.upgradeTo', { plan: check.upgrade.label, fee: check.upgrade.monthlyEur ? money(check.upgrade.monthlyEur, 0) : '' })}</div>}
+      {check.level !== 'ok' && !check.upgrade && check.items.some((i) => i.kind !== 'rate' && i.ratio >= 0.8) && <div className="ap-g-up warn">{t('apiUsage.sim.noPlan')}</div>}
+      {check.rate && <div className="ap-g-up warn">{t('apiUsage.sim.rateAdvice')}</div>}
+    </div>
+  );
+}
+
 export default function ApiSimulator() {
   const { t } = useTranslation('admin');
   const [opt, setOpt] = useState(null);
   const [spins, setSpins] = useState(1000);
   const [f, setF] = useState({ bouncerPct: 100, hunterPct: 20, emailsPerSpin: 1, aiCallsPerSpin: 1, aiInTokens: 1500, aiOutTokens: 300, notePct: 30, noteInTokens: 1500, noteOutTokens: 400 });
   const [plans, setPlans] = useState({});
+  const [users, setUsers] = useState(10);
+  const [seconds, setSeconds] = useState(45);
   const set = (k) => (v) => setF((p) => ({ ...p, [k]: v }));
   useEffect(() => { api.getApiSimulatorOptions().then(setOpt).catch(() => setOpt({ providers: {}, tokens: {} })); }, []);
-  const res = opt && opt.providers ? compute(opt, spins, f, plans) : null;
+  const res = opt && opt.providers ? compute(opt, spins, f, plans, { users, seconds }) : null;
+  const alerts = res ? Object.entries(res.checks).filter(([, c]) => c.level !== 'ok') : [];
+  const reachedCount = alerts.filter(([, c]) => c.level === 'reached').length;
   const total = res ? res.totalEur : 0;
   const colorOf = (l) => COLORS[l.id || l.provider === 'anthropic' ? (l.id === 'notes' ? 'notes' : 'ai') : l.provider] || '#94A3B8';
   return (
@@ -78,6 +136,17 @@ export default function ApiSimulator() {
             {res.lines.filter((l) => l.costEur > 0).map((l) => <i key={idOf(l)} style={{ width: `${(l.costEur / total) * 100}%`, background: colorOf(l) }} title={`${l.label} · ${money(l.costEur)}`} />)}
           </div>
         )}
+        {res && alerts.length > 0 && (
+          <div className={`ap-sim-limits ${reachedCount ? 'reached' : 'near'}`}>
+            <b>{reachedCount ? t('apiUsage.sim.limitsReached', { count: reachedCount, n: reachedCount }) : t('apiUsage.sim.limitsNear')}</b>
+            {alerts.map(([p, c]) => (
+              <span key={p} className={c.level}>
+                {NAMES[p]} · {Math.round(c.worst * 100)} %
+                {c.upgrade ? ` → ${c.upgrade.label}${c.upgrade.monthlyEur ? ` (${money(c.upgrade.monthlyEur, 0)}${t('apiUsage.sim.perMonth')})` : ''}` : ''}
+              </span>
+            ))}
+          </div>
+        )}
         {res && res.incomplete.length > 0 && <p className="ap-warn" style={{ gridColumn: '1 / -1', margin: 0 }}>{t('apiUsage.sim.incomplete', { list: res.incomplete.map((p) => NAMES[p] || p).join(', ') })}</p>}
       </div>
 
@@ -92,15 +161,26 @@ export default function ApiSimulator() {
         <div className="ap-sim-chips">{[100, 1000, 5000, 25000, 100000].map((n) => <button key={n} type="button" className={spins === n ? 'on' : ''} onClick={() => setSpins(n)}>{n.toLocaleString()}</button>)}</div>
       </div>
 
+      <div className="ap-sim-spins">
+        <div className="ap-sim-traffic">
+          <Slider label={t('apiUsage.sim.users')} hint={t('apiUsage.sim.usersHint')} value={users} min={1} max={500} color="#002881" onChange={setUsers} />
+          <Slider label={t('apiUsage.sim.seconds')} hint={t('apiUsage.sim.secondsHint')} value={seconds} min={10} max={180} step={5} unit=" s" color="#002881" onChange={setSeconds} />
+          <div className="ap-sim-peak"><span>{t('apiUsage.sim.peak')}</span><b>{Math.round((users * 60) / seconds).toLocaleString()}</b><small>{t('apiUsage.sim.peakUnit')}</small></div>
+        </div>
+      </div>
+
       <div className="ap-sim-cols">
         <Group icon="✓" title="Bouncer" color={COLORS.bouncer}>
           <Slider label={t('apiUsage.sim.bouncerPct')} hint={t('apiUsage.sim.bouncerHint')} value={f.bouncerPct} max={100} unit=" %" color={COLORS.bouncer} onChange={set('bouncerPct')} />
+          {res && <Gauge check={res.checks.bouncer} />}
         </Group>
         <Group icon="⌕" title="Hunter" color={COLORS.hunter}>
           <Slider label={t('apiUsage.sim.hunterPct')} hint={t('apiUsage.sim.hunterHint')} value={f.hunterPct} max={100} unit=" %" color={COLORS.hunter} onChange={set('hunterPct')} />
+          {res && <Gauge check={res.checks.hunter} />}
         </Group>
         <Group icon="✉" title="Resend" color={COLORS.resend}>
           <Slider label={t('apiUsage.sim.emails')} value={f.emailsPerSpin} max={5} step={0.5} color={COLORS.resend} onChange={set('emailsPerSpin')} />
+          {res && <Gauge check={res.checks.resend} />}
         </Group>
         <Group icon="✦" title={t('apiUsage.sim.aiGroup')} color={COLORS.ai}>
           <Slider label={t('apiUsage.sim.aiCalls')} value={f.aiCallsPerSpin} max={5} step={0.5} color={COLORS.ai} onChange={set('aiCallsPerSpin')} />

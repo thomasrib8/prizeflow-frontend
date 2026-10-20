@@ -282,3 +282,22 @@
 @keyframes jr-pop { 0% { transform: scale(.8); } 60% { transform: scale(1.12); } 100% { transform: scale(1); } }
 @media (prefers-reduced-motion: reduce) { .jr-track, .jr-parcel, .jr-steps li.now i, .jr-node.done .jr-ico { animation: none !important; } }
 @media (max-width: 760px) { .jr-row { grid-template-columns: 1fr; } .jr-lane { height: auto; padding: 12px 0; } .jr-card .jr-track { width: 70%; } .jr-steps li { font-size: 10px; } }
+
+.ap-sim-traffic { display: grid; grid-template-columns: 1fr 1fr auto; gap: 24px; align-items: end; }
+.ap-sim-peak { display: flex; flex-direction: column; align-items: flex-end; padding: 8px 16px; border-radius: 12px; background: #EAF1FF; min-width: 120px; }
+.ap-sim-peak span { font-size: 10px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #64748B; }
+.ap-sim-peak b { font-size: 22px; color: var(--ap-navy); } .ap-sim-peak small { font-size: 11px; color: #64748B; }
+.ap-sim-limits { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 14px; border-radius: 12px; background: rgba(255,255,255,.14); font-size: 13px; }
+.ap-sim-limits.reached { background: #FEE2E2; color: #7F1D1D; } .ap-sim-limits.near { background: #FEF3C7; color: #78350F; }
+.ap-sim-limits span { padding: 3px 11px; border-radius: 99px; font-weight: 700; background: rgba(255,255,255,.7); }
+.ap-sim-limits span.reached { color: #B91C1C; } .ap-sim-limits span.near { color: #B45309; }
+.ap-gauge { display: flex; flex-direction: column; gap: 9px; margin-top: 4px; padding-top: 10px; border-top: 1px dashed #E3EAF8; }
+.ap-g-top { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; color: #475569; }
+.ap-g-bar { height: 7px; margin: 4px 0 2px; border-radius: 5px; background: #E8EEFB; overflow: hidden; }
+.ap-g-bar i { display: block; height: 100%; border-radius: 5px; background: #10B981; transition: width .2s; }
+.ap-g.near .ap-g-bar i { background: #F59E0B; } .ap-g.reached .ap-g-bar i { background: #EF4444; }
+.ap-g.reached .ap-g-top b { color: #B91C1C; } .ap-g.near .ap-g-top b { color: #B45309; }
+.ap-g small { color: #94A3B8; font-size: 11px; }
+.ap-g-up { padding: 8px 11px; border-radius: 10px; background: #EAF1FF; color: var(--ap-navy); font-size: 12.5px; font-weight: 700; }
+.ap-g-up.warn { background: #FEF3C7; color: #92400E; font-weight: 600; }
+@media (max-width: 760px) { .ap-sim-traffic { grid-template-columns: 1fr; } }

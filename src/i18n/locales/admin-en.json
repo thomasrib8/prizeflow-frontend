@@ -2382,7 +2382,23 @@
       "forSpins": "for {{n}} spins",
       "aiGroup": "AI per spin",
       "noteGroup": "AI notes assistant",
-      "plansGroup": "Plans to compare"
+      "plansGroup": "Plans to compare",
+      "users": "Concurrent users",
+      "usersHint": "Players playing at the same time (peak)",
+      "seconds": "Length of one pass",
+      "secondsHint": "From the form to the result",
+      "peak": "Peak of passes",
+      "peakUnit": "per minute",
+      "gQuota": "Plan monthly quota",
+      "gDaily": "Daily cap (average)",
+      "gRate": "Maximum rate (calls / min)",
+      "upgradeTo": "Move up to the {{plan}} plan {{fee}}",
+      "noPlan": "No saved plan is enough: contact the provider.",
+      "rateAdvice": "The provider’s rate limit is reached: changing plan is not enough, ask for a higher limit.",
+      "limitsReached_one": "{{n}} limit reached",
+      "limitsReached_other": "{{n}} limits reached",
+      "limitsNear": "Limits almost reached",
+      "perMonth": " /month"
     }
   },
   "myPark": {

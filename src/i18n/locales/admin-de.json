@@ -2382,7 +2382,23 @@
       "forSpins": "für {{n}} Drehungen",
       "aiGroup": "KI pro Drehung",
       "noteGroup": "KI-Notizassistent",
-      "plansGroup": "Tarife zum Vergleichen"
+      "plansGroup": "Tarife zum Vergleichen",
+      "users": "Gleichzeitige Nutzer",
+      "usersHint": "Spieler, die gleichzeitig spielen (Spitze)",
+      "seconds": "Dauer eines Durchgangs",
+      "secondsHint": "Vom Formular bis zum Ergebnis",
+      "peak": "Spitze der Durchgänge",
+      "peakUnit": "pro Minute",
+      "gQuota": "Monatskontingent des Tarifs",
+      "gDaily": "Tageslimit (Durchschnitt)",
+      "gRate": "Maximale Rate (Aufrufe / Min.)",
+      "upgradeTo": "Auf den Tarif {{plan}} wechseln {{fee}}",
+      "noPlan": "Kein gespeicherter Tarif reicht aus: kontaktieren Sie den Anbieter.",
+      "rateAdvice": "Die Rate des Anbieters ist erreicht: ein Tarifwechsel genügt nicht, beantragen Sie ein höheres Limit.",
+      "limitsReached_one": "{{n}} Limit erreicht",
+      "limitsReached_other": "{{n}} Limits erreicht",
+      "limitsNear": "Limits fast erreicht",
+      "perMonth": " /Monat"
     }
   },
   "myPark": {

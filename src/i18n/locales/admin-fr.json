@@ -2382,7 +2382,23 @@
       "forSpins": "pour {{n}} lancers",
       "aiGroup": "IA par lancer",
       "noteGroup": "Assistant IA de notes",
-      "plansGroup": "Forfaits à comparer"
+      "plansGroup": "Forfaits à comparer",
+      "users": "Utilisateurs simultanés",
+      "usersHint": "Joueurs qui jouent au même moment (pic)",
+      "seconds": "Durée d’un passage",
+      "secondsHint": "De la saisie du formulaire au résultat",
+      "peak": "Pic de passages",
+      "peakUnit": "par minute",
+      "gQuota": "Quota mensuel du forfait",
+      "gDaily": "Plafond par jour (moyenne)",
+      "gRate": "Débit maximum (appels / min)",
+      "upgradeTo": "Passer au forfait {{plan}} {{fee}}",
+      "noPlan": "Aucun forfait enregistré ne suffit : contactez le fournisseur.",
+      "rateAdvice": "Le débit du fournisseur est atteint : le changement de forfait ne suffit pas, demandez une hausse de limite.",
+      "limitsReached_one": "{{n}} limite atteinte",
+      "limitsReached_other": "{{n}} limites atteintes",
+      "limitsNear": "Limites bientôt atteintes",
+      "perMonth": " /mois"
     }
   },
   "myPark": {
