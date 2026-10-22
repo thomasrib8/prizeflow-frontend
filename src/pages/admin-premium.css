@@ -301,3 +301,5 @@
 .ap-g-up { padding: 8px 11px; border-radius: 10px; background: #EAF1FF; color: var(--ap-navy); font-size: 12.5px; font-weight: 700; }
 .ap-g-up.warn { background: #FEF3C7; color: #92400E; font-weight: 600; }
 @media (max-width: 760px) { .ap-sim-traffic { grid-template-columns: 1fr; } }
+
+.pm-badge { display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: 11.5px; font-weight: 700; white-space: nowrap; }

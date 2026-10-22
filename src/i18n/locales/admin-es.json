@@ -2399,6 +2399,18 @@
       "limitsReached_other": "{{n}} límites alcanzados",
       "limitsNear": "Límites a punto de alcanzarse",
       "perMonth": " /mes"
+    },
+    "pm": {
+      "free": "Gratis",
+      "fixed": "Fijo {{fixed}}/mes",
+      "variable": "Variable (pago por uso)",
+      "mixed": "Fijo {{fixed}}/mes + variable",
+      "hint": {
+        "free": "Plan gratuito: nada que pagar mientras se respete la cuota.",
+        "fixed": "Precio fijo cada mes, sea cual sea el consumo.",
+        "variable": "Facturado por uso: el coste sigue el consumo.",
+        "mixed": "Suscripción fija, más un coste variable más allá de la cuota o por uso."
+      }
     }
   },
   "myPark": {

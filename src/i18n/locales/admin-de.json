@@ -2399,6 +2399,18 @@
       "limitsReached_other": "{{n}} Limits erreicht",
       "limitsNear": "Limits fast erreicht",
       "perMonth": " /Monat"
+    },
+    "pm": {
+      "free": "Kostenlos",
+      "fixed": "Fix {{fixed}}/Monat",
+      "variable": "Variabel (nach Verbrauch)",
+      "mixed": "Fix {{fixed}}/Monat + variabel",
+      "hint": {
+        "free": "Kostenloser Tarif: nichts zu zahlen, solange das Kontingent eingehalten wird.",
+        "fixed": "Fester Preis jeden Monat, unabhängig vom Verbrauch.",
+        "variable": "Nach Verbrauch abgerechnet: die Kosten folgen dem Verbrauch.",
+        "mixed": "Festes Abonnement plus variable Kosten über dem Kontingent oder nach Verbrauch."
+      }
     }
   },
   "myPark": {

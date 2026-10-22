@@ -2399,6 +2399,18 @@
       "limitsReached_other": "{{n}} limits reached",
       "limitsNear": "Limits almost reached",
       "perMonth": " /month"
+    },
+    "pm": {
+      "free": "Free",
+      "fixed": "Fixed {{fixed}}/month",
+      "variable": "Variable (pay as you go)",
+      "mixed": "Fixed {{fixed}}/month + variable",
+      "hint": {
+        "free": "Free plan: nothing to pay while the quota is respected.",
+        "fixed": "Fixed price every month, whatever the usage.",
+        "variable": "Billed on usage: the cost follows consumption.",
+        "mixed": "Fixed subscription, plus a variable cost beyond the quota or on usage."
+      }
     }
   },
   "myPark": {

@@ -19,6 +19,15 @@ const nameOf = (p) => NAMES[p] || p;
 const thisMonth = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; };
 const REC_TONE = { ok: 'green', gap: 'red', unavailable: 'orange', not_configured: 'neutral', no_comparison: 'neutral' };
 
+// How a provider bills: fixed monthly fee, variable (pay as you go), both, or free.
+function PricingBadge({ model }) {
+  const { t } = useTranslation('admin');
+  if (!model || model.mode === 'none') return null;
+  const fixed = model.fixedCents === null ? '?' : (model.fixedCents / 100).toLocaleString(undefined, { style: 'currency', currency: 'EUR', maximumFractionDigits: model.fixedCents % 100 ? 2 : 0 });
+  const tone = { free: ['#047857', '#D1FAE5'], fixed: ['#0055F8', '#DBEAFE'], variable: ['#B45309', '#FEF3C7'], mixed: ['#6D28D9', '#EDE9FE'] }[model.mode];
+  return <span className="pm-badge" style={{ color: tone[0], background: tone[1] }} title={t(`apiUsage.pm.hint.${model.mode}`)}>{t(`apiUsage.pm.${model.mode}`, { fixed })}</span>;
+}
+
 function Delta({ cur, prev }) {
   const { t } = useTranslation('admin');
   if (prev === null || prev === undefined) return null;
@@ -99,7 +108,7 @@ function Overview({ d, onProvider, reload }) {
           <thead><tr><th>{t('apiUsage.provider')}</th><th>{t('apiUsage.calls')}</th><th>{t('apiUsage.plan')}</th><th>{t('apiUsage.real')}</th><th>{t('apiUsage.imputed')}</th><th>{t('apiUsage.unallocated')}</th><th>{t('apiUsage.nature')}</th></tr></thead>
           <tbody>{d.providers.map((p) => (
             <tr key={p.provider} style={{ cursor: 'pointer' }} onClick={() => onProvider(p.provider)}>
-              <td style={{ fontWeight: 600 }}>{nameOf(p.provider)}</td><td>{p.calls.toLocaleString()}</td>
+              <td style={{ fontWeight: 600 }}>{nameOf(p.provider)}<div style={{ marginTop: 4 }}><PricingBadge model={p.pricingModel} /></div></td><td>{p.calls.toLocaleString()}</td>
               <td>{p.plan ? <><div style={{ fontSize: 12 }}>{p.plan.label}{p.plan.quota ? ` · ${p.plan.used.toLocaleString()} / ${p.plan.quota.toLocaleString()}` : ''}</div><Bar100 value={p.plan.usedPct} /></> : '—'}</td>
               <td>{eur(p.realCents, 2)}<div><Delta cur={p.realCents} prev={p.previousRealCents} /></div></td><td>{eur(p.imputedCents, 2)}</td><td>{eur(p.unallocatedCents, 2)}</td>
               <td>{p.nature.map((n) => <Badge key={n} tone={n === 'real' ? 'green' : n === 'computed' ? 'blue' : 'orange'}>{t(`apiUsage.natures.${n}`)}</Badge>)}{(p.incomplete.no_tariff > 0 || p.incomplete.no_rate > 0) && <Badge tone="red">{t('apiUsage.incomplete')}</Badge>}</td>
@@ -130,6 +139,7 @@ function ProviderSheet({ provider, month, setProvider, providers }) {
       <Card className="mt-card">
         <label>{t('apiUsage.provider')}
           <select value={provider} onChange={(e) => setProvider(e.target.value)} style={{ display: 'block' }}>{providers.map((p) => <option key={p} value={p}>{nameOf(p)}</option>)}</select></label>
+        {d && <div style={{ marginTop: 8 }}><PricingBadge model={d.pricingModel} /></div>}
       </Card>
       {error && <div className="error-banner">{error}</div>}
       {!d ? <p className="page-subtitle">{t('common.loading')}</p> : (

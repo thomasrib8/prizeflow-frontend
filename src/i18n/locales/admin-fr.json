@@ -2399,6 +2399,18 @@
       "limitsReached_other": "{{n}} limites atteintes",
       "limitsNear": "Limites bientôt atteintes",
       "perMonth": " /mois"
+    },
+    "pm": {
+      "free": "Gratuit",
+      "fixed": "Fixe {{fixed}}/mois",
+      "variable": "Variable (à l’usage)",
+      "mixed": "Fixe {{fixed}}/mois + variable",
+      "hint": {
+        "free": "Forfait gratuit : rien à payer tant que le quota est respecté.",
+        "fixed": "Prix fixe chaque mois, quelle que soit la consommation.",
+        "variable": "Facturé à l’usage : le coût suit la consommation.",
+        "mixed": "Abonnement fixe, plus un coût variable au-delà du quota ou à l’usage."
+      }
     }
   },
   "myPark": {
