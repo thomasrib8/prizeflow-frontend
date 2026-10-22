@@ -251,7 +251,8 @@
     "tableModelNumber": "Numéro de modèle",
     "tableSerialNumber": "Numéro de série",
     "tableSecurityKey": "Clé de sécurité",
-    "tablePutIntoService": "Mise en service"
+    "tablePutIntoService": "Mise en service",
+    "roleMagician": "Magicien"
   },
   "rewards": {
     "pageSubtitle": "Entrez le code à 8 caractères d'un invité pour ouvrir sa récompense",

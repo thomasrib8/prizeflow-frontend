@@ -251,7 +251,8 @@
     "tableModelNumber": "Model Number",
     "tableSerialNumber": "Serial Number",
     "tableSecurityKey": "Security Key",
-    "tablePutIntoService": "Put into service"
+    "tablePutIntoService": "Put into service",
+    "roleMagician": "Magician"
   },
   "rewards": {
     "pageSubtitle": "Enter a guest's 8-character code to open their reward",

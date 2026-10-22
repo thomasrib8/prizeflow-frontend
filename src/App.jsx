@@ -53,10 +53,24 @@ function loginRedirect(location) {
   return `/login?returnTo=${returnTo}`;
 }
 
+// The magician only has Magic, Sequence and Settings (information / local mode / calibration): everything else leads back to Magic.
+const MAGICIAN_PAGES = ['/magic', '/sequence', '/settings', '/calibration'];
+const magicianMayOpen = (path) => MAGICIAN_PAGES.some((p) => path === p || path.startsWith(`${p}/`));
+
 function PrivateRoute({ children }) {
   const { user } = useAuth();
   const location = useLocation();
   if (!user) return <Navigate to={loginRedirect(location)} replace />;
+  if (user.role === 'magician' && !magicianMayOpen(location.pathname)) return <Navigate to="/magic" replace />;
+  return <Layout>{children}</Layout>;
+}
+
+// Admin or magician (Magic, Sequence).
+function MagicRoute({ children }) {
+  const { user } = useAuth();
+  const location = useLocation();
+  if (!user) return <Navigate to={loginRedirect(location)} replace />;
+  if (user.role !== 'admin' && user.role !== 'magician') return <Navigate to="/" replace />;
   return <Layout>{children}</Layout>;
 }
 
@@ -65,7 +79,7 @@ function AdminRoute({ children }) {
   const { isAdmin } = useAdmin();
   const location = useLocation();
   if (!user) return <Navigate to={loginRedirect(location)} replace />;
-  if (!isAdmin) return <Navigate to="/" replace />;
+  if (!isAdmin) return <Navigate to={user.role === 'magician' ? '/magic' : '/'} replace />;
   return <Layout>{children}</Layout>;
 }
 
@@ -129,8 +143,8 @@ export default function App() {
           <Route path="/catalog" element={<Navigate to="/settings?tab=catalog" replace />} />
           <Route path="/admin-dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
           <Route path="/health" element={<AdminRoute><AppHealth /></AdminRoute>} />
-          <Route path="/magic" element={<AdminRoute><Magic /></AdminRoute>} />
-          <Route path="/sequence" element={<AdminRoute><SequenceBuilder /></AdminRoute>} />
+          <Route path="/magic" element={<MagicRoute><Magic /></MagicRoute>} />
+          <Route path="/sequence" element={<MagicRoute><SequenceBuilder /></MagicRoute>} />
           </>}
           <Route path="*" element={<Navigate to={IS_BOX_BUILD ? '/pwa/home' : '/'} replace />} />
         </Routes>

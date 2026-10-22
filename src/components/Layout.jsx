@@ -38,11 +38,12 @@ const ADMIN_NAV_ITEMS = [
   { to: '/sequence', tKey: 'sequence', icon: IconSequence },
 ];
 
+const MAGICIAN_NAV_ITEMS = ADMIN_NAV_ITEMS.filter((i) => i.to === '/magic' || i.to === '/sequence');
 const PENDING_COUNT_POLL_MS = 30000;
 
 export default function Layout({ children }) {
   const { user, logout, updateStoredUser } = useAuth();
-  const { isAdmin } = useAdmin();
+  const { isAdmin, isMagician } = useAdmin();
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation('admin');
@@ -73,6 +74,7 @@ export default function Layout({ children }) {
 
   useEffect(() => { // the "Mon parc" entry only exists for reseller accounts
     if (isAdmin) return;
+    if (isMagician) return;
     api.getResellerStatus().then((r) => setIsReseller(!!r.reseller)).catch(() => {});
   }, [isAdmin]);
 
@@ -115,7 +117,7 @@ export default function Layout({ children }) {
         </div>
 
         <nav className="nav">
-          {(isReseller ? [...NAV_ITEMS, { to: '/my-park', tKey: 'myPark', icon: IconPark }] : NAV_ITEMS).map(({ to, tKey, icon: Icon, badgeKey }) => (
+          {(isMagician ? MAGICIAN_NAV_ITEMS : isReseller ? [...NAV_ITEMS, { to: '/my-park', tKey: 'myPark', icon: IconPark }] : NAV_ITEMS).map(({ to, tKey, icon: Icon, badgeKey }) => (
             <NavLink
               key={to}
               to={to}
@@ -178,10 +180,12 @@ export default function Layout({ children }) {
           >
             {ADMIN_LANGUAGE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
-          <NavLink to="/tutorials" className={({ isActive }) => `nav-item settings-footer-link${isActive ? ' active' : ''}`}>
-            <IconBook />
-            <span>{t('nav.tutorials')}</span>
-          </NavLink>
+          {!isMagician && (
+            <NavLink to="/tutorials" className={({ isActive }) => `nav-item settings-footer-link${isActive ? ' active' : ''}`}>
+              <IconBook />
+              <span>{t('nav.tutorials')}</span>
+            </NavLink>
+          )}
           <NavLink to="/settings" className={({ isActive }) => `nav-item settings-footer-link${isActive ? ' active' : ''}`}>
             <IconSettings />
             <span>{t('nav.settings')}</span>

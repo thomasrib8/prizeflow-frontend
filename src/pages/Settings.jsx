@@ -1206,6 +1206,8 @@ const MODULE_KEYS = [
   { key: 'catalog', tKey: 'tabCatalog', adminOnly: true },
 ];
 
+const MAGICIAN_TABS = ['information', 'offline', 'calibration']; // the magician's Settings
+
 export default function Settings() {
   const { t } = useTranslation('admin');
   const [searchParams] = useSearchParams();
@@ -1215,7 +1217,8 @@ export default function Settings() {
     return MODULE_KEYS.some((m) => m.key === tab) ? tab : 'information';
   });
   const [catalogPending, setCatalogPending] = useState(0);
-  const { isAdmin } = useAdmin();
+  const { isAdmin, isMagician } = useAdmin();
+  useEffect(() => { if (isMagician && !MAGICIAN_TABS.includes(module)) setModule('information'); }, [isMagician, module]);
   useEffect(() => { if (isAdmin) api.getCatalogPending().then((r) => setCatalogPending(r.count)).catch(() => {}); }, [isAdmin, module]);
 
   return (
@@ -1228,7 +1231,7 @@ export default function Settings() {
       </div>
 
       <div className="tabs ap-tabs">
-        {MODULE_KEYS.filter((m) => !m.adminOnly || isAdmin).map((m) => (
+        {MODULE_KEYS.filter((m) => (!m.adminOnly || isAdmin) && (!isMagician || MAGICIAN_TABS.includes(m.key))).map((m) => (
           <button key={m.key} className={`tab${module === m.key ? ' active' : ''}`} onClick={() => setModule(m.key)}>
             {t(`settings.${m.tKey}`)}{m.key === 'catalog' && catalogPending > 0 ? ` (${catalogPending})` : ''}
           </button>

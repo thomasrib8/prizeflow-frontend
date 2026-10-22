@@ -124,6 +124,7 @@ export default function Users() {
                           className="ap-select"
                         >
                           <option value="operator">{t('users.roleOperator')}</option>
+                          <option value="magician">{t('users.roleMagician')}</option>
                           <option value="admin">{t('users.roleAdmin')}</option>
                         </select>
                       </td>
