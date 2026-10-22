@@ -161,8 +161,8 @@ export default function Calibration({ onExit }) {
     if (calLaunch > lastCalLaunch && wheelState === 'CalRun') {
       setLastCalLaunch(calLaunch);
       setSpinMsg(t('calibration.spinRecorded'));
-      const t = setTimeout(() => setSpinMsg(''), 2000);
-      return () => clearTimeout(t);
+      const timer = setTimeout(() => setSpinMsg(''), 2000); // not named `t`: that would shadow the translation function above
+      return () => clearTimeout(timer);
     }
   }, [calLaunch, lastCalLaunch, wheelState]);
 
