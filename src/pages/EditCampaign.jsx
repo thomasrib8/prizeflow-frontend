@@ -58,13 +58,13 @@ export default function EditCampaign() {
         persoSubject: s.perso_subject || '',
         persoBody: s.perso_body || '',
         persoAutoDistribute: !!s.perso_auto_distribute,
-        persoUniqueCode: !!s.perso_unique_code, savedUnique: !!s.perso_unique_code,
+        persoUniqueCode: !!s.perso_unique_code, savedUnique: !!s.perso_unique_code, pendingCodes: '',
         variantsEnabled: !!s.variants_enabled,
         variants: (s.variants || []).map((v) => ({
           id: v.id, name: v.name, stock: v.stock_initial, stockRemaining: v.stock_remaining,
           redeemMethod: ['code', 'voucher', 'perso'].includes(v.redeem_method) ? v.redeem_method : 'qr',
           persoDelivery: v.perso_delivery || 'code', persoSubject: v.perso_subject || '', persoBody: v.perso_body || '', persoAutoDistribute: !!v.perso_auto_distribute,
-          persoUniqueCode: !!v.perso_unique_code, savedUnique: !!v.perso_unique_code,
+          persoUniqueCode: !!v.perso_unique_code, savedUnique: !!v.perso_unique_code, pendingCodes: '',
         })),
       });
       if (source.status === 'draft') {
@@ -106,8 +106,26 @@ export default function EditCampaign() {
             ...(v.redeemMethod === 'perso' ? { persoDelivery: v.persoDelivery, persoSubject: v.persoSubject, persoBody: v.persoBody, persoAutoDistribute: !!v.persoAutoDistribute, persoUniqueCode: !!v.persoUniqueCode } : {}) })) } : {}),
           ...(s.redeemMethod === 'perso' ? { persoDelivery: s.persoDelivery, persoSubject: s.persoSubject, persoBody: s.persoBody, persoAutoDistribute: !!s.persoAutoDistribute, persoUniqueCode: !!s.persoUniqueCode && !s.variantsEnabled } : {}),
         })));
-        // stay here: the unique codes of a gift can only be loaded once the draft is saved with the option on
-        setSavedNote(t('editCampaign.draftSaved'));
+        // The codes pasted before the first save were only staged: now that the gifts exist on the server, load them (replacing any previous list).
+        const staged = [];
+        slots.forEach((sl) => {
+          if (sl.variantsEnabled) sl.variants.forEach((v, vi) => { if (v.persoUniqueCode && !v.savedUnique && (v.pendingCodes || '').trim()) staged.push({ slotIndex: sl.slotIndex, variantIndex: vi, text: v.pendingCodes }); });
+          else if (sl.persoUniqueCode && !sl.savedUnique && (sl.pendingCodes || '').trim()) staged.push({ slotIndex: sl.slotIndex, variantIndex: null, text: sl.pendingCodes });
+        });
+        let note = t('editCampaign.draftSaved');
+        if (staged.length) {
+          const fresh = await api.getCampaign(id);
+          let loaded = 0;
+          for (const st of staged) {
+            const fs = fresh.slots.find((x) => x.slot_index === st.slotIndex);
+            const variantId = st.variantIndex === null ? undefined : (fs && fs.variants[st.variantIndex] ? fs.variants[st.variantIndex].id : null);
+            if (variantId === null) continue;
+            try { const r = await api.importCampaignCodes(id, { slotIndex: st.slotIndex, variantId, text: st.text, mode: 'replace' }); loaded += r.imported; }
+            catch (err) { setError(`${t('dashboard.caseLabel', { n: st.slotIndex + 1 })} : ${err.message}`); }
+          }
+          if (loaded) note = `${note} ${t('uniqueCodes.imported', { n: loaded })}`;
+        }
+        setSavedNote(note);
         await reloadCampaign();
         return;
       }
@@ -202,9 +220,8 @@ export default function EditCampaign() {
                   )}
                   {!s.variantsEnabled && s.redeemMethod === 'perso' && (
                     <PersoFields value={s} idPrefix={`slot-${s.slotIndex}`} uniqueCodeEditable={campaign.status === 'draft'} onChange={(field, value) => updateSlot(i, field, value)}>
-                      {s.savedUnique
-                        ? <UniqueCodesPanel campaignId={id} slotIndex={s.slotIndex} stock={Number(s.stockInitial) || 0} label={s.giftName} draft={campaign.status === 'draft'} onChanged={reloadCampaign} />
-                        : <p className="ap-hint">{t('uniqueCodes.saveFirst')}</p>}
+                      <UniqueCodesPanel campaignId={id} slotIndex={s.slotIndex} stock={Number(s.stockInitial) || 0} label={s.giftName || t('dashboard.caseLabel', { n: s.slotIndex + 1 })} draft={campaign.status === 'draft'} onChanged={reloadCampaign}
+                        persisted={!!s.savedUnique} staged={s.pendingCodes || ''} onStage={(txt) => updateSlot(i, 'pendingCodes', txt)} />
                     </PersoFields>
                   )}
                   {s.variantsEnabled && (

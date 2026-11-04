@@ -66,7 +66,7 @@ export function PersoFields({ value, onChange, idPrefix = 'perso', uniqueCodeEdi
   );
 }
 
-export const emptyVariant = () => ({ id: null, name: '', stock: 0, stockRemaining: 0, redeemMethod: 'qr', persoDelivery: 'code', persoSubject: '', persoBody: '', persoAutoDistribute: false, persoUniqueCode: false, savedUnique: false });
+export const emptyVariant = () => ({ id: null, name: '', stock: 0, stockRemaining: 0, redeemMethod: 'qr', persoDelivery: 'code', persoSubject: '', persoBody: '', persoAutoDistribute: false, persoUniqueCode: false, savedUnique: false, pendingCodes: '' });
 
 export default function VariantsEditor({ slot, draft, onChange, campaignId = null, onCodesChanged = () => {} }) {
   const { t } = useTranslation('admin');
@@ -77,34 +77,46 @@ export default function VariantsEditor({ slot, draft, onChange, campaignId = nul
   const update = (i, field, value) => onChange({ variants: vs.map((v, k) => (k === i ? { ...v, [field]: value } : v)) });
   return (
     <div className="vr-box">
+      <div className="vr-title">{t('variants.boxTitle')}</div>
       {vs.map((v, i) => (
-        <div key={v.id || `new-${i}`} className="vr-item">
-          <div className="vr-row">
-            <span className="vr-tag">{t('variants.variantN', { n: i + 1 })}</span>
-            <input placeholder={t('variants.namePlaceholder')} value={v.name} onChange={(e) => update(i, 'name', e.target.value)} />
+        <div key={v.id || `new-${i}`} className="vr-card">
+          <div className="vr-grid">
+            <span className="vr-num">{i + 1}</span>
+            <label className="vr-f"><span>{t('variants.nameLabel')}</span>
+              <input placeholder={t('variants.namePlaceholder')} value={v.name} onChange={(e) => update(i, 'name', e.target.value)} />
+            </label>
+            <label className="vr-f"><span>{t('variants.stockLabel')}</span>
+              {draft ? (
+                <input type="number" min="0" step="1" value={v.stock} aria-label={t('variants.stock')}
+                  onChange={(e) => update(i, 'stock', e.target.value === '' ? '' : Math.max(0, Math.floor(Number(e.target.value)) || 0))} />
+              ) : (
+                <input readOnly value={t('editCampaign.stockLeftLabel', { remaining: v.stockRemaining, initial: v.stock })} />
+              )}
+            </label>
+            <label className="vr-f"><span>{t('variants.modeLabel')}</span>
+              <select value={v.redeemMethod} title={t('editCampaign.redeemMethodTitle')} onChange={(e) => update(i, 'redeemMethod', e.target.value)}>
+                <option value="qr">QR</option><option value="code">Code</option><option value="voucher">Voucher</option><option value="perso">Perso</option>
+              </select>
+            </label>
             {draft ? (
-              <input type="number" min="0" step="1" value={v.stock} aria-label={t('variants.stock')} title={t('variants.stock')} style={{ width: 84 }}
-                onChange={(e) => update(i, 'stock', e.target.value === '' ? '' : Math.max(0, Math.floor(Number(e.target.value)) || 0))} />
-            ) : (
-              <span style={{ fontSize: 12, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{t('editCampaign.stockLeftLabel', { remaining: v.stockRemaining, initial: v.stock })}</span>
-            )}
-            <select value={v.redeemMethod} title={t('editCampaign.redeemMethodTitle')} onChange={(e) => update(i, 'redeemMethod', e.target.value)}>
-              <option value="qr">QR</option><option value="code">Code</option><option value="voucher">Voucher</option><option value="perso">Perso</option>
-            </select>
-            {draft && <button type="button" className="vr-del" onClick={() => onChange({ variants: vs.filter((_, k) => k !== i) })} aria-label={t('variants.remove')} title={t('variants.remove')}>×</button>}
+              <button type="button" className="vr-del" onClick={() => onChange({ variants: vs.filter((_, k) => k !== i) })} aria-label={t('variants.remove')} title={t('variants.remove')}>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3" /></svg>
+              </button>
+            ) : <span />}
           </div>
           {v.redeemMethod === 'perso' && (
             <PersoFields value={v} idPrefix={`var-${slot.slotIndex}-${i}`} uniqueCodeEditable={draft} onChange={(field, value) => update(i, field, value)}>
-              {campaignId && v.savedUnique && v.id ? <UniqueCodesPanel campaignId={campaignId} slotIndex={slot.slotIndex} variantId={v.id} stock={Number(v.stock) || 0} label={v.name} draft={draft} onChanged={onCodesChanged} /> : (campaignId ? <p className="ap-hint">{t('uniqueCodes.saveFirst')}</p> : null)}
+              {campaignId && <UniqueCodesPanel campaignId={campaignId} slotIndex={slot.slotIndex} variantId={v.id} stock={Number(v.stock) || 0} label={v.name || t('variants.variantN', { n: i + 1 })} draft={draft} onChanged={onCodesChanged}
+                persisted={!!(v.savedUnique && v.id)} staged={v.pendingCodes || ''} onStage={(txt) => update(i, 'pendingCodes', txt)} />}
             </PersoFields>
           )}
         </div>
       ))}
-      {draft && <Button type="button" size="sm" variant="secondary" onClick={() => onChange({ variants: [...vs, emptyVariant()] })}>{t('variants.add')}</Button>}
+      {draft && <button type="button" className="vr-add" onClick={() => onChange({ variants: [...vs, emptyVariant()] })}>{t('variants.add')}</button>}
       <div className={`vr-sum ${diff === 0 && vs.length ? 'ok' : 'ko'}`}>
-        <span>{t('variants.caseStock')} <b>{total}</b></span>
-        <span>{t('variants.variantsTotal')} <b>{sum}</b></span>
-        <span>{t('variants.difference')} <b>{diff}</b></span>
+        <span className="vr-chip">{t('variants.caseStock')} <b>{total}</b></span>
+        <span className="vr-chip">{t('variants.variantsTotal')} <b>{sum}</b></span>
+        <span className="vr-chip">{t('variants.difference')} <b>{diff}</b></span>
         <em>{!vs.length ? t('variants.needOne') : diff === 0 ? t('variants.consistent') : diff > 0 ? t('variants.missing', { n: diff }) : t('variants.tooMany', { n: -diff })}</em>
       </div>
     </div>

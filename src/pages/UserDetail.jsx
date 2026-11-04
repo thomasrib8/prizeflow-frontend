@@ -273,8 +273,9 @@ export default function UserDetail() {
           <label style={{ display: 'flex', gap: 10, alignItems: 'center', cursor: busy ? 'default' : 'pointer' }}>
             <input type="checkbox" checked={!!detail.enriched_crm_enabled} disabled={busy} style={{ width: 18, height: 18 }}
               onChange={async (e) => {
+                const next = e.target.checked; // read NOW: a controlled checkbox is put back to its old state while the request is running
                 setBusy(true); setError('');
-                try { await api.setEnrichedCrm(id, e.target.checked); setDetail((d) => ({ ...d, enriched_crm_enabled: e.target.checked ? 1 : 0 })); }
+                try { await api.setEnrichedCrm(id, next); setDetail((d) => ({ ...d, enriched_crm_enabled: next ? 1 : 0 })); }
                 catch (err) { setError(err.message); } finally { setBusy(false); }
               }} />
             <span style={{ fontSize: 14, fontWeight: 600 }}>{detail.enriched_crm_enabled ? t('userDetail.enrichedCrmOn') : t('userDetail.enrichedCrmOff')}</span>

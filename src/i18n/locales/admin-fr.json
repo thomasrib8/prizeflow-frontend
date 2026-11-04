@@ -2587,7 +2587,11 @@
     "missing": "Il manque {{n}} dans les variantes (leur total doit égaler le stock de la case).",
     "tooMany": "Les variantes dépassent le stock de la case de {{n}}.",
     "modeInVariants": "Chaque variante a son propre mode de délivrabilité.",
-    "modeInVariantsShort": "Mode par variante"
+    "modeInVariantsShort": "Mode par variante",
+    "boxTitle": "Variantes de cette case",
+    "nameLabel": "Nom",
+    "stockLabel": "Stock",
+    "modeLabel": "Délivrabilité"
   },
   "uniqueCodes": {
     "option": "Insérer un code unique",
@@ -2637,6 +2641,10 @@
     "email_error": "En erreur",
     "email_pending": "En attente",
     "resend": "Renvoyer",
-    "responsibility": "SPARK garantit qu’un code n’est donné qu’une seule fois ; la validité du code sur le site du marchand reste de la responsabilité du marchand."
+    "responsibility": "SPARK garantit qu’un code n’est donné qu’une seule fois ; la validité du code sur le site du marchand reste de la responsabilité du marchand.",
+    "stagedHelp": "Collez ici votre liste de codes promo (un par ligne) ou importez un fichier CSV : il en faut exactement {{stock}}. Ils sont enregistrés en même temps que le brouillon (bouton « Enregistrer »).",
+    "clear": "Vider la liste",
+    "pvCountHint": "{{n}} code(s) pour un stock de {{stock}} : il faudra les égaliser avant d’activer.",
+    "willBeSaved": "Ces codes seront enregistrés quand vous cliquerez sur « Enregistrer »."
   }
 }

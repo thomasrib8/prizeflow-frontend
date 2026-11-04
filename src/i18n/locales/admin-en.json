@@ -2587,7 +2587,11 @@
     "missing": "{{n}} missing in the variants (their total must equal the case stock).",
     "tooMany": "The variants exceed the case stock by {{n}}.",
     "modeInVariants": "Each variant has its own delivery mode.",
-    "modeInVariantsShort": "Mode per variant"
+    "modeInVariantsShort": "Mode per variant",
+    "boxTitle": "Variants of this case",
+    "nameLabel": "Name",
+    "stockLabel": "Stock",
+    "modeLabel": "Delivery"
   },
   "uniqueCodes": {
     "option": "Insert a unique code",
@@ -2637,6 +2641,10 @@
     "email_error": "In error",
     "email_pending": "Pending",
     "resend": "Send again",
-    "responsibility": "SPARK guarantees a code is given only once; whether the code works on the merchant’s website remains the merchant’s responsibility."
+    "responsibility": "SPARK guarantees a code is given only once; whether the code works on the merchant’s website remains the merchant’s responsibility.",
+    "stagedHelp": "Paste your promo code list here (one per line) or import a CSV file: exactly {{stock}} are needed. They are saved together with the draft (“Save” button).",
+    "clear": "Clear the list",
+    "pvCountHint": "{{n}} code(s) for a stock of {{stock}}: they must match before activating.",
+    "willBeSaved": "These codes will be saved when you click “Save”."
   }
 }

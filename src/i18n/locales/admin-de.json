@@ -2587,7 +2587,11 @@
     "missing": "{{n}} fehlen in den Varianten (ihre Summe muss dem Bestand des Felds entsprechen).",
     "tooMany": "Die Varianten übersteigen den Bestand des Felds um {{n}}.",
     "modeInVariants": "Jede Variante hat ihre eigene Liefermethode.",
-    "modeInVariantsShort": "Modus je Variante"
+    "modeInVariantsShort": "Modus je Variante",
+    "boxTitle": "Varianten dieses Felds",
+    "nameLabel": "Name",
+    "stockLabel": "Bestand",
+    "modeLabel": "Lieferung"
   },
   "uniqueCodes": {
     "option": "Einen eindeutigen Code einfügen",
@@ -2637,6 +2641,10 @@
     "email_error": "Fehler",
     "email_pending": "Ausstehend",
     "resend": "Erneut senden",
-    "responsibility": "SPARK garantiert, dass ein Code nur einmal vergeben wird; die Gültigkeit des Codes auf der Website des Händlers liegt in dessen Verantwortung."
+    "responsibility": "SPARK garantiert, dass ein Code nur einmal vergeben wird; die Gültigkeit des Codes auf der Website des Händlers liegt in dessen Verantwortung.",
+    "stagedHelp": "Fügen Sie hier Ihre Gutscheincode-Liste ein (einer pro Zeile) oder importieren Sie eine CSV-Datei: es werden genau {{stock}} benötigt. Sie werden zusammen mit dem Entwurf gespeichert („Speichern“).",
+    "clear": "Liste leeren",
+    "pvCountHint": "{{n}} Code(s) für einen Bestand von {{stock}}: sie müssen vor der Aktivierung übereinstimmen.",
+    "willBeSaved": "Diese Codes werden gespeichert, wenn Sie auf „Speichern“ klicken."
   }
 }

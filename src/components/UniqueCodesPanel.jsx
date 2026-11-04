@@ -5,7 +5,62 @@ import { Button } from './ui';
 
 // The merchant's unique codes of ONE gift (a case or a variant): import (paste or CSV) with a preview, counters against the stock, and the
 // list of codes. Before activation the list can be replaced; afterwards codes can only be added, corrected or removed one by one.
-export default function UniqueCodesPanel({ campaignId, slotIndex, variantId = null, stock, label, draft, onChanged = () => {} }) {
+// Same split as the server's parser (a pasted list or a CSV): one code per line, several allowed with ; , or tab.
+export function parseCodesLocally(text) {
+  const items = []; let empty = 0;
+  for (const line of String(text || '').split(/\r?\n/)) {
+    if (!line.trim()) { empty += 1; continue; }
+    for (const part of line.split(/[;,\t]/)) { const c = part.trim().replace(/^["']|["']$/g, '').trim(); if (c) items.push(c); }
+  }
+  const seen = new Map(); const valid = []; const dups = [];
+  for (const c of items) { const k = c.toLowerCase(); if (seen.has(k)) { seen.set(k, seen.get(k) + 1); continue; } seen.set(k, 1); valid.push(c); }
+  for (const [k, n] of seen) if (n > 1) dups.push({ code: valid.find((c) => c.toLowerCase() === k), times: n });
+  return { valid, dups, empty };
+}
+
+// Before the draft is saved the gift does not exist on the server yet: the list is only STAGED here and is imported as soon as the draft is saved.
+function StagedCodes({ stock, label, staged, onStage }) {
+  const { t } = useTranslation('admin');
+  const r = parseCodesLocally(staged);
+  const onFile = (e) => {
+    const f = e.target.files && e.target.files[0]; e.target.value = '';
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = () => onStage(String(reader.result || ''));
+    reader.readAsText(f);
+  };
+  const ok = r.valid.length === stock && stock > 0 && r.dups.length === 0;
+  return (
+    <div className="uc-panel">
+      <div className="uc-head">
+        <b>{t('uniqueCodes.panelTitle', { label })}</b>
+        <span className={`uc-count ${ok ? 'ok' : 'ko'}`}>{t('uniqueCodes.count', { imported: r.valid.length, stock })}</span>
+      </div>
+      <p className="ap-hint" style={{ margin: '2px 0 8px' }}>{t('uniqueCodes.stagedHelp', { stock })}</p>
+      <textarea rows={5} value={staged || ''} placeholder={t('uniqueCodes.pastePlaceholder')} onChange={(e) => onStage(e.target.value)} style={{ width: '100%', fontFamily: 'var(--font-mono, monospace)', fontSize: 12 }} />
+      <div className="uc-actions">
+        <label className="btn btn-secondary btn-sm" style={{ cursor: 'pointer' }}>{t('uniqueCodes.chooseFile')}<input type="file" accept=".csv,.txt,text/csv,text/plain" hidden onChange={onFile} /></label>
+        {staged && <button type="button" className="uc-link" onClick={() => onStage('')}>{t('uniqueCodes.clear')}</button>}
+      </div>
+      {(staged || '').trim() && (
+        <div className="uc-preview-box">
+          <div><b>{r.valid.length}</b> {t('uniqueCodes.pvValid')}{r.valid.length > 0 && <span className="uc-sample"> ({r.valid.slice(0, 5).join(', ')}{r.valid.length > 5 ? '…' : ''})</span>}</div>
+          {r.empty > 0 && <div className="uc-warn">{t('uniqueCodes.pvEmpty', { n: r.empty })}</div>}
+          {r.dups.length > 0 && <div className="uc-bad">{t('uniqueCodes.pvDuplicates', { list: r.dups.map((d) => `${d.code} ×${d.times}`).join(', ') })}</div>}
+          {r.valid.length !== stock && stock > 0 && <div className="uc-warn">{t('uniqueCodes.pvCountHint', { n: r.valid.length, stock })}</div>}
+          <div className="uc-saveat">{t('uniqueCodes.willBeSaved')}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function UniqueCodesPanel({ campaignId, slotIndex, variantId = null, stock, label, draft, onChanged = () => {}, persisted = true, staged = '', onStage = () => {} }) {
+  if (!persisted) return <StagedCodes stock={stock} label={label} staged={staged} onStage={onStage} />;
+  return <PersistedCodes campaignId={campaignId} slotIndex={slotIndex} variantId={variantId} stock={stock} label={label} draft={draft} onChanged={onChanged} />;
+}
+
+function PersistedCodes({ campaignId, slotIndex, variantId = null, stock, label, draft, onChanged = () => {} }) {
   const { t } = useTranslation('admin');
   const [info, setInfo] = useState(null);
   const [text, setText] = useState('');
