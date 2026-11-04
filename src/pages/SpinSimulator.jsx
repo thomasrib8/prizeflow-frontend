@@ -70,6 +70,13 @@ export default function SpinSimulator() {
       await api.downloadSpinSimulatorPdf({
         title: t('spinSim.pdf.title'),
         subtitle: t('spinSim.pdf.subtitle', { date: new Date().toLocaleDateString(loc) }),
+        highlights: [
+          { label: t('spinSim.kpi.totalSpins'), value: int(sim.spins) },
+          { label: t('spinSim.res.opening'), value: hours(sim.openingHours) },
+          { label: t('spinSim.res.theoretical'), value: int(sim.theoretical) },
+          { label: t('spinSim.kpi.shareVisitors'), value: pc(sim.shareOfVisitors) },
+        ],
+        note: t('spinSim.heroHelp'),
         sections: [
           { title: t('spinSim.pdf.hypotheses'), rows: [
             [t('spinSim.params.visitors.label'), int(i.visitors)],
@@ -77,13 +84,14 @@ export default function SpinSimulator() {
             [t('spinSim.params.secondsPerSpin.label'), `${i.secondsPerSpin} s`], [t('spinSim.params.wheels.label'), `${i.wheels}`],
             [t('spinSim.params.utilization.label'), `${i.utilization} %`], [t('spinSim.params.spinsPerParticipant.label'), dec(i.spinsPerParticipant)],
           ] },
-          { title: t('spinSim.pdf.scenarios'), head: ['', ...SCENARIOS.map(name)], rows: [
+          { title: t('spinSim.pdf.scenarios'), colors: [null, COLORS.pessimistic, COLORS.realistic, COLORS.optimistic], head: ['', ...SCENARIOS.map(name)], rows: [
             [t('spinSim.params.utilization.label'), ...SCENARIOS.map((k) => `${dec(sc[k].inputs.utilization)} %`)],
             [t('spinSim.kpi.totalSpins'), ...SCENARIOS.map((k) => int(sc[k].spins))],
             [t('spinSim.kpi.participants'), ...SCENARIOS.map((k) => int(sc[k].participants))],
             [t('spinSim.kpi.spinsPerDay'), ...SCENARIOS.map((k) => int(sc[k].spinsPerDay))],
             [t('spinSim.kpi.spinsPerHour'), ...SCENARIOS.map((k) => int(sc[k].spinsPerHour))],
             [t('spinSim.kpi.shareVisitors'), ...SCENARIOS.map((k) => pc(sc[k].shareOfVisitors))],
+            [t('spinSim.kpi.hoursNeeded'), ...SCENARIOS.map((k) => hours(sc[k].activeHoursPerWheel))],
           ] },
           ...(alerts.length ? [{ title: t('spinSim.pdf.alerts'), rows: alerts.map((a) => [t(`spinSim.alerts.${a}`)]) }] : []),
         ],
