@@ -154,6 +154,8 @@ export default function SpinSimulator() {
               <div className="sp-scen-row"><span>{t('spinSim.kpi.spinsPerDay')}</span><strong>{int(sc[k].spinsPerDay)}</strong></div>
               <div className="sp-scen-row"><span>{t('spinSim.kpi.participants')}</span><strong>{int(sc[k].participants)}</strong></div>
               <div className="sp-scen-row"><span>{t('spinSim.kpi.spinsPerHour')}</span><strong>{int(sc[k].spinsPerHour)}</strong></div>
+              <div className="sp-scen-row"><span>{t('spinSim.kpi.shareVisitors')}</span><strong>{pc(sc[k].shareOfVisitors)}</strong></div>
+              <div className="sp-scen-row"><span>{t('spinSim.kpi.hoursNeeded')}</span><strong>{hours(sc[k].activeHoursPerWheel)}</strong></div>
               <small>{t('spinSim.scenarioRates', { util: dec(sc[k].inputs.utilization) })}</small>
             </div>
           ))}
