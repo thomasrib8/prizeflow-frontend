@@ -9,9 +9,9 @@ export const LIMITS = {
   visitors: { min: 100, max: 100000, step: 100 },
   days: { min: 1, max: 15, step: 1 },
   hoursPerDay: { min: 1, max: 16, step: 1 },
-  secondsPerSpin: { min: 10, max: 180, step: 5 },
+  secondsPerSpin: { min: 10, max: 180, step: 1 },
   wheels: { min: 1, max: 10, step: 1 },
-  utilization: { min: 10, max: 100, step: 5 },
+  utilization: { min: 10, max: 100, step: 1 },
   spinsPerParticipant: { min: 1, max: 3, step: 0.1 },
 };
 
