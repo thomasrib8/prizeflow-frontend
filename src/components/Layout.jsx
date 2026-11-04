@@ -32,6 +32,7 @@ const ADMIN_NAV_ITEMS = [
   { to: '/users', tKey: 'users', icon: IconUsers, badgeKey: 'pendingCount' },
   { to: '/live', tKey: 'live', icon: IconGlobe },
   { to: '/api-usage', tKey: 'apiUsage', icon: IconGauge },
+  { to: '/spin-simulator', tKey: 'spinSim', icon: IconSpin },
   { to: '/park', tKey: 'park', icon: IconPark },
   { to: '/health', tKey: 'health', icon: IconHeart },
   { to: '/magic', tKey: 'magic', icon: IconMagic },
@@ -259,6 +260,9 @@ function IconPark() {
 }
 function IconGauge() {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M4 18a8 8 0 1116 0"/><path d="M12 18l4-6"/><circle cx="12" cy="18" r="1"/></svg>;
+}
+function IconSpin() {
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4"/></svg>;
 }
 function IconGlobe() {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/></svg>;

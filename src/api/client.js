@@ -89,11 +89,15 @@ async function request(path, { method = 'GET', body, auth = true } = {}) {
 // Authenticated file download — browsers won't attach the Bearer token to a
 // plain navigation/<a href>, so this fetches the file as a blob (with the
 // header attached) and triggers the save via a throwaway object URL instead.
-async function downloadFile(path) {
+async function downloadFile(path, { method = 'GET', body } = {}) {
   if (IS_DEMO) return; // nothing to download in a tutorial
   const token = getToken();
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  if (body !== undefined) headers['Content-Type'] = 'application/json';
   const res = await fetch(`${API_BASE}${path}`, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    method,
+    headers,
+    body: body !== undefined ? JSON.stringify(body) : undefined,
     cache: 'no-store',
   });
   if (!res.ok) {
@@ -161,6 +165,7 @@ export const api = {
   addWheelDirectCost: (id, payload) => request(`/wheels/${id}/direct-costs`, { method: 'POST', body: payload }),
   deleteWheelDirectCost: (id, costId) => request(`/wheels/${id}/direct-costs/${costId}`, { method: 'DELETE' }),
   getAdminDashboard: (query) => request(`/admin/dashboard?${query}`),
+  downloadSpinSimulatorPdf: (payload) => downloadFile('/admin/spin-simulator/pdf', { method: 'POST', body: payload }),
   downloadAdminDashboardCsv: (query) => downloadFile(`/admin/dashboard/export.csv?${query}`),
   searchEvents: (q) => request(`/events/search?q=${encodeURIComponent(q)}`),
   listCatalog: (query = '') => request(`/admin/catalog${query ? `?${query}` : ''}`),

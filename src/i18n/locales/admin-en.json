@@ -1017,7 +1017,8 @@
     "catalog": "Events catalog",
     "live": "Locations Live",
     "apiUsage": "API consumption",
-    "myPark": "My park"
+    "myPark": "My park",
+    "spinSim": "Spin simulator"
   },
   "pwa": {
     "signOut": "Sign out",
@@ -2646,5 +2647,118 @@
     "clear": "Clear the list",
     "pvCountHint": "{{n}} code(s) for a stock of {{stock}}: they must match before activating.",
     "willBeSaved": "These codes will be saved when you click “Save”."
+  },
+  "spinSim": {
+    "title": "Spin simulator",
+    "subtitle": "Estimate a wheel's potential at an event. Everything is computed live, nothing is saved.",
+    "reset": "Reset",
+    "exportPdf": "Export PDF",
+    "exporting": "Exporting…",
+    "assumptions": "Assumptions",
+    "unit": {
+      "people": "ppl",
+      "days": "d",
+      "wheels": "wheel(s)"
+    },
+    "params": {
+      "visitors": {
+        "label": "Total attendance",
+        "help": "Visitors over the whole event (not per day)."
+      },
+      "days": {
+        "label": "Days",
+        "help": "Number of opening days."
+      },
+      "hoursPerDay": {
+        "label": "Hours / day",
+        "help": "Hours the wheel is open each day."
+      },
+      "passRate": {
+        "label": "Visitors passing the wheel",
+        "help": "Share of visitors who see the wheel."
+      },
+      "participationRate": {
+        "label": "Participation rate",
+        "help": "Share of those who see it and play."
+      },
+      "secondsPerSpin": {
+        "label": "Average time per spin",
+        "help": "Whole player journey, from welcome to prize handed over."
+      },
+      "wheels": {
+        "label": "Number of wheels",
+        "help": "Wheels running at the same time."
+      },
+      "utilization": {
+        "label": "Operational utilization",
+        "help": "Share of the time the wheel is really available (breaks, faults, waiting)."
+      },
+      "spinsPerParticipant": {
+        "label": "Spins per participant",
+        "help": "Average number of spins per person."
+      }
+    },
+    "kpi": {
+      "totalSpins": "Estimated spins",
+      "participants": "Unique participants",
+      "spinsPerDay": "Spins / day",
+      "spinsPerHour": "Spins / hour",
+      "hoursNeeded": "Activity time needed",
+      "saturation": "Wheel saturation",
+      "shareVisitors": "Visitors who played"
+    },
+    "kpiHelp": {
+      "totalSpins": "The smaller of demand and capacity.",
+      "participants": "People actually served.",
+      "spinsPerDay": "Evenly spread over the days.",
+      "spinsPerHour": "Over opening hours.",
+      "hoursNeeded": "Opening time needed for these spins.",
+      "saturation": "Capacity really used.",
+      "shareVisitors": "Share of total attendance."
+    },
+    "res": {
+      "demand": "Theoretical demand",
+      "capacity": "Max capacity",
+      "unmet": "Unmet demand",
+      "wheelsNeeded": "Wheels needed"
+    },
+    "limited": {
+      "demand": "Limited by demand: the wheel has room.",
+      "capacity": "Limited by capacity: the wheel is the bottleneck."
+    },
+    "alerts": {
+      "saturated": "Your wheel may not be able to host all the interested participants.",
+      "slowSpin": "Shortening the player journey could increase your capacity.",
+      "spare": "Your wheel has spare capacity to host more participants.",
+      "wheelsNeeded": "To serve all the demand you would need about {{count}} wheels."
+    },
+    "scenarios": "Three scenarios",
+    "scenariosHelp": "The pass rate and the participation rate are varied, then everything is recomputed. Capacity can never be exceeded.",
+    "scenario": {
+      "pessimistic": "Pessimistic",
+      "realistic": "Realistic",
+      "optimistic": "Optimistic"
+    },
+    "scenarioRates": "Pass {{pass}} % · participation {{part}} %",
+    "factorsTitle": "Adjust the scenario coefficients",
+    "factorsHelp": "Coefficients applied to both rates (capped at 100 %). 1 = your assumptions.",
+    "charts": {
+      "scenarios": "Scenario comparison",
+      "demandVsCapacity": "Theoretical demand and maximum capacity",
+      "perDay": "Estimated spins per day",
+      "perDayHelp": "Even spread: no attendance curve is invented.",
+      "demand": "Demand",
+      "capacity": "Capacity",
+      "spins": "Spins",
+      "day": "Day"
+    },
+    "pdf": {
+      "title": "Spin simulation",
+      "subtitle": "Generated on {{date}}",
+      "hypotheses": "Assumptions",
+      "scenarios": "Scenarios",
+      "rates": "Pass / participation",
+      "alerts": "Points of attention"
+    }
   }
 }

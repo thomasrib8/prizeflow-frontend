@@ -1017,7 +1017,8 @@
     "catalog": "Messekatalog",
     "live": "Locations Live",
     "apiUsage": "API-Verbrauch",
-    "myPark": "Mein Park"
+    "myPark": "Mein Park",
+    "spinSim": "Dreh-Simulator"
   },
   "pwa": {
     "signOut": "Abmelden",
@@ -2646,5 +2647,118 @@
     "clear": "Liste leeren",
     "pvCountHint": "{{n}} Code(s) für einen Bestand von {{stock}}: sie müssen vor der Aktivierung übereinstimmen.",
     "willBeSaved": "Diese Codes werden gespeichert, wenn Sie auf „Speichern“ klicken."
+  },
+  "spinSim": {
+    "title": "Dreh-Simulator",
+    "subtitle": "Schätzen Sie das Potenzial eines Glücksrads bei einer Veranstaltung. Alles wird live berechnet, nichts wird gespeichert.",
+    "reset": "Zurücksetzen",
+    "exportPdf": "Als PDF exportieren",
+    "exporting": "Export…",
+    "assumptions": "Annahmen",
+    "unit": {
+      "people": "Pers.",
+      "days": "T",
+      "wheels": "Rad/Räder"
+    },
+    "params": {
+      "visitors": {
+        "label": "Gesamtbesucherzahl",
+        "help": "Besucher der gesamten Veranstaltung (nicht pro Tag)."
+      },
+      "days": {
+        "label": "Tage",
+        "help": "Anzahl der Öffnungstage."
+      },
+      "hoursPerDay": {
+        "label": "Stunden / Tag",
+        "help": "Tägliche Öffnungszeit des Glücksrads."
+      },
+      "passRate": {
+        "label": "Besucher am Glücksrad",
+        "help": "Anteil der Besucher, die das Rad sehen."
+      },
+      "participationRate": {
+        "label": "Teilnahmequote",
+        "help": "Anteil derer, die es sehen und mitspielen."
+      },
+      "secondsPerSpin": {
+        "label": "Durchschnittsdauer pro Dreh",
+        "help": "Gesamter Spielerweg, von der Begrüßung bis zur Gewinnübergabe."
+      },
+      "wheels": {
+        "label": "Anzahl der Räder",
+        "help": "Gleichzeitig laufende Räder."
+      },
+      "utilization": {
+        "label": "Betriebliche Auslastung",
+        "help": "Anteil der Zeit, in der das Rad wirklich verfügbar ist (Pausen, Störungen, Warten)."
+      },
+      "spinsPerParticipant": {
+        "label": "Drehs pro Teilnehmer",
+        "help": "Durchschnittliche Anzahl Drehs pro Person."
+      }
+    },
+    "kpi": {
+      "totalSpins": "Geschätzte Drehs",
+      "participants": "Einzelne Teilnehmer",
+      "spinsPerDay": "Drehs / Tag",
+      "spinsPerHour": "Drehs / Stunde",
+      "hoursNeeded": "Benötigte Aktivitätszeit",
+      "saturation": "Auslastung des Rads",
+      "shareVisitors": "Besucher, die gespielt haben"
+    },
+    "kpiHelp": {
+      "totalSpins": "Das Kleinere aus Nachfrage und Kapazität.",
+      "participants": "Tatsächlich bediente Personen.",
+      "spinsPerDay": "Gleichmäßig auf die Tage verteilt.",
+      "spinsPerHour": "Über die Öffnungsstunden.",
+      "hoursNeeded": "Nötige Öffnungszeit für diese Drehs.",
+      "saturation": "Tatsächlich genutzte Kapazität.",
+      "shareVisitors": "Anteil an der Gesamtbesucherzahl."
+    },
+    "res": {
+      "demand": "Theoretische Nachfrage",
+      "capacity": "Max. Kapazität",
+      "unmet": "Unbefriedigte Nachfrage",
+      "wheelsNeeded": "Benötigte Räder"
+    },
+    "limited": {
+      "demand": "Durch die Nachfrage begrenzt: das Rad hat Luft.",
+      "capacity": "Durch die Kapazität begrenzt: das Rad ist der Engpass."
+    },
+    "alerts": {
+      "saturated": "Ihr Rad kann möglicherweise nicht alle interessierten Teilnehmer aufnehmen.",
+      "slowSpin": "Ein kürzerer Spielerweg könnte Ihre Kapazität erhöhen.",
+      "spare": "Ihr Rad hat zusätzliche Kapazität für weitere Teilnehmer.",
+      "wheelsNeeded": "Um die gesamte Nachfrage zu bedienen, wären etwa {{count}} Räder nötig."
+    },
+    "scenarios": "Drei Szenarien",
+    "scenariosHelp": "Vorbeigehquote und Teilnahmequote werden variiert, dann wird alles neu berechnet. Die Kapazität wird nie überschritten.",
+    "scenario": {
+      "pessimistic": "Pessimistisch",
+      "realistic": "Realistisch",
+      "optimistic": "Optimistisch"
+    },
+    "scenarioRates": "Vorbeigehen {{pass}} % · Teilnahme {{part}} %",
+    "factorsTitle": "Szenario-Koeffizienten anpassen",
+    "factorsHelp": "Auf beide Quoten angewendete Koeffizienten (max. 100 %). 1 = Ihre Annahmen.",
+    "charts": {
+      "scenarios": "Szenarienvergleich",
+      "demandVsCapacity": "Theoretische Nachfrage und maximale Kapazität",
+      "perDay": "Geschätzte Drehs pro Tag",
+      "perDayHelp": "Gleichmäßige Verteilung: keine Besucherkurve wird erfunden.",
+      "demand": "Nachfrage",
+      "capacity": "Kapazität",
+      "spins": "Drehs",
+      "day": "Tag"
+    },
+    "pdf": {
+      "title": "Dreh-Simulation",
+      "subtitle": "Erstellt am {{date}}",
+      "hypotheses": "Annahmen",
+      "scenarios": "Szenarien",
+      "rates": "Vorbeigehen / Teilnahme",
+      "alerts": "Hinweise"
+    }
   }
 }

@@ -32,6 +32,7 @@ import Users from './pages/Users';
 import Park from './pages/Park';
 import AdminDashboard from './pages/AdminDashboard';
 import ApiUsage from './pages/ApiUsage';
+import SpinSimulator from './pages/SpinSimulator';
 import MyPark from './pages/MyPark';
 const Live = lazy(() => import('./pages/Live')); // MapLibre is heavy: loaded only when the page is opened
 import WheelScan from './pages/WheelScan';
@@ -139,6 +140,7 @@ export default function App() {
           <Route path="/park" element={<AdminRoute><Park /></AdminRoute>} />
           <Route path="/my-park" element={<PrivateRoute><MyPark /></PrivateRoute>} />
           <Route path="/api-usage" element={<AdminRoute><ApiUsage /></AdminRoute>} />
+          <Route path="/spin-simulator" element={<AdminRoute><SpinSimulator /></AdminRoute>} />
           <Route path="/live" element={<AdminRoute><Suspense fallback={null}><Live /></Suspense></AdminRoute>} />
           <Route path="/catalog" element={<Navigate to="/settings?tab=catalog" replace />} />
           <Route path="/admin-dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
