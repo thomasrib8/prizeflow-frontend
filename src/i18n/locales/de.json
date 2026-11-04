@@ -1,7 +1,9 @@
 {
   "common": {
     "loading": "Wird geladen…",
-    "noCampaign": "Derzeit läuft keine Kampagne. Bitte schau später noch einmal vorbei."
+    "noCampaign": "Derzeit läuft keine Kampagne. Bitte schau später noch einmal vorbei.",
+    "waitingCampaign": "Das Spiel hat noch nicht begonnen.",
+    "waitingCampaignHint": "Diese Seite öffnet sich von selbst, sobald es startet: Sie können sie geöffnet lassen."
   },
   "expired": {
     "skipped": "Du wurdest übersprungen — du kannst es sofort noch einmal versuchen.",

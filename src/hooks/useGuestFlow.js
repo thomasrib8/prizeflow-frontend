@@ -97,10 +97,19 @@ export function useGuestFlow({ token, persistSession = false, autoReturnMs = nul
     return api.getGuestCampaign(token)
       .then((res) => {
         setCampaignInfo(res);
-        setView(res.active ? 'form' : 'no_campaign');
+        // a draft campaign already has its public link: a waiting page until it is activated
+        setView(res.active ? 'form' : res.waiting ? 'waiting' : 'no_campaign');
       })
       .catch(() => setView('no_campaign'));
   }
+
+  // Waiting for the campaign to start: look again every few seconds, the same page then turns into the form by itself.
+  useEffect(() => {
+    if (view !== 'waiting') return undefined;
+    const timer = setInterval(() => { checkCampaign(); }, 8000);
+    return () => clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view, token]);
 
   useEffect(() => {
     if (sessionTokenRef.current) { setView('queue'); return; }

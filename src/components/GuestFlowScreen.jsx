@@ -212,6 +212,19 @@ export default function GuestFlowScreen({
     return <div style={fullScreenBase}>{cornerCloseZone}<div style={{ color: 'white' }}>{t('common.loading')}</div></div>;
   }
 
+  if (view === 'waiting') {
+    return (
+      <div style={fullScreenBase}>
+        {cornerCloseZone}
+        <div style={{ color: 'white', maxWidth: 420, lineHeight: 1.4 }}>
+          {campaignInfo && campaignInfo.name && <div style={{ fontSize: 14, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', opacity: 0.7, marginBottom: 10 }}>{campaignInfo.name}</div>}
+          <div style={{ fontSize: 22, fontWeight: 800 }}>{t('common.waitingCampaign')}</div>
+          <div style={{ fontSize: 15, opacity: 0.8, marginTop: 10 }}>{t('common.waitingCampaignHint')}</div>
+        </div>
+      </div>
+    );
+  }
+
   if (view === 'no_campaign') {
     return (
       <div style={fullScreenBase}>

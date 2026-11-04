@@ -268,6 +268,20 @@ export default function UserDetail() {
 
       {/* C. Actions on the account */}
       {module === 'actions' && (
+        <Card title={t('userDetail.enrichedCrmTitle')} className="mt-card">
+          <p className="ap-hint" style={{ marginTop: 0 }}>{t('userDetail.enrichedCrmDesc')}</p>
+          <label style={{ display: 'flex', gap: 10, alignItems: 'center', cursor: busy ? 'default' : 'pointer' }}>
+            <input type="checkbox" checked={!!detail.enriched_crm_enabled} disabled={busy} style={{ width: 18, height: 18 }}
+              onChange={async (e) => {
+                setBusy(true); setError('');
+                try { await api.setEnrichedCrm(id, e.target.checked); setDetail((d) => ({ ...d, enriched_crm_enabled: e.target.checked ? 1 : 0 })); }
+                catch (err) { setError(err.message); } finally { setBusy(false); }
+              }} />
+            <span style={{ fontSize: 14, fontWeight: 600 }}>{detail.enriched_crm_enabled ? t('userDetail.enrichedCrmOn') : t('userDetail.enrichedCrmOff')}</span>
+          </label>
+        </Card>
+      )}
+      {module === 'actions' && (
         <Card title={t('userDetail.actionsTitle')} className="mt-card">
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
             {detail.status === 'deactivated' ? (
@@ -283,6 +297,7 @@ export default function UserDetail() {
               style={{ padding: '9px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13 }}
             >
               <option value="operator">{t('users.roleOperator')}</option>
+              <option value="magician">{t('users.roleMagician')}</option>
               <option value="admin">{t('users.roleAdmin')}</option>
             </select>
             <Button variant="ghost" disabled={busy} onClick={handleDelete} style={{ color: '#EF4444' }}>

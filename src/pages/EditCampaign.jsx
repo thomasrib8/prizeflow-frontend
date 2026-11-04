@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import EventNameField, { EMPTY_PLACE, placeFromCampaign, placePayload } from '../components/EventNameField';
 import { Card, Button } from '../components/ui';
+import VariantsEditor, { PersoFields, emptyVariant } from '../components/VariantsEditor';
+import UniqueCodesPanel from '../components/UniqueCodesPanel';
 
 // The language guests see throughout the play flow — see NewCampaign.jsx's
 // LANGUAGE_OPTIONS for why this is separate from the admin panel's language.
@@ -14,7 +16,7 @@ const LANGUAGE_OPTIONS = [
   { value: 'de', label: 'Deutsch' },
 ];
 
-// Edits an already-launched campaign's gifts in place — name, redeem method,
+// A DRAFT shows its 12 cases with free gifts and stocks (saved half-finished if needed). An already-launched campaign's gifts are edited in place — name, redeem method,
 // and (for 'perso') its delivery/subject/body/auto-distribute. Deliberately
 // excludes stock (shown read-only) and never adds/removes cases — only the
 // slots already configured at creation can be edited here.
@@ -31,9 +33,9 @@ export default function EditCampaign() {
   const [slots, setSlots] = useState([]);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+  const [savedNote, setSavedNote] = useState('');
 
-  useEffect(() => {
-    api.getCampaign(id).then((source) => {
+  const reloadCampaign = () => api.getCampaign(id).then((source) => {
       setName(source.name || '');
       setDescription(source.description || '');
       setEventName(source.event_name || '');
@@ -45,7 +47,8 @@ export default function EditCampaign() {
         return;
       }
       setCampaign(source);
-      setSlots(source.slots.map((s) => ({
+      // A draft (never ran): every one of the 12 cases is shown, gifts and stocks are freely editable. A launched campaign keeps its cases.
+      const mk = (s) => ({
         slotIndex: s.slot_index,
         giftName: s.gift_name,
         stockInitial: s.stock_initial,
@@ -55,32 +58,66 @@ export default function EditCampaign() {
         persoSubject: s.perso_subject || '',
         persoBody: s.perso_body || '',
         persoAutoDistribute: !!s.perso_auto_distribute,
-      })));
-    }).catch((e) => setError(e.message));
-  }, [id]);
+        persoUniqueCode: !!s.perso_unique_code, savedUnique: !!s.perso_unique_code,
+        variantsEnabled: !!s.variants_enabled,
+        variants: (s.variants || []).map((v) => ({
+          id: v.id, name: v.name, stock: v.stock_initial, stockRemaining: v.stock_remaining,
+          redeemMethod: ['code', 'voucher', 'perso'].includes(v.redeem_method) ? v.redeem_method : 'qr',
+          persoDelivery: v.perso_delivery || 'code', persoSubject: v.perso_subject || '', persoBody: v.perso_body || '', persoAutoDistribute: !!v.perso_auto_distribute,
+          persoUniqueCode: !!v.perso_unique_code, savedUnique: !!v.perso_unique_code,
+        })),
+      });
+      if (source.status === 'draft') {
+        const byIndex = new Map(source.slots.map((s) => [s.slot_index, s]));
+        setSlots(Array.from({ length: 12 }, (_, i) => (byIndex.has(i) ? mk(byIndex.get(i)) : { slotIndex: i, giftName: '', stockInitial: 0, stockRemaining: 0, redeemMethod: 'qr', persoDelivery: 'code', persoSubject: '', persoBody: '', persoAutoDistribute: false, persoUniqueCode: false, savedUnique: false, variantsEnabled: false, variants: [] })));
+      } else {
+        setSlots(source.slots.map(mk));
+      }
+  }).catch((e) => setError(e.message));
+  useEffect(() => { reloadCampaign(); }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function updateSlot(i, field, value) {
     setSlots((prev) => prev.map((s, idx) => (idx === i ? { ...s, [field]: value } : s)));
+  }
+  function patchSlot(i, patch) {
+    setSlots((prev) => prev.map((s, idx) => (idx === i ? { ...s, ...patch } : s)));
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
     if (!name.trim()) return setError(t('newCampaign.campaignNameRequiredError'));
-    for (const s of slots) {
+    const isDraft = campaign && campaign.status === 'draft';
+    for (const s of isDraft ? [] : slots) {
       if (!s.giftName.trim()) return setError(t('editCampaign.giftNameRequiredError', { n: s.slotIndex + 1 }));
-      if (s.redeemMethod === 'perso' && (!s.persoSubject.trim() || !s.persoBody.trim())) {
+      if (!s.variantsEnabled && s.redeemMethod === 'perso' && (!s.persoSubject.trim() || !s.persoBody.trim())) {
         return setError(t('newCampaign.persoNeedsSubjectBodyError', { n: s.slotIndex + 1 }));
       }
     }
     setSaving(true);
     try {
       await api.updateCampaignDetails(id, { name, description, eventName, eventPlace: placePayload(eventPlace), language });
+      if (isDraft) {
+        // half-finished is fine: what is missing is listed on the campaign page and checked when it is activated
+        await api.saveDraftSlots(id, slots.filter((s) => s.giftName.trim() || Number(s.stockInitial) > 0).map((s) => ({
+          slotIndex: s.slotIndex, giftName: s.giftName, stock: Number(s.stockInitial) || 0, redeemMethod: s.redeemMethod,
+          variantsEnabled: !!s.variantsEnabled,
+          ...(s.variantsEnabled ? { variants: s.variants.map((v) => ({ id: v.id || undefined, name: v.name, stock: Number(v.stock) || 0, redeemMethod: v.redeemMethod,
+            ...(v.redeemMethod === 'perso' ? { persoDelivery: v.persoDelivery, persoSubject: v.persoSubject, persoBody: v.persoBody, persoAutoDistribute: !!v.persoAutoDistribute, persoUniqueCode: !!v.persoUniqueCode } : {}) })) } : {}),
+          ...(s.redeemMethod === 'perso' ? { persoDelivery: s.persoDelivery, persoSubject: s.persoSubject, persoBody: s.persoBody, persoAutoDistribute: !!s.persoAutoDistribute, persoUniqueCode: !!s.persoUniqueCode && !s.variantsEnabled } : {}),
+        })));
+        // stay here: the unique codes of a gift can only be loaded once the draft is saved with the option on
+        setSavedNote(t('editCampaign.draftSaved'));
+        await reloadCampaign();
+        return;
+      }
       await api.updateCampaignSlots(id, {
         slots: slots.map((s) => ({
           slotIndex: s.slotIndex,
           giftName: s.giftName,
           redeemMethod: s.redeemMethod,
+          ...(s.variantsEnabled ? { variants: s.variants.map((v) => ({ id: v.id, name: v.name, redeemMethod: v.redeemMethod,
+            ...(v.redeemMethod === 'perso' ? { persoDelivery: v.persoDelivery, persoSubject: v.persoSubject, persoBody: v.persoBody, persoAutoDistribute: !!v.persoAutoDistribute } : {}) })) } : {}),
           ...(s.redeemMethod === 'perso'
             ? { persoDelivery: s.persoDelivery, persoSubject: s.persoSubject, persoBody: s.persoBody, persoAutoDistribute: !!s.persoAutoDistribute }
             : {}),
@@ -105,6 +142,7 @@ export default function EditCampaign() {
         </div>
       </div>
       {error && <div className="error-banner">{error}</div>}
+      {savedNote && <div className="ap-info" style={{ marginBottom: 12 }}>{savedNote} <button type="button" className="uc-link" onClick={() => navigate(`/campaigns/${id}`)}>{t('editCampaign.backToCampaign')}</button></div>}
       {campaign.status !== 'archived' && (
         <form onSubmit={handleSubmit}>
           <Card title={t('newCampaign.campaignDetailsTitle')} className="mt-card">
@@ -135,51 +173,43 @@ export default function EditCampaign() {
                   <div className="slot-row">
                     <div className="slot-index">{t('dashboard.caseLabel', { n: s.slotIndex + 1 })}</div>
                     <input placeholder={t('editCampaign.giftNamePlaceholder')} value={s.giftName} onChange={(e) => updateSlot(i, 'giftName', e.target.value)} />
-                    <div style={{ fontSize: 12, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
-                      {t('editCampaign.stockLeftLabel', { remaining: s.stockRemaining, initial: s.stockInitial })}
-                    </div>
-                    <select value={s.redeemMethod} title={t('editCampaign.redeemMethodTitle')} onChange={(e) => updateSlot(i, 'redeemMethod', e.target.value)}>
-                      <option value="qr">QR</option>
-                      <option value="code">Code</option>
-                      <option value="voucher">Voucher</option>
-                      <option value="perso">Perso</option>
-                    </select>
+                    {campaign.status === 'draft' ? (
+                      <input type="number" min="0" step="1" value={s.stockInitial} title={t('editCampaign.stockInputTitle')} aria-label={t('editCampaign.stockInputTitle')}
+                        onChange={(e) => updateSlot(i, 'stockInitial', e.target.value === '' ? '' : Math.max(0, Math.floor(Number(e.target.value)) || 0))} style={{ width: 84 }} />
+                    ) : (
+                      <div style={{ fontSize: 12, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                        {t('editCampaign.stockLeftLabel', { remaining: s.stockRemaining, initial: s.stockInitial })}
+                      </div>
+                    )}
+                    {s.variantsEnabled ? (
+                      <span className="vr-flag" title={t('variants.modeInVariants')}>{t('variants.modeInVariantsShort')}</span>
+                    ) : (
+                      <select value={s.redeemMethod} title={t('editCampaign.redeemMethodTitle')} onChange={(e) => updateSlot(i, 'redeemMethod', e.target.value)}>
+                        <option value="qr">QR</option>
+                        <option value="code">Code</option>
+                        <option value="voucher">Voucher</option>
+                        <option value="perso">Perso</option>
+                      </select>
+                    )}
                     <div className="slot-pct" />
                   </div>
-                  {s.redeemMethod === 'perso' && (
-                    <div style={{ gridColumn: '1 / -1', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 8, padding: 12, margin: '-2px 0 4px' }}>
-                      <div style={{ display: 'flex', gap: 10, marginBottom: 8, flexWrap: 'wrap' }}>
-                        <div className="field" style={{ margin: 0, flex: '0 0 180px' }}>
-                          <label style={{ fontSize: 11 }}>{t('editCampaign.deliversLabel')}</label>
-                          <select value={s.persoDelivery} onChange={(e) => updateSlot(i, 'persoDelivery', e.target.value)}>
-                            <option value="code">{t('editCampaign.deliversCode')}</option>
-                            <option value="qr">{t('editCampaign.deliversQr')}</option>
-                            <option value="text">{t('editCampaign.deliversText')}</option>
-                          </select>
-                        </div>
-                        <div className="field" style={{ margin: 0, flex: '1 1 260px' }}>
-                          <label style={{ fontSize: 11 }}>{t('settings.emailTemplates.subjectLabel')}</label>
-                          <input placeholder={t('editCampaign.subjectPlaceholder')} value={s.persoSubject} onChange={(e) => updateSlot(i, 'persoSubject', e.target.value)} />
-                        </div>
-                      </div>
-                      <div className="field" style={{ margin: 0 }}>
-                        <label style={{ fontSize: 11 }}>
-                          {t('editCampaign.messageLabel', { vars: `{{firstName}} / {{giftName}}${s.persoDelivery === 'code' ? ' / {{code}}' : ''}` })}
-                        </label>
-                        <textarea rows={2} placeholder={t('editCampaign.messagePlaceholder')} value={s.persoBody} onChange={(e) => updateSlot(i, 'persoBody', e.target.value)} style={{ width: '100%', fontFamily: 'inherit' }} />
-                        {s.persoDelivery === 'code' && (
-                          <p style={{ fontSize: 11, color: '#94A3B8', margin: '4px 0 0' }}>
-                            {t('editCampaign.codeAutoAddedNote', { code: '{{code}}' })}
-                          </p>
-                        )}
-                      </div>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, cursor: 'pointer' }}>
-                        <input type="checkbox" checked={!!s.persoAutoDistribute} onChange={(e) => updateSlot(i, 'persoAutoDistribute', e.target.checked)} />
-                        <span style={{ fontSize: 12, color: '#334155' }}>
-                          {t('editCampaign.autoDistributeLabel')}
-                          <span style={{ display: 'block', fontSize: 11, color: '#94A3B8' }}>{t('editCampaign.autoDistributeDesc')}</span>
-                        </span>
-                      </label>
+                  {campaign.status === 'draft' && (s.giftName.trim() || Number(s.stockInitial) > 0) && (
+                    <label className="vr-toggle">
+                      <input type="checkbox" checked={!!s.variantsEnabled}
+                        onChange={(e) => patchSlot(i, { variantsEnabled: e.target.checked, variants: e.target.checked && !(s.variants || []).length ? [emptyVariant()] : (s.variants || []) })} />
+                      <span>{t('variants.enable')}</span>
+                    </label>
+                  )}
+                  {!s.variantsEnabled && s.redeemMethod === 'perso' && (
+                    <PersoFields value={s} idPrefix={`slot-${s.slotIndex}`} uniqueCodeEditable={campaign.status === 'draft'} onChange={(field, value) => updateSlot(i, field, value)}>
+                      {s.savedUnique
+                        ? <UniqueCodesPanel campaignId={id} slotIndex={s.slotIndex} stock={Number(s.stockInitial) || 0} label={s.giftName} draft={campaign.status === 'draft'} onChanged={reloadCampaign} />
+                        : <p className="ap-hint">{t('uniqueCodes.saveFirst')}</p>}
+                    </PersoFields>
+                  )}
+                  {s.variantsEnabled && (
+                    <div style={{ gridColumn: '1 / -1' }}>
+                      <VariantsEditor slot={s} draft={campaign.status === 'draft'} onChange={(patch) => patchSlot(i, patch)} campaignId={id} onCodesChanged={reloadCampaign} />
                     </div>
                   )}
                 </div>

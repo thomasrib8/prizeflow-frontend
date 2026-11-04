@@ -79,6 +79,8 @@ async function request(path, { method = 'GET', body, auth = true } = {}) {
     const boxKey = { BOX_NOT_PRIMARY: 'boxApp.readOnly', BOX_BAD_CODE: 'boxApp.badCode', BOX_NO_CODE: 'boxApp.noCode', BOX_NOT_READY: 'boxApp.notReady' }[data && data.code];
     const err = new Error(boxKey ? i18n.t(boxKey, { ns: 'admin' }) : (data && data.error) || `Request failed (${res.status})`);
     if (data && data.code) err.code = data.code; // e.g. POSSIBLE_DUPLICATE — lets a screen offer a specific way forward
+    if (data && data.analysis) err.analysis = data.analysis; // codes import refused: what is wrong, precisely
+    if (data && Array.isArray(data.issues)) err.issues = data.issues; // e.g. ACTIVATION_BLOCKED: what is missing, precisely
     throw err;
   }
   return data;
@@ -200,6 +202,7 @@ export const api = {
   cancelPlannedRental: (id) => request(`/admin/commercial/planned/${id}/cancel`, { method: 'POST' }),
   getRevenue: (query = '') => request(`/admin/commercial/revenue${query ? `?${query}` : ''}`),
   reverseRevenueEntry: (id, note) => request(`/admin/commercial/revenue/${id}/reverse`, { method: 'POST', body: { note } }),
+  setEnrichedCrm: (userId, enabled) => request(`/users/${encodeURIComponent(userId)}/enriched-crm`, { method: 'PATCH', body: { enabled } }),
   getWheelShipping: (id) => request(`/wheels/${id}/shipping`),
   sendWheelToShipr: (id, body, leg = 'out') => request(`/wheels/${id}/shipping${leg === 'return' ? '?leg=return' : ''}`, { method: 'POST', body }),
   resetWheelShipping: (id, leg = 'out') => request(`/wheels/${id}/shipping/reset${leg === 'return' ? '?leg=return' : ''}`, { method: 'POST' }),
@@ -297,6 +300,17 @@ export const api = {
   getPackWheelScript: (wheelId) => request(`/box-activation/pack/${encodeURIComponent(wheelId)}/wheel-script`),
   preparePackBox: (wheelId) => request(`/box-activation/pack/${encodeURIComponent(wheelId)}/prepare`, { method: 'POST', body: {} }),
   markPackReady: (wheelId, boxAlreadyActivated) => request(`/box-activation/pack/${encodeURIComponent(wheelId)}/ready`, { method: 'POST', body: { boxAlreadyActivated: !!boxAlreadyActivated } }),
+  getCampaignCodes: (id) => request(`/campaigns/${id}/codes`),
+  listCampaignCodes: (id, slotIndex, variantId) => request(`/campaigns/${id}/codes/list?slotIndex=${slotIndex}${variantId ? `&variantId=${encodeURIComponent(variantId)}` : ''}`),
+  getCampaignCodesHistory: (id) => request(`/campaigns/${id}/codes/history`),
+  previewCampaignCodes: (id, body) => request(`/campaigns/${id}/codes/preview`, { method: 'POST', body }),
+  importCampaignCodes: (id, body) => request(`/campaigns/${id}/codes/import`, { method: 'POST', body }),
+  updateCampaignCode: (id, codeId, code) => request(`/campaigns/${id}/codes/${codeId}`, { method: 'PATCH', body: { code } }),
+  deleteCampaignCode: (id, codeId) => request(`/campaigns/${id}/codes/${codeId}`, { method: 'DELETE' }),
+  resendRewardEmail: (rewardId) => request(`/account/rewards/${encodeURIComponent(rewardId)}/resend-email`, { method: 'POST' }),
+  getCampaignPublicLink: (id) => request(`/campaigns/${id}/public-link`),
+  getCampaignActivationCheck: (id) => request(`/campaigns/${id}/activation-check`),
+  saveDraftSlots: (id, slots) => request(`/campaigns/${id}/draft-slots`, { method: 'PUT', body: { slots } }),
   downloadCampaignQrPdf: (id) => downloadFile(`/campaigns/${id}/qr.pdf`),
   // Manual fallback for when scanning the QR fails — an already-logged-in
   // operator looks up a reward by ID and gets back the same signed code

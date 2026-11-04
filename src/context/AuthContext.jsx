@@ -19,6 +19,20 @@ export function AuthProvider({ children }) {
     if (user?.language) i18n.changeLanguage(user.language);
   }, [user?.language]);
 
+  // The account's "enriched CRM" option can be switched by a SPARK administrator at any time: read it again whenever the app starts.
+  const userId = user?.id;
+  useEffect(() => {
+    if (!userId) return;
+    api.getAccountSettings().then((s) => {
+      setUser((prev) => {
+        if (!prev || prev.enrichedCrm === !!s.enrichedCrm) return prev;
+        const next = { ...prev, enrichedCrm: !!s.enrichedCrm };
+        writeStoredUser(next);
+        return next;
+      });
+    }).catch(() => {});
+  }, [userId]);
+
   const startSession = useCallback(({ user, token }) => {
     setToken(token);
     writeStoredUser(user);

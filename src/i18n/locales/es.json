@@ -1,7 +1,9 @@
 {
   "common": {
     "loading": "Cargando…",
-    "noCampaign": "No hay ninguna campaña activa en este momento. Vuelve más tarde."
+    "noCampaign": "No hay ninguna campaña activa en este momento. Vuelve más tarde.",
+    "waitingCampaign": "El juego aún no ha comenzado.",
+    "waitingCampaignHint": "Esta página se abrirá sola en cuanto empiece: puede dejarla abierta."
   },
   "expired": {
     "skipped": "Te hemos pasado de turno — puedes volver a intentarlo ahora mismo.",

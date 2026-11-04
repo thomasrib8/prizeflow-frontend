@@ -11,6 +11,7 @@ import LinkedInSearchDialog from './linkedin/LinkedInSearchDialog';
 import { transcriptOf, joinNote } from '../utils/speech';
 import { useLinkedInStatus } from '../hooks/useLinkedInStatus';
 import { canSearchLinkedIn, shortLinkedInUrl } from '../utils/linkedin';
+import { useEnrichedCrm } from '../hooks/useEnrichedCrm';
 
 // Chrome/Edge only (webkitSpeechRecognition) — same as ProspectCard.jsx, see
 // there for why this doesn't render anywhere else.
@@ -86,6 +87,7 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
   // { state: 'idle' | 'searching' | 'found' | 'not_found', email, score } —
   // live Hunter.io lookup, so the rep sees a result (and can review/correct
   // it) before saving, instead of only finding out afterwards via a toast.
+  const enrichedCrm = useEnrichedCrm(); // Hunter search, badge scan and LinkedIn belong to the enriched CRM option
   const [hunterSearch, setHunterSearch] = useState({ state: 'idle' });
   const hunterSignatureRef = useRef(''); // last "first|last|company" combo actually searched — never search the same one twice
   const hunterRequestIdRef = useRef(0); // bumped per request so a late response from an older search is ignored
@@ -255,7 +257,7 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
   // straight off the badge) — there is nothing to look up, and it would only
   // burn a Hunter.io credit for a result that gets thrown away.
   useEffect(() => {
-    if (IS_BOX_BUILD) return undefined; // e-mail search needs the internet: not on the event box
+    if (IS_BOX_BUILD || !enrichedCrm) return undefined; // e-mail search needs the internet (not on the event box) and the enriched CRM option
     if (form.email.trim()) return undefined;
     const first = form.firstName.trim();
     const last = form.lastName.trim();
@@ -385,7 +387,7 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
             {/* Hunter.io is only ever worth it when there's no email yet —
                 once one is known (typed, or already on the badge), there's
                 nothing to look up and no reason to spend a credit on it. */}
-            {!IS_BOX_BUILD && !form.email.trim() && (
+            {!IS_BOX_BUILD && enrichedCrm && !form.email.trim() && (
               <Button
                 type="button"
                 variant="secondary"

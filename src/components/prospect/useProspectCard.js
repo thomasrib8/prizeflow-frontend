@@ -15,6 +15,7 @@ import { IS_BOX_BUILD } from '../../utils/boxMode';
 import { isPlaceholderEmail } from '../../utils/placeholderEmail';
 import { canSearchLinkedIn, normalizeLinkedInUrl } from '../../utils/linkedin';
 import { useLinkedInStatus } from '../../hooks/useLinkedInStatus';
+import { useEnrichedCrm } from '../../hooks/useEnrichedCrm';
 import { IS_DEMO } from '../../tutorial/demo';
 
 // Tutorial mode: a pretend recogniser (no microphone, no permission prompt) that "hears" the sentence the tutorial gives it.
@@ -88,7 +89,8 @@ export function useProspectCard({ campaignId, guest, initialMode, onClose, onSav
   const [aiError, setAiError] = useState('');
   const [aiEnabledCampaign, setAiEnabledCampaign] = useState(false);
   // The assistant needs the internet: never on the event box, whatever the campaign says.
-  const aiOn = aiEnabledCampaign && !IS_BOX_BUILD;
+  const enrichedCrm = useEnrichedCrm(); // AI assistant and LinkedIn belong to the enriched CRM option
+  const aiOn = aiEnabledCampaign && !IS_BOX_BUILD && enrichedCrm;
 
   // Right-hand column: dated history and the other campaigns (cloud only — the box has neither), manual notes (both).
   const [history, setHistory] = useState(null);
@@ -421,7 +423,7 @@ export function useProspectCard({ campaignId, guest, initialMode, onClose, onSav
     : li.offline ? (linkedinCampaign ? 'offline' : 'none')
     : li.status && li.status.available ? (li.status.credits.remaining <= 0 ? 'exhausted' : 'search')
     : 'none';
-  const linkedinEditable = !li.offline && !!(li.status && li.status.accountEnabled && li.status.campaignEnabled);
+  const linkedinEditable = enrichedCrm && !li.offline && !!(li.status && li.status.accountEnabled && li.status.campaignEnabled);
 
   const phone = phoneFromForm || Object.entries(guestAnswers).find(([label, v]) => PHONE_LABEL_RE.test(label.trim()) && v)?.[1] || null;
 

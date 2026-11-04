@@ -1,4 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import CampaignLinkModal from '../components/CampaignLinkModal';
+import UniqueCodesSummary from '../components/UniqueCodesSummary';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
@@ -85,9 +87,18 @@ export default function CampaignDetail() {
     }
   }
 
+  // What still stops a draft from being activated, translated by code (server sentence as a fallback)
+  const [issues, setIssues] = useState([]);
+  const [linkOpen, setLinkOpen] = useState(false);
+  const issueText = (i) => t(`activation.issue.${i.code}`, { ...(i.params || {}), defaultValue: i.message });
+  useEffect(() => {
+    if (campaign && campaign.status === 'draft') api.getCampaignActivationCheck(campaign.id).then((r) => setIssues(r.issues || [])).catch(() => {});
+    else setIssues([]);
+  }, [campaign && campaign.id, campaign && campaign.status]); // eslint-disable-line react-hooks/exhaustive-deps
+
   async function runAction(fn) {
     setBusy(true); setError('');
-    try { await fn(); load(); } catch (e) { setError(e.message); } finally { setBusy(false); }
+    try { await fn(); load(); } catch (e) { if (e.issues) setIssues(e.issues); setError(e.issues ? t('activation.blocked') : e.message); } finally { setBusy(false); }
   }
 
   async function handleDelete() {
@@ -163,6 +174,7 @@ export default function CampaignDetail() {
               campaign.status !== 'archived' && { key: 'gifts', label: t('campaignDetail.editGiftsBtn'), onClick: () => navigate(`/campaigns/${campaign.id}/edit`) },
               campaign.status !== 'archived' && { key: 'seg', label: t('campaignDetail.editSegmentationBtn'), onClick: () => navigate(`/campaigns/${campaign.id}/edit-settings`) },
               campaign.status !== 'archived' && { key: 'settings', label: t('campaignDetail.editSettingsBtn'), onClick: () => navigate(`/campaigns/${campaign.id}/settings`) },
+              { key: 'link', label: t('campaignLink.menuItem'), onClick: () => setLinkOpen(true) },
               campaign.status !== 'archived' && { key: 'dup', label: t('campaignDetail.duplicateBtn'), onClick: () => navigate(`/campaigns/new?from=${campaign.id}`) },
               { separator: true },
               { key: 'csv', label: exportBusy ? t('campaignDetail.exportingBtn') : t('campaignDetail.exportGiftDistBtn'), disabled: exportBusy, onClick: handleExportGiftDistribution },
@@ -175,6 +187,13 @@ export default function CampaignDetail() {
         </div>
       </div>
       {error && <div className="error-banner">{error}</div>}
+      {campaign.status === 'draft' && issues.length > 0 && (
+        <div className="ap-warn" style={{ marginBottom: 14 }}>
+          <b>{t('activation.todoTitle')}</b>
+          <ul style={{ margin: '6px 0 0', paddingLeft: 18 }}>{issues.map((i, k) => <li key={k}>{issueText(i)}</li>)}</ul>
+        </div>
+      )}
+      {linkOpen && <CampaignLinkModal campaignId={campaign.id} onClose={() => setLinkOpen(false)} />}
       {campaign.status === 'archived' && (
         <div style={{
           background: '#F1F5F9', border: '1px solid #E2E8F0', borderRadius: 10, padding: '10px 16px',
@@ -183,6 +202,8 @@ export default function CampaignDetail() {
           {t('campaignDetail.archivedNotice')}
         </div>
       )}
+
+      <UniqueCodesSummary campaignId={campaign.id} />
 
       {/* Gift distribution */}
       <Card title={t('campaignDetail.giftDistributionTitle')}>
@@ -194,7 +215,8 @@ export default function CampaignDetail() {
             {campaign.slots.map(s => {
               const pct = s.stock_initial ? Math.round(((s.stock_initial - s.stock_remaining) / s.stock_initial) * 100) : 0;
               return (
-                <tr key={s.slot_index}>
+                <Fragment key={s.slot_index}>
+                <tr>
                   <td style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)' }}>{s.slot_index + 1}</td>
                   <td><GiftPill slotIndex={s.slot_index} name={s.gift_name} /></td>
                   <td style={{ color: 'var(--text-muted)' }}>{s.stock_initial}</td>
@@ -203,6 +225,21 @@ export default function CampaignDetail() {
                   <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{s.redeem_method === 'code' ? t('campaignDetail.redeemCode') : s.redeem_method === 'voucher' ? t('campaignDetail.redeemVoucher') : s.redeem_method === 'perso' ? t('campaignDetail.redeemPerso') : t('campaignDetail.redeemQr')}</td>
                   <td><MiniBar pct={pct} color={SLOT_COLORS[s.slot_index % SLOT_COLORS.length]} /></td>
                 </tr>
+                {(s.variants || []).map((v) => {
+                  const vpct = v.stock_initial ? Math.round(((v.stock_initial - v.stock_remaining) / v.stock_initial) * 100) : 0;
+                  return (
+                    <tr key={v.id} style={{ background: '#FAF8FF' }}>
+                      <td />
+                      <td style={{ paddingLeft: 26, fontSize: 12.5 }}>↳ {v.name}</td>
+                      <td style={{ color: 'var(--text-muted)' }}>{v.stock_initial}</td>
+                      <td style={{ color: 'var(--text-muted)' }}>{((v.stock_initial / total) * 100).toFixed(1)}%</td>
+                      <td style={{ fontWeight: 600 }}>{v.stock_remaining}</td>
+                      <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{v.redeem_method === 'code' ? t('campaignDetail.redeemCode') : v.redeem_method === 'voucher' ? t('campaignDetail.redeemVoucher') : v.redeem_method === 'perso' ? 'Perso' : 'QR'}</td>
+                      <td><MiniBar pct={vpct} color="#7C3AED" /></td>
+                    </tr>
+                  );
+                })}
+                </Fragment>
               );
             })}
           </tbody>

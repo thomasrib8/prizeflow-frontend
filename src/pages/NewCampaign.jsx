@@ -179,6 +179,35 @@ export default function NewCampaign() {
     return '';
   }
 
+  // Saves what has been filled in so far as a draft (a name is enough): the campaign gets its link and QR code at once and
+  // the configuration is finished later from the campaign page; everything is checked when the campaign is activated.
+  async function handleSaveDraft() {
+    if (!name.trim()) { setError(t('newCampaign.campaignNameRequiredError')); setStep(1); return; }
+    setError('');
+    setSaving(true);
+    try {
+      const created = await api.createCampaign({
+        draft: true, name, description, eventName, eventPlace: placePayload(eventPlace), language, isTest,
+        ...settings, googleReviewUrl: settings.googleReviewUrl.trim(),
+        slots: gifts.filter((g) => g.caseIndex !== null && (g.giftName.trim() || Number(g.stock) > 0)).map((g) => ({
+          slotIndex: g.caseIndex, giftName: g.giftName, stock: Number(g.stock) || 0,
+          redeemMethod: ['code', 'voucher', 'perso'].includes(g.redeemMethod) ? g.redeemMethod : 'qr',
+          ...(g.redeemMethod === 'perso' ? { persoDelivery: g.persoDelivery, persoSubject: g.persoSubject, persoBody: g.persoBody, persoAutoDistribute: !!g.persoAutoDistribute } : {}),
+        })),
+        segmentCategories: segmentCategories.filter((c) => c.name.trim() && (c.options || []).length),
+        fields: [
+          ...salesFields.filter((f) => f.label.trim()).map((f) => ({ ...f, scope: 'sales' })),
+          ...guestFields.filter((f) => f.label.trim()).map((f) => ({ ...f, scope: 'guest' })),
+        ],
+      });
+      navigate(`/campaigns/${created.id}`);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
   function goToStep(n) {
     if (n > step && step === 1) {
       const err = validateStep1();
@@ -329,6 +358,7 @@ export default function NewCampaign() {
             <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
               <Button type="button" onClick={() => goToStep(2)} disabled={placedCount < CASE_COUNT}>{t('newCampaign.nextBtn')}</Button>
               <Button type="button" variant="secondary" onClick={() => navigate('/campaigns')}>{t('common.cancel')}</Button>
+              <Button type="button" variant="ghost" disabled={saving} onClick={handleSaveDraft}>{t('newCampaign.saveDraftBtn')}</Button>
               {placedCount < CASE_COUNT && (
                 <span style={{ alignSelf: 'center', fontSize: 12, color: '#64748B' }}>
                   {t('newCampaign.placeAllGiftsHint', { count: CASE_COUNT, placed: placedCount })}
@@ -357,6 +387,7 @@ export default function NewCampaign() {
             <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
               <Button type="button" onClick={() => goToStep(3)}>{t('newCampaign.nextBtn')}</Button>
               <Button type="button" variant="secondary" onClick={() => setStep(1)}>{t('newCampaign.backBtn')}</Button>
+              <Button type="button" variant="ghost" disabled={saving} onClick={handleSaveDraft}>{t('newCampaign.saveDraftBtn')}</Button>
             </div>
           </>
         )}
@@ -380,6 +411,7 @@ export default function NewCampaign() {
             <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
               <Button type="button" onClick={() => goToStep(4)}>{t('newCampaign.nextBtn')}</Button>
               <Button type="button" variant="secondary" onClick={() => setStep(2)}>{t('newCampaign.backBtn')}</Button>
+              <Button type="button" variant="ghost" disabled={saving} onClick={handleSaveDraft}>{t('newCampaign.saveDraftBtn')}</Button>
             </div>
           </>
         )}
@@ -391,6 +423,7 @@ export default function NewCampaign() {
             <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
               <Button type="submit" disabled={saving}>{saving ? t('newCampaign.creatingBtn') : t('newCampaign.createCampaignBtn')}</Button>
               <Button type="button" variant="secondary" onClick={() => setStep(3)}>{t('newCampaign.backBtn')}</Button>
+              <Button type="button" variant="ghost" disabled={saving} onClick={handleSaveDraft}>{t('newCampaign.saveDraftBtn')}</Button>
             </div>
           </>
         )}

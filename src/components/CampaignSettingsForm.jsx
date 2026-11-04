@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
+import { useEnrichedCrm } from '../hooks/useEnrichedCrm';
 import { Card } from './ui';
 import ResultScreenCard, { DEFAULT_RESULT_SCREEN, resultScreenFromCampaign } from './ResultScreenCard';
 import CreditsBar from './linkedin/CreditsBar';
@@ -53,6 +54,7 @@ const warnStyle = { background: '#FFFBEB', border: '1px solid #FDE68A', borderRa
 // without the explanatory paragraphs and with line icons instead of emoji.
 export default function CampaignSettingsForm({ value, onChange, compact = false, language = 'fr' }) {
   const { t } = useTranslation('admin');
+  const enrichedCrm = useEnrichedCrm(); // AI assistant and LinkedIn search belong to the enriched CRM option
   const [account, setAccount] = useState(null);
   const [aiConfigured, setAiConfigured] = useState(null);
   const prefilledRef = useRef(false);
@@ -171,7 +173,7 @@ export default function CampaignSettingsForm({ value, onChange, compact = false,
 
       <ResultScreenCard value={value.resultScreen} onChange={(resultScreen) => onChange({ resultScreen })} language={language} compact={compact} />
 
-      <Card title={t('campaignSettings.aiTitle')} className="mt-card">
+      {enrichedCrm && <Card title={t('campaignSettings.aiTitle')} className="mt-card">
         {!compact && (
           <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px', lineHeight: 1.6 }}>
             {t('campaignSettings.aiDesc')}
@@ -189,10 +191,10 @@ export default function CampaignSettingsForm({ value, onChange, compact = false,
           />
           <span style={{ fontSize: 14, fontWeight: 600 }}>{t('campaignSettings.aiToggleLabel')}</span>
         </label>
-      </Card>
+      </Card>}
 
       {/* LinkedIn profile search: only offered when an SPARK admin has allowed it for this account */}
-      {account?.linkedinSearch?.enabled && (
+      {enrichedCrm && account?.linkedinSearch?.enabled && (
         <Card title={<span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}><LinkedInIcon style={{ width: 18, height: 18 }} />{t('linkedin.cardTitle')}</span>} className="mt-card">
           {!compact && (
             <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px', lineHeight: 1.6 }}>{t('linkedin.cardDesc')}</p>

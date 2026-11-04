@@ -1,7 +1,9 @@
 {
   "common": {
     "loading": "Loading…",
-    "noCampaign": "No campaign is currently running. Please check back later."
+    "noCampaign": "No campaign is currently running. Please check back later.",
+    "waitingCampaign": "The game has not started yet.",
+    "waitingCampaignHint": "This page opens by itself as soon as it starts: you can leave it open."
   },
   "expired": {
     "skipped": "You've been skipped — you can try again right away.",

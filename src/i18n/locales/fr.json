@@ -1,7 +1,9 @@
 {
   "common": {
     "loading": "Chargement…",
-    "noCampaign": "Aucune campagne n'est active pour le moment. Revenez plus tard."
+    "noCampaign": "Aucune campagne n'est active pour le moment. Revenez plus tard.",
+    "waitingCampaign": "Le jeu n’a pas encore commencé.",
+    "waitingCampaignHint": "Cette page s’ouvrira toute seule dès qu’il démarre : vous pouvez la laisser ouverte."
   },
   "expired": {
     "skipped": "Vous avez été passé — vous pouvez retenter votre chance tout de suite.",
