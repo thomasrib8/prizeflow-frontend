@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from 'recharts';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, CartesianGrid, LabelList } from 'recharts';
 import { api } from '../api/client';
 import { Card, Button } from '../components/ui';
 import { LIMITS, DEFAULTS, DEFAULT_FACTORS, simulate, simulateScenarios, alertsFor } from '../utils/spinSimulation';
@@ -57,7 +57,6 @@ export default function SpinSimulator() {
   const name = (k) => t(`spinSim.scenario.${k}`);
 
   const scenarioData = SCENARIOS.map((k) => ({ name: name(k), spins: sc[k].rounded.spins, key: k }));
-  const compareData = [{ name: t('spinSim.charts.demand'), v: sim.rounded.demand }, { name: t('spinSim.charts.capacity'), v: sim.rounded.capacity }, { name: t('spinSim.charts.spins'), v: sim.rounded.spins }];
   const dayData = Array.from({ length: sim.inputs.days }, (_, i) => {
     const row = { name: `${t('spinSim.charts.day')} ${i + 1}` };
     for (const k of SCENARIOS) row[k] = Math.round(sc[k].daily[i]);
@@ -75,21 +74,16 @@ export default function SpinSimulator() {
           { title: t('spinSim.pdf.hypotheses'), rows: [
             [t('spinSim.params.visitors.label'), int(i.visitors)],
             [t('spinSim.params.days.label'), `${i.days}`], [t('spinSim.params.hoursPerDay.label'), `${i.hoursPerDay} h`],
-            [t('spinSim.params.passRate.label'), `${dec(i.passRate)} %`], [t('spinSim.params.participationRate.label'), `${dec(i.participationRate)} %`],
             [t('spinSim.params.secondsPerSpin.label'), `${i.secondsPerSpin} s`], [t('spinSim.params.wheels.label'), `${i.wheels}`],
             [t('spinSim.params.utilization.label'), `${i.utilization} %`], [t('spinSim.params.spinsPerParticipant.label'), dec(i.spinsPerParticipant)],
           ] },
           { title: t('spinSim.pdf.scenarios'), head: ['', ...SCENARIOS.map(name)], rows: [
-            [t('spinSim.pdf.rates'), ...SCENARIOS.map((k) => `${dec(sc[k].inputs.passRate)} % / ${dec(sc[k].inputs.participationRate)} %`)],
+            [t('spinSim.params.utilization.label'), ...SCENARIOS.map((k) => `${dec(sc[k].inputs.utilization)} %`)],
             [t('spinSim.kpi.totalSpins'), ...SCENARIOS.map((k) => int(sc[k].spins))],
-            [t('spinSim.kpi.participants'), ...SCENARIOS.map((k) => int(sc[k].servedParticipants))],
+            [t('spinSim.kpi.participants'), ...SCENARIOS.map((k) => int(sc[k].participants))],
             [t('spinSim.kpi.spinsPerDay'), ...SCENARIOS.map((k) => int(sc[k].spinsPerDay))],
             [t('spinSim.kpi.spinsPerHour'), ...SCENARIOS.map((k) => int(sc[k].spinsPerHour))],
-            [t('spinSim.res.demand'), ...SCENARIOS.map((k) => int(sc[k].demand))],
-            [t('spinSim.res.capacity'), ...SCENARIOS.map((k) => int(sc[k].capacity))],
-            [t('spinSim.kpi.saturation'), ...SCENARIOS.map((k) => pc(sc[k].saturation))],
-            [t('spinSim.res.unmet'), ...SCENARIOS.map((k) => int(sc[k].unmetSpins))],
-            [t('spinSim.res.wheelsNeeded'), ...SCENARIOS.map((k) => `${sc[k].wheelsNeeded}`)],
+            [t('spinSim.kpi.shareVisitors'), ...SCENARIOS.map((k) => pc(sc[k].shareOfVisitors))],
           ] },
           ...(alerts.length ? [{ title: t('spinSim.pdf.alerts'), rows: alerts.map((a) => [t(`spinSim.alerts.${a}`)]) }] : []),
         ],
@@ -98,13 +92,10 @@ export default function SpinSimulator() {
   }
 
   const kpis = [
-    ['totalSpins', int(sim.spins), 'accent-blue'],
-    ['participants', int(sim.servedParticipants)],
+    ['participants', int(sim.participants)],
     ['spinsPerDay', int(sim.spinsPerDay)],
     ['spinsPerHour', int(sim.spinsPerHour)],
-    ['hoursNeeded', hours(sim.openingHoursNeeded)],
-    ['saturation', pc(sim.saturation), sim.saturation >= 0.95 ? 'accent-orange' : ''],
-    ['shareVisitors', pc(sim.shareOfVisitors)],
+    ['hoursNeeded', hours(sim.activeHoursPerWheel)],
   ];
 
   return (
@@ -118,49 +109,40 @@ export default function SpinSimulator() {
       </div>
       {error && <div className="error-banner">{error}</div>}
 
-      <div className="sp-layout">
-        <Card title={t('spinSim.assumptions')} className="sp-params">
-          <Field id="visitors" value={inputs.visitors} onChange={set('visitors')} label={t('spinSim.params.visitors.label')} help={t('spinSim.params.visitors.help')} unit={t('spinSim.unit.people')} />
-          <div className="sp-pair">
-            <Field id="days" value={inputs.days} onChange={set('days')} label={t('spinSim.params.days.label')} help={t('spinSim.params.days.help')} unit={t('spinSim.unit.days')} />
-            <Field id="hoursPerDay" value={inputs.hoursPerDay} onChange={set('hoursPerDay')} label={t('spinSim.params.hoursPerDay.label')} help={t('spinSim.params.hoursPerDay.help')} unit="h" />
+        <div className="sp-hero">
+          <div className="sp-hero-main">
+            <span>{t('spinSim.kpi.totalSpins')}</span>
+            <b>{int(sim.spins)}</b>
+            <em>{t('spinSim.heroHelp')}</em>
           </div>
-          <Field id="passRate" value={inputs.passRate} onChange={set('passRate')} label={t('spinSim.params.passRate.label')} help={t('spinSim.params.passRate.help')} unit="%" />
-          <Field id="participationRate" value={inputs.participationRate} onChange={set('participationRate')} label={t('spinSim.params.participationRate.label')} help={t('spinSim.params.participationRate.help')} unit="%" />
-          <Field id="secondsPerSpin" value={inputs.secondsPerSpin} onChange={set('secondsPerSpin')} label={t('spinSim.params.secondsPerSpin.label')} help={t('spinSim.params.secondsPerSpin.help')} unit="s" />
-          <div className="sp-pair">
-            <Field id="wheels" value={inputs.wheels} onChange={set('wheels')} label={t('spinSim.params.wheels.label')} help={t('spinSim.params.wheels.help')} unit={t('spinSim.unit.wheels')} />
-            <Field id="utilization" value={inputs.utilization} onChange={set('utilization')} label={t('spinSim.params.utilization.label')} help={t('spinSim.params.utilization.help')} unit="%" />
-          </div>
-          <Field id="spinsPerParticipant" value={inputs.spinsPerParticipant} onChange={set('spinsPerParticipant')} step={0.1} label={t('spinSim.params.spinsPerParticipant.label')} help={t('spinSim.params.spinsPerParticipant.help')} unit="×" />
-        </Card>
-
-        <div className="sp-results">
-          <div className="sp-hero">
-            <div className="sp-hero-main">
-              <span>{t('spinSim.kpi.totalSpins')}</span>
-              <b>{int(sim.spins)}</b>
-              <em>{t(`spinSim.limited.${sim.limitedBy}`)}</em>
-            </div>
-            <div className="sp-hero-side"><span>{t('spinSim.res.demand')}</span><b>{int(sim.demand)}</b></div>
-            <div className="sp-hero-side"><span>{t('spinSim.res.capacity')}</span><b>{int(sim.capacity)}</b></div>
-            <div className="sp-hero-side"><span>{t('spinSim.res.unmet')}</span><b>{int(sim.unmetSpins)}</b></div>
-          </div>
-
-          <div className="grid-stats sp-kpis">
-            {kpis.map(([k, v, tone]) => (
-              <div key={k} className="stat"><div className="stat-label">{t(`spinSim.kpi.${k}`).toUpperCase()}</div><div className={`stat-value ${tone || ''}`}>{v}</div><div className="ap-sub">{t(`spinSim.kpiHelp.${k}`)}</div></div>
-            ))}
-          </div>
-
-          {(alerts.length > 0 || sim.wheelsNeeded > sim.inputs.wheels) && (
-            <div className="sp-alerts">
-              {alerts.map((a) => <div key={a} className={`sp-alert ${a === 'spare' ? 'info' : 'warn'}`}>{t(`spinSim.alerts.${a}`)}</div>)}
-              {sim.wheelsNeeded > sim.inputs.wheels && <div className="sp-alert warn">{t('spinSim.alerts.wheelsNeeded', { count: sim.wheelsNeeded })}</div>}
-            </div>
-          )}
+          <div className="sp-hero-side"><span>{t('spinSim.res.opening')}</span><b>{hours(sim.openingHours)}</b></div>
+          <div className="sp-hero-side"><span>{t('spinSim.res.theoretical')}</span><b>{int(sim.theoretical)}</b></div>
+          <div className="sp-hero-side"><span>{t('spinSim.kpi.shareVisitors')}</span><b>{pc(sim.shareOfVisitors)}</b></div>
         </div>
-      </div>
+
+        <div className="grid-stats sp-kpis">
+          {kpis.map(([k, v, tone]) => (
+            <div key={k} className="stat"><div className="stat-label">{t(`spinSim.kpi.${k}`).toUpperCase()}</div><div className={`stat-value ${tone || ''}`}>{v}</div><div className="ap-sub">{t(`spinSim.kpiHelp.${k}`)}</div></div>
+          ))}
+        </div>
+
+      <Card title={t('spinSim.assumptions')} className="sp-params">
+        <div className="sp-params-grid">
+          <Field id="visitors" value={inputs.visitors} onChange={set('visitors')} label={t('spinSim.params.visitors.label')} help={t('spinSim.params.visitors.help')} unit={t('spinSim.unit.people')} />
+          <Field id="days" value={inputs.days} onChange={set('days')} label={t('spinSim.params.days.label')} help={t('spinSim.params.days.help')} unit={t('spinSim.unit.days')} />
+          <Field id="hoursPerDay" value={inputs.hoursPerDay} onChange={set('hoursPerDay')} label={t('spinSim.params.hoursPerDay.label')} help={t('spinSim.params.hoursPerDay.help')} unit="h" />
+          <Field id="secondsPerSpin" value={inputs.secondsPerSpin} onChange={set('secondsPerSpin')} label={t('spinSim.params.secondsPerSpin.label')} help={t('spinSim.params.secondsPerSpin.help')} unit="s" />
+          <Field id="wheels" value={inputs.wheels} onChange={set('wheels')} label={t('spinSim.params.wheels.label')} help={t('spinSim.params.wheels.help')} unit={t('spinSim.unit.wheels')} />
+          <Field id="utilization" value={inputs.utilization} onChange={set('utilization')} label={t('spinSim.params.utilization.label')} help={t('spinSim.params.utilization.help')} unit="%" />
+          <Field id="spinsPerParticipant" value={inputs.spinsPerParticipant} onChange={set('spinsPerParticipant')} step={0.1} label={t('spinSim.params.spinsPerParticipant.label')} help={t('spinSim.params.spinsPerParticipant.help')} unit="×" />
+        </div>
+      </Card>
+
+        {alerts.length > 0 && (
+          <div className="sp-alerts">
+            {alerts.map((a) => <div key={a} className={`sp-alert ${a === 'slowSpin' ? 'info' : 'warn'}`}>{t(`spinSim.alerts.${a}`)}</div>)}
+          </div>
+        )}
 
       <Card title={t('spinSim.scenarios')} className="mt-card">
         <p className="ap-hint">{t('spinSim.scenariosHelp')}</p>
@@ -170,9 +152,9 @@ export default function SpinSimulator() {
               <h4>{name(k)}</h4>
               <b>{int(sc[k].spins)}</b><span>{t('spinSim.kpi.totalSpins')}</span>
               <div className="sp-scen-row"><span>{t('spinSim.kpi.spinsPerDay')}</span><strong>{int(sc[k].spinsPerDay)}</strong></div>
-              <div className="sp-scen-row"><span>{t('spinSim.kpi.participants')}</span><strong>{int(sc[k].servedParticipants)}</strong></div>
-              <div className="sp-scen-row"><span>{t('spinSim.kpi.saturation')}</span><strong>{pc(sc[k].saturation)}</strong></div>
-              <small>{t('spinSim.scenarioRates', { pass: dec(sc[k].inputs.passRate), part: dec(sc[k].inputs.participationRate) })}</small>
+              <div className="sp-scen-row"><span>{t('spinSim.kpi.participants')}</span><strong>{int(sc[k].participants)}</strong></div>
+              <div className="sp-scen-row"><span>{t('spinSim.kpi.spinsPerHour')}</span><strong>{int(sc[k].spinsPerHour)}</strong></div>
+              <small>{t('spinSim.scenarioRates', { util: dec(sc[k].inputs.utilization) })}</small>
             </div>
           ))}
         </div>
@@ -192,29 +174,20 @@ export default function SpinSimulator() {
       <div className="sp-charts">
         <Card title={t('spinSim.charts.scenarios')}>
           <div className="sp-chart"><ResponsiveContainer width="100%" height="100%">
-            <BarChart data={scenarioData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+            <BarChart data={scenarioData} margin={{ top: 22, right: 8, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#E3EAF8" vertical={false} /><XAxis dataKey="name" tick={{ fontSize: 12 }} /><YAxis tick={{ fontSize: 12 }} width={56} tickFormatter={int} />
               <Tooltip formatter={(v) => int(v)} />
-              <Bar dataKey="spins" name={t('spinSim.kpi.totalSpins')} radius={[8, 8, 0, 0]} fill={COLORS.realistic} shape={(p) => <rect x={p.x} y={p.y} width={p.width} height={p.height} rx="8" fill={COLORS[p.payload.key]} />} />
-            </BarChart>
-          </ResponsiveContainer></div>
-        </Card>
-        <Card title={t('spinSim.charts.demandVsCapacity')}>
-          <div className="sp-chart"><ResponsiveContainer width="100%" height="100%">
-            <BarChart data={compareData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#E3EAF8" vertical={false} /><XAxis dataKey="name" tick={{ fontSize: 12 }} /><YAxis tick={{ fontSize: 12 }} width={56} tickFormatter={int} />
-              <Tooltip formatter={(v) => int(v)} />
-              <Bar dataKey="v" name={t('spinSim.charts.spins')} radius={[8, 8, 0, 0]} shape={(p) => <rect x={p.x} y={p.y} width={p.width} height={p.height} rx="8" fill={[COLORS.demand, COLORS.capacity, COLORS.realistic][p.index]} />} />
+              <Bar dataKey="spins" name={t('spinSim.kpi.totalSpins')} radius={[8, 8, 0, 0]} fill={COLORS.realistic} shape={(p) => <rect x={p.x} y={p.y} width={p.width} height={p.height} rx="8" fill={COLORS[p.payload.key]} />}><LabelList dataKey="spins" position="top" formatter={int} className="sp-label" /></Bar>
             </BarChart>
           </ResponsiveContainer></div>
         </Card>
         <Card title={t('spinSim.charts.perDay')} className="sp-wide">
           <p className="ap-hint">{t('spinSim.charts.perDayHelp')}</p>
           <div className="sp-chart"><ResponsiveContainer width="100%" height="100%">
-            <BarChart data={dayData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+            <BarChart data={dayData} margin={{ top: 22, right: 8, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#E3EAF8" vertical={false} /><XAxis dataKey="name" tick={{ fontSize: 12 }} /><YAxis tick={{ fontSize: 12 }} width={56} tickFormatter={int} />
               <Tooltip formatter={(v) => int(v)} /><Legend />
-              {SCENARIOS.map((k) => <Bar key={k} dataKey={k} name={name(k)} fill={COLORS[k]} radius={[6, 6, 0, 0]} />)}
+              {SCENARIOS.map((k) => <Bar key={k} dataKey={k} name={name(k)} fill={COLORS[k]} radius={[6, 6, 0, 0]}><LabelList dataKey={k} position="top" formatter={int} className="sp-label" /></Bar>)}
             </BarChart>
           </ResponsiveContainer></div>
         </Card>

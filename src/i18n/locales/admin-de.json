@@ -2663,7 +2663,7 @@
     "params": {
       "visitors": {
         "label": "Gesamtbesucherzahl",
-        "help": "Besucher der gesamten Veranstaltung (nicht pro Tag)."
+        "help": "Zur Information: dient zur Berechnung des Anteils der Besucher, die spielen."
       },
       "days": {
         "label": "Tage",
@@ -2672,14 +2672,6 @@
       "hoursPerDay": {
         "label": "Stunden / Tag",
         "help": "Tägliche Öffnungszeit des Glücksrads."
-      },
-      "passRate": {
-        "label": "Besucher am Glücksrad",
-        "help": "Anteil der Besucher, die das Rad sehen."
-      },
-      "participationRate": {
-        "label": "Teilnahmequote",
-        "help": "Anteil derer, die es sehen und mitspielen."
       },
       "secondsPerSpin": {
         "label": "Durchschnittsdauer pro Dreh",
@@ -2691,7 +2683,7 @@
       },
       "utilization": {
         "label": "Betriebliche Auslastung",
-        "help": "Anteil der Zeit, in der das Rad wirklich verfügbar ist (Pausen, Störungen, Warten)."
+        "help": "Anteil der Zeit, in der sich das Rad wirklich dreht (Pausen, Störungen, Warten). Die Szenarien variieren diesen Wert."
       },
       "spinsPerParticipant": {
         "label": "Drehs pro Teilnehmer",
@@ -2703,48 +2695,37 @@
       "participants": "Einzelne Teilnehmer",
       "spinsPerDay": "Drehs / Tag",
       "spinsPerHour": "Drehs / Stunde",
-      "hoursNeeded": "Benötigte Aktivitätszeit",
-      "saturation": "Auslastung des Rads",
+      "hoursNeeded": "Effektive Spielzeit pro Rad",
       "shareVisitors": "Besucher, die gespielt haben"
     },
     "kpiHelp": {
-      "totalSpins": "Das Kleinere aus Nachfrage und Kapazität.",
+      "totalSpins": "Kapazität des Rads: Öffnungszeit ÷ Dauer pro Dreh × Auslastung.",
       "participants": "Tatsächlich bediente Personen.",
       "spinsPerDay": "Gleichmäßig auf die Tage verteilt.",
       "spinsPerHour": "Über die Öffnungsstunden.",
-      "hoursNeeded": "Nötige Öffnungszeit für diese Drehs.",
-      "saturation": "Tatsächlich genutzte Kapazität.",
+      "hoursNeeded": "Zeit, in der sich ein Rad wirklich dreht.",
       "shareVisitors": "Anteil an der Gesamtbesucherzahl."
     },
     "res": {
-      "demand": "Theoretische Nachfrage",
-      "capacity": "Max. Kapazität",
-      "unmet": "Unbefriedigte Nachfrage",
-      "wheelsNeeded": "Benötigte Räder"
-    },
-    "limited": {
-      "demand": "Durch die Nachfrage begrenzt: das Rad hat Luft.",
-      "capacity": "Durch die Kapazität begrenzt: das Rad ist der Engpass."
+      "opening": "Gesamte Öffnungszeit",
+      "theoretical": "Drehs bei 100 % Auslastung"
     },
     "alerts": {
-      "saturated": "Ihr Rad kann möglicherweise nicht alle interessierten Teilnehmer aufnehmen.",
       "slowSpin": "Ein kürzerer Spielerweg könnte Ihre Kapazität erhöhen.",
-      "spare": "Ihr Rad hat zusätzliche Kapazität für weitere Teilnehmer.",
-      "wheelsNeeded": "Um die gesamte Nachfrage zu bedienen, wären etwa {{count}} Räder nötig."
+      "exceedsVisitors": "Dieses Volumen übersteigt Ihre Besucherzahl: Besucherzahl oder Dauer pro Dreh prüfen."
     },
     "scenarios": "Drei Szenarien",
-    "scenariosHelp": "Vorbeigehquote und Teilnahmequote werden variiert, dann wird alles neu berechnet. Die Kapazität wird nie überschritten.",
+    "scenariosHelp": "Nur die betriebliche Auslastung wird variiert (max. 100 %).",
     "scenario": {
       "pessimistic": "Pessimistisch",
       "realistic": "Realistisch",
       "optimistic": "Optimistisch"
     },
-    "scenarioRates": "Vorbeigehen {{pass}} % · Teilnahme {{part}} %",
+    "scenarioRates": "Auslastung {{util}} %",
     "factorsTitle": "Szenario-Koeffizienten anpassen",
-    "factorsHelp": "Auf beide Quoten angewendete Koeffizienten (max. 100 %). 1 = Ihre Annahmen.",
+    "factorsHelp": "Auf die betriebliche Auslastung angewendete Koeffizienten (max. 100 %). 1 = Ihre Annahme.",
     "charts": {
       "scenarios": "Szenarienvergleich",
-      "demandVsCapacity": "Theoretische Nachfrage und maximale Kapazität",
       "perDay": "Geschätzte Drehs pro Tag",
       "perDayHelp": "Gleichmäßige Verteilung: keine Besucherkurve wird erfunden.",
       "demand": "Nachfrage",
@@ -2757,8 +2738,8 @@
       "subtitle": "Erstellt am {{date}}",
       "hypotheses": "Annahmen",
       "scenarios": "Szenarien",
-      "rates": "Vorbeigehen / Teilnahme",
       "alerts": "Hinweise"
-    }
+    },
+    "heroHelp": "Kapazität des Rads: Öffnungszeit ÷ Dauer pro Dreh × Auslastung."
   }
 }

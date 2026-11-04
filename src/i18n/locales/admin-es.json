@@ -2663,7 +2663,7 @@
     "params": {
       "visitors": {
         "label": "Afluencia total",
-        "help": "Visitantes en todo el evento (no por día)."
+        "help": "A título informativo: sirve para calcular la parte de visitantes que juegan."
       },
       "days": {
         "label": "Días",
@@ -2672,14 +2672,6 @@
       "hoursPerDay": {
         "label": "Horas / día",
         "help": "Horas diarias de apertura de la ruleta."
-      },
-      "passRate": {
-        "label": "Visitantes que pasan por la ruleta",
-        "help": "Parte de los visitantes que ven la ruleta."
-      },
-      "participationRate": {
-        "label": "Tasa de participación",
-        "help": "Parte de quienes la ven y juegan."
       },
       "secondsPerSpin": {
         "label": "Duración media por tirada",
@@ -2691,7 +2683,7 @@
       },
       "utilization": {
         "label": "Utilización operativa",
-        "help": "Parte del tiempo en que la ruleta está realmente disponible (pausas, averías, espera)."
+        "help": "Parte del tiempo en que la ruleta gira de verdad (pausas, averías, espera). Es la que varían los escenarios."
       },
       "spinsPerParticipant": {
         "label": "Tiradas por participante",
@@ -2703,48 +2695,37 @@
       "participants": "Participantes únicos",
       "spinsPerDay": "Tiradas / día",
       "spinsPerHour": "Tiradas / hora",
-      "hoursNeeded": "Tiempo de actividad necesario",
-      "saturation": "Saturación de la ruleta",
+      "hoursNeeded": "Tiempo de juego efectivo por ruleta",
       "shareVisitors": "Visitantes que jugaron"
     },
     "kpiHelp": {
-      "totalSpins": "El menor entre demanda y capacidad.",
+      "totalSpins": "Capacidad de la ruleta: tiempo de apertura ÷ duración de una tirada × utilización.",
       "participants": "Personas realmente atendidas.",
       "spinsPerDay": "Reparto uniforme entre los días.",
       "spinsPerHour": "Sobre las horas de apertura.",
-      "hoursNeeded": "Apertura necesaria para estas tiradas.",
-      "saturation": "Capacidad realmente usada.",
+      "hoursNeeded": "Tiempo en que una ruleta gira realmente.",
       "shareVisitors": "Parte de la afluencia total."
     },
     "res": {
-      "demand": "Demanda teórica",
-      "capacity": "Capacidad máx.",
-      "unmet": "Demanda no satisfecha",
-      "wheelsNeeded": "Ruletas necesarias"
-    },
-    "limited": {
-      "demand": "Limitado por la demanda: la ruleta tiene margen.",
-      "capacity": "Limitado por la capacidad: la ruleta es el cuello de botella."
+      "opening": "Tiempo de apertura total",
+      "theoretical": "Tiradas al 100 % de utilización"
     },
     "alerts": {
-      "saturated": "Su ruleta podría no poder atender a todos los participantes interesados.",
       "slowSpin": "Reducir la duración del recorrido del jugador podría aumentar su capacidad.",
-      "spare": "Su ruleta dispone de capacidad adicional para atender a más participantes.",
-      "wheelsNeeded": "Para satisfacer toda la demanda harían falta unas {{count}} ruletas."
+      "exceedsVisitors": "Este volumen supera su afluencia: revise la afluencia o la duración de una tirada."
     },
     "scenarios": "Tres escenarios",
-    "scenariosHelp": "Se varían la tasa de paso y la de participación y se recalcula todo. La capacidad nunca se puede superar.",
+    "scenariosHelp": "Solo se varía la utilización operativa (máx. 100 %).",
     "scenario": {
       "pessimistic": "Pesimista",
       "realistic": "Realista",
       "optimistic": "Optimista"
     },
-    "scenarioRates": "Paso {{pass}} % · participación {{part}} %",
+    "scenarioRates": "Utilización {{util}} %",
     "factorsTitle": "Ajustar los coeficientes de los escenarios",
-    "factorsHelp": "Coeficientes aplicados a ambas tasas (máx. 100 %). 1 = sus hipótesis.",
+    "factorsHelp": "Coeficientes aplicados a la utilización operativa (máx. 100 %). 1 = su hipótesis.",
     "charts": {
       "scenarios": "Comparación de escenarios",
-      "demandVsCapacity": "Demanda teórica y capacidad máxima",
       "perDay": "Tiradas estimadas por día",
       "perDayHelp": "Reparto uniforme: no se inventa ninguna curva de afluencia.",
       "demand": "Demanda",
@@ -2757,8 +2738,8 @@
       "subtitle": "Generado el {{date}}",
       "hypotheses": "Hipótesis",
       "scenarios": "Escenarios",
-      "rates": "Paso / participación",
       "alerts": "Puntos de atención"
-    }
+    },
+    "heroHelp": "Capacidad de la ruleta: tiempo de apertura ÷ duración de una tirada × utilización."
   }
 }

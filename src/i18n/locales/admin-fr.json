@@ -2663,7 +2663,7 @@
     "params": {
       "visitors": {
         "label": "Fréquentation totale",
-        "help": "Nombre de visiteurs sur tout l'événement (pas par jour)."
+        "help": "Pour information : sert à calculer la part des visiteurs qui jouent."
       },
       "days": {
         "label": "Jours",
@@ -2672,14 +2672,6 @@
       "hoursPerDay": {
         "label": "Heures / jour",
         "help": "Heures d'ouverture de la roue par jour."
-      },
-      "passRate": {
-        "label": "Visiteurs passant devant la roue",
-        "help": "Part des visiteurs qui voient la roue."
-      },
-      "participationRate": {
-        "label": "Taux de participation",
-        "help": "Part de ceux qui la voient et qui jouent."
       },
       "secondsPerSpin": {
         "label": "Durée moyenne par lancer",
@@ -2691,7 +2683,7 @@
       },
       "utilization": {
         "label": "Utilisation opérationnelle",
-        "help": "Part du temps où la roue est réellement disponible (pauses, pannes, attente)."
+        "help": "Part du temps où la roue tourne vraiment (pauses, pannes, attente). C'est elle que font varier les scénarios."
       },
       "spinsPerParticipant": {
         "label": "Lancers par participant",
@@ -2703,48 +2695,37 @@
       "participants": "Participants uniques",
       "spinsPerDay": "Lancers / jour",
       "spinsPerHour": "Lancers / heure",
-      "hoursNeeded": "Temps d'activité nécessaire",
-      "saturation": "Saturation de la roue",
+      "hoursNeeded": "Temps de jeu effectif par roue",
       "shareVisitors": "Visiteurs ayant joué"
     },
     "kpiHelp": {
-      "totalSpins": "Le plus petit entre la demande et la capacité.",
+      "totalSpins": "Capacité de la roue : durée d'ouverture ÷ durée d'un lancer × utilisation.",
       "participants": "Personnes réellement servies.",
       "spinsPerDay": "Répartition uniforme sur les jours.",
       "spinsPerHour": "Sur les heures d'ouverture.",
-      "hoursNeeded": "Ouverture nécessaire pour ces lancers.",
-      "saturation": "Capacité réellement utilisée.",
+      "hoursNeeded": "Temps pendant lequel une roue tourne réellement.",
       "shareVisitors": "Part de la fréquentation totale."
     },
     "res": {
-      "demand": "Demande théorique",
-      "capacity": "Capacité max",
-      "unmet": "Demande non satisfaite",
-      "wheelsNeeded": "Roues nécessaires"
-    },
-    "limited": {
-      "demand": "Limité par la demande : la roue a de la place.",
-      "capacity": "Limité par la capacité : la roue est le goulot."
+      "opening": "Durée d'ouverture totale",
+      "theoretical": "Lancers à 100 % d'utilisation"
     },
     "alerts": {
-      "saturated": "Votre roue risque de ne pas pouvoir accueillir tous les participants intéressés.",
       "slowSpin": "Réduire la durée du parcours joueur pourrait augmenter votre capacité.",
-      "spare": "Votre roue dispose d'une capacité supplémentaire pour accueillir davantage de participants.",
-      "wheelsNeeded": "Pour satisfaire toute la demande, il faudrait environ {{count}} roues."
+      "exceedsVisitors": "Ce volume dépasse votre fréquentation : revoyez la fréquentation ou la durée d'un lancer."
     },
     "scenarios": "Trois scénarios",
-    "scenariosHelp": "On fait varier le taux de passage et le taux de participation, puis tout est recalculé. La capacité ne peut jamais être dépassée.",
+    "scenariosHelp": "On fait varier uniquement l'utilisation opérationnelle (plafonnée à 100 %).",
     "scenario": {
       "pessimistic": "Pessimiste",
       "realistic": "Réaliste",
       "optimistic": "Optimiste"
     },
-    "scenarioRates": "Passage {{pass}} % · participation {{part}} %",
+    "scenarioRates": "Utilisation {{util}} %",
     "factorsTitle": "Régler les coefficients des scénarios",
-    "factorsHelp": "Coefficients appliqués aux deux taux (plafonnés à 100 %). 1 = vos hypothèses.",
+    "factorsHelp": "Coefficients appliqués à l'utilisation opérationnelle (plafonnée à 100 %). 1 = votre hypothèse.",
     "charts": {
       "scenarios": "Comparaison des scénarios",
-      "demandVsCapacity": "Demande théorique et capacité maximale",
       "perDay": "Lancers estimés par jour",
       "perDayHelp": "Répartition uniforme : aucune courbe de fréquentation n'est inventée.",
       "demand": "Demande",
@@ -2757,8 +2738,8 @@
       "subtitle": "Généré le {{date}}",
       "hypotheses": "Hypothèses",
       "scenarios": "Scénarios",
-      "rates": "Passage / participation",
       "alerts": "Points d'attention"
-    }
+    },
+    "heroHelp": "Capacité de la roue : durée d'ouverture ÷ durée d'un lancer × utilisation."
   }
 }

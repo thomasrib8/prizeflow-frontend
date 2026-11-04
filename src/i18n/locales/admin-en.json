@@ -2663,7 +2663,7 @@
     "params": {
       "visitors": {
         "label": "Total attendance",
-        "help": "Visitors over the whole event (not per day)."
+        "help": "For information: used to work out the share of visitors who play."
       },
       "days": {
         "label": "Days",
@@ -2672,14 +2672,6 @@
       "hoursPerDay": {
         "label": "Hours / day",
         "help": "Hours the wheel is open each day."
-      },
-      "passRate": {
-        "label": "Visitors passing the wheel",
-        "help": "Share of visitors who see the wheel."
-      },
-      "participationRate": {
-        "label": "Participation rate",
-        "help": "Share of those who see it and play."
       },
       "secondsPerSpin": {
         "label": "Average time per spin",
@@ -2691,7 +2683,7 @@
       },
       "utilization": {
         "label": "Operational utilization",
-        "help": "Share of the time the wheel is really available (breaks, faults, waiting)."
+        "help": "Share of the time the wheel really spins (breaks, faults, waiting). The scenarios vary this one."
       },
       "spinsPerParticipant": {
         "label": "Spins per participant",
@@ -2703,48 +2695,37 @@
       "participants": "Unique participants",
       "spinsPerDay": "Spins / day",
       "spinsPerHour": "Spins / hour",
-      "hoursNeeded": "Activity time needed",
-      "saturation": "Wheel saturation",
+      "hoursNeeded": "Effective playing time per wheel",
       "shareVisitors": "Visitors who played"
     },
     "kpiHelp": {
-      "totalSpins": "The smaller of demand and capacity.",
+      "totalSpins": "Wheel capacity: opening time ÷ time per spin × utilization.",
       "participants": "People actually served.",
       "spinsPerDay": "Evenly spread over the days.",
       "spinsPerHour": "Over opening hours.",
-      "hoursNeeded": "Opening time needed for these spins.",
-      "saturation": "Capacity really used.",
+      "hoursNeeded": "Time a wheel is really spinning.",
       "shareVisitors": "Share of total attendance."
     },
     "res": {
-      "demand": "Theoretical demand",
-      "capacity": "Max capacity",
-      "unmet": "Unmet demand",
-      "wheelsNeeded": "Wheels needed"
-    },
-    "limited": {
-      "demand": "Limited by demand: the wheel has room.",
-      "capacity": "Limited by capacity: the wheel is the bottleneck."
+      "opening": "Total opening time",
+      "theoretical": "Spins at 100 % utilization"
     },
     "alerts": {
-      "saturated": "Your wheel may not be able to host all the interested participants.",
       "slowSpin": "Shortening the player journey could increase your capacity.",
-      "spare": "Your wheel has spare capacity to host more participants.",
-      "wheelsNeeded": "To serve all the demand you would need about {{count}} wheels."
+      "exceedsVisitors": "This volume exceeds your attendance: review the attendance or the time per spin."
     },
     "scenarios": "Three scenarios",
-    "scenariosHelp": "The pass rate and the participation rate are varied, then everything is recomputed. Capacity can never be exceeded.",
+    "scenariosHelp": "Only the operational utilization is varied (capped at 100 %).",
     "scenario": {
       "pessimistic": "Pessimistic",
       "realistic": "Realistic",
       "optimistic": "Optimistic"
     },
-    "scenarioRates": "Pass {{pass}} % · participation {{part}} %",
+    "scenarioRates": "Utilization {{util}} %",
     "factorsTitle": "Adjust the scenario coefficients",
-    "factorsHelp": "Coefficients applied to both rates (capped at 100 %). 1 = your assumptions.",
+    "factorsHelp": "Coefficients applied to the operational utilization (capped at 100 %). 1 = your assumption.",
     "charts": {
       "scenarios": "Scenario comparison",
-      "demandVsCapacity": "Theoretical demand and maximum capacity",
       "perDay": "Estimated spins per day",
       "perDayHelp": "Even spread: no attendance curve is invented.",
       "demand": "Demand",
@@ -2757,8 +2738,8 @@
       "subtitle": "Generated on {{date}}",
       "hypotheses": "Assumptions",
       "scenarios": "Scenarios",
-      "rates": "Pass / participation",
       "alerts": "Points of attention"
-    }
+    },
+    "heroHelp": "Wheel capacity: opening time ÷ time per spin × utilization."
   }
 }
