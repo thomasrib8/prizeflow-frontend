@@ -75,6 +75,7 @@ export default function NewCampaign() {
   const [guestFields, setGuestFields] = useState([]);
   const [settings, setSettings] = useState(DEFAULT_CAMPAIGN_SETTINGS);
   // what is typed in the step-4 sections that belong to the campaign itself (social links, reward e-mail, privacy, game rules): sent right after creation
+  const [socialLinks, setSocialLinks] = useState({ facebookUrl: '', instagramUrl: '', linkedinUrl: '', xUrl: '' });
   const overridesRef = useRef(null); // { payload, file, initial }
   const rulesRef = useRef(DEFAULT_RULES_CONFIG);
   const { wheelStatus, agentConnected } = useWheelSocket();
@@ -234,6 +235,7 @@ export default function NewCampaign() {
     const o = overridesRef.current;
     try {
       if (o && JSON.stringify(o.payload) !== JSON.stringify(o.initial)) await api.updateCampaignOverrides(id, o.payload);
+      if (Object.values(socialLinks).some((v) => v.trim())) await api.updateCampaignOverrides(id, socialLinks);
       if (o && o.file) await api.uploadCampaignLogo(id, o.file);
     } catch (e) { problems.push(e.message); }
     try { if (JSON.stringify(rulesRef.current) !== JSON.stringify(DEFAULT_RULES_CONFIG)) await api.saveRulesConfig(id, rulesRef.current); } catch (e) { problems.push(e.message); }
@@ -454,7 +456,8 @@ export default function NewCampaign() {
           </>
         )}
 
-        {step === 4 && <CampaignSettingsForm value={settings} language={language} onChange={(patch) => setSettings((s) => ({ ...s, ...patch }))} />}
+        {step === 4 && <CampaignSettingsForm value={settings} language={language} onChange={(patch) => setSettings((s) => ({ ...s, ...patch }))}
+          socialLinks={socialLinks} onSocialLinksChange={(patch) => setSocialLinks((l) => ({ ...l, ...patch }))} />}
 
         {/* social links, reward e-mail, privacy and game rules of THIS campaign (empty = the account's values from Settings).
             Always mounted, only hidden outside step 4, so what is typed is not lost when going back to a previous step. */}

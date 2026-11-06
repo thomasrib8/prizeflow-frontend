@@ -1304,7 +1304,7 @@
     "useDefaultLinkBtn": "Use the link from Settings",
     "googleReviewLinkRequiredError": "Add a Google review link to turn the review invite on.",
     "socialTitle": "Social media",
-    "socialDesc": "The buttons use the account's social media links (Settings), or the ones you set for this campaign under \"Campaign social networks\" below.",
+    "socialDesc": "The buttons use the account's links (Settings) or the ones you enter below for this campaign.",
     "socialToggleLabel": "Invite guests to follow us on social media",
     "socialLinksUsed": "Buttons shown:",
     "socialNoLinksWarning": "No social media link is set in your app Settings yet, so no button would appear.",
@@ -1332,7 +1332,8 @@
       "buttonHint": "The link must start with https://. This button is added to the Google review and social networks if they are enabled.",
       "preview": "Preview",
       "sampleGift": "Your gift"
-    }
+    },
+    "socialLinksHint": "Leave a field empty to use the account's link (shown in grey)."
   },
   "pwaApp": {
     "navHome": "Home",
@@ -2851,7 +2852,7 @@
     }
   },
   "campaignOverrides": {
-    "intro": "The three blocks below belong to this campaign only. A field left empty takes the account's default value (Settings menu), shown in grey.",
+    "intro": "The two blocks below belong to this campaign only. A field left empty takes the account's default value (Settings menu), shown in grey.",
     "openDefaults": "See the default values",
     "defaultPrefix": "Default:",
     "useDefault": "Account default ({{value}})",

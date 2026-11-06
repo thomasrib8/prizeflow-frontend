@@ -1304,7 +1304,7 @@
     "useDefaultLinkBtn": "Link aus den Einstellungen verwenden",
     "googleReviewLinkRequiredError": "Fügen Sie einen Link zur Google-Bewertung hinzu, um die Einladung zu aktivieren.",
     "socialTitle": "Soziale Medien",
-    "socialDesc": "Die Schaltflächen verwenden die Social-Media-Links des Kontos (Einstellungen) oder die, die Sie für diese Kampagne unter „Soziale Netzwerke der Kampagne“ unten festlegen.",
+    "socialDesc": "Die Schaltflächen verwenden die Links des Kontos (Einstellungen) oder die, die Sie unten für diese Kampagne eingeben.",
     "socialToggleLabel": "Gäste einladen, uns in den sozialen Medien zu folgen",
     "socialLinksUsed": "Angezeigte Buttons:",
     "socialNoLinksWarning": "In den App-Einstellungen ist noch kein Social-Media-Link hinterlegt, daher würde kein Button erscheinen.",
@@ -1332,7 +1332,8 @@
       "buttonHint": "Der Link muss mit https:// beginnen. Die Schaltfläche kommt zur Google-Bewertung und zu den sozialen Netzwerken hinzu, falls aktiviert.",
       "preview": "Vorschau",
       "sampleGift": "Ihr Geschenk"
-    }
+    },
+    "socialLinksHint": "Lassen Sie ein Feld leer, um den Link des Kontos zu verwenden (grau angezeigt)."
   },
   "pwaApp": {
     "navHome": "Start",
@@ -2851,7 +2852,7 @@
     }
   },
   "campaignOverrides": {
-    "intro": "Die drei Blöcke unten gelten nur für diese Kampagne. Ein leeres Feld übernimmt den Standardwert des Kontos (Menü Einstellungen), grau angezeigt.",
+    "intro": "Die zwei Blöcke unten gehören nur zu dieser Kampagne. Ein leeres Feld übernimmt den Standardwert des Kontos (Menü Einstellungen), grau angezeigt.",
     "openDefaults": "Standardwerte ansehen",
     "defaultPrefix": "Standard:",
     "useDefault": "Standard des Kontos ({{value}})",

@@ -8,7 +8,7 @@ import CampaignRulesConfig from '../components/CampaignRulesConfig';
 import CampaignSettingsForm, { DEFAULT_CAMPAIGN_SETTINGS, settingsFromCampaign } from '../components/CampaignSettingsForm';
 
 // Post-creation editing of New campaign's "Settings" step: Google review
-// invite (and its link for this campaign), social media invite, AI assistant.
+// invite (and its link for this campaign), social media invite (and its links for this campaign).
 // Editable on a running campaign too — guests pick the change up on their
 // next page load. (Segmentation / forms live on EditCampaignSettings.jsx,
 // gifts on EditCampaign.jsx.)
@@ -19,6 +19,7 @@ export default function CampaignSettings() {
   const [campaign, setCampaign] = useState(null);
   const [settings, setSettings] = useState(DEFAULT_CAMPAIGN_SETTINGS);
   const [error, setError] = useState('');
+  const [socialLinks, setSocialLinks] = useState({ facebookUrl: '', instagramUrl: '', linkedinUrl: '', xUrl: '' });
   const [saving, setSaving] = useState(false);
   const [savedMsg, setSavedMsg] = useState('');
 
@@ -27,6 +28,7 @@ export default function CampaignSettings() {
       setCampaign(c);
       setSettings(settingsFromCampaign(c));
     }).catch((e) => setError(e.message));
+    api.getCampaignOverrides(id).then((r) => setSocialLinks({ facebookUrl: r.own.facebookUrl || '', instagramUrl: r.own.instagramUrl || '', linkedinUrl: r.own.linkedinUrl || '', xUrl: r.own.xUrl || '' })).catch(() => {});
   }, [id]);
 
   async function handleSave() {
@@ -39,6 +41,7 @@ export default function CampaignSettings() {
     setSavedMsg('');
     try {
       await api.updateCampaignSettings(id, { ...settings, googleReviewUrl: settings.googleReviewUrl.trim() });
+      await api.updateCampaignOverrides(id, socialLinks); // the links of the social card (empty = the account's)
       setSavedMsg(t('common.saved'));
       setTimeout(() => setSavedMsg(''), 2000);
     } catch (e) {
@@ -65,7 +68,8 @@ export default function CampaignSettings() {
       </div>
       {error && <div className="error-banner">{error}</div>}
 
-      <CampaignSettingsForm value={settings} language={campaign?.language || "fr"} onChange={(patch) => setSettings((s) => ({ ...s, ...patch }))} />
+      <CampaignSettingsForm value={settings} language={campaign?.language || "fr"} onChange={(patch) => setSettings((s) => ({ ...s, ...patch }))}
+        socialLinks={socialLinks} onSocialLinksChange={(patch) => setSocialLinks((l) => ({ ...l, ...patch }))} />
 
       <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
         <Button disabled={saving} onClick={handleSave}>{saving ? t('common.saving') : t('editCampaignSettings.saveChangesBtn')}</Button>

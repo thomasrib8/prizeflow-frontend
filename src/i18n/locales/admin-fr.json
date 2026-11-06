@@ -1304,7 +1304,7 @@
     "useDefaultLinkBtn": "Utiliser le lien des Paramètres",
     "googleReviewLinkRequiredError": "Ajoutez un lien d'avis Google pour activer l'invitation.",
     "socialTitle": "Réseaux sociaux",
-    "socialDesc": "Les boutons utilisent les liens de réseaux sociaux du compte (Paramètres), ou ceux que vous définissez pour cette campagne dans « Réseaux sociaux de la campagne » plus bas.",
+    "socialDesc": "Les boutons utilisent les liens du compte (Paramètres) ou ceux que vous saisissez ci-dessous pour cette campagne.",
     "socialToggleLabel": "Inviter les visiteurs à nous suivre sur les réseaux sociaux",
     "socialLinksUsed": "Boutons affichés :",
     "socialNoLinksWarning": "Aucun lien de réseau social n'est défini dans les Paramètres de l'app, donc aucun bouton ne s'afficherait.",
@@ -1332,7 +1332,8 @@
       "buttonHint": "Le lien doit commencer par https://. Ce bouton s'ajoute à l'avis Google et aux réseaux sociaux s'ils sont activés.",
       "preview": "Aperçu",
       "sampleGift": "Votre cadeau"
-    }
+    },
+    "socialLinksHint": "Laissez un champ vide pour reprendre le lien du compte (affiché en grisé)."
   },
   "pwaApp": {
     "navHome": "Accueil",
@@ -2851,7 +2852,7 @@
     }
   },
   "campaignOverrides": {
-    "intro": "Les trois blocs ci-dessous sont propres à cette campagne. Un champ laissé vide reprend la valeur par défaut du compte (menu Paramètres), affichée en grisé.",
+    "intro": "Les deux blocs ci-dessous sont propres à cette campagne. Un champ laissé vide reprend la valeur par défaut du compte (menu Paramètres), affichée en grisé.",
     "openDefaults": "Voir les valeurs par défaut",
     "defaultPrefix": "Par défaut :",
     "useDefault": "Valeur par défaut du compte ({{value}})",

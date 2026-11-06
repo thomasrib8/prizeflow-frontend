@@ -5,20 +5,13 @@ import { api } from '../api/client';
 import { Button } from './ui';
 import CollapsibleCard from './CollapsibleCard';
 const Card = CollapsibleCard; // every section folds
-import { SocialGlyph } from './SocialIcons';
 
-const SOCIAL = [
-  { key: 'facebookUrl', label: 'Facebook', ph: 'https://facebook.com/yourpage' },
-  { key: 'instagramUrl', label: 'Instagram', ph: 'https://instagram.com/yourpage' },
-  { key: 'linkedinUrl', label: 'LinkedIn', ph: 'https://linkedin.com/company/yourpage' },
-  { key: 'xUrl', label: 'X', ph: 'https://x.com/yourpage' },
-];
 const METHODS = [['qr', 'redeemTabQr'], ['code', 'redeemTabCode'], ['voucher', 'redeemTabVoucher']];
 const input = { width: '100%', padding: '10px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 14, fontFamily: 'inherit' };
 const triToValue = (v) => (v === null || v === undefined ? '' : v ? 'yes' : 'no');
 const valueToTri = (v) => (v === 'yes' ? true : v === 'no' ? false : null);
 
-// Campaign settings, second part: what the Settings menu holds as the ACCOUNT defaults (social links, reward e-mail, privacy) can be decided
+// Campaign settings, second part: what the Settings menu holds as the ACCOUNT defaults (reward e-mail, privacy; the social links are in the social card of the settings form) can be decided
 // for this campaign only. Left empty, the account's value is used (shown as the placeholder of each field).
 // `campaignId` null = the campaign does not exist yet (creation wizard): the form starts from the account's values, keeps what is typed in the
 // parent through onStage(payload, logoFile), and the parent applies it right after the campaign is created.
@@ -47,7 +40,6 @@ export default function CampaignOverrides({ campaignId = null, archived = false,
   useEffect(() => () => { if (logoUrl) URL.revokeObjectURL(logoUrl); }, [logoUrl]);
 
   const payloadOf = (f) => ({
-    ...Object.fromEntries(SOCIAL.map((p) => [p.key, f[p.key]])),
     senderName: f.senderName, replyTo: f.replyTo, headerColor: f.headerColor, footerText: f.footerText,
     logoSize: f.logoSize === '' ? null : Number(f.logoSize),
     guestFormLogoEnabled: valueToTri(f.guestFormLogoEnabled),
@@ -96,16 +88,6 @@ export default function CampaignOverrides({ campaignId = null, archived = false,
         {staged ? t('campaignOverrides.introStaged') : t('campaignOverrides.intro')} <Link to="/settings">{t('campaignOverrides.openDefaults')}</Link>
       </div>
       {error && <div className="error-banner" style={{ marginTop: 12 }}>{error}</div>}
-
-      <Card title={t('campaignOverrides.socialTitle')} className="mt-card">
-        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px', lineHeight: 1.6 }}>{t('campaignOverrides.socialDesc')}</p>
-        {SOCIAL.map((p) => (
-          <div className="field" key={p.key}>
-            <label><SocialGlyph name={p.key} size={16} /> {p.label}</label>
-            <input type="url" disabled={dis} value={form[p.key]} placeholder={d[p.key] ? `${t('campaignOverrides.defaultPrefix')} ${d[p.key]}` : p.ph} onChange={(e) => set({ [p.key]: e.target.value })} style={input} />
-          </div>
-        ))}
-      </Card>
 
       <Card title={t('campaignOverrides.emailTitle')} className="mt-card">
         <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px', lineHeight: 1.6 }}>{t('campaignOverrides.emailDesc')}</p>

@@ -1304,7 +1304,7 @@
     "useDefaultLinkBtn": "Usar el enlace de Ajustes",
     "googleReviewLinkRequiredError": "Añade un enlace de reseña de Google para activar la invitación.",
     "socialTitle": "Redes sociales",
-    "socialDesc": "Los botones usan los enlaces de redes sociales de la cuenta (Ajustes), o los que defina para esta campaña en «Redes sociales de la campaña» más abajo.",
+    "socialDesc": "Los botones usan los enlaces de la cuenta (Ajustes) o los que introduzca abajo para esta campaña.",
     "socialToggleLabel": "Invitar a los visitantes a seguirnos en redes sociales",
     "socialLinksUsed": "Botones mostrados:",
     "socialNoLinksWarning": "Aún no hay ningún enlace de redes sociales en los Ajustes de la app, así que no aparecería ningún botón.",
@@ -1332,7 +1332,8 @@
       "buttonHint": "El enlace debe empezar por https://. Este botón se suma a la reseña de Google y a las redes sociales si están activadas.",
       "preview": "Vista previa",
       "sampleGift": "Su regalo"
-    }
+    },
+    "socialLinksHint": "Deje un campo vacío para usar el enlace de la cuenta (en gris)."
   },
   "pwaApp": {
     "navHome": "Inicio",
@@ -2851,7 +2852,7 @@
     }
   },
   "campaignOverrides": {
-    "intro": "Los tres bloques siguientes son propios de esta campaña. Un campo vacío toma el valor por defecto de la cuenta (menú Ajustes), en gris.",
+    "intro": "Los dos bloques de abajo son propios de esta campaña. Un campo vacío toma el valor por defecto de la cuenta (menú Ajustes), en gris.",
     "openDefaults": "Ver los valores por defecto",
     "defaultPrefix": "Por defecto:",
     "useDefault": "Valor por defecto de la cuenta ({{value}})",

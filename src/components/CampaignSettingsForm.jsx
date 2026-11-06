@@ -8,7 +8,7 @@ import CollapsibleCard from './CollapsibleCard';
 import ResultScreenCard, { DEFAULT_RESULT_SCREEN, resultScreenFromCampaign } from './ResultScreenCard';
 import CreditsBar from './linkedin/CreditsBar';
 import LinkedInIcon from './linkedin/LinkedInIcon';
-import { FacebookIcon, InstagramIcon, LinkedinIcon, XIcon } from './SocialIcons';
+import { FacebookIcon, InstagramIcon, LinkedinIcon, XIcon, SocialGlyph } from './SocialIcons';
 
 // Brand names — never translated. Keys match GET /account/settings.
 const SOCIAL_PLATFORMS = [
@@ -51,7 +51,7 @@ const warnStyle = { background: '#FFFBEB', border: '1px solid #FDE68A', borderRa
 // changed fields so the parent can merge them into its own state.
 // `compact` is the mobile (PWA) presentation: same fields and behaviour, but
 // without the explanatory paragraphs and with line icons instead of emoji.
-export default function CampaignSettingsForm({ value, onChange, compact = false, language = 'fr' }) {
+export default function CampaignSettingsForm({ value, onChange, compact = false, language = 'fr', socialLinks = null, onSocialLinksChange = null }) {
   const { t } = useTranslation('admin');
   const Card = compact ? PlainCard : CollapsibleCard; // the mobile app keeps flat cards
   const enrichedCrm = useEnrichedCrm(); // LinkedIn search belongs to the enriched CRM option
@@ -155,18 +155,36 @@ export default function CampaignSettingsForm({ value, onChange, compact = false,
             {configuredSocials.map((p) => <span key={p.key}><p.Svg size={20} />{p.label}</span>)}
           </div>
         )}
-        {account && configuredSocials.length > 0 && !compact && (
+        {/* the links of THIS campaign (empty = the account's, shown greyed): only when the invite is on, same card as the switch */}
+        {socialLinks && value.socialMediaRequired && (
+          <div style={{ marginTop: 4 }}>
+            <p style={{ fontSize: 12, color: '#64748B', margin: '0 0 10px', lineHeight: 1.5 }}>{t('campaignSettings.socialLinksHint')}</p>
+            {SOCIAL_PLATFORMS.map((p) => (
+              <div className="field" key={p.key}>
+                <label><SocialGlyph name={p.key} size={16} /> {p.label}</label>
+                <input type="url" value={socialLinks[p.key] || ''} onChange={(e) => onSocialLinksChange({ [p.key]: e.target.value })}
+                  placeholder={account?.[p.key] ? `${t('campaignOverrides.defaultPrefix')} ${account[p.key]}` : `https://${p.label.toLowerCase()}.com/…`} style={selectStyle} />
+              </div>
+            ))}
+            {account && configuredSocials.length === 0 && !SOCIAL_PLATFORMS.some((p) => (socialLinks[p.key] || '').trim()) && (
+              <div style={warnStyle}>{t('campaignSettings.socialNoLinksWarning')}</div>
+            )}
+          </div>
+        )}
+        {!socialLinks && account && configuredSocials.length > 0 && !compact && (
           <div style={{ fontSize: 13, color: '#64748B' }}>
             {t('campaignSettings.socialLinksUsed')}{' '}
             {configuredSocials.map((p, i) => <span key={p.key}>{i > 0 ? ' · ' : ''}<p.Svg size={15} /> {p.label}</span>)}
           </div>
         )}
-        {account && configuredSocials.length === 0 && (
+        {!socialLinks && account && configuredSocials.length === 0 && (
           <div style={warnStyle}>{t('campaignSettings.socialNoLinksWarning')}</div>
         )}
-        <div style={{ marginTop: 10 }}>
-          <Link to="/settings" style={{ fontSize: 12, color: '#002881' }}>{t('campaignSettings.manageInSettingsLink')}</Link>
-        </div>
+        {!socialLinks && (
+          <div style={{ marginTop: 10 }}>
+            <Link to="/settings" style={{ fontSize: 12, color: '#002881' }}>{t('campaignSettings.manageInSettingsLink')}</Link>
+          </div>
+        )}
       </Card>
 
       <ResultScreenCard value={value.resultScreen} onChange={(resultScreen) => onChange({ resultScreen })} language={language} compact={compact} />
