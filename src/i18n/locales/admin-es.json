@@ -779,7 +779,7 @@
       "fieldRegistrationNumber": "N.º de registro de la empresa",
       "fieldCity": "Ciudad de la sede",
       "fieldGdprContactEmail": "E-mail de contacto de datos personales (si es distinto)",
-      "rulesHint": "Empresa, forma jurídica, número de registro, dirección, ciudad y e-mail figuran en el reglamento del juego de sus campañas: son necesarios para iniciar una campaña."
+      "rulesHint": "Empresa, dirección y e-mail son necesarios para iniciar una campaña. Forma jurídica, capital, número de registro y ciudad son opcionales: si se indican, figuran en el reglamento del juego; si no, no aparecen."
     },
     "googleReview": {
       "googleReviewLinkTitle": "Enlace de reseña de Google predeterminado",

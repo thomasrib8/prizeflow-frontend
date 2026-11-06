@@ -779,7 +779,7 @@
       "fieldRegistrationNumber": "SIREN / RCS",
       "fieldCity": "Ville du siège",
       "fieldGdprContactEmail": "E-mail contact données personnelles (si différent)",
-      "rulesHint": "Société, forme juridique, SIREN / RCS, adresse, ville et e-mail figurent dans le règlement du jeu de vos campagnes : ils sont nécessaires pour démarrer une campagne."
+      "rulesHint": "Société, adresse et e-mail sont nécessaires pour démarrer une campagne. Forme juridique, capital, SIREN / RCS et ville sont facultatifs : s'ils sont renseignés, ils figurent dans le règlement du jeu ; sinon ils n'y apparaissent pas."
     },
     "googleReview": {
       "googleReviewLinkTitle": "Lien d'avis Google par défaut",

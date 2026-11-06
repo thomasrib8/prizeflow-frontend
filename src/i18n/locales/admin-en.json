@@ -779,7 +779,7 @@
       "fieldRegistrationNumber": "Company registration number",
       "fieldCity": "Head office city",
       "fieldGdprContactEmail": "Personal data contact e-mail (if different)",
-      "rulesHint": "Company, legal form, registration number, address, city and e-mail appear in the game rules of your campaigns: they are required to start a campaign."
+      "rulesHint": "Company, address and e-mail are required to start a campaign. Legal form, share capital, registration number and city are optional: when given they appear in the game rules; otherwise they are left out."
     },
     "googleReview": {
       "googleReviewLinkTitle": "Default Google review link",

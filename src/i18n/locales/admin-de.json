@@ -779,7 +779,7 @@
       "fieldRegistrationNumber": "Handelsregisternummer",
       "fieldCity": "Sitz (Stadt)",
       "fieldGdprContactEmail": "Kontakt-E-Mail für Datenschutzanfragen (falls abweichend)",
-      "rulesHint": "Firma, Rechtsform, Registernummer, Adresse, Stadt und E-Mail stehen in den Spielregeln Ihrer Kampagnen: Sie sind zum Start einer Kampagne erforderlich."
+      "rulesHint": "Firma, Adresse und E-Mail sind zum Start einer Kampagne erforderlich. Rechtsform, Stammkapital, Registernummer und Stadt sind optional: wenn angegeben, stehen sie in den Spielregeln; sonst fehlen sie dort."
     },
     "googleReview": {
       "googleReviewLinkTitle": "Standard-Link zur Google-Bewertung",
