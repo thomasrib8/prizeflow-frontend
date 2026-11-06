@@ -106,7 +106,7 @@ export default function VariantsEditor({ slot, draft, onChange, campaignId = nul
           </div>
           {v.redeemMethod === 'perso' && (
             <PersoFields value={v} idPrefix={`var-${slot.slotIndex}-${i}`} uniqueCodeEditable={draft} onChange={(field, value) => update(i, field, value)}>
-              {campaignId && <UniqueCodesPanel campaignId={campaignId} slotIndex={slot.slotIndex} variantId={v.id} stock={Number(v.stock) || 0} label={v.name || t('variants.variantN', { n: i + 1 })} draft={draft} onChanged={onCodesChanged}
+              {<UniqueCodesPanel campaignId={campaignId} slotIndex={slot.slotIndex} variantId={v.id} stock={Number(v.stock) || 0} label={v.name || t('variants.variantN', { n: i + 1 })} draft={draft} onChanged={onCodesChanged}
                 persisted={!!(v.savedUnique && v.id)} staged={v.pendingCodes || ''} onStage={(txt) => update(i, 'pendingCodes', txt)} />}
             </PersoFields>
           )}

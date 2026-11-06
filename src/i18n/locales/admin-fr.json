@@ -468,7 +468,8 @@
     "fieldNeedsLabelError": "Chaque champ personnalisé a besoin d'un libellé",
     "copyOfPrefix": "Copie de {{name}}",
     "step4Label": "Paramètres",
-    "saveDraftBtn": "Enregistrer en brouillon"
+    "saveDraftBtn": "Enregistrer en brouillon",
+    "partialSave": "La campagne est créée, mais certains réglages n'ont pas pu être enregistrés. Vous pouvez les compléter dans les réglages de la campagne :"
   },
   "builders": {
     "categoryNamePlaceholder": "Nom de la catégorie — ex. Budget",
@@ -1298,7 +1299,7 @@
     "useDefaultLinkBtn": "Utiliser le lien des Paramètres",
     "googleReviewLinkRequiredError": "Ajoutez un lien d'avis Google pour activer l'invitation.",
     "socialTitle": "Réseaux sociaux",
-    "socialDesc": "Invitez les visiteurs à vous suivre une fois leur cadeau gagné. Les boutons utilisent les liens de réseaux sociaux définis dans les Paramètres de l'app — ils ne peuvent pas être modifiés pour une seule campagne.",
+    "socialDesc": "Les boutons utilisent les liens de réseaux sociaux du compte (Paramètres), ou ceux que vous définissez pour cette campagne dans « Réseaux sociaux de la campagne » plus bas.",
     "socialToggleLabel": "Inviter les visiteurs à nous suivre sur les réseaux sociaux",
     "socialLinksUsed": "Boutons affichés :",
     "socialNoLinksWarning": "Aucun lien de réseau social n'est défini dans les Paramètres de l'app, donc aucun bouton ne s'afficherait.",
@@ -2865,7 +2866,8 @@
     "privacyDesc": "Le lien affiché au formulaire des invités et le consentement marketing séparé. Vide = ceux du compte.",
     "policyUrl": "Lien vers la politique de confidentialité",
     "marketingConsent": "Proposer un consentement marketing séparé",
-    "save": "Enregistrer ces réglages"
+    "save": "Enregistrer ces réglages",
+    "introStaged": "Ces réglages sont propres à cette campagne et seront enregistrés avec elle. Un champ laissé vide reprend la valeur par défaut du compte (menu Paramètres), affichée en grisé."
   },
   "rulesConfig": {
     "title": "Règlement du jeu",
@@ -2895,19 +2897,11 @@
     "eventPaid": "L'entrée à l'événement est payante",
     "imageRights": "Autoriser la publication du prénom et de la photo du gagnant",
     "imageRightsHint": "Ajoute l'article « Droit à l'image » au règlement.",
-    "bailiff": "Dépôt chez un commissaire de justice (étude)",
-    "bailiffPh": "Facultatif",
-    "bailiffCity": "Ville de l'étude",
-    "mediator": "Médiateur de la consommation",
-    "mediatorPh": "Facultatif : nom et site",
-    "valuesTitle": "Valeur indicative TTC de chaque lot",
-    "valuesHint": "Facultative. Si vous n'en saisissez aucune, la colonne n'apparaît pas dans l'annexe. Elle apparaît dans l'annexe du règlement, avec les quantités et les probabilités.",
-    "noGifts": "Ajoutez d'abord des cadeaux à la campagne.",
-    "valuesMissing": "{{count}} lot(s) sans valeur : l'annexe affichera « — ».",
     "save": "Enregistrer",
     "preview": "Aperçu du règlement",
     "publishNew": "Publier une nouvelle version",
     "autoAtStart": "Le règlement sera publié automatiquement au démarrage de la campagne.",
-    "menuItem": "Règlement du jeu"
+    "menuItem": "Règlement du jeu",
+    "newVersionHint": "Le règlement publié ne change pas tout seul : pour tenir compte d'une modification, publiez une nouvelle version."
   }
 }

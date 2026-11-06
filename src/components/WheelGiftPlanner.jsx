@@ -5,6 +5,8 @@ import WheelSVG from './WheelSVG';
 import { SLOT_COLORS } from './slotColors';
 import { CASE_COUNT, isGiftReady } from './giftPlanning';
 import { ProbabilityTotal, TopCaseWarning } from './DynamicCaseFields';
+import VariantsEditor, { PersoFields, emptyVariant } from './VariantsEditor';
+import UniqueCodesPanel from './UniqueCodesPanel';
 import './dynamic-distribution.css';
 
 // Step 1 of campaign creation: define 12 gifts first (name, how it's
@@ -36,6 +38,10 @@ export default function WheelGiftPlanner({ gifts, setGifts, wheelProps, wheelCap
 
   function updateGift(id, field, value) {
     setGifts((prev) => prev.map((g) => (g.id === id ? { ...g, [field]: value } : g)));
+  }
+
+  function patchGift(id, patch) {
+    setGifts((prev) => prev.map((g) => (g.id === id ? { ...g, ...patch } : g)));
   }
 
   function place(id, c) {
@@ -149,12 +155,12 @@ export default function WheelGiftPlanner({ gifts, setGifts, wheelProps, wheelCap
                       <span>{t('dynamic.unlimitedShort')}</span>
                     </label>
                   )}
-                  <select className="dyn-redeem" value={g.redeemMethod} title={t('editCampaign.redeemMethodTitle')} onChange={(e) => updateGift(g.id, 'redeemMethod', e.target.value)}>
+                  {g.variantsEnabled ? <span className="vr-flag dyn-redeem" title={t('variants.modeInVariants')}>{t('variants.modeInVariantsShort')}</span> : <select className="dyn-redeem" value={g.redeemMethod} title={t('editCampaign.redeemMethodTitle')} onChange={(e) => updateGift(g.id, 'redeemMethod', e.target.value)}>
                     <option value="qr">QR</option>
                     <option value="code">Code</option>
                     <option value="voucher">Voucher</option>
                     <option value="perso">Perso</option>
-                  </select>
+                  </select>}
                   {!dynamic && <div className="gift-pct">{pct ? `${pct.toFixed(1)}%` : '—'}</div>}
                 </div>
 
@@ -182,41 +188,22 @@ export default function WheelGiftPlanner({ gifts, setGifts, wheelProps, wheelCap
                   )}
                 </div>
 
-                {g.redeemMethod === 'perso' && (
-                  <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 8, padding: 12, marginTop: 10 }}>
-                    <div style={{ display: 'flex', gap: 10, marginBottom: 8, flexWrap: 'wrap' }}>
-                      <div className="field" style={{ margin: 0, flex: '0 0 180px' }}>
-                        <label style={{ fontSize: 11 }}>{t('editCampaign.deliversLabel')}</label>
-                        <select value={g.persoDelivery} onChange={(e) => updateGift(g.id, 'persoDelivery', e.target.value)}>
-                          <option value="code">{t('editCampaign.deliversCode')}</option>
-                          <option value="qr">{t('editCampaign.deliversQr')}</option>
-                          <option value="text">{t('editCampaign.deliversText')}</option>
-                        </select>
-                      </div>
-                      <div className="field" style={{ margin: 0, flex: '1 1 260px' }}>
-                        <label style={{ fontSize: 11 }}>{t('settings.emailTemplates.subjectLabel')}</label>
-                        <input placeholder={t('editCampaign.subjectPlaceholder')} value={g.persoSubject} onChange={(e) => updateGift(g.id, 'persoSubject', e.target.value)} />
-                      </div>
-                    </div>
-                    <div className="field" style={{ margin: 0 }}>
-                      <label style={{ fontSize: 11 }}>
-                        {t('editCampaign.messageLabel', { vars: `{{firstName}} / {{giftName}}${g.persoDelivery === 'code' ? ' / {{code}}' : ''}` })}
-                      </label>
-                      <textarea rows={2} placeholder={t('editCampaign.messagePlaceholder')} value={g.persoBody} onChange={(e) => updateGift(g.id, 'persoBody', e.target.value)} style={{ width: '100%', fontFamily: 'inherit' }} />
-                      {g.persoDelivery === 'code' && (
-                        <p style={{ fontSize: 11, color: '#94A3B8', margin: '4px 0 0' }}>
-                          {t('editCampaign.codeAutoAddedNote', { code: '{{code}}' })}
-                        </p>
-                      )}
-                    </div>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, cursor: 'pointer' }}>
-                      <input type="checkbox" checked={!!g.persoAutoDistribute} onChange={(e) => updateGift(g.id, 'persoAutoDistribute', e.target.checked)} />
-                      <span style={{ fontSize: 12, color: '#334155' }}>
-                        {t('editCampaign.autoDistributeLabel')}
-                        <span style={{ display: 'block', fontSize: 11, color: '#94A3B8' }}>{t('editCampaign.autoDistributeDesc')}</span>
-                      </span>
-                    </label>
-                  </div>
+                {/* several gifts behind one case (variants) — not for an unlimited gift */}
+                {(g.giftName.trim() || Number(g.stock) > 0) && !(dynamic && g.unlimited) && (
+                  <label className="vr-toggle">
+                    <input type="checkbox" checked={!!g.variantsEnabled}
+                      onChange={(e) => patchGift(g.id, { variantsEnabled: e.target.checked, variants: e.target.checked && !(g.variants || []).length ? [emptyVariant()] : (g.variants || []) })} />
+                    <span>{t('variants.enable')}</span>
+                  </label>
+                )}
+                {!g.variantsEnabled && g.redeemMethod === 'perso' && (
+                  <PersoFields value={g} idPrefix={`gift-${g.id}`} uniqueCodeEditable={!(dynamic && g.unlimited)} onChange={(field, value) => updateGift(g.id, field, value)}>
+                    <UniqueCodesPanel campaignId={null} slotIndex={g.caseIndex ?? g.id} stock={Number(g.stock) || 0} label={g.giftName || t('wheelGiftPlanner.giftNumberBadge', { n: g.id + 1 })} draft
+                      persisted={false} staged={g.pendingCodes || ''} onStage={(txt) => updateGift(g.id, 'pendingCodes', txt)} />
+                  </PersoFields>
+                )}
+                {g.variantsEnabled && (
+                  <VariantsEditor slot={{ ...g, slotIndex: g.caseIndex ?? g.id, stockInitial: g.stock }} draft onChange={(patch) => patchGift(g.id, patch)} />
                 )}
               </div>
             );

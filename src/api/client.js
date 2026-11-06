@@ -345,6 +345,7 @@ export const api = {
   // Google review invite (+ its link), social media invite and AI assistant
   // for one campaign — see CampaignSettingsForm.jsx.
   // Settings of ONE campaign (social links, reward e-mail, privacy); an empty value = the account's (Settings menu)
+  getCampaignOverridesDefaults: () => request('/campaigns/overrides-defaults'),
   getCampaignOverrides: (id) => request(`/campaigns/${id}/overrides`),
   updateCampaignOverrides: (id, body) => request(`/campaigns/${id}/overrides`, { method: 'PATCH', body }),
   uploadCampaignLogo: async (id, file) => {

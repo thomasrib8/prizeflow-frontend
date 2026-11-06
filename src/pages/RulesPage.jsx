@@ -47,7 +47,7 @@ export default function RulesPage() {
               <thead><tr>{doc.annex.columns.map((c) => <th key={c}>{c}</th>)}</tr></thead>
               <tbody>
                 {doc.annex.rows.map((r) => (
-                  <tr key={r.case}><td>{r.case}</td><td>{r.gift}</td><td>{r.quantity}</td>{r.value !== undefined && <td>{r.value}</td>}<td>{r.probability}</td></tr>
+                  <tr key={r.case}><td>{r.case}</td><td>{r.gift}</td><td>{r.quantity}</td><td>{r.probability}</td></tr>
                 ))}
                 <tr className="rl-total"><td colSpan={doc.annex.columns.length - 1}>Total</td><td>{doc.annex.total}</td></tr>
               </tbody>

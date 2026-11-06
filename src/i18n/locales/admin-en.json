@@ -468,7 +468,8 @@
     "fieldNeedsLabelError": "Every custom field needs a label",
     "copyOfPrefix": "Copy of {{name}}",
     "step4Label": "Settings",
-    "saveDraftBtn": "Save as draft"
+    "saveDraftBtn": "Save as draft",
+    "partialSave": "The campaign is created, but some settings could not be saved. You can complete them in the campaign's settings:"
   },
   "builders": {
     "categoryNamePlaceholder": "Category name — e.g. Budget",
@@ -1298,7 +1299,7 @@
     "useDefaultLinkBtn": "Use the link from Settings",
     "googleReviewLinkRequiredError": "Add a Google review link to turn the review invite on.",
     "socialTitle": "Social media",
-    "socialDesc": "Invite guests to follow you once their gift is won. The buttons use the social media links from your app Settings — they can't be changed for a single campaign.",
+    "socialDesc": "The buttons use the account's social media links (Settings), or the ones you set for this campaign under \"Campaign social networks\" below.",
     "socialToggleLabel": "Invite guests to follow us on social media",
     "socialLinksUsed": "Buttons shown:",
     "socialNoLinksWarning": "No social media link is set in your app Settings yet, so no button would appear.",
@@ -2865,7 +2866,8 @@
     "privacyDesc": "The link shown on the guest form and the separate marketing consent. Empty = the account's.",
     "policyUrl": "Link to the privacy policy",
     "marketingConsent": "Offer a separate marketing consent",
-    "save": "Save these settings"
+    "save": "Save these settings",
+    "introStaged": "These settings belong to this campaign and are saved with it. A field left empty takes the account's default value (Settings menu), shown in grey."
   },
   "rulesConfig": {
     "title": "Game rules",
@@ -2895,19 +2897,11 @@
     "eventPaid": "Entry to the event is paid",
     "imageRights": "Allow publishing the winner's first name and photo",
     "imageRightsHint": "Adds the \"Image rights\" article to the rules.",
-    "bailiff": "Deposit with a bailiff (firm)",
-    "bailiffPh": "Optional",
-    "bailiffCity": "Firm's city",
-    "mediator": "Consumer mediator",
-    "mediatorPh": "Optional: name and website",
-    "valuesTitle": "Indicative value (incl. tax) of each prize",
-    "valuesHint": "Optional. If you enter none, the column does not appear in the annex. It appears in the rules' annex, with the quantities and probabilities.",
-    "noGifts": "Add gifts to the campaign first.",
-    "valuesMissing": "{{count}} prize(s) without a value: the annex will show \"—\".",
     "save": "Save",
     "preview": "Preview the rules",
     "publishNew": "Publish a new version",
     "autoAtStart": "The rules will be published automatically when the campaign starts.",
-    "menuItem": "Game rules"
+    "menuItem": "Game rules",
+    "newVersionHint": "The published rules do not change by themselves: to take a change into account, publish a new version."
   }
 }

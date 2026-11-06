@@ -2,28 +2,33 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
-import { Card, Button } from './ui';
+import { Button } from './ui';
+import CollapsibleCard from './CollapsibleCard';
 
 const input = { width: '100%', padding: '10px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 14, fontFamily: 'inherit' };
 const FIELD_KEYS = { company: 'fieldCompany', legalForm: 'fieldLegalForm', registrationNumber: 'fieldRegistrationNumber', address: 'fieldAddress', city: 'fieldCity', email: 'fieldEmail' };
+export const DEFAULT_RULES_CONFIG = { gameName: '', standName: '', adultOnly: true, terminalAvailable: true, eventPaid: false, hasNoPrizeCases: false, imageRights: false, startDate: '', endDate: '', claimDeadline: '', claimDelayDays: 30 };
 
-// Campaign settings: what the game rules need beyond the gifts and the organiser's identity (dates, stand, value of each gift, options).
-// The text itself is generated when the campaign starts and published at /rules/<campaign id>.
-export default function CampaignRulesConfig({ campaignId, status }) {
+// Campaign settings: what the game rules need beyond the gifts and the organiser's identity (dates, stand, options). The text itself is generated
+// when the campaign starts and published at /rules/<campaign id>.
+// `campaignId` null = the campaign does not exist yet (creation wizard): the form is kept by the parent through onStage(config).
+export default function CampaignRulesConfig({ campaignId = null, status = 'draft', onStage = null }) {
   const { t } = useTranslation('admin');
-  const [data, setData] = useState(null);
-  const [cfg, setCfg] = useState(null);
+  const staged = !campaignId;
+  const [data, setData] = useState(staged ? { config: DEFAULT_RULES_CONFIG, missingOrganizer: [], published: null, publicUrl: '' } : null);
+  const [cfg, setCfg] = useState(staged ? DEFAULT_RULES_CONFIG : null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [msg, setMsg] = useState('');
   const [copied, setCopied] = useState(false);
 
-  const load = () => api.getRulesConfig(campaignId).then((r) => { setData(r); setCfg({ ...r.config, values: { ...r.config.values } }); }).catch((e) => setError(e.message));
-  useEffect(() => { load(); }, [campaignId]); // eslint-disable-line react-hooks/exhaustive-deps
+  const load = () => api.getRulesConfig(campaignId).then((r) => { setData(r); setCfg({ ...r.config }); }).catch((e) => setError(e.message));
+  useEffect(() => { if (!staged) load(); }, [campaignId]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (staged && onStage && cfg) onStage(cfg); }, [cfg]); // eslint-disable-line react-hooks/exhaustive-deps
   if (!cfg || !data) return error ? <div className="error-banner">{error}</div> : null;
   const set = (patch) => setCfg((c) => ({ ...c, ...patch }));
   const archived = status === 'archived';
-  const running = status === 'active' || status === 'paused' || status === 'completed';
+  const running = !staged && (status === 'active' || status === 'paused' || status === 'completed');
   const check = (key, label, hint) => (
     <label style={{ display: 'flex', gap: 10, alignItems: 'flex-start', margin: '8px 0', cursor: 'pointer' }}>
       <input type="checkbox" disabled={archived} checked={!!cfg[key]} onChange={(e) => set({ [key]: e.target.checked })} style={{ marginTop: 3 }} />
@@ -43,17 +48,14 @@ export default function CampaignRulesConfig({ campaignId, status }) {
   }
   async function preview() {
     setBusy(true); setError('');
-    try { await api.saveRulesConfig(campaignId, cfg); const doc = await api.previewRules(campaignId); window.__rulesPreview = doc; const w = window.open('', '_blank'); if (w) { w.document.write(renderPreview(doc)); w.document.close(); } }
+    try { await api.saveRulesConfig(campaignId, cfg); const doc = await api.previewRules(campaignId); const w = window.open('', '_blank'); if (w) { w.document.write(renderPreview(doc)); w.document.close(); } }
     catch (e) { setError(e.code === 'RULES_ORGANIZER_INFO' ? t('rulesConfig.missingOrganizer') : e.message); } finally { setBusy(false); }
   }
   const copyUrl = () => { try { navigator.clipboard.writeText(data.publicUrl); setCopied(true); setTimeout(() => setCopied(false), 1800); } catch { /* no clipboard */ } };
   const missingLabels = data.missingOrganizer.map((k) => t(`settings.information.${FIELD_KEYS[k] || k}`)).join(', ');
-  const filled = data.slots.filter((s) => cfg.values[String(s.slotIndex)] !== undefined && cfg.values[String(s.slotIndex)] !== '');
-  // optional: the warning only appears when SOME gifts have a value and others do not
-  const missingValues = filled.length === 0 ? [] : data.slots.filter((s) => !filled.includes(s));
 
   return (
-    <Card title={t('rulesConfig.title')} className="mt-card">
+    <CollapsibleCard title={t('rulesConfig.title')} className="mt-card">
       <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 12px', lineHeight: 1.6 }}>{t('rulesConfig.intro')}</p>
       {error && <div className="error-banner">{error}</div>}
       {data.missingOrganizer.length > 0 && (
@@ -78,9 +80,9 @@ export default function CampaignRulesConfig({ campaignId, status }) {
         </div>
       </div>
       <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', margin: '12px 0' }}>
-        {[['startDate', 'startDate', t('rulesConfig.startPh')], ['endDate', 'endDate', t('rulesConfig.endPh')], ['claimDeadline', 'claimDeadline', t('rulesConfig.claimPh')]].map(([k, label, ph]) => (
+        {[['startDate', t('rulesConfig.startPh')], ['endDate', t('rulesConfig.endPh')], ['claimDeadline', t('rulesConfig.claimPh')]].map(([k, ph]) => (
           <div className="field" key={k} style={{ margin: 0, flex: 1, minWidth: 170 }}>
-            <label>{t(`rulesConfig.${label}`)}</label>
+            <label>{t(`rulesConfig.${k}`)}</label>
             <input type="date" disabled={archived} value={cfg[k]} onChange={(e) => set({ [k]: e.target.value })} style={input} />
             <small style={{ color: '#94A3B8', fontSize: 11.5 }}>{ph}</small>
           </div>
@@ -97,44 +99,16 @@ export default function CampaignRulesConfig({ campaignId, status }) {
       {check('eventPaid', t('rulesConfig.eventPaid'))}
       {check('imageRights', t('rulesConfig.imageRights'), t('rulesConfig.imageRightsHint'))}
 
-      <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', margin: '12px 0' }}>
-        <div className="field" style={{ margin: 0, flex: 1, minWidth: 220 }}>
-          <label>{t('rulesConfig.bailiff')}</label>
-          <input type="text" maxLength={200} disabled={archived} value={cfg.bailiffName} placeholder={t('rulesConfig.bailiffPh')} onChange={(e) => set({ bailiffName: e.target.value })} style={input} />
-        </div>
-        <div className="field" style={{ margin: 0, flex: 1, minWidth: 160 }}>
-          <label>{t('rulesConfig.bailiffCity')}</label>
-          <input type="text" maxLength={120} disabled={archived} value={cfg.bailiffCity} onChange={(e) => set({ bailiffCity: e.target.value })} style={input} />
-        </div>
-        <div className="field" style={{ margin: 0, flex: 2, minWidth: 220 }}>
-          <label>{t('rulesConfig.mediator')}</label>
-          <input type="text" maxLength={300} disabled={archived} value={cfg.mediator} placeholder={t('rulesConfig.mediatorPh')} onChange={(e) => set({ mediator: e.target.value })} style={input} />
-        </div>
-      </div>
-
-      <h4 style={{ margin: '16px 0 6px', fontSize: 13 }}>{t('rulesConfig.valuesTitle')}</h4>
-      <p style={{ fontSize: 12.5, color: '#64748B', margin: '0 0 8px' }}>{t('rulesConfig.valuesHint')}</p>
-      {data.slots.length === 0 ? <p className="ap-hint">{t('rulesConfig.noGifts')}</p> : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 10 }}>
-          {data.slots.map((s) => (
-            <label key={s.slotIndex} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}>
-              <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t('dashboard.caseLabel', { n: s.slotIndex + 1 })} · {s.giftName}</span>
-              <input type="number" min="0" step="0.01" disabled={archived} value={cfg.values[String(s.slotIndex)] ?? ''} placeholder="0" onChange={(e) => set({ values: { ...cfg.values, [String(s.slotIndex)]: e.target.value } })} style={{ ...input, width: 96, textAlign: 'right' }} />
-              <span style={{ fontSize: 12, color: '#64748B' }}>€</span>
-            </label>
-          ))}
+      {!staged && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 18, flexWrap: 'wrap' }}>
+          <Button disabled={busy || archived} onClick={save}>{busy ? t('common.saving') : t('rulesConfig.save')}</Button>
+          <Button variant="secondary" disabled={busy || archived} onClick={preview}>{t('rulesConfig.preview')}</Button>
+          {running && <Button variant="secondary" disabled={busy || archived} onClick={publish}>{t('rulesConfig.publishNew')}</Button>}
+          {msg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{msg}</span>}
         </div>
       )}
-      {missingValues.length > 0 && data.slots.length > 0 && <p className="dyn-short" style={{ fontSize: 12.5, margin: '8px 0 0' }}>{t('rulesConfig.valuesMissing', { count: missingValues.length })}</p>}
-
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 18, flexWrap: 'wrap' }}>
-        <Button disabled={busy || archived} onClick={save}>{busy ? t('common.saving') : t('rulesConfig.save')}</Button>
-        <Button variant="secondary" disabled={busy || archived} onClick={preview}>{t('rulesConfig.preview')}</Button>
-        {running && <Button variant="secondary" disabled={busy || archived} onClick={publish}>{t('rulesConfig.publishNew')}</Button>}
-        {msg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{msg}</span>}
-      </div>
-      {!running && <p style={{ fontSize: 12, color: '#94A3B8', margin: '10px 0 0' }}>{t('rulesConfig.autoAtStart')}</p>}
-    </Card>
+      <p style={{ fontSize: 12, color: '#94A3B8', margin: '10px 0 0' }}>{running ? t('rulesConfig.newVersionHint') : t('rulesConfig.autoAtStart')}</p>
+    </CollapsibleCard>
   );
 }
 
@@ -142,6 +116,6 @@ export default function CampaignRulesConfig({ campaignId, status }) {
 function renderPreview(doc) {
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const body = doc.articles.map((a) => `<h2>${esc(a.heading)}</h2>${a.blocks.map((b) => (b.type === 'list' ? `<ul>${b.items.map((i) => `<li>${esc(i)}</li>`).join('')}</ul>` : `<p>${esc(b.text)}</p>`)).join('')}`).join('');
-  const rows = doc.annex.rows.map((r) => `<tr><td>${esc(r.case)}</td><td>${esc(r.gift)}</td><td>${esc(r.quantity)}</td>${r.value !== undefined ? `<td>${esc(r.value)}</td>` : ''}<td>${esc(r.probability)}</td></tr>`).join('');
-  return `<!doctype html><meta charset="utf-8"><title>Aperçu du règlement</title><style>body{font:15px/1.65 system-ui;max-width:760px;margin:30px auto;padding:0 16px;color:#0F172A}h1{text-align:center}h2{font-size:16px;color:#002881;margin-top:26px}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ddd;padding:6px 8px;text-align:left}.b{background:#FFF7E6;border:1px solid #FCD9A0;padding:8px 12px;border-radius:8px;font-size:13px}</style><p class="b">Aperçu — non publié</p><h1>${esc(doc.title)} « ${esc(doc.gameName)} »</h1><p style="text-align:center">${esc(doc.subtitle)}</p>${body}<h2>${esc(doc.annex.heading)}</h2><p>${esc(doc.annex.intro)}</p><table><tr>${doc.annex.columns.map((c) => `<th>${esc(c)}</th>`).join('')}</tr>${rows}<tr><td colspan="${doc.annex.columns.length - 1}"><b>Total</b></td><td><b>${esc(doc.annex.total)}</b></td></tr></table>${doc.annex.note ? `<p>${esc(doc.annex.note)}</p>` : ''}`;
+  const rows = doc.annex.rows.map((r) => `<tr><td>${esc(r.case)}</td><td>${esc(r.gift)}</td><td>${esc(r.quantity)}</td><td>${esc(r.probability)}</td></tr>`).join('');
+  return `<!doctype html><meta charset="utf-8"><title>Aperçu du règlement</title><style>body{font:15px/1.65 system-ui;max-width:760px;margin:30px auto;padding:0 16px;color:#0F172A}h1{text-align:center}h2{font-size:16px;color:#002881;margin-top:26px}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ddd;padding:6px 8px;text-align:left}.b{background:#FFF7E6;border:1px solid #FCD9A0;padding:8px 12px;border-radius:8px;font-size:13px}</style><p class="b">Aperçu — non publié</p><h1>${esc(doc.title)} « ${esc(doc.gameName)} »</h1><p style="text-align:center">${esc(doc.subtitle)}</p>${body}<h2>${esc(doc.annex.heading)}</h2><p>${esc(doc.annex.intro)}</p><table><tr>${doc.annex.columns.map((c) => `<th>${esc(c)}</th>`).join('')}</tr>${rows}<tr><td colspan="3"><b>Total</b></td><td><b>${esc(doc.annex.total)}</b></td></tr></table>${doc.annex.note ? `<p>${esc(doc.annex.note)}</p>` : ''}`;
 }

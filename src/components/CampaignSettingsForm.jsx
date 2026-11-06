@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { useEnrichedCrm } from '../hooks/useEnrichedCrm';
-import { Card } from './ui';
+import { Card as PlainCard } from './ui';
+import CollapsibleCard from './CollapsibleCard';
 import ResultScreenCard, { DEFAULT_RESULT_SCREEN, resultScreenFromCampaign } from './ResultScreenCard';
 import CreditsBar from './linkedin/CreditsBar';
 import LinkedInIcon from './linkedin/LinkedInIcon';
@@ -54,6 +55,7 @@ const warnStyle = { background: '#FFFBEB', border: '1px solid #FDE68A', borderRa
 // without the explanatory paragraphs and with line icons instead of emoji.
 export default function CampaignSettingsForm({ value, onChange, compact = false, language = 'fr' }) {
   const { t } = useTranslation('admin');
+  const Card = compact ? PlainCard : CollapsibleCard; // the mobile app keeps flat cards
   const enrichedCrm = useEnrichedCrm(); // AI assistant and LinkedIn search belong to the enriched CRM option
   const [account, setAccount] = useState(null);
   const [aiConfigured, setAiConfigured] = useState(null);

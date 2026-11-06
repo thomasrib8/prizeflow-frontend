@@ -468,7 +468,8 @@
     "fieldNeedsLabelError": "Jedes benutzerdefinierte Feld braucht eine Bezeichnung",
     "copyOfPrefix": "Kopie von {{name}}",
     "step4Label": "Einstellungen",
-    "saveDraftBtn": "Als Entwurf speichern"
+    "saveDraftBtn": "Als Entwurf speichern",
+    "partialSave": "Die Kampagne wurde erstellt, aber einige Einstellungen konnten nicht gespeichert werden. Sie können sie in den Kampagneneinstellungen ergänzen:"
   },
   "builders": {
     "categoryNamePlaceholder": "Kategoriename — z. B. Budget",
@@ -1298,7 +1299,7 @@
     "useDefaultLinkBtn": "Link aus den Einstellungen verwenden",
     "googleReviewLinkRequiredError": "Fügen Sie einen Link zur Google-Bewertung hinzu, um die Einladung zu aktivieren.",
     "socialTitle": "Soziale Medien",
-    "socialDesc": "Laden Sie Gäste ein, Ihnen zu folgen, sobald ihr Geschenk gewonnen ist. Die Buttons nutzen die Social-Media-Links aus Ihren App-Einstellungen — sie können nicht für eine einzelne Kampagne geändert werden.",
+    "socialDesc": "Die Schaltflächen verwenden die Social-Media-Links des Kontos (Einstellungen) oder die, die Sie für diese Kampagne unter „Soziale Netzwerke der Kampagne“ unten festlegen.",
     "socialToggleLabel": "Gäste einladen, uns in den sozialen Medien zu folgen",
     "socialLinksUsed": "Angezeigte Buttons:",
     "socialNoLinksWarning": "In den App-Einstellungen ist noch kein Social-Media-Link hinterlegt, daher würde kein Button erscheinen.",
@@ -2865,7 +2866,8 @@
     "privacyDesc": "Der Link im Gästeformular und die getrennte Marketing-Einwilligung. Leer = die des Kontos.",
     "policyUrl": "Link zur Datenschutzerklärung",
     "marketingConsent": "Getrennte Marketing-Einwilligung anbieten",
-    "save": "Diese Einstellungen speichern"
+    "save": "Diese Einstellungen speichern",
+    "introStaged": "Diese Einstellungen gehören zu dieser Kampagne und werden mit ihr gespeichert. Ein leeres Feld übernimmt den Standardwert des Kontos (Menü Einstellungen), grau angezeigt."
   },
   "rulesConfig": {
     "title": "Spielregeln",
@@ -2895,19 +2897,11 @@
     "eventPaid": "Der Eintritt zur Veranstaltung ist kostenpflichtig",
     "imageRights": "Veröffentlichung von Vorname und Foto des Gewinners erlauben",
     "imageRightsHint": "Fügt den Artikel „Bildrechte“ zu den Regeln hinzu.",
-    "bailiff": "Hinterlegung bei einem Gerichtsvollzieher (Kanzlei)",
-    "bailiffPh": "Optional",
-    "bailiffCity": "Stadt der Kanzlei",
-    "mediator": "Verbraucherschlichter",
-    "mediatorPh": "Optional: Name und Website",
-    "valuesTitle": "Richtwert inkl. Steuern jedes Gewinns",
-    "valuesHint": "Optional. Wenn Sie keinen eingeben, erscheint die Spalte nicht im Anhang. Er erscheint im Anhang der Regeln, mit Mengen und Wahrscheinlichkeiten.",
-    "noGifts": "Fügen Sie der Kampagne zuerst Geschenke hinzu.",
-    "valuesMissing": "{{count}} Gewinn(e) ohne Wert: der Anhang zeigt „—“.",
     "save": "Speichern",
     "preview": "Vorschau der Regeln",
     "publishNew": "Neue Version veröffentlichen",
     "autoAtStart": "Die Spielregeln werden beim Start der Kampagne automatisch veröffentlicht.",
-    "menuItem": "Spielregeln"
+    "menuItem": "Spielregeln",
+    "newVersionHint": "Die veröffentlichten Spielregeln ändern sich nicht von selbst: um eine Änderung zu berücksichtigen, veröffentlichen Sie eine neue Version."
   }
 }

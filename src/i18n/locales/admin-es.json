@@ -468,7 +468,8 @@
     "fieldNeedsLabelError": "Cada campo personalizado necesita una etiqueta",
     "copyOfPrefix": "Copia de {{name}}",
     "step4Label": "Ajustes",
-    "saveDraftBtn": "Guardar como borrador"
+    "saveDraftBtn": "Guardar como borrador",
+    "partialSave": "La campaña está creada, pero algunos ajustes no se pudieron guardar. Puede completarlos en los ajustes de la campaña:"
   },
   "builders": {
     "categoryNamePlaceholder": "Nombre de la categoría — p. ej. Presupuesto",
@@ -1298,7 +1299,7 @@
     "useDefaultLinkBtn": "Usar el enlace de Ajustes",
     "googleReviewLinkRequiredError": "Añade un enlace de reseña de Google para activar la invitación.",
     "socialTitle": "Redes sociales",
-    "socialDesc": "Invita a los visitantes a seguirte cuando ganen su regalo. Los botones usan los enlaces de redes sociales de los Ajustes de la app — no se pueden cambiar para una sola campaña.",
+    "socialDesc": "Los botones usan los enlaces de redes sociales de la cuenta (Ajustes), o los que defina para esta campaña en «Redes sociales de la campaña» más abajo.",
     "socialToggleLabel": "Invitar a los visitantes a seguirnos en redes sociales",
     "socialLinksUsed": "Botones mostrados:",
     "socialNoLinksWarning": "Aún no hay ningún enlace de redes sociales en los Ajustes de la app, así que no aparecería ningún botón.",
@@ -2865,7 +2866,8 @@
     "privacyDesc": "El enlace del formulario de los invitados y el consentimiento de marketing separado. Vacío = los de la cuenta.",
     "policyUrl": "Enlace a la política de privacidad",
     "marketingConsent": "Ofrecer un consentimiento de marketing separado",
-    "save": "Guardar estos ajustes"
+    "save": "Guardar estos ajustes",
+    "introStaged": "Estos ajustes son propios de esta campaña y se guardan con ella. Un campo vacío toma el valor por defecto de la cuenta (menú Ajustes), en gris."
   },
   "rulesConfig": {
     "title": "Reglamento del juego",
@@ -2895,19 +2897,11 @@
     "eventPaid": "La entrada al evento es de pago",
     "imageRights": "Permitir publicar el nombre y la foto del ganador",
     "imageRightsHint": "Añade el artículo «Derecho de imagen» al reglamento.",
-    "bailiff": "Depósito ante un agente judicial (despacho)",
-    "bailiffPh": "Opcional",
-    "bailiffCity": "Ciudad del despacho",
-    "mediator": "Mediador de consumo",
-    "mediatorPh": "Opcional: nombre y sitio web",
-    "valuesTitle": "Valor indicativo con impuestos de cada premio",
-    "valuesHint": "Opcional. Si no introduce ninguno, la columna no aparece en el anexo. Aparece en el anexo del reglamento, con las cantidades y las probabilidades.",
-    "noGifts": "Añada primero regalos a la campaña.",
-    "valuesMissing": "{{count}} premio(s) sin valor: el anexo mostrará «—».",
     "save": "Guardar",
     "preview": "Vista previa del reglamento",
     "publishNew": "Publicar una nueva versión",
     "autoAtStart": "El reglamento se publicará automáticamente al iniciar la campaña.",
-    "menuItem": "Reglamento del juego"
+    "menuItem": "Reglamento del juego",
+    "newVersionHint": "El reglamento publicado no cambia solo: para tener en cuenta un cambio, publique una nueva versión."
   }
 }

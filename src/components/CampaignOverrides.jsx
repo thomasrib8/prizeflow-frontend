@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
-import { Card, Button } from './ui';
+import { Button } from './ui';
+import CollapsibleCard from './CollapsibleCard';
+const Card = CollapsibleCard; // every section folds
 import { SocialGlyph } from './SocialIcons';
 
 const SOCIAL = [
@@ -18,12 +20,16 @@ const valueToTri = (v) => (v === 'yes' ? true : v === 'no' ? false : null);
 
 // Campaign settings, second part: what the Settings menu holds as the ACCOUNT defaults (social links, reward e-mail, privacy) can be decided
 // for this campaign only. Left empty, the account's value is used (shown as the placeholder of each field).
-export default function CampaignOverrides({ campaignId, archived = false }) {
+// `campaignId` null = the campaign does not exist yet (creation wizard): the form starts from the account's values, keeps what is typed in the
+// parent through onStage(payload, logoFile), and the parent applies it right after the campaign is created.
+export default function CampaignOverrides({ campaignId = null, archived = false, onStage = null }) {
+  const staged = !campaignId;
   const { t } = useTranslation('admin');
   const [data, setData] = useState(null);
   const [form, setForm] = useState(null);
   const [method, setMethod] = useState('qr');
   const [logoUrl, setLogoUrl] = useState(null);
+  const [logoFile, setLogoFile] = useState(null); // staged mode: uploaded after the campaign is created
   const [busy, setBusy] = useState(false);
   const [logoBusy, setLogoBusy] = useState(false);
   const [error, setError] = useState('');
@@ -35,11 +41,21 @@ export default function CampaignOverrides({ campaignId, archived = false }) {
   };
   const loadLogo = () => api.getCampaignLogoPreviewUrl(campaignId).then((u) => setLogoUrl((prev) => { if (prev) URL.revokeObjectURL(prev); return u; }));
   useEffect(() => {
-    api.getCampaignOverrides(campaignId).then((res) => { apply(res); if (res.own.hasLogo) loadLogo(); }).catch((e) => setError(e.message));
+    (staged ? api.getCampaignOverridesDefaults() : api.getCampaignOverrides(campaignId)).then((res) => { apply(res); if (!staged && res.own.hasLogo) loadLogo(); }).catch((e) => setError(e.message));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [campaignId]);
   useEffect(() => () => { if (logoUrl) URL.revokeObjectURL(logoUrl); }, [logoUrl]);
 
+  const payloadOf = (f) => ({
+    ...Object.fromEntries(SOCIAL.map((p) => [p.key, f[p.key]])),
+    senderName: f.senderName, replyTo: f.replyTo, headerColor: f.headerColor, footerText: f.footerText,
+    logoSize: f.logoSize === '' ? null : Number(f.logoSize),
+    guestFormLogoEnabled: valueToTri(f.guestFormLogoEnabled),
+    privacyPolicyUrl: f.privacyPolicyUrl, marketingConsentEnabled: valueToTri(f.marketingConsentEnabled),
+    templates: f.templates,
+  });
+  // staged: the parent always holds the latest form (nothing is saved until the campaign exists)
+  useEffect(() => { if (staged && form && onStage) onStage(payloadOf(form), logoFile); }, [form, logoFile]); // eslint-disable-line react-hooks/exhaustive-deps
   if (!form || !data) return error ? <div className="error-banner">{error}</div> : null;
   const d = data.defaults; const b = data.builtIn;
   const set = (patch) => setForm((f) => ({ ...f, ...patch }));
@@ -49,14 +65,7 @@ export default function CampaignOverrides({ campaignId, archived = false }) {
   async function save() {
     setBusy(true); setError(''); setMsg('');
     try {
-      const res = await api.updateCampaignOverrides(campaignId, {
-        ...Object.fromEntries(SOCIAL.map((p) => [p.key, form[p.key]])),
-        senderName: form.senderName, replyTo: form.replyTo, headerColor: form.headerColor, footerText: form.footerText,
-        logoSize: form.logoSize === '' ? null : Number(form.logoSize),
-        guestFormLogoEnabled: valueToTri(form.guestFormLogoEnabled),
-        privacyPolicyUrl: form.privacyPolicyUrl, marketingConsentEnabled: valueToTri(form.marketingConsentEnabled),
-        templates: form.templates,
-      });
+      const res = await api.updateCampaignOverrides(campaignId, payloadOf(form));
       apply(res);
       setMsg(t('common.saved')); setTimeout(() => setMsg(''), 2500);
     } catch (e) {
@@ -65,11 +74,15 @@ export default function CampaignOverrides({ campaignId, archived = false }) {
   }
   async function uploadLogo(e) {
     const file = e.target.files[0]; if (!file) return;
+    if (staged) { // kept here, sent once the campaign exists
+      setLogoFile(file); setLogoUrl((prev) => { if (prev) URL.revokeObjectURL(prev); return URL.createObjectURL(file); }); setForm((f) => ({ ...f, hasLogo: true })); e.target.value = ''; return;
+    }
     setLogoBusy(true); setError('');
     try { await api.uploadCampaignLogo(campaignId, file); const res = await api.getCampaignOverrides(campaignId); setData(res); setForm((f) => ({ ...f, hasLogo: true })); await loadLogo(); }
     catch (err) { setError(err.message); } finally { setLogoBusy(false); e.target.value = ''; }
   }
   async function removeLogo() {
+    if (staged) { setLogoFile(null); setLogoUrl((p) => { if (p) URL.revokeObjectURL(p); return null; }); setForm((f) => ({ ...f, hasLogo: false })); return; }
     setLogoBusy(true); setError('');
     try { await api.deleteCampaignLogo(campaignId); setForm((f) => ({ ...f, hasLogo: false })); setLogoUrl((p) => { if (p) URL.revokeObjectURL(p); return null; }); }
     catch (err) { setError(err.message); } finally { setLogoBusy(false); }
@@ -80,7 +93,7 @@ export default function CampaignOverrides({ campaignId, archived = false }) {
   return (
     <>
       <div className="ap-info" style={{ marginTop: 18 }}>
-        {t('campaignOverrides.intro')} <Link to="/settings">{t('campaignOverrides.openDefaults')}</Link>
+        {staged ? t('campaignOverrides.introStaged') : t('campaignOverrides.intro')} <Link to="/settings">{t('campaignOverrides.openDefaults')}</Link>
       </div>
       {error && <div className="error-banner" style={{ marginTop: 12 }}>{error}</div>}
 
@@ -176,10 +189,12 @@ export default function CampaignOverrides({ campaignId, archived = false }) {
         </div>
       </Card>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 18 }}>
-        <Button disabled={dis} onClick={save}>{busy ? t('common.saving') : t('campaignOverrides.save')}</Button>
-        {msg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{msg}</span>}
-      </div>
+      {!staged && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 18 }}>
+          <Button disabled={dis} onClick={save}>{busy ? t('common.saving') : t('campaignOverrides.save')}</Button>
+          {msg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{msg}</span>}
+        </div>
+      )}
     </>
   );
 }

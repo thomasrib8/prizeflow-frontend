@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
@@ -14,13 +14,16 @@ import { SALES_FIELD_TYPES, GUEST_FIELD_TYPES } from '../components/fieldTypes';
 import EventNameField, { EMPTY_PLACE, placePayload } from '../components/EventNameField';
 import DistributionModePicker from '../components/DistributionModePicker';
 import { probabilityProblem } from '../components/DynamicCaseFields';
+import CampaignOverrides from '../components/CampaignOverrides';
+import CampaignRulesConfig, { DEFAULT_RULES_CONFIG } from '../components/CampaignRulesConfig';
+import { applyDraftExtras, hasExtras } from '../utils/draftExtras';
 import CampaignSettingsForm, { DEFAULT_CAMPAIGN_SETTINGS, settingsFromCampaign } from '../components/CampaignSettingsForm';
 
 // The 12 gifts are defined first and only afterwards dragged onto a case of
 // the wheel: `id` is the gift's own fixed position in the list, `caseIndex`
 // (0-11, or null while it hasn't been placed yet) is the wheel case it ended
 // up on — that's what becomes the campaign slot's slotIndex on submit.
-const EMPTY_GIFTS = Array.from({ length: CASE_COUNT }, (_, i) => ({ id: i, caseIndex: null, giftName: '', stock: 0, probability: '', unlimited: false, redeemMethod: 'qr', persoDelivery: 'qr', persoSubject: '', persoBody: '', persoAutoDistribute: false }));
+const EMPTY_GIFTS = Array.from({ length: CASE_COUNT }, (_, i) => ({ id: i, caseIndex: null, giftName: '', stock: 0, probability: '', unlimited: false, variantsEnabled: false, variants: [], persoUniqueCode: false, pendingCodes: '', redeemMethod: 'qr', persoDelivery: 'qr', persoSubject: '', persoBody: '', persoAutoDistribute: false }));
 // The language the *guest* sees throughout the play flow (form, queue,
 // wheel, result screen, reward email) — independent of the admin panel's own
 // per-account language (users.language). Defaults to English, matching
@@ -71,6 +74,9 @@ export default function NewCampaign() {
   const [salesFields, setSalesFields] = useState([]);
   const [guestFields, setGuestFields] = useState([]);
   const [settings, setSettings] = useState(DEFAULT_CAMPAIGN_SETTINGS);
+  // what is typed in the step-4 sections that belong to the campaign itself (social links, reward e-mail, privacy, game rules): sent right after creation
+  const overridesRef = useRef(null); // { payload, file, initial }
+  const rulesRef = useRef(DEFAULT_RULES_CONFIG);
   const { wheelStatus, agentConnected } = useWheelSocket();
 
   // Mirror the real physical wheel live whenever it's connected — the on-screen
@@ -212,12 +218,26 @@ export default function NewCampaign() {
           ...guestFields.filter((f) => f.label.trim()).map((f) => ({ ...f, scope: 'guest' })),
         ],
       });
+      await applyAfterCreate(created.id);
       navigate(`/campaigns/${created.id}`);
     } catch (err) {
       setError(err.message);
     } finally {
       setSaving(false);
     }
+  }
+
+  // Right after the campaign (a draft) exists: gift variants and unique codes, then what was typed in the campaign's own settings sections.
+  async function applyAfterCreate(id) {
+    const problems = [];
+    try { if (hasExtras(gifts)) problems.push(...await applyDraftExtras(api, id, gifts, dynamic)); } catch (e) { problems.push(e.message); }
+    const o = overridesRef.current;
+    try {
+      if (o && JSON.stringify(o.payload) !== JSON.stringify(o.initial)) await api.updateCampaignOverrides(id, o.payload);
+      if (o && o.file) await api.uploadCampaignLogo(id, o.file);
+    } catch (e) { problems.push(e.message); }
+    try { if (JSON.stringify(rulesRef.current) !== JSON.stringify(DEFAULT_RULES_CONFIG)) await api.saveRulesConfig(id, rulesRef.current); } catch (e) { problems.push(e.message); }
+    if (problems.length) window.alert(`${t('newCampaign.partialSave')}\n\n${problems.join('\n')}`);
   }
 
   function goToStep(n) {
@@ -265,6 +285,7 @@ export default function NewCampaign() {
           ...guestFields.filter((f) => f.label.trim()).map((f) => ({ ...f, scope: 'guest' })),
         ],
       });
+      await applyAfterCreate(created.id);
       navigate(`/campaigns/${created.id}`);
     } catch (err) {
       setError(err.message);
@@ -433,16 +454,21 @@ export default function NewCampaign() {
           </>
         )}
 
-        {step === 4 && (
-          <>
-            <CampaignSettingsForm value={settings} language={language} onChange={(patch) => setSettings((s) => ({ ...s, ...patch }))} />
+        {step === 4 && <CampaignSettingsForm value={settings} language={language} onChange={(patch) => setSettings((s) => ({ ...s, ...patch }))} />}
 
-            <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
-              <Button type="submit" disabled={saving}>{saving ? t('newCampaign.creatingBtn') : t('newCampaign.createCampaignBtn')}</Button>
-              <Button type="button" variant="secondary" onClick={() => setStep(3)}>{t('newCampaign.backBtn')}</Button>
-              <Button type="button" variant="ghost" disabled={saving} onClick={handleSaveDraft}>{t('newCampaign.saveDraftBtn')}</Button>
-            </div>
-          </>
+        {/* social links, reward e-mail, privacy and game rules of THIS campaign (empty = the account's values from Settings).
+            Always mounted, only hidden outside step 4, so what is typed is not lost when going back to a previous step. */}
+        <div style={{ display: step === 4 ? 'block' : 'none' }} aria-hidden={step !== 4}>
+          <CampaignOverrides onStage={(payload, file) => { overridesRef.current = { payload, file, initial: overridesRef.current ? overridesRef.current.initial : payload }; }} />
+          <CampaignRulesConfig onStage={(cfg) => { rulesRef.current = cfg; }} />
+        </div>
+
+        {step === 4 && (
+          <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
+            <Button type="submit" disabled={saving}>{saving ? t('newCampaign.creatingBtn') : t('newCampaign.createCampaignBtn')}</Button>
+            <Button type="button" variant="secondary" onClick={() => setStep(3)}>{t('newCampaign.backBtn')}</Button>
+            <Button type="button" variant="ghost" disabled={saving} onClick={handleSaveDraft}>{t('newCampaign.saveDraftBtn')}</Button>
+          </div>
         )}
       </form>
     </div>

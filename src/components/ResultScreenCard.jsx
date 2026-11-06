@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { Card } from './ui';
+import { Card as PlainCard } from './ui';
+import CollapsibleCard from './CollapsibleCard';
 import { RESULT_EMOJIS, resultCopy } from '../utils/resultScreen';
 
 export const DEFAULT_RESULT_SCREEN = {
@@ -34,6 +35,7 @@ function Preview({ value, guestT, giftName }) {
 export default function ResultScreenCard({ value, onChange, language = 'fr', compact = false }) {
   const { t, i18n } = useTranslation('admin');
   const guestT = i18n.getFixedT(language, 'translation');
+  const Card = compact ? PlainCard : CollapsibleCard;
   const rs = value || DEFAULT_RESULT_SCREEN;
   const set = (patch) => onChange({ ...rs, ...patch });
   const setBtn = (patch) => onChange({ ...rs, button: { ...rs.button, ...patch } });
