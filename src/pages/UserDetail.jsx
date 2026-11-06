@@ -283,6 +283,22 @@ export default function UserDetail() {
         </Card>
       )}
       {module === 'actions' && (
+        <Card title={t('userDetail.aiAssistantTitle')} className="mt-card">
+          <p className="ap-hint" style={{ marginTop: 0 }}>{t('userDetail.aiAssistantDesc')}</p>
+          <label style={{ display: 'flex', gap: 10, alignItems: 'center', cursor: busy || !detail.enriched_crm_enabled ? 'default' : 'pointer', opacity: detail.enriched_crm_enabled ? 1 : 0.55 }}>
+            <input type="checkbox" checked={!!detail.ai_assistant_enabled} disabled={busy || !detail.enriched_crm_enabled} style={{ width: 18, height: 18 }}
+              onChange={async (e) => {
+                const next = e.target.checked;
+                setBusy(true); setError('');
+                try { await api.setAiAssistant(id, next); setDetail((d) => ({ ...d, ai_assistant_enabled: next ? 1 : 0 })); }
+                catch (err) { setError(err.message); } finally { setBusy(false); }
+              }} />
+            <span style={{ fontSize: 14, fontWeight: 600 }}>{detail.ai_assistant_enabled ? t('userDetail.aiAssistantOn') : t('userDetail.aiAssistantOff')}</span>
+          </label>
+          {!detail.enriched_crm_enabled && <p className="ap-hint" style={{ marginBottom: 0 }}>{t('userDetail.aiAssistantNeedsCrm')}</p>}
+        </Card>
+      )}
+      {module === 'actions' && (
         <Card title={t('userDetail.actionsTitle')} className="mt-card">
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
             {detail.status === 'deactivated' ? (

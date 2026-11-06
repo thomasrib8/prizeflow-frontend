@@ -207,6 +207,7 @@ export const api = {
   cancelPlannedRental: (id) => request(`/admin/commercial/planned/${id}/cancel`, { method: 'POST' }),
   getRevenue: (query = '') => request(`/admin/commercial/revenue${query ? `?${query}` : ''}`),
   reverseRevenueEntry: (id, note) => request(`/admin/commercial/revenue/${id}/reverse`, { method: 'POST', body: { note } }),
+  setAiAssistant: (userId, enabled) => request(`/users/${encodeURIComponent(userId)}/ai-assistant`, { method: 'PATCH', body: { enabled } }),
   setEnrichedCrm: (userId, enabled) => request(`/users/${encodeURIComponent(userId)}/enriched-crm`, { method: 'PATCH', body: { enabled } }),
   getWheelShipping: (id) => request(`/wheels/${id}/shipping`),
   sendWheelToShipr: (id, body, leg = 'out') => request(`/wheels/${id}/shipping${leg === 'return' ? '?leg=return' : ''}`, { method: 'POST', body }),

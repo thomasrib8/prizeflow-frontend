@@ -1256,7 +1256,12 @@
     "enrichedCrmTitle": "CRM enrichi",
     "enrichedCrmDesc": "Recherche d’e-mail (Hunter), vérification d’adresse (Bouncer), recherche LinkedIn (Apollo), scan de badge et assistant IA sur les notes. Désactivé, plus rien n’est proposé au client et aucun service payant n’est appelé ; les données déjà enrichies sont conservées.",
     "enrichedCrmOn": "CRM enrichi activé pour ce client",
-    "enrichedCrmOff": "CRM enrichi désactivé pour ce client"
+    "enrichedCrmOff": "CRM enrichi désactivé pour ce client",
+    "aiAssistantTitle": "Assistant IA",
+    "aiAssistantDesc": "Lit la note qu'un commercial écrit ou dicte sur un prospect et remplit la fiche à partir d'elle ; propose aussi une disposition de tableau de bord. Réservé à l'administrateur : s'applique à toutes les campagnes du client.",
+    "aiAssistantOn": "Assistant IA activé pour ce client",
+    "aiAssistantOff": "Assistant IA désactivé pour ce client",
+    "aiAssistantNeedsCrm": "Activez d'abord le CRM enrichi pour ce client."
   },
   "sequenceBuilder": {
     "pageSubtitle": "Construisez un ordre d'exécution personnalisé à la main, puis activez-le sur la roue",
@@ -1308,7 +1313,7 @@
     "aiDesc": "Lit la note qu'un commercial écrit ou dicte sur un prospect et remplit à partir d'elle les segments, champs commerciaux, étoiles et tags de cette campagne. Ce qu'un commercial a saisi à la main n'est jamais écrasé.",
     "aiToggleLabel": "Activer l'assistant IA pour cette campagne",
     "editPageTitle": "Paramètres — {{name}}",
-    "editPageSubtitle": "Invitation à l'avis Google, invitation aux réseaux sociaux et assistant IA pour cette campagne.",
+    "editPageSubtitle": "Invitation à l'avis Google et invitation aux réseaux sociaux pour cette campagne.",
     "resultScreen": {
       "title": "Écran de fin de jeu",
       "desc": "Personnalisez l'écran que le joueur voit quand il reçoit son cadeau (téléphone et borne kiosque). Laissez vide pour garder l'écran par défaut.",

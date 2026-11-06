@@ -1256,7 +1256,12 @@
     "enrichedCrmTitle": "Erweitertes CRM",
     "enrichedCrmDesc": "E-Mail-Suche (Hunter), Adressprüfung (Bouncer), LinkedIn-Suche (Apollo), Badge-Scan und KI-Assistent für Notizen. Deaktiviert wird dem Kunden nichts angeboten und kein kostenpflichtiger Dienst aufgerufen; bereits angereicherte Daten bleiben erhalten.",
     "enrichedCrmOn": "Erweitertes CRM für diesen Kunden aktiv",
-    "enrichedCrmOff": "Erweitertes CRM für diesen Kunden aus"
+    "enrichedCrmOff": "Erweitertes CRM für diesen Kunden aus",
+    "aiAssistantTitle": "KI-Assistent",
+    "aiAssistantDesc": "Liest die Notiz, die ein Vertriebsmitarbeiter zu einem Interessenten schreibt oder diktiert, und füllt die Karte damit aus; schlägt auch ein Dashboard-Layout vor. Nur für Administratoren: gilt für alle Kampagnen des Kunden.",
+    "aiAssistantOn": "KI-Assistent für diesen Kunden aktiviert",
+    "aiAssistantOff": "KI-Assistent für diesen Kunden deaktiviert",
+    "aiAssistantNeedsCrm": "Aktivieren Sie zuerst das erweiterte CRM für diesen Kunden."
   },
   "sequenceBuilder": {
     "pageSubtitle": "Erstellen Sie manuell eine individuelle Ablaufreihenfolge und aktivieren Sie sie dann auf dem Rad",
@@ -1308,7 +1313,7 @@
     "aiDesc": "Liest die Notiz, die ein Vertriebsmitarbeiter zu einem Interessenten schreibt oder diktiert, und füllt daraus die Segmente, Vertriebsfelder, Sterne und Tags dieser Kampagne aus. Was ein Mitarbeiter von Hand eingetragen hat, wird nie überschrieben.",
     "aiToggleLabel": "KI-Assistent für diese Kampagne aktivieren",
     "editPageTitle": "Einstellungen — {{name}}",
-    "editPageSubtitle": "Einladung zur Google-Bewertung, Einladung zu sozialen Medien und KI-Assistent für diese Kampagne.",
+    "editPageSubtitle": "Einladung zur Google-Bewertung und zu den sozialen Netzwerken für diese Kampagne.",
     "resultScreen": {
       "title": "Abschlussbildschirm",
       "desc": "Passen Sie den Bildschirm an, den Spieler beim Erhalt ihres Geschenks sehen (Handy und Kiosk). Leer lassen, um den Standard zu behalten.",

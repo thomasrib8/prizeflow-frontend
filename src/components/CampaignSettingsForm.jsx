@@ -22,7 +22,6 @@ export const DEFAULT_CAMPAIGN_SETTINGS = {
   googleReviewMode: 'off', // 'off' | 'before' | 'after'
   googleReviewUrl: '', // '' = follow the account's link (Settings)
   socialMediaRequired: false,
-  aiAssistantEnabled: false,
   linkedinSearchEnabled: false,
   resultScreen: DEFAULT_RESULT_SCREEN,
 };
@@ -34,7 +33,6 @@ export function settingsFromCampaign(c) {
     googleReviewMode: c.google_review_required ? (c.google_review_position === 'before' ? 'before' : 'after') : 'off',
     googleReviewUrl: c.google_review_url || '',
     socialMediaRequired: !!c.social_media_required,
-    aiAssistantEnabled: !!c.ai_assistant_enabled,
     linkedinSearchEnabled: !!c.linkedin_search_enabled,
     resultScreen: resultScreenFromCampaign(c),
   };
@@ -56,14 +54,12 @@ const warnStyle = { background: '#FFFBEB', border: '1px solid #FDE68A', borderRa
 export default function CampaignSettingsForm({ value, onChange, compact = false, language = 'fr' }) {
   const { t } = useTranslation('admin');
   const Card = compact ? PlainCard : CollapsibleCard; // the mobile app keeps flat cards
-  const enrichedCrm = useEnrichedCrm(); // AI assistant and LinkedIn search belong to the enriched CRM option
+  const enrichedCrm = useEnrichedCrm(); // LinkedIn search belongs to the enriched CRM option
   const [account, setAccount] = useState(null);
-  const [aiConfigured, setAiConfigured] = useState(null);
   const prefilledRef = useRef(false);
 
   useEffect(() => {
     api.getAccountSettings().then(setAccount).catch(() => setAccount({}));
-    api.getAiAssistantStatus().then((res) => setAiConfigured(res.configured)).catch(() => setAiConfigured(false));
   }, []);
 
   // The app's own link is the starting point: pre-fill it once it's known
@@ -174,26 +170,6 @@ export default function CampaignSettingsForm({ value, onChange, compact = false,
       </Card>
 
       <ResultScreenCard value={value.resultScreen} onChange={(resultScreen) => onChange({ resultScreen })} language={language} compact={compact} />
-
-      {enrichedCrm && <Card title={t('campaignSettings.aiTitle')} className="mt-card">
-        {!compact && (
-          <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px', lineHeight: 1.6 }}>
-            {t('campaignSettings.aiDesc')}
-          </p>
-        )}
-        {aiConfigured === false && (
-          <div style={{ ...warnStyle, marginBottom: 14 }}>{t('settings.aiAssistant.notConfiguredWarning')}</div>
-        )}
-        <label style={{ display: 'flex', gap: 10, alignItems: 'center', cursor: 'pointer' }}>
-          <input
-            type="checkbox"
-            checked={value.aiAssistantEnabled}
-            onChange={(e) => onChange({ aiAssistantEnabled: e.target.checked })}
-            style={{ width: 18, height: 18, flexShrink: 0 }}
-          />
-          <span style={{ fontSize: 14, fontWeight: 600 }}>{t('campaignSettings.aiToggleLabel')}</span>
-        </label>
-      </Card>}
 
       {/* LinkedIn profile search: only offered when an SPARK admin has allowed it for this account */}
       {enrichedCrm && account?.linkedinSearch?.enabled && (

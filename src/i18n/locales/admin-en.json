@@ -1256,7 +1256,12 @@
     "enrichedCrmTitle": "Enriched CRM",
     "enrichedCrmDesc": "E-mail search (Hunter), address verification (Bouncer), LinkedIn search (Apollo), badge scan and AI assistant on notes. When off, nothing is offered to the client and no paid service is called; data already enriched is kept.",
     "enrichedCrmOn": "Enriched CRM on for this client",
-    "enrichedCrmOff": "Enriched CRM off for this client"
+    "enrichedCrmOff": "Enriched CRM off for this client",
+    "aiAssistantTitle": "AI assistant",
+    "aiAssistantDesc": "Reads the note a sales rep writes or dictates on a prospect and fills in the record from it; also proposes a dashboard layout. Administrator only: applies to every campaign of the client.",
+    "aiAssistantOn": "AI assistant enabled for this client",
+    "aiAssistantOff": "AI assistant disabled for this client",
+    "aiAssistantNeedsCrm": "Switch the enriched CRM on for this client first."
   },
   "sequenceBuilder": {
     "pageSubtitle": "Build a custom run order by hand, then activate it on the wheel",
@@ -1308,7 +1313,7 @@
     "aiDesc": "Reads the note a sales rep writes or dictates on a prospect and fills in this campaign's segments, sales fields, lead rating and tags from it. Anything a rep entered by hand is never overwritten.",
     "aiToggleLabel": "Enable the AI assistant for this campaign",
     "editPageTitle": "Settings — {{name}}",
-    "editPageSubtitle": "Google review invite, social media invite and AI assistant for this campaign.",
+    "editPageSubtitle": "Google review invite and social media invite for this campaign.",
     "resultScreen": {
       "title": "End-of-game screen",
       "desc": "Customize the screen players see when they receive their gift (phone and kiosk). Leave empty to keep the default screen.",
