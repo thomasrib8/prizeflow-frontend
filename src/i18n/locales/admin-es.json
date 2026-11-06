@@ -2815,7 +2815,8 @@
       "CAMPAIGN_NOT_RUNNING": "Se puede añadir stock a una campaña activa o en pausa."
     },
     "stockTitle": "Stock",
-    "addShort": "Añadir"
+    "addShort": "Añadir",
+    "plannerHelp": "Cada casilla tiene una probabilidad de salir (el total debe ser 100 %) y un stock. Marque «Ilimitado» para una casilla que nunca se agota, como una casilla perdedora o un regalo digital."
   },
   "transfer": {
     "menu": "Transferir la campaña",

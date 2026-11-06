@@ -2815,7 +2815,8 @@
       "CAMPAIGN_NOT_RUNNING": "Le stock peut être ajouté à une campagne active ou en pause."
     },
     "stockTitle": "Stock",
-    "addShort": "Ajouter"
+    "addShort": "Ajouter",
+    "plannerHelp": "Chaque case a une probabilité de sortir (le total doit faire 100 %) et un stock. Cochez « Illimité » pour une case qui ne s'épuise jamais, comme une case perdante ou un cadeau numérique."
   },
   "transfer": {
     "menu": "Transférer la campagne",

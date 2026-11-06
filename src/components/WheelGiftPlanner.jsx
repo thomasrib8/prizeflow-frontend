@@ -4,7 +4,8 @@ import { Card, MiniBar } from './ui';
 import WheelSVG from './WheelSVG';
 import { SLOT_COLORS } from './slotColors';
 import { CASE_COUNT, isGiftReady } from './giftPlanning';
-import DynamicCaseFields, { ProbabilityTotal } from './DynamicCaseFields';
+import { ProbabilityTotal } from './DynamicCaseFields';
+import './dynamic-distribution.css';
 
 // Step 1 of campaign creation: define 12 gifts first (name, how it's
 // redeemed, stock) with no position yet, then drag each one onto a case of
@@ -112,6 +113,7 @@ export default function WheelGiftPlanner({ gifts, setGifts, wheelProps, wheelCap
         <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 12px' }}>
           {t('wheelGiftPlanner.instructionsIntro')} <b>{t('wheelGiftPlanner.instructionsDragBold')}</b>{t('wheelGiftPlanner.instructionsRedeemIntro')} <b>QR</b> {t('wheelGiftPlanner.instructionsQrDesc')} <b>Code</b> {t('wheelGiftPlanner.instructionsCodeDesc')} <b>Voucher</b> {t('wheelGiftPlanner.instructionsVoucherDesc')} <b>Perso</b> {t('wheelGiftPlanner.instructionsPersoDesc')}
         </p>
+        {dynamic && <p className="dyn-help">{t('dynamic.plannerHelp')}</p>}
         <div className="gift-list">
           {gifts.map((g) => {
             const placed = g.caseIndex !== null;
@@ -120,7 +122,7 @@ export default function WheelGiftPlanner({ gifts, setGifts, wheelProps, wheelCap
             const pct = totalStock ? ((Number(g.stock) || 0) / totalStock) * 100 : 0;
             return (
               <div key={g.id} className={`gift-card${placed ? ' placed' : ''}`}>
-                <div className="gift-row">
+                <div className={`gift-row${dynamic ? ' dyn' : ''}`}>
                   <div
                     className={`gift-handle${draggable ? ' ready' : ''}${placed ? ' placed' : ''}`}
                     onPointerDown={(e) => startDrag(e, g)}
@@ -131,17 +133,29 @@ export default function WheelGiftPlanner({ gifts, setGifts, wheelProps, wheelCap
                   >
                     {placed ? t('wheelGiftPlanner.placedCaseBadge', { n: g.caseIndex + 1 }) : draggable ? t('wheelGiftPlanner.dragBadge') : t('wheelGiftPlanner.giftNumberBadge', { n: g.id + 1 })}
                   </div>
-                  <input placeholder={t('editCampaign.giftNamePlaceholder')} value={g.giftName} onChange={(e) => updateGift(g.id, 'giftName', e.target.value)} />
-                  <input type="number" min="0" placeholder={dynamic && g.unlimited ? t('dynamic.unlimitedShort') : t('wheelGiftPlanner.stockPlaceholder')} value={dynamic && g.unlimited ? '' : (g.stock || '')} disabled={dynamic && !!g.unlimited} onChange={(e) => updateGift(g.id, 'stock', e.target.value)} />
-                  <select value={g.redeemMethod} title={t('editCampaign.redeemMethodTitle')} onChange={(e) => updateGift(g.id, 'redeemMethod', e.target.value)}>
+                  <input className="dyn-name" placeholder={t('editCampaign.giftNamePlaceholder')} value={g.giftName} onChange={(e) => updateGift(g.id, 'giftName', e.target.value)} />
+                  {/* dynamic method: probability of the case (%), then its stock or "Illimité" — all on the same line */}
+                  {dynamic && (
+                    <label className="dyn-pct" title={t('dynamic.probability')}>
+                      <input type="number" min="0" max="100" step="0.01" inputMode="decimal" placeholder="0" aria-label={t('dynamic.probability')} value={g.probability === 0 || g.probability === undefined ? '' : g.probability} onChange={(e) => updateGift(g.id, 'probability', e.target.value)} />
+                      <span>%</span>
+                    </label>
+                  )}
+                  <input className="dyn-stock" type="number" min="0" placeholder={dynamic && g.unlimited ? t('dynamic.unlimitedShort') : t('wheelGiftPlanner.stockPlaceholder')} value={dynamic && g.unlimited ? '' : (g.stock || '')} disabled={dynamic && !!g.unlimited} onChange={(e) => updateGift(g.id, 'stock', e.target.value)} />
+                  {dynamic && (
+                    <label className={`dyn-unl${g.unlimited ? ' on' : ''}`} title={t('dynamic.unlimitedHint')}>
+                      <input type="checkbox" checked={!!g.unlimited} onChange={(e) => setGifts((prev) => prev.map((x) => (x.id === g.id ? { ...x, unlimited: e.target.checked, stock: e.target.checked ? 0 : x.stock } : x)))} />
+                      <span>{t('dynamic.unlimitedShort')}</span>
+                    </label>
+                  )}
+                  <select className="dyn-redeem" value={g.redeemMethod} title={t('editCampaign.redeemMethodTitle')} onChange={(e) => updateGift(g.id, 'redeemMethod', e.target.value)}>
                     <option value="qr">QR</option>
                     <option value="code">Code</option>
                     <option value="voucher">Voucher</option>
                     <option value="perso">Perso</option>
                   </select>
-                  <div className="gift-pct">{dynamic ? (Number(g.probability) ? `${Number(g.probability)}%` : '—') : (pct ? `${pct.toFixed(1)}%` : '—')}</div>
+                  {!dynamic && <div className="gift-pct">{pct ? `${pct.toFixed(1)}%` : '—'}</div>}
                 </div>
-                {dynamic && <DynamicCaseFields probability={g.probability} unlimited={g.unlimited} onProbability={(v) => updateGift(g.id, 'probability', v)} onUnlimited={(v) => setGifts((prev) => prev.map((x) => (x.id === g.id ? { ...x, unlimited: v, stock: v ? 0 : x.stock } : x)))} />}
 
                 <div className="gift-place-row">
                   {placed ? (

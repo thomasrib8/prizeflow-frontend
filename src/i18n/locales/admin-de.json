@@ -2815,7 +2815,8 @@
       "CAMPAIGN_NOT_RUNNING": "Bestand kann zu einer aktiven oder pausierten Kampagne hinzugefügt werden."
     },
     "stockTitle": "Bestand",
-    "addShort": "Hinzufügen"
+    "addShort": "Hinzufügen",
+    "plannerHelp": "Jedes Feld hat eine Ziehungswahrscheinlichkeit (die Summe muss 100 % ergeben) und einen Bestand. Haken Sie „Unbegrenzt“ an für ein Feld, das nie ausgeht, etwa eine Niete oder ein digitales Geschenk."
   },
   "transfer": {
     "menu": "Kampagne übertragen",

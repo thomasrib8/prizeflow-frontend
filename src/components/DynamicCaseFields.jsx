@@ -5,7 +5,7 @@ import './dynamic-distribution.css';
 export default function DynamicCaseFields({ probability, unlimited, onProbability, onUnlimited, readOnly = false }) {
   const { t } = useTranslation('admin');
   return (
-    <div className="dyn-case">
+    <div className="dyn-case" title={t('dynamic.unlimitedHint')}>
       <label className="dyn-prob">{t('dynamic.probability')}
         <input type="number" min="0" max="100" step="0.01" inputMode="decimal" value={probability === 0 || probability === null || probability === undefined ? '' : probability}
           placeholder="0" disabled={readOnly} onChange={(e) => onProbability(e.target.value)} />
@@ -14,7 +14,6 @@ export default function DynamicCaseFields({ probability, unlimited, onProbabilit
         <input type="checkbox" checked={!!unlimited} disabled={readOnly} onChange={(e) => onUnlimited(e.target.checked)} />
         <span>{t('dynamic.unlimited')}</span>
       </label>
-      {!readOnly && <small>{t('dynamic.unlimitedHint')}</small>}
     </div>
   );
 }

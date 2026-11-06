@@ -2815,7 +2815,8 @@
       "CAMPAIGN_NOT_RUNNING": "Stock can be added to an active or paused campaign."
     },
     "stockTitle": "Stock",
-    "addShort": "Add"
+    "addShort": "Add",
+    "plannerHelp": "Each case has a probability of being drawn (the total must be 100 %) and a stock. Tick \"Unlimited\" for a case that never runs out, such as a losing case or a digital gift."
   },
   "transfer": {
     "menu": "Transfer campaign",
