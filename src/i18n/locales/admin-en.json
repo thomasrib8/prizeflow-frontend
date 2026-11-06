@@ -740,7 +740,10 @@
     "emptyDescription": "Create your first campaign to configure gifts and stock.",
     "emptyFilteredTitle": "No {{status}} campaigns",
     "emptyFilteredDescription": "Try a different filter.",
-    "searchPlaceholder": "Search a campaign…"
+    "searchPlaceholder": "Search a campaign…",
+    "tableMode": "Management",
+    "modeStatic": "Static",
+    "modeDynamic": "Dynamic"
   },
   "settings": {
     "pageTitle": "Settings",
@@ -2788,10 +2791,10 @@
     "variant": "Variant",
     "addNote": "Only an addition is possible: a stock can never be reduced. The case gets its reference probability back at once.",
     "suspendedTitle": "Draws suspended",
-    "suspendedBody": "No case can receive the probability of the exhausted gifts. Players are waiting: restock the exhausted case with the highest probability to resume.",
-    "suspendedLaunch": "restock the exhausted gift (campaign page) to resume.",
+    "suspendedBody": "Every gift is out of stock. Players are waiting: add stock to any gift to resume.",
+    "suspendedLaunch": "add stock to a gift (campaign page) to resume.",
     "depletedTitle": "Out of stock",
-    "depletedBody": "Exhausted: {{names}}. Their probability is moved up to the next level.",
+    "depletedBody": "Exhausted: {{names}}. Their probability moves up to the next level, or failing that to the nearest lower level.",
     "forecastTitle": "Statistical forecast",
     "forecastParticipants": "Expected participants",
     "forecastExpected": "Expected wins",
@@ -2816,7 +2819,8 @@
     },
     "stockTitle": "Stock",
     "addShort": "Add",
-    "plannerHelp": "Each case has a probability of being drawn (the total must be 100 %) and a stock. Tick \"Unlimited\" for a case that never runs out, such as a losing case or a digital gift."
+    "plannerHelp": "Each case has a probability of being drawn (the total must be 100 %) and a stock. Tick \"Unlimited\" for a case that never runs out, such as a losing case or a digital gift.",
+    "topCaseWarning": "The most probable case is limited: when it runs out, its share ({{p}} %) will go to the nearest lower level. Plan enough stock, or an unlimited case."
   },
   "transfer": {
     "menu": "Transfer campaign",

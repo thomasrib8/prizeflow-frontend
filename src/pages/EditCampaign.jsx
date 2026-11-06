@@ -7,7 +7,7 @@ import { Card, Button } from '../components/ui';
 import VariantsEditor, { PersoFields, emptyVariant } from '../components/VariantsEditor';
 import UniqueCodesPanel from '../components/UniqueCodesPanel';
 import DistributionModePicker from '../components/DistributionModePicker';
-import DynamicCaseFields, { ProbabilityTotal } from '../components/DynamicCaseFields';
+import DynamicCaseFields, { ProbabilityTotal, TopCaseWarning } from '../components/DynamicCaseFields';
 
 // The language guests see throughout the play flow — see NewCampaign.jsx's
 // LANGUAGE_OPTIONS for why this is separate from the admin panel's language.
@@ -193,6 +193,7 @@ export default function EditCampaign() {
           {campaign.status === 'draft' && <DistributionModePicker value={mode} onChange={setMode} />}
 
           <Card title={t('editCampaign.giftsTitle')} className="mt-card" action={mode === 'dynamic' ? <ProbabilityTotal values={slots.filter((s) => s.giftName.trim() || s.unlimited || Number(s.stockInitial) > 0).map((s) => s.probability)} /> : undefined}>
+            {mode === 'dynamic' && campaign.status === 'draft' && <TopCaseWarning items={slots.map((s) => ({ used: !!s.giftName.trim(), probability: s.probability, unlimited: s.unlimited }))} />}
             <div className="slots-grid">
               {slots.map((s, i) => (
                 <div key={s.slotIndex} style={{ display: 'contents' }}>

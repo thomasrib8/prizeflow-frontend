@@ -740,7 +740,10 @@
     "emptyDescription": "Crea tu primera campaña para configurar regalos y stock.",
     "emptyFilteredTitle": "Sin campañas {{status}}",
     "emptyFilteredDescription": "Prueba con otro filtro.",
-    "searchPlaceholder": "Buscar una campaña…"
+    "searchPlaceholder": "Buscar una campaña…",
+    "tableMode": "Gestión",
+    "modeStatic": "Estática",
+    "modeDynamic": "Dinámica"
   },
   "settings": {
     "pageTitle": "Ajustes",
@@ -2788,10 +2791,10 @@
     "variant": "Variante",
     "addNote": "Solo se puede añadir: un stock nunca se puede reducir. La casilla recupera enseguida su probabilidad de referencia.",
     "suspendedTitle": "Sorteos suspendidos",
-    "suspendedBody": "Ninguna casilla puede recibir la probabilidad de los regalos agotados. Los jugadores esperan: reponga la casilla agotada con mayor probabilidad para reanudar.",
-    "suspendedLaunch": "reponga el regalo agotado (página de la campaña) para reanudar.",
+    "suspendedBody": "Todos los regalos están agotados. Los jugadores esperan: añada stock a cualquier regalo para reanudar.",
+    "suspendedLaunch": "añada stock a un regalo (página de la campaña) para reanudar.",
     "depletedTitle": "Sin existencias",
-    "depletedBody": "Agotado(s): {{names}}. Su probabilidad pasa al nivel superior.",
+    "depletedBody": "Agotado(s): {{names}}. Su probabilidad pasa al nivel superior o, si no es posible, al nivel inferior más cercano.",
     "forecastTitle": "Previsión estadística",
     "forecastParticipants": "Participantes previstos",
     "forecastExpected": "Premios esperados",
@@ -2816,7 +2819,8 @@
     },
     "stockTitle": "Stock",
     "addShort": "Añadir",
-    "plannerHelp": "Cada casilla tiene una probabilidad de salir (el total debe ser 100 %) y un stock. Marque «Ilimitado» para una casilla que nunca se agota, como una casilla perdedora o un regalo digital."
+    "plannerHelp": "Cada casilla tiene una probabilidad de salir (el total debe ser 100 %) y un stock. Marque «Ilimitado» para una casilla que nunca se agota, como una casilla perdedora o un regalo digital.",
+    "topCaseWarning": "La casilla más probable es limitada: cuando se agote, su parte ({{p}} %) irá al nivel inferior más cercano. Prevea stock suficiente o una casilla ilimitada."
   },
   "transfer": {
     "menu": "Transferir la campaña",

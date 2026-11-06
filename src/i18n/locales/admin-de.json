@@ -740,7 +740,10 @@
     "emptyDescription": "Erstellen Sie Ihre erste Kampagne, um Geschenke und Bestand einzurichten.",
     "emptyFilteredTitle": "Keine Kampagnen mit Status {{status}}",
     "emptyFilteredDescription": "Versuchen Sie einen anderen Filter.",
-    "searchPlaceholder": "Kampagne suchen…"
+    "searchPlaceholder": "Kampagne suchen…",
+    "tableMode": "Verwaltung",
+    "modeStatic": "Statisch",
+    "modeDynamic": "Dynamisch"
   },
   "settings": {
     "pageTitle": "Einstellungen",
@@ -2788,10 +2791,10 @@
     "variant": "Variante",
     "addNote": "Nur ein Zuwachs ist möglich: ein Bestand kann nie verringert werden. Das Feld erhält sofort seine Referenzwahrscheinlichkeit zurück.",
     "suspendedTitle": "Ziehungen ausgesetzt",
-    "suspendedBody": "Kein Feld kann die Wahrscheinlichkeit der aufgebrauchten Geschenke aufnehmen. Die Spieler warten: Füllen Sie das aufgebrauchte Feld mit der höchsten Wahrscheinlichkeit auf, um fortzufahren.",
-    "suspendedLaunch": "füllen Sie das aufgebrauchte Geschenk auf (Kampagnenseite), um fortzufahren.",
+    "suspendedBody": "Alle Geschenke sind aufgebraucht. Die Spieler warten: Fügen Sie einem beliebigen Geschenk Bestand hinzu, um fortzufahren.",
+    "suspendedLaunch": "fügen Sie einem Geschenk Bestand hinzu (Kampagnenseite), um fortzufahren.",
     "depletedTitle": "Nicht auf Lager",
-    "depletedBody": "Aufgebraucht: {{names}}. Ihre Wahrscheinlichkeit rückt zur nächsthöheren Stufe.",
+    "depletedBody": "Aufgebraucht: {{names}}. Ihre Wahrscheinlichkeit rückt zur nächsthöheren Stufe, ersatzweise zur nächstniedrigeren.",
     "forecastTitle": "Statistische Prognose",
     "forecastParticipants": "Erwartete Teilnehmer",
     "forecastExpected": "Erwartete Gewinne",
@@ -2816,7 +2819,8 @@
     },
     "stockTitle": "Bestand",
     "addShort": "Hinzufügen",
-    "plannerHelp": "Jedes Feld hat eine Ziehungswahrscheinlichkeit (die Summe muss 100 % ergeben) und einen Bestand. Haken Sie „Unbegrenzt“ an für ein Feld, das nie ausgeht, etwa eine Niete oder ein digitales Geschenk."
+    "plannerHelp": "Jedes Feld hat eine Ziehungswahrscheinlichkeit (die Summe muss 100 % ergeben) und einen Bestand. Haken Sie „Unbegrenzt“ an für ein Feld, das nie ausgeht, etwa eine Niete oder ein digitales Geschenk.",
+    "topCaseWarning": "Das wahrscheinlichste Feld ist begrenzt: ist es aufgebraucht, geht sein Anteil ({{p}} %) an die nächstniedrigere Stufe. Planen Sie genug Bestand oder ein unbegrenztes Feld ein."
   },
   "transfer": {
     "menu": "Kampagne übertragen",

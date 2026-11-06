@@ -42,3 +42,13 @@ export function probabilityProblem(items, t) {
   const units = items.reduce((a, it) => a + Math.round((Number(it.probability) || 0) * 100), 0);
   return units === 10000 ? '' : t('dynamic.sumError', { total: units / 100 });
 }
+
+// Heads-up when the MOST probable case is limited: its share will move down to the next level when it runs out.
+export function TopCaseWarning({ items }) {
+  const { t } = useTranslation('admin');
+  const used = items.filter((i) => i.used);
+  const top = used.reduce((m, i) => Math.max(m, Number(i.probability) || 0), 0);
+  const limitedTop = top > 0 && used.some((i) => (Number(i.probability) || 0) === top && !i.unlimited) && !used.some((i) => (Number(i.probability) || 0) === top && i.unlimited);
+  if (!limitedTop) return null;
+  return <p className="dyn-help" style={{ background: '#FFF7E6', borderColor: '#FCD9A0', color: '#8A5200' }}>{t('dynamic.topCaseWarning', { p: top })}</p>;
+}

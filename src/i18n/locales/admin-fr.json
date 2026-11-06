@@ -740,7 +740,10 @@
     "emptyDescription": "Créez votre première campagne pour configurer les cadeaux et le stock.",
     "emptyFilteredTitle": "Aucune campagne {{status}}",
     "emptyFilteredDescription": "Essayez un autre filtre.",
-    "searchPlaceholder": "Rechercher une campagne…"
+    "searchPlaceholder": "Rechercher une campagne…",
+    "tableMode": "Gestion",
+    "modeStatic": "Statique",
+    "modeDynamic": "Dynamique"
   },
   "settings": {
     "pageTitle": "Paramètres",
@@ -2788,10 +2791,10 @@
     "variant": "Variante",
     "addNote": "Seul un ajout est possible : un stock ne peut jamais être diminué. La case retrouve aussitôt sa probabilité de référence.",
     "suspendedTitle": "Tirages suspendus",
-    "suspendedBody": "Aucune case ne peut recevoir la probabilité des cadeaux épuisés. Les joueurs patientent : réapprovisionnez la case épuisée qui a la plus forte probabilité pour reprendre.",
-    "suspendedLaunch": "réapprovisionnez le cadeau épuisé (page de la campagne) pour reprendre.",
+    "suspendedBody": "Tous les lots sont épuisés. Les joueurs patientent : ajoutez du stock à n'importe quel cadeau pour reprendre.",
+    "suspendedLaunch": "ajoutez du stock à un cadeau (page de la campagne) pour reprendre.",
     "depletedTitle": "Rupture de stock",
-    "depletedBody": "Épuisé(s) : {{names}}. Leur probabilité est transférée au palier supérieur.",
+    "depletedBody": "Épuisé(s) : {{names}}. Leur probabilité est transférée au palier supérieur, ou à défaut au palier inférieur le plus proche.",
     "forecastTitle": "Prévision statistique",
     "forecastParticipants": "Participants prévus",
     "forecastExpected": "Gains attendus",
@@ -2816,7 +2819,8 @@
     },
     "stockTitle": "Stock",
     "addShort": "Ajouter",
-    "plannerHelp": "Chaque case a une probabilité de sortir (le total doit faire 100 %) et un stock. Cochez « Illimité » pour une case qui ne s'épuise jamais, comme une case perdante ou un cadeau numérique."
+    "plannerHelp": "Chaque case a une probabilité de sortir (le total doit faire 100 %) et un stock. Cochez « Illimité » pour une case qui ne s'épuise jamais, comme une case perdante ou un cadeau numérique.",
+    "topCaseWarning": "La case la plus probable est limitée : quand elle sera épuisée, sa part ({{p}} %) ira vers le palier inférieur le plus proche. Pensez à un stock suffisant ou à une case illimitée."
   },
   "transfer": {
     "menu": "Transférer la campagne",

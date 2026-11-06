@@ -83,13 +83,14 @@ export default function Campaigns() {
         <Card><EmptyState title={t('campaigns.emptyFilteredTitle', { status: statusLabel(statusFilter) })} description={t('campaigns.emptyFilteredDescription')} /></Card>
       ) : (
         <div className="cp-list">
-          <div className="cp-head"><span>{t('campaigns.tableName')}</span><span>{t('campaigns.tableStatus')}</span><span>{t('campaigns.tableDistributedTotal')}</span><span>{t('campaigns.tableCreated')}</span><span /></div>
+          <div className="cp-head cp-6"><span>{t('campaigns.tableName')}</span><span>{t('campaigns.tableMode')}</span><span>{t('campaigns.tableStatus')}</span><span>{t('campaigns.tableDistributedTotal')}</span><span>{t('campaigns.tableCreated')}</span><span /></div>
           {filtered.map(c => {
             const pct = c.total_stock ? Math.min(100, Math.round((c.total_distributed / c.total_stock) * 100)) : 0;
             const open = () => navigate(`/campaigns/${c.id}`);
             return (
-              <div key={c.id} className="cp-row" style={{ '--c': STATUS_COLOR[c.status] || '#0055F8' }} role="link" tabIndex={0} onClick={open} onKeyDown={e => { if (e.key === 'Enter') open(); }}>
+              <div key={c.id} className="cp-row cp-6" style={{ '--c': STATUS_COLOR[c.status] || '#0055F8' }} role="link" tabIndex={0} onClick={open} onKeyDown={e => { if (e.key === 'Enter') open(); }}>
                 <div className="cp-name"><b>{c.name}</b><span>{c.id}</span></div>
+                <div><span className={`cp-mode${c.distribution_mode === 'dynamic' ? ' dynamic' : ''}`}>{t(c.distribution_mode === 'dynamic' ? 'campaigns.modeDynamic' : 'campaigns.modeStatic')}</span></div>
                 <div><Badge tone={STATUS_TONE[c.status] || 'neutral'}>{statusLabel(c.status)}</Badge></div>
                 <div className="cp-prog">
                   <div className="cp-prog-top"><b>{c.total_distributed}</b><span> / {c.total_stock}</span><em>{pct} %</em></div>

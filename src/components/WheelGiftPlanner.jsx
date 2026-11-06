@@ -4,7 +4,7 @@ import { Card, MiniBar } from './ui';
 import WheelSVG from './WheelSVG';
 import { SLOT_COLORS } from './slotColors';
 import { CASE_COUNT, isGiftReady } from './giftPlanning';
-import { ProbabilityTotal } from './DynamicCaseFields';
+import { ProbabilityTotal, TopCaseWarning } from './DynamicCaseFields';
 import './dynamic-distribution.css';
 
 // Step 1 of campaign creation: define 12 gifts first (name, how it's
@@ -114,6 +114,7 @@ export default function WheelGiftPlanner({ gifts, setGifts, wheelProps, wheelCap
           {t('wheelGiftPlanner.instructionsIntro')} <b>{t('wheelGiftPlanner.instructionsDragBold')}</b>{t('wheelGiftPlanner.instructionsRedeemIntro')} <b>QR</b> {t('wheelGiftPlanner.instructionsQrDesc')} <b>Code</b> {t('wheelGiftPlanner.instructionsCodeDesc')} <b>Voucher</b> {t('wheelGiftPlanner.instructionsVoucherDesc')} <b>Perso</b> {t('wheelGiftPlanner.instructionsPersoDesc')}
         </p>
         {dynamic && <p className="dyn-help">{t('dynamic.plannerHelp')}</p>}
+        {dynamic && <TopCaseWarning items={gifts.map((g) => ({ used: !!g.giftName.trim(), probability: g.probability, unlimited: g.unlimited }))} />}
         <div className="gift-list">
           {gifts.map((g) => {
             const placed = g.caseIndex !== null;

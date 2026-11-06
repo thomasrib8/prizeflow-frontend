@@ -4,6 +4,9 @@
 .cp-search:focus { outline: none; border-color: #0055F8; box-shadow: 0 0 0 3px rgba(0, 85, 248, .12); }
 .cp-list { container-type: inline-size; }
 .cp-head, .cp-row { display: grid; grid-template-columns: minmax(0, 2fr) 110px minmax(0, 1.4fr) 110px 28px; gap: 16px; align-items: center; }
+.cp-head.cp-6, .cp-row.cp-6 { grid-template-columns: minmax(0, 2fr) 116px 110px minmax(0, 1.4fr) 110px 28px; }
+.cp-mode { display: inline-block; font-size: 11.5px; font-weight: 700; padding: 3px 10px; border-radius: 99px; background: #F1F5F9; color: #475569; white-space: nowrap; }
+.cp-mode.dynamic { background: #EAF1FF; color: #002881; }
 .cp-head { padding: 0 18px 8px; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #94A3B8; }
 .cp-row { position: relative; background: #fff; border: 1px solid #E7ECF8; border-radius: 14px; padding: 13px 18px; margin-bottom: 8px; cursor: pointer; box-shadow: 0 4px 12px -10px rgba(0, 40, 129, .5); transition: border-color .15s, box-shadow .15s, transform .15s; }
 .cp-row:hover, .cp-row:focus-visible { border-color: #BFD4FF; box-shadow: 0 10px 22px -14px rgba(0, 85, 248, .55); outline: none; }
@@ -21,7 +24,7 @@
 .cp-row:hover .cp-go { background: #0055F8; color: #fff; }
 @container (max-width: 760px) {
   .cp-head { display: none; }
-  .cp-row { grid-template-columns: minmax(0, 1fr) auto; gap: 8px 12px; }
+  .cp-row, .cp-head.cp-6, .cp-row.cp-6 { grid-template-columns: minmax(0, 1fr) auto; gap: 8px 12px; }
   .cp-prog { grid-column: 1 / -1; order: 3; }
   .cp-date { order: 4; }
 }
