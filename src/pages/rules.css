@@ -1,0 +1,25 @@
+/* Public page of the game rules: a sheet of paper, readable on a phone, printable */
+.rl-page { min-height: 100vh; background: #F1F5FB; padding: 24px 14px 48px; font-family: var(--font-ui, system-ui, sans-serif); color: #0F172A; }
+.rl-sheet { max-width: 780px; margin: 0 auto; background: #fff; border-radius: 16px; padding: 36px 40px; box-shadow: 0 10px 40px -20px rgba(0, 40, 129, .35); line-height: 1.65; font-size: 15px; }
+.rl-head { text-align: center; border-bottom: 1px solid #E3E9F7; padding-bottom: 22px; margin-bottom: 8px; }
+.rl-kicker { margin: 0; font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #64748B; }
+.rl-head h1 { margin: 6px 0 4px; font-size: 26px; letter-spacing: -.02em; }
+.rl-sub { margin: 0; color: #475569; font-size: 14px; }
+.rl-version { margin: 10px 0 0; font-size: 12px; color: #94A3B8; }
+.rl-print { margin-top: 14px; background: #fff; border: 1.5px solid #CBD5E1; border-radius: 10px; padding: 8px 16px; font-size: 13px; font-weight: 700; cursor: pointer; color: #0F1C3F; font-family: inherit; }
+.rl-art h2 { font-size: 16px; margin: 26px 0 8px; color: #002881; }
+.rl-art p { margin: 0 0 10px; }
+.rl-art ul { margin: 0 0 10px; padding-left: 22px; }
+.rl-table-wrap { overflow-x: auto; }
+.rl-annex table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 8px 0 12px; }
+.rl-annex th, .rl-annex td { border: 1px solid #E3E9F7; padding: 8px 10px; text-align: left; }
+.rl-annex th { background: #F4F8FF; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: #475569; }
+.rl-annex td:nth-child(n+3), .rl-annex th:nth-child(n+3) { text-align: right; white-space: nowrap; }
+.rl-total td { font-weight: 800; background: #F8FAFF; }
+@media (max-width: 600px) { .rl-sheet { padding: 22px 18px; border-radius: 12px; } .rl-head h1 { font-size: 21px; } }
+@media print {
+  .rl-page { background: #fff; padding: 0; }
+  .rl-sheet { box-shadow: none; max-width: none; padding: 0; border-radius: 0; }
+  .rl-print { display: none; }
+  .rl-art { break-inside: avoid-page; }
+}

@@ -22,6 +22,8 @@
     "skip": "No, gracias, continuar"
   },
   "queue": {
+    "suspendedTitle": "Un momento…",
+    "suspendedBody": "Estamos preparando su premio. Mantenga esta pantalla abierta: su turno se reanudará automáticamente.",
     "waitTitle": "¡Espera tu turno!",
     "positionPrefix": "Eres el número",
     "positionSuffix": "en la cola",
@@ -51,12 +53,16 @@
     "firstName": "Nombre",
     "lastName": "Apellido",
     "email": "Correo electrónico",
+    "consentRulesBefore": "He leído y acepto el ",
+    "consentRulesLink": "reglamento del juego",
+    "consentRulesAfter": ", acepto recibir mi regalo por email y consiento el tratamiento de mis datos personales.",
     "consent": "Acepto recibir mi regalo por email y consiento el tratamiento de mis datos personales.",
     "submitBusy": "ESPERA UN MOMENTO…",
     "submitIdle": "COMPROBAR Y GIRAR LA RUEDA",
     "selectPlaceholder": "— Seleccionar —",
     "marketingConsent": "También acepto recibir novedades y ofertas de {{company}} (opcional).",
     "theOrganizer": "el organizador",
+    "rulesLink": "Reglamento del juego",
     "privacyLink": "Política de privacidad"
   },
   "errors": {

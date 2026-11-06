@@ -22,6 +22,8 @@
     "skip": "Nein danke, weiter"
   },
   "queue": {
+    "suspendedTitle": "Einen Moment…",
+    "suspendedBody": "Wir bereiten Ihren Gewinn vor. Lassen Sie diesen Bildschirm geöffnet: Ihr Zug geht automatisch weiter.",
     "waitTitle": "Warte, bis du dran bist!",
     "positionPrefix": "Du bist Nummer",
     "positionSuffix": "in der Warteschlange",
@@ -51,12 +53,16 @@
     "firstName": "Vorname",
     "lastName": "Nachname",
     "email": "E-Mail-Adresse",
+    "consentRulesBefore": "Ich habe die ",
+    "consentRulesLink": "Spielregeln",
+    "consentRulesAfter": " gelesen und akzeptiere sie, stimme zu, mein Geschenk per E-Mail zu erhalten, und willige in die Verarbeitung meiner personenbezogenen Daten ein.",
     "consent": "Ich stimme zu, mein Geschenk per E-Mail zu erhalten, und willige in die Verarbeitung meiner personenbezogenen Daten ein.",
     "submitBusy": "BITTE WARTEN…",
     "submitIdle": "PRÜFEN UND RAD DREHEN",
     "selectPlaceholder": "— Auswählen —",
     "marketingConsent": "Ich möchte außerdem Neuigkeiten und Angebote von {{company}} erhalten (optional).",
     "theOrganizer": "dem Veranstalter",
+    "rulesLink": "Spielregeln",
     "privacyLink": "Datenschutzerklärung"
   },
   "errors": {

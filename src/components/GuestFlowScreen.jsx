@@ -408,7 +408,12 @@ export default function GuestFlowScreen({
                   {RETRY_MESSAGES[status.retryMessage]}
                 </div>
               )}
-              {!status.launched ? (
+              {status.suspended ? (
+                <>
+                  <div style={{ color: 'white', fontSize: 'clamp(26px, 7vw, 38px)', fontWeight: 800, lineHeight: 1.15, maxWidth: 460 }}>{t('queue.suspendedTitle')}</div>
+                  <div style={{ color: 'rgba(255,255,255,0.9)', fontSize: 16, fontWeight: 500, maxWidth: 380, lineHeight: 1.5 }}>{t('queue.suspendedBody')}</div>
+                </>
+              ) : !status.launched ? (
                 <>
                   <div style={{ color: 'white', fontSize: 'clamp(22px, 6vw, 32px)', fontWeight: 800, letterSpacing: '0.02em', textTransform: 'uppercase' }}>
                     {t('queue.yourTurn')}
@@ -500,7 +505,14 @@ export default function GuestFlowScreen({
 
           <label style={{ display: 'flex', gap: 10, alignItems: 'flex-start', fontSize: 12, color: '#64748B', cursor: 'pointer', margin: '12px 0 20px', lineHeight: 1.5 }}>
             <input type="checkbox" checked={form.consent} onChange={e => setForm({ ...form, consent: e.target.checked })} style={{ marginTop: 2, flexShrink: 0 }} />
-            {t('form.consent')}
+            {campaignInfo?.rulesPath ? (
+              // ticking the box means accepting the game rules: the link opens them in a new tab without ticking or unticking
+              <span>
+                {t('form.consentRulesBefore')}
+                <a href={`${window.location.origin}${campaignInfo.rulesPath}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} style={{ color: '#475569', textDecoration: 'underline' }}>{t('form.consentRulesLink')}</a>
+                {t('form.consentRulesAfter')}
+              </span>
+            ) : t('form.consent')}
           </label>
           {/* Optional, separate marketing opt-in (only when the account turned it on) +
               the account's own privacy-policy link. Both come from the campaign info. */}
@@ -523,6 +535,12 @@ export default function GuestFlowScreen({
           }}>
             {busy ? t('form.submitBusy') : t('form.submitIdle')}
           </button>
+          {/* the published game rules (built when the campaign started); relative, so the cloud and the offline box each serve their own copy */}
+          {campaignInfo?.rulesPath && (
+            <div style={{ textAlign: 'center', marginTop: 14, fontSize: 12 }}>
+              <a href={`${window.location.origin}${campaignInfo.rulesPath}`} target="_blank" rel="noopener noreferrer" style={{ color: '#94A3B8', textDecoration: 'underline' }}>{t('form.rulesLink')}</a>
+            </div>
+          )}
         </form>
       </div>
     </div>

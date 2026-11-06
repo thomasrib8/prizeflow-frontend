@@ -1,5 +1,7 @@
 import CampaignLinkModal from '../components/CampaignLinkModal';
 import UniqueCodesSummary from '../components/UniqueCodesSummary';
+import DynamicPanel from '../components/DynamicPanel';
+import TransferCampaignModal from '../components/TransferCampaignModal';
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -59,6 +61,7 @@ export default function CampaignDetail() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [deleting, setDeleting] = useState(false);
+  const [transferOpen, setTransferOpen] = useState(false);
 
   const load = () => api.getCampaign(id).then(setCampaign).catch(e => setError(e.message));
   useEffect(() => { load(); }, [id]);
@@ -90,7 +93,8 @@ export default function CampaignDetail() {
   // What still stops a draft from being activated, translated by code (server sentence as a fallback)
   const [issues, setIssues] = useState([]);
   const [linkOpen, setLinkOpen] = useState(false);
-  const issueText = (i) => t(`activation.issue.${i.code}`, { ...(i.params || {}), defaultValue: i.message });
+  const FIELD_KEYS = { company: 'fieldCompany', legalForm: 'fieldLegalForm', registrationNumber: 'fieldRegistrationNumber', address: 'fieldAddress', city: 'fieldCity', email: 'fieldEmail' };
+  const issueText = (i) => t(`activation.issue.${i.code}`, { ...(i.params || {}), ...(i.fields ? { fields: i.fields.map((k) => t(`settings.information.${FIELD_KEYS[k] || k}`)).join(', ') } : {}), defaultValue: i.message });
   useEffect(() => {
     if (campaign && campaign.status === 'draft') api.getCampaignActivationCheck(campaign.id).then((r) => setIssues(r.issues || [])).catch(() => {});
     else setIssues([]);
@@ -175,11 +179,14 @@ export default function CampaignDetail() {
               campaign.status !== 'archived' && { key: 'seg', label: t('campaignDetail.editSegmentationBtn'), onClick: () => navigate(`/campaigns/${campaign.id}/edit-settings`) },
               campaign.status !== 'archived' && { key: 'settings', label: t('campaignDetail.editSettingsBtn'), onClick: () => navigate(`/campaigns/${campaign.id}/settings`) },
               { key: 'link', label: t('campaignLink.menuItem'), onClick: () => setLinkOpen(true) },
+              campaign.rules_generated_at && { key: 'rules', label: t('rulesConfig.menuItem'), onClick: () => window.open(`/rules/${campaign.id}`, '_blank', 'noopener') },
+              // admin only: a campaign configured here, never started, goes to a client account
+              isAdmin && campaign.status === 'draft' && !campaign.is_test && { key: 'transfer', label: t('transfer.menu'), onClick: () => setTransferOpen(true) },
               campaign.status !== 'archived' && { key: 'dup', label: t('campaignDetail.duplicateBtn'), onClick: () => navigate(`/campaigns/new?from=${campaign.id}`) },
               { separator: true },
               { key: 'csv', label: exportBusy ? t('campaignDetail.exportingBtn') : t('campaignDetail.exportGiftDistBtn'), disabled: exportBusy, onClick: handleExportGiftDistribution },
               { key: 'pdf', label: reportBusy ? t('launchCampaign.generatingBtn') : t('campaignDetail.downloadPdfReportBtn'), disabled: reportBusy, onClick: handleDownloadReport },
-              isAdmin && !!campaign.is_test && { key: 'seq', label: seqLoading ? t('common.loading') : showSeq ? t('campaignDetail.hideSequenceBtn') : t('campaignDetail.viewSequenceBtn'), disabled: seqLoading, onClick: showSeq ? () => setShowSeq(false) : loadSequence },
+              isAdmin && !!campaign.is_test && campaign.distribution_mode !== 'dynamic' && { key: 'seq', label: seqLoading ? t('common.loading') : showSeq ? t('campaignDetail.hideSequenceBtn') : t('campaignDetail.viewSequenceBtn'), disabled: seqLoading, onClick: showSeq ? () => setShowSeq(false) : loadSequence },
               campaign.status !== 'active' && { separator: true },
               campaign.status !== 'active' && { key: 'del', label: t('campaignDetail.deleteCampaignBtn'), danger: true, onClick: () => { setDeleteConfirmText(''); setDeleteOpen(true); } },
             ]}
@@ -193,6 +200,7 @@ export default function CampaignDetail() {
           <ul style={{ margin: '6px 0 0', paddingLeft: 18 }}>{issues.map((i, k) => <li key={k}>{issueText(i)}</li>)}</ul>
         </div>
       )}
+      {transferOpen && <TransferCampaignModal campaign={campaign} onClose={() => setTransferOpen(false)} onDone={() => navigate('/campaigns?filter=transferred')} />}
       {linkOpen && <CampaignLinkModal campaignId={campaign.id} onClose={() => setLinkOpen(false)} />}
       {campaign.status === 'archived' && (
         <div style={{
@@ -205,8 +213,11 @@ export default function CampaignDetail() {
 
       <UniqueCodesSummary campaignId={campaign.id} />
 
+      {/* Dynamic distribution: live probabilities, stocks, restock, history */}
+      {campaign.distribution_mode === 'dynamic' && <DynamicPanel campaign={campaign} onChanged={load} />}
+
       {/* Gift distribution */}
-      <Card title={t('campaignDetail.giftDistributionTitle')}>
+      {campaign.distribution_mode !== 'dynamic' && <Card title={t('campaignDetail.giftDistributionTitle')}>
         <table className="data-table">
           <thead>
             <tr><th>{t('campaignDetail.tableCase')}</th><th>{t('common.gift')}</th><th>{t('campaignDetail.tableStock')}</th><th>{t('campaignDetail.tablePct')}</th><th>{t('campaignDetail.tableRemaining')}</th><th>{t('campaignDetail.tableRedeem')}</th><th>{t('campaignDetail.tableProgress')}</th></tr>
@@ -244,7 +255,7 @@ export default function CampaignDetail() {
             })}
           </tbody>
         </table>
-      </Card>
+      </Card>}
 
       {/* Sequence viewer — admin + test only */}
       {showSeq && sequence && (

@@ -315,7 +315,10 @@ export const api = {
   resendRewardEmail: (rewardId) => request(`/account/rewards/${encodeURIComponent(rewardId)}/resend-email`, { method: 'POST' }),
   getCampaignPublicLink: (id) => request(`/campaigns/${id}/public-link`),
   getCampaignActivationCheck: (id) => request(`/campaigns/${id}/activation-check`),
-  saveDraftSlots: (id, slots) => request(`/campaigns/${id}/draft-slots`, { method: 'PUT', body: { slots } }),
+  saveDraftSlots: (id, slots, distributionMode) => request(`/campaigns/${id}/draft-slots`, { method: 'PUT', body: { slots, ...(distributionMode ? { distributionMode } : {}) } }),
+  // Dynamic distribution: live state (reference vs effective probability, stocks, movements) and "add stock" (positive only)
+  getDynamicState: (id) => request(`/campaigns/${id}/dynamic`),
+  restockCampaign: (id, body) => request(`/campaigns/${id}/restock`, { method: 'POST', body }),
   downloadCampaignQrPdf: (id) => downloadFile(`/campaigns/${id}/qr.pdf`),
   // Manual fallback for when scanning the QR fails — an already-logged-in
   // operator looks up a reward by ID and gets back the same signed code
@@ -341,6 +344,36 @@ export const api = {
   deleteCampaign: (id) => request(`/campaigns/${id}`, { method: 'DELETE' }),
   // Google review invite (+ its link), social media invite and AI assistant
   // for one campaign — see CampaignSettingsForm.jsx.
+  // Settings of ONE campaign (social links, reward e-mail, privacy); an empty value = the account's (Settings menu)
+  getCampaignOverrides: (id) => request(`/campaigns/${id}/overrides`),
+  updateCampaignOverrides: (id, body) => request(`/campaigns/${id}/overrides`, { method: 'PATCH', body }),
+  uploadCampaignLogo: async (id, file) => {
+    const token = getToken();
+    const formData = new FormData();
+    formData.append('logo', file);
+    const res = await fetch(`${API_BASE}/campaigns/${id}/email-logo`, { method: 'POST', headers: token ? { Authorization: `Bearer ${token}` } : {}, body: formData });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) throw new Error((data && data.error) || `Request failed (${res.status})`);
+    return data;
+  },
+  deleteCampaignLogo: (id) => request(`/campaigns/${id}/email-logo`, { method: 'DELETE' }),
+  getCampaignLogoPreviewUrl: async (id) => {
+    if (IS_DEMO) return null;
+    const token = getToken();
+    const res = await fetch(`${API_BASE}/campaigns/${id}/email-logo`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+    if (!res.ok) return null;
+    return URL.createObjectURL(await res.blob());
+  },
+  // Game rules: what the organiser decides for the campaign, a preview, a new published version, and the public text itself
+  getRulesConfig: (id) => request(`/campaigns/${id}/rules-config`),
+  saveRulesConfig: (id, config) => request(`/campaigns/${id}/rules-config`, { method: 'PUT', body: config }),
+  previewRules: (id) => request(`/campaigns/${id}/rules/preview`),
+  generateRules: (id) => request(`/campaigns/${id}/rules/generate`, { method: 'POST' }),
+  getPublicRules: (id) => request(`/guest/rules/${encodeURIComponent(id)}`, { auth: false }),
+  // Admin: hand a configured draft to a client account
+  listTransferTargets: () => request('/campaigns/transfer-targets'),
+  transferCampaign: (id, toUserId) => request(`/campaigns/${id}/transfer`, { method: 'POST', body: { toUserId } }),
+  listCampaignTransfers: () => request('/campaigns/transfers'),
   updateCampaignSettings: (id, settings) =>
     request(`/campaigns/${id}/settings`, { method: 'PATCH', body: settings }),
 

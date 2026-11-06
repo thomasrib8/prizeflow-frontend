@@ -1,0 +1,42 @@
+/* Gestion dynamique: method choice, probability fields, live panel */
+.dyn-modes { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 4px; }
+.dyn-mode { text-align: left; border: 1.5px solid #E3E9F7; background: #fff; border-radius: 14px; padding: 14px 16px; cursor: pointer; font-family: inherit; display: flex; flex-direction: column; gap: 4px; transition: border-color .12s, box-shadow .12s; }
+.dyn-mode:hover { border-color: #BFD4FF; }
+.dyn-mode.on { border-color: #0055F8; box-shadow: 0 0 0 3px rgba(0, 85, 248, .12); background: #F4F8FF; }
+.dyn-mode b { font-size: 14px; color: #03041A; display: flex; align-items: center; gap: 8px; }
+.dyn-mode b::before { content: ""; width: 14px; height: 14px; border-radius: 50%; border: 2px solid #BFD4FF; background: #fff; flex: none; }
+.dyn-mode.on b::before { border-color: #0055F8; background: radial-gradient(#0055F8 45%, #fff 50%); }
+.dyn-mode span { font-size: 12.5px; color: #64748B; line-height: 1.5; }
+.dyn-mode:disabled { opacity: .7; cursor: default; }
+.dyn-lock { font-size: 12px; color: #94A3B8; margin: 8px 0 0; }
+
+.dyn-case { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; padding: 8px 2px 2px; }
+.dyn-case label.dyn-prob { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: #475569; }
+.dyn-case label.dyn-prob input { width: 92px; text-align: right; }
+.dyn-case label.dyn-check { display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: #334155; cursor: pointer; }
+.dyn-case small { color: #94A3B8; font-size: 11.5px; }
+.dyn-total { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 800; border-radius: 99px; padding: 4px 11px; background: #FFF7E6; color: #8A5200; border: 1px solid #FCD9A0; }
+.dyn-total.ok { background: #E8F8F0; color: #047857; border-color: #A7E3C4; }
+
+.dyn-panel .dyn-table td, .dyn-panel .dyn-table th { white-space: nowrap; }
+.dyn-panel .num { text-align: right; font-variant-numeric: tabular-nums; }
+.dyn-eff { font-weight: 800; }
+.dyn-eff.up { color: #047857; }
+.dyn-eff.down { color: #B45309; }
+.dyn-w { font-size: 11.5px; color: #64748B; }
+.dyn-w.in { color: #047857; font-weight: 700; }
+.dyn-w.out { color: #B45309; font-weight: 700; }
+.dyn-alert { border-radius: 12px; padding: 12px 15px; font-size: 13px; line-height: 1.5; margin-bottom: 12px; }
+.dyn-alert.stop { background: #FEF1F1; border: 1px solid #F5B5B5; color: #8F1D1D; }
+.dyn-alert.warn { background: #FFF7E6; border: 1px solid #FCD9A0; color: #8A5200; }
+.dyn-alert b { display: block; margin-bottom: 2px; }
+.dyn-hist { max-height: 260px; overflow-y: auto; border: 1px solid #F1F4FB; border-radius: 10px; }
+.dyn-hist-row { display: flex; gap: 10px; align-items: baseline; padding: 7px 12px; font-size: 12.5px; border-bottom: 1px solid #F1F4FB; }
+.dyn-hist-row:last-child { border-bottom: none; }
+.dyn-hist-row time { color: #94A3B8; font-variant-numeric: tabular-nums; flex: none; }
+.dyn-forecast { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; font-size: 13px; }
+.dyn-forecast input { width: 110px; }
+.dyn-note { font-size: 12px; color: #64748B; margin: 8px 0 0; line-height: 1.5; }
+.dyn-short { color: #B45309; font-weight: 700; }
+.dyn-fine { color: #047857; font-weight: 700; }
+@media (max-width: 700px) { .dyn-modes { grid-template-columns: 1fr; } }

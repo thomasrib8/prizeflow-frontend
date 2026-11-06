@@ -239,7 +239,9 @@ export default function LaunchCampaign() {
                       </div>
                       <span className={`lc-state${q.queue.active.launched ? ' spin' : ''}`}>{q.queue.active.launched ? t('pwa.spinning') : t('pwa.waitingToSpin')}</span>
                     </div>
-                    {q.queue.active.retryMessage && <div className="lc-retry">{q.queue.active.retryMessage}</div>}
+                    {q.queue.active.suspended
+                      ? <div className="lc-retry" style={{ background: '#FEF1F1', color: '#8F1D1D', borderColor: '#F5B5B5' }}><b>{t('dynamic.suspendedTitle')}</b> — {t('dynamic.suspendedLaunch')}</div>
+                      : q.queue.active.retryMessage && <div className="lc-retry">{q.queue.active.retryMessage}</div>}
                     <div className="lc-actions">
                       <button type="button" className="lc-btn warn" disabled={q.queueActionBusy} onClick={q.handleSkipPlayer}>{t('pwa.skipPlayer')}</button>
                       <button type="button" className="lc-btn danger" disabled={q.queueActionBusy} onClick={q.handleCancelPlayer}>{t('pwa.cancelPlayer')}</button>

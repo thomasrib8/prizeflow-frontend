@@ -22,6 +22,7 @@ import PwaProspects from './pages/pwa/PwaProspects';
 import PwaAnalytics from './pages/pwa/PwaAnalytics';
 import PwaSettings from './pages/pwa/PwaSettings';
 import Guest from './pages/Guest';
+import RulesPage from './pages/RulesPage';
 import Kiosk from './pages/Kiosk';
 import RedeemPage from './pages/RedeemPage';
 import Rewards from './pages/Rewards';
@@ -98,6 +99,8 @@ export default function App() {
           </>}
           {/* Public guest flow — scanned via QR code, no login, outside the authenticated shell */}
           <Route path="/play/:token" element={<Guest />} />
+          {/* Public game rules of a campaign (generated when it starts) — linked from the guest form */}
+          <Route path="/rules/:id" element={<RulesPage />} />
           {/* Staff tablet kiosk ("Spin the wheel" for walk-up guests), public like /play/:token —
               served by the offline event box so a tablet can play with no internet. */}
           <Route path="/kiosk/:token" element={<Kiosk />} />

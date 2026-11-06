@@ -1,0 +1,185 @@
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { api } from '../api/client';
+import { Card, Button } from './ui';
+import { SocialGlyph } from './SocialIcons';
+
+const SOCIAL = [
+  { key: 'facebookUrl', label: 'Facebook', ph: 'https://facebook.com/yourpage' },
+  { key: 'instagramUrl', label: 'Instagram', ph: 'https://instagram.com/yourpage' },
+  { key: 'linkedinUrl', label: 'LinkedIn', ph: 'https://linkedin.com/company/yourpage' },
+  { key: 'xUrl', label: 'X', ph: 'https://x.com/yourpage' },
+];
+const METHODS = [['qr', 'redeemTabQr'], ['code', 'redeemTabCode'], ['voucher', 'redeemTabVoucher']];
+const input = { width: '100%', padding: '10px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 14, fontFamily: 'inherit' };
+const triToValue = (v) => (v === null || v === undefined ? '' : v ? 'yes' : 'no');
+const valueToTri = (v) => (v === 'yes' ? true : v === 'no' ? false : null);
+
+// Campaign settings, second part: what the Settings menu holds as the ACCOUNT defaults (social links, reward e-mail, privacy) can be decided
+// for this campaign only. Left empty, the account's value is used (shown as the placeholder of each field).
+export default function CampaignOverrides({ campaignId, archived = false }) {
+  const { t } = useTranslation('admin');
+  const [data, setData] = useState(null);
+  const [form, setForm] = useState(null);
+  const [method, setMethod] = useState('qr');
+  const [logoUrl, setLogoUrl] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [logoBusy, setLogoBusy] = useState(false);
+  const [error, setError] = useState('');
+  const [msg, setMsg] = useState('');
+
+  const apply = (res) => {
+    setData(res);
+    setForm({ ...res.own, guestFormLogoEnabled: triToValue(res.own.guestFormLogoEnabled), marketingConsentEnabled: triToValue(res.own.marketingConsentEnabled), logoSize: res.own.logoSize || '' });
+  };
+  const loadLogo = () => api.getCampaignLogoPreviewUrl(campaignId).then((u) => setLogoUrl((prev) => { if (prev) URL.revokeObjectURL(prev); return u; }));
+  useEffect(() => {
+    api.getCampaignOverrides(campaignId).then((res) => { apply(res); if (res.own.hasLogo) loadLogo(); }).catch((e) => setError(e.message));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [campaignId]);
+  useEffect(() => () => { if (logoUrl) URL.revokeObjectURL(logoUrl); }, [logoUrl]);
+
+  if (!form || !data) return error ? <div className="error-banner">{error}</div> : null;
+  const d = data.defaults; const b = data.builtIn;
+  const set = (patch) => setForm((f) => ({ ...f, ...patch }));
+  const setTemplate = (field, value) => setForm((f) => ({ ...f, templates: { ...f.templates, [method]: { ...f.templates[method], [field]: value } } }));
+  const defaultTpl = d.templates[method] || { subject: '', bodyText: '' };
+
+  async function save() {
+    setBusy(true); setError(''); setMsg('');
+    try {
+      const res = await api.updateCampaignOverrides(campaignId, {
+        ...Object.fromEntries(SOCIAL.map((p) => [p.key, form[p.key]])),
+        senderName: form.senderName, replyTo: form.replyTo, headerColor: form.headerColor, footerText: form.footerText,
+        logoSize: form.logoSize === '' ? null : Number(form.logoSize),
+        guestFormLogoEnabled: valueToTri(form.guestFormLogoEnabled),
+        privacyPolicyUrl: form.privacyPolicyUrl, marketingConsentEnabled: valueToTri(form.marketingConsentEnabled),
+        templates: form.templates,
+      });
+      apply(res);
+      setMsg(t('common.saved')); setTimeout(() => setMsg(''), 2500);
+    } catch (e) {
+      setError(e.code === 'BAD_REPLY_TO' ? t('settings.emailTemplates.replyToInvalid') : e.message);
+    } finally { setBusy(false); }
+  }
+  async function uploadLogo(e) {
+    const file = e.target.files[0]; if (!file) return;
+    setLogoBusy(true); setError('');
+    try { await api.uploadCampaignLogo(campaignId, file); const res = await api.getCampaignOverrides(campaignId); setData(res); setForm((f) => ({ ...f, hasLogo: true })); await loadLogo(); }
+    catch (err) { setError(err.message); } finally { setLogoBusy(false); e.target.value = ''; }
+  }
+  async function removeLogo() {
+    setLogoBusy(true); setError('');
+    try { await api.deleteCampaignLogo(campaignId); setForm((f) => ({ ...f, hasLogo: false })); setLogoUrl((p) => { if (p) URL.revokeObjectURL(p); return null; }); }
+    catch (err) { setError(err.message); } finally { setLogoBusy(false); }
+  }
+  const dis = archived || busy;
+  const triLabel = (on) => t(on ? 'campaignOverrides.yes' : 'campaignOverrides.no');
+
+  return (
+    <>
+      <div className="ap-info" style={{ marginTop: 18 }}>
+        {t('campaignOverrides.intro')} <Link to="/settings">{t('campaignOverrides.openDefaults')}</Link>
+      </div>
+      {error && <div className="error-banner" style={{ marginTop: 12 }}>{error}</div>}
+
+      <Card title={t('campaignOverrides.socialTitle')} className="mt-card">
+        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px', lineHeight: 1.6 }}>{t('campaignOverrides.socialDesc')}</p>
+        {SOCIAL.map((p) => (
+          <div className="field" key={p.key}>
+            <label><SocialGlyph name={p.key} size={16} /> {p.label}</label>
+            <input type="url" disabled={dis} value={form[p.key]} placeholder={d[p.key] ? `${t('campaignOverrides.defaultPrefix')} ${d[p.key]}` : p.ph} onChange={(e) => set({ [p.key]: e.target.value })} style={input} />
+          </div>
+        ))}
+      </Card>
+
+      <Card title={t('campaignOverrides.emailTitle')} className="mt-card">
+        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px', lineHeight: 1.6 }}>{t('campaignOverrides.emailDesc')}</p>
+
+        <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginBottom: 12 }}>
+          <div className="field" style={{ margin: 0, flex: 1, minWidth: 220 }}>
+            <label>{t('settings.emailTemplates.senderNameLabel')}</label>
+            <input type="text" maxLength={60} disabled={dis} value={form.senderName} placeholder={d.senderName ? `${t('campaignOverrides.defaultPrefix')} ${d.senderName}` : t('settings.emailTemplates.senderNamePh')} onChange={(e) => set({ senderName: e.target.value })} style={input} />
+          </div>
+          <div className="field" style={{ margin: 0, flex: 1, minWidth: 220 }}>
+            <label>{t('settings.emailTemplates.replyToLabel')}</label>
+            <input type="email" maxLength={120} disabled={dis} value={form.replyTo} placeholder={d.replyTo ? `${t('campaignOverrides.defaultPrefix')} ${d.replyTo}` : 'contact@votre-entreprise.fr'} onChange={(e) => set({ replyTo: e.target.value })} style={input} />
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginBottom: 12, alignItems: 'flex-end' }}>
+          <div className="field" style={{ margin: 0 }}>
+            <label>{t('settings.emailTemplates.headerColorLabel', { defaultValue: 'Header colour' })}</label>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <input type="color" disabled={dis} value={/^#[0-9a-fA-F]{6}$/.test(form.headerColor) ? form.headerColor : (/^#[0-9a-fA-F]{6}$/.test(d.headerColor) ? d.headerColor : b.headerColor)} onChange={(e) => set({ headerColor: e.target.value })} style={{ width: 46, height: 38, padding: 2, border: '1px solid #E2E8F0', borderRadius: 8 }} />
+              <input type="text" disabled={dis} value={form.headerColor} placeholder={d.headerColor || b.headerColor} onChange={(e) => set({ headerColor: e.target.value })} style={{ ...input, width: 120 }} />
+            </div>
+          </div>
+          <div className="field" style={{ margin: 0 }}>
+            <label>{t('campaignOverrides.logoSize')}</label>
+            <input type="number" min={b.minLogoSize} max={b.maxLogoSize} disabled={dis} value={form.logoSize} placeholder={String(d.logoSize || b.logoSize)} onChange={(e) => set({ logoSize: e.target.value === '' ? '' : Number(e.target.value) })} style={{ ...input, width: 110 }} />
+          </div>
+          <div className="field" style={{ margin: 0, flex: 1, minWidth: 220 }}>
+            <label>{t('campaignOverrides.footer')}</label>
+            <input type="text" maxLength={500} disabled={dis} value={form.footerText} placeholder={d.footerText || b.footerText} onChange={(e) => set({ footerText: e.target.value })} style={input} />
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap', margin: '14px 0' }}>
+          <div style={{ width: 56, height: 56, borderRadius: 10, border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', background: '#F8FAFC' }}>
+            {form.hasLogo && logoUrl ? <img src={logoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : <span style={{ fontSize: 11, color: '#94A3B8', textAlign: 'center' }}>{d.hasLogo ? t('campaignOverrides.accountLogo') : t('settings.emailTemplates.defaultLabel')}</span>}
+          </div>
+          <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '9px 16px', border: '1px solid #CBD5E1', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: logoBusy || archived ? 'not-allowed' : 'pointer', color: '#0F1C3F' }}>
+            {logoBusy ? t('settings.emailTemplates.uploadingBtn') : form.hasLogo ? t('settings.emailTemplates.replaceLogoBtn') : t('settings.emailTemplates.uploadLogoBtn')}
+            <input type="file" accept="image/png,image/jpeg,image/webp" disabled={logoBusy || archived} onChange={uploadLogo} style={{ display: 'none' }} />
+          </label>
+          {form.hasLogo && <Button variant="ghost" disabled={logoBusy} onClick={removeLogo} style={{ color: '#EF4444' }}>{t('settings.emailTemplates.removeBtn')}</Button>}
+          <div className="field" style={{ margin: 0 }}>
+            <label>{t('settings.emailTemplates.useInPreSpinFormLabel')}</label>
+            <select disabled={dis} value={form.guestFormLogoEnabled} onChange={(e) => set({ guestFormLogoEnabled: e.target.value })} style={{ ...input, width: 'auto' }}>
+              <option value="">{t('campaignOverrides.useDefault', { value: triLabel(d.guestFormLogoEnabled) })}</option>
+              <option value="yes">{t('campaignOverrides.yes')}</option>
+              <option value="no">{t('campaignOverrides.no')}</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="tabs" style={{ marginTop: 8 }}>
+          {METHODS.map(([m, key]) => <button type="button" key={m} className={`tab${method === m ? ' active' : ''}`} onClick={() => setMethod(m)}>{t(`settings.emailTemplates.${key}`)}</button>)}
+        </div>
+        <div className="field">
+          <label>{t('settings.emailTemplates.subjectLabel')}</label>
+          <input type="text" maxLength={300} disabled={dis} value={form.templates[method].subject} placeholder={defaultTpl.subject || data.builtIn.defaultSubject || ''} onChange={(e) => setTemplate('subject', e.target.value)} style={input} />
+        </div>
+        <div className="field">
+          <label>{t('campaignOverrides.message')}</label>
+          <textarea rows={4} maxLength={5000} disabled={dis} value={form.templates[method].bodyText} placeholder={defaultTpl.bodyText || data.builtIn.defaultBodyText || ''} onChange={(e) => setTemplate('bodyText', e.target.value)} style={{ ...input, resize: 'vertical' }} />
+          <p style={{ fontSize: 12, color: '#94A3B8', margin: '4px 0 0' }}>{t('campaignOverrides.messageHint', { vars: '{{firstName}} / {{giftName}} / {{code}} / {{unique_code}}' })}</p>
+        </div>
+        <p style={{ fontSize: 12, color: '#94A3B8', margin: 0 }}>{t('campaignOverrides.persoNote')}</p>
+      </Card>
+
+      <Card title={t('campaignOverrides.privacyTitle')} className="mt-card">
+        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px', lineHeight: 1.6 }}>{t('campaignOverrides.privacyDesc')}</p>
+        <div className="field">
+          <label>{t('campaignOverrides.policyUrl')}</label>
+          <input type="url" disabled={dis} value={form.privacyPolicyUrl} placeholder={d.privacyPolicyUrl ? `${t('campaignOverrides.defaultPrefix')} ${d.privacyPolicyUrl}` : 'https://votre-site.fr/confidentialite'} onChange={(e) => set({ privacyPolicyUrl: e.target.value })} style={input} />
+        </div>
+        <div className="field">
+          <label>{t('campaignOverrides.marketingConsent')}</label>
+          <select disabled={dis} value={form.marketingConsentEnabled} onChange={(e) => set({ marketingConsentEnabled: e.target.value })} style={{ ...input, width: 'auto' }}>
+            <option value="">{t('campaignOverrides.useDefault', { value: triLabel(d.marketingConsentEnabled) })}</option>
+            <option value="yes">{t('campaignOverrides.yes')}</option>
+            <option value="no">{t('campaignOverrides.no')}</option>
+          </select>
+        </div>
+      </Card>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 18 }}>
+        <Button disabled={dis} onClick={save}>{busy ? t('common.saving') : t('campaignOverrides.save')}</Button>
+        {msg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{msg}</span>}
+      </div>
+    </>
+  );
+}

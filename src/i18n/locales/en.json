@@ -22,6 +22,8 @@
     "skip": "No thanks, continue"
   },
   "queue": {
+    "suspendedTitle": "One moment…",
+    "suspendedBody": "We are getting your prize ready. Keep this screen open: your turn will resume automatically.",
     "waitTitle": "Wait for your turn!",
     "positionPrefix": "You are number",
     "positionSuffix": "in the queue",
@@ -51,12 +53,16 @@
     "firstName": "First name",
     "lastName": "Last name",
     "email": "Email address",
+    "consentRulesBefore": "I have read and accept the ",
+    "consentRulesLink": "game rules",
+    "consentRulesAfter": ", I agree to receive my reward by email and consent to the processing of my personal data.",
     "consent": "I agree to receive my reward by email and consent to the processing of my personal data.",
     "submitBusy": "PLEASE WAIT…",
     "submitIdle": "CHECK AND SPIN THE WHEEL",
     "selectPlaceholder": "— Select —",
     "marketingConsent": "I also agree to receive news and offers from {{company}} (optional).",
     "theOrganizer": "the organizer",
+    "rulesLink": "Game rules",
     "privacyLink": "Privacy policy"
   },
   "errors": {

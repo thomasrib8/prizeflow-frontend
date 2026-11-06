@@ -12,13 +12,15 @@ import SegmentationBuilder from '../components/SegmentationBuilder';
 import CampaignFieldsBuilder from '../components/CampaignFieldsBuilder';
 import { SALES_FIELD_TYPES, GUEST_FIELD_TYPES } from '../components/fieldTypes';
 import EventNameField, { EMPTY_PLACE, placePayload } from '../components/EventNameField';
+import DistributionModePicker from '../components/DistributionModePicker';
+import { probabilityProblem } from '../components/DynamicCaseFields';
 import CampaignSettingsForm, { DEFAULT_CAMPAIGN_SETTINGS, settingsFromCampaign } from '../components/CampaignSettingsForm';
 
 // The 12 gifts are defined first and only afterwards dragged onto a case of
 // the wheel: `id` is the gift's own fixed position in the list, `caseIndex`
 // (0-11, or null while it hasn't been placed yet) is the wheel case it ended
 // up on — that's what becomes the campaign slot's slotIndex on submit.
-const EMPTY_GIFTS = Array.from({ length: CASE_COUNT }, (_, i) => ({ id: i, caseIndex: null, giftName: '', stock: 0, redeemMethod: 'qr', persoDelivery: 'qr', persoSubject: '', persoBody: '', persoAutoDistribute: false }));
+const EMPTY_GIFTS = Array.from({ length: CASE_COUNT }, (_, i) => ({ id: i, caseIndex: null, giftName: '', stock: 0, probability: '', unlimited: false, redeemMethod: 'qr', persoDelivery: 'qr', persoSubject: '', persoBody: '', persoAutoDistribute: false }));
 // The language the *guest* sees throughout the play flow (form, queue,
 // wheel, result screen, reward email) — independent of the admin panel's own
 // per-account language (users.language). Defaults to English, matching
@@ -55,6 +57,9 @@ export default function NewCampaign() {
   const [eventPlace, setEventPlace] = useState(EMPTY_PLACE);
   const [language, setLanguage] = useState('en');
   const [gifts, setGifts] = useState(EMPTY_GIFTS);
+  // 'static' = pre-generated sequence (historical way), 'dynamic' = a draw at every spin with probabilities; chosen here, locked at activation
+  const [distributionMode, setDistributionMode] = useState('static');
+  const dynamic = distributionMode === 'dynamic';
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
   const [previewAngle, setPreviewAngle] = useState(0);
@@ -97,7 +102,9 @@ export default function NewCampaign() {
     api.getCampaign(fromCampaignId).then((source) => {
       setName(t('newCampaign.copyOfPrefix', { name: source.name }));
       setSettings(settingsFromCampaign(source));
+      setDistributionMode(source.distribution_mode === 'dynamic' ? 'dynamic' : 'static');
       applySlotConfig(source.slots.map((s) => ({
+        probability: s.probability, unlimited: !!s.unlimited,
         slotIndex: s.slot_index,
         giftName: s.gift_name,
         redeemMethod: s.redeem_method,
@@ -127,6 +134,8 @@ export default function NewCampaign() {
         ...g,
         caseIndex: Number.isInteger(src.slotIndex) && src.slotIndex >= 0 && src.slotIndex < CASE_COUNT ? src.slotIndex : null,
         giftName: src.giftName || '',
+        probability: Number(src.probability) ? src.probability : '',
+        unlimited: !!src.unlimited,
         redeemMethod: ['code', 'voucher', 'perso'].includes(src.redeemMethod) ? src.redeemMethod : 'qr',
         persoDelivery: src.persoDelivery || 'qr',
         persoSubject: src.persoSubject || '',
@@ -171,11 +180,12 @@ export default function NewCampaign() {
     const placed = gifts.filter((g) => g.caseIndex !== null);
     if (placed.length < CASE_COUNT) return t('newCampaign.placeAllGiftsError', { count: CASE_COUNT, placed: placed.length });
     for (const g of placed) {
-      if (!isGiftReady(g)) return t('newCampaign.giftNeedsNameStockError', { n: g.caseIndex + 1 });
+      if (!isGiftReady(g, dynamic)) return t('newCampaign.giftNeedsNameStockError', { n: g.caseIndex + 1 });
       if (g.redeemMethod === 'perso' && (!g.persoSubject.trim() || !g.persoBody.trim())) {
         return t('newCampaign.persoNeedsSubjectBodyError', { n: g.caseIndex + 1 });
       }
     }
+    if (dynamic) return probabilityProblem(placed.map((g) => ({ n: g.caseIndex + 1, probability: g.probability })), t);
     return '';
   }
 
@@ -187,10 +197,12 @@ export default function NewCampaign() {
     setSaving(true);
     try {
       const created = await api.createCampaign({
-        draft: true, name, description, eventName, eventPlace: placePayload(eventPlace), language, isTest,
+        draft: true, name, description, eventName, eventPlace: placePayload(eventPlace), language, isTest, distributionMode,
+        ...(fromCampaignId ? { duplicateOf: fromCampaignId } : {}),
         ...settings, googleReviewUrl: settings.googleReviewUrl.trim(),
         slots: gifts.filter((g) => g.caseIndex !== null && (g.giftName.trim() || Number(g.stock) > 0)).map((g) => ({
-          slotIndex: g.caseIndex, giftName: g.giftName, stock: Number(g.stock) || 0,
+          slotIndex: g.caseIndex, giftName: g.giftName, stock: dynamic && g.unlimited ? 0 : (Number(g.stock) || 0),
+          ...(dynamic ? { probability: Number(g.probability) || 0, unlimited: !!g.unlimited } : {}),
           redeemMethod: ['code', 'voucher', 'perso'].includes(g.redeemMethod) ? g.redeemMethod : 'qr',
           ...(g.redeemMethod === 'perso' ? { persoDelivery: g.persoDelivery, persoSubject: g.persoSubject, persoBody: g.persoBody, persoAutoDistribute: !!g.persoAutoDistribute } : {}),
         })),
@@ -236,12 +248,14 @@ export default function NewCampaign() {
     const active = gifts.filter((g) => g.caseIndex !== null);
     try {
       const created = await api.createCampaign({
-        name, description, eventName, eventPlace: placePayload(eventPlace), language, isTest,
+        name, description, eventName, eventPlace: placePayload(eventPlace), language, isTest, distributionMode,
+        ...(fromCampaignId ? { duplicateOf: fromCampaignId } : {}),
         ...settings, googleReviewUrl: settings.googleReviewUrl.trim(),
         slots: active.map(g => ({
           slotIndex: g.caseIndex,
           giftName: g.giftName,
-          stock: Number(g.stock),
+          stock: dynamic && g.unlimited ? 0 : Number(g.stock),
+          ...(dynamic ? { probability: Number(g.probability) || 0, unlimited: !!g.unlimited } : {}),
           redeemMethod: ['code', 'voucher', 'perso'].includes(g.redeemMethod) ? g.redeemMethod : 'qr',
           ...(g.redeemMethod === 'perso' ? { persoDelivery: g.persoDelivery, persoSubject: g.persoSubject, persoBody: g.persoBody, persoAutoDistribute: !!g.persoAutoDistribute } : {}),
         })),
@@ -324,7 +338,10 @@ export default function NewCampaign() {
               )}
             </Card>
 
+            <DistributionModePicker value={distributionMode} onChange={setDistributionMode} />
+
             <WheelGiftPlanner
+              dynamic={dynamic}
               gifts={gifts}
               setGifts={setGifts}
               wheelProps={{ positionAngle: previewAngle, interactive: true, onRotate: handleManualRotate }}

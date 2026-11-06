@@ -7,6 +7,7 @@ import { Button } from '../../components/ui';
 import { IS_BOX_BUILD } from '../../utils/boxMode';
 import { IconChevronRight, IconFilter, IconPlus, IconScan, IconSearch, IconUsers } from '../../components/pwa/PwaIcons';
 import { CampaignLoading, NoCampaign, PersonCard, PersonSkeletons, Skel } from '../../components/pwa/PwaParts';
+import PwaStockCard from '../../components/pwa/PwaStockCard';
 import { usePwa } from './PwaContext';
 
 // Home: what is happening on the active campaign right now — the two
@@ -54,7 +55,9 @@ function LiveQueueCard() {
             </span>
           </div>
           {active.giftName && <div className="pw-queue-win">{t('pwa.willWin')} <strong>{active.giftName}</strong></div>}
-          {active.retryMessage && <div className="pw-queue-retry">{active.retryMessage}</div>}
+          {active.suspended
+            ? <div className="pw-queue-retry"><b>{t('dynamic.suspendedTitle')}</b> — {t('dynamic.suspendedLaunch')}</div>
+            : active.retryMessage && <div className="pw-queue-retry">{active.retryMessage}</div>}
           <div className="pw-queue-actions">
             <button type="button" className="pw-queue-btn skip" disabled={q.queueActionBusy} onClick={q.handleSkipPlayer}>{t('pwa.skipPlayer')}</button>
             <button type="button" className="pw-queue-btn cancel" disabled={q.queueActionBusy} onClick={q.handleCancelPlayer}>{t('pwa.cancelPlayer')}</button>
@@ -108,6 +111,7 @@ export default function PwaHome() {
       </button>
 
       <LiveQueueCard />
+      <PwaStockCard campaign={q.campaign} />
 
       <section aria-label={t('pwa.last20PlayersTitle')}>
         <div className="pw-card-head" style={{ margin: '8px 2px 12px' }}>

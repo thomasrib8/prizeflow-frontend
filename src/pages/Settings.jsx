@@ -31,6 +31,12 @@ const PROFILE_FIELD_KEYS = [
   { key: 'address', tKey: 'fieldAddress' },
   { key: 'email', tKey: 'fieldEmail', type: 'email' },
   { key: 'phone', tKey: 'fieldPhone', type: 'tel' },
+  // what the game rules of a campaign need about the organiser (see the hint under the form)
+  { key: 'legalForm', tKey: 'fieldLegalForm' },
+  { key: 'shareCapital', tKey: 'fieldShareCapital' },
+  { key: 'registrationNumber', tKey: 'fieldRegistrationNumber' },
+  { key: 'city', tKey: 'fieldCity' },
+  { key: 'gdprContactEmail', tKey: 'fieldGdprContactEmail', type: 'email' },
 ];
 
 function MfaCard() {
@@ -168,6 +174,7 @@ function InformationModule() {
       setForm({
         lastName: u.last_name || '', firstName: u.first_name || '', company: u.company || '',
         industrySector: u.industry_sector || '', address: u.address || '', email: u.email || '', phone: u.phone || '',
+        legalForm: u.legal_form || '', shareCapital: u.share_capital || '', registrationNumber: u.registration_number || '', city: u.city || '', gdprContactEmail: u.gdpr_contact_email || '',
       });
     }).catch((e) => setError(e.message));
   }, []);
@@ -246,6 +253,7 @@ function InformationModule() {
               </div>
             ))}
           </div>
+          <p style={{ fontSize: 12, color: '#64748B', margin: '12px 0 0', lineHeight: 1.5 }}>{t('settings.information.rulesHint')}</p>
           {emailChanged && (
             <div className="field" style={{ marginTop: 14, maxWidth: 360 }}>
               <label>{t('settings.information.emailChangePasswordLabel')}</label>

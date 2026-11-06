@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { Button } from '../components/ui';
+import CampaignOverrides from '../components/CampaignOverrides';
+import CampaignRulesConfig from '../components/CampaignRulesConfig';
 import CampaignSettingsForm, { DEFAULT_CAMPAIGN_SETTINGS, settingsFromCampaign } from '../components/CampaignSettingsForm';
 
 // Post-creation editing of New campaign's "Settings" step: Google review
@@ -69,6 +71,12 @@ export default function CampaignSettings() {
         <Button disabled={saving} onClick={handleSave}>{saving ? t('common.saving') : t('editCampaignSettings.saveChangesBtn')}</Button>
         <Button variant="secondary" onClick={() => navigate(`/campaigns/${id}`)}>{t('editCampaignSettings.backBtn')}</Button>
       </div>
+
+      {/* social links, reward e-mail and privacy of THIS campaign (empty = the account's values from Settings) */}
+      <CampaignOverrides campaignId={id} archived={campaign.status === 'archived'} />
+
+      {/* game rules: dates, stand, gift values, options; the text is generated when the campaign starts */}
+      <CampaignRulesConfig campaignId={id} status={campaign.status} />
     </div>
   );
 }

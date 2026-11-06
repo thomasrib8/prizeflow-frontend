@@ -6,6 +6,8 @@ import EventNameField, { EMPTY_PLACE, placeFromCampaign, placePayload } from '..
 import { Card, Button } from '../components/ui';
 import VariantsEditor, { PersoFields, emptyVariant } from '../components/VariantsEditor';
 import UniqueCodesPanel from '../components/UniqueCodesPanel';
+import DistributionModePicker from '../components/DistributionModePicker';
+import DynamicCaseFields, { ProbabilityTotal } from '../components/DynamicCaseFields';
 
 // The language guests see throughout the play flow — see NewCampaign.jsx's
 // LANGUAGE_OPTIONS for why this is separate from the admin panel's language.
@@ -31,6 +33,7 @@ export default function EditCampaign() {
   const [eventPlace, setEventPlace] = useState(EMPTY_PLACE);
   const [language, setLanguage] = useState('en');
   const [slots, setSlots] = useState([]);
+  const [mode, setMode] = useState('static'); // distribution method: switchable while the campaign is a draft
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
   const [savedNote, setSavedNote] = useState('');
@@ -41,6 +44,7 @@ export default function EditCampaign() {
       setEventName(source.event_name || '');
       setEventPlace(placeFromCampaign(source));
       setLanguage(source.language || 'en');
+      setMode(source.distribution_mode === 'dynamic' ? 'dynamic' : 'static');
       if (source.status === 'archived') {
         setError(t('editCampaign.archivedReadOnlyError'));
         setCampaign(source);
@@ -53,6 +57,7 @@ export default function EditCampaign() {
         giftName: s.gift_name,
         stockInitial: s.stock_initial,
         stockRemaining: s.stock_remaining,
+        probability: s.probability || 0, unlimited: !!s.unlimited,
         redeemMethod: ['code', 'voucher', 'perso'].includes(s.redeem_method) ? s.redeem_method : 'qr',
         persoDelivery: s.perso_delivery || 'qr',
         persoSubject: s.perso_subject || '',
@@ -69,7 +74,7 @@ export default function EditCampaign() {
       });
       if (source.status === 'draft') {
         const byIndex = new Map(source.slots.map((s) => [s.slot_index, s]));
-        setSlots(Array.from({ length: 12 }, (_, i) => (byIndex.has(i) ? mk(byIndex.get(i)) : { slotIndex: i, giftName: '', stockInitial: 0, stockRemaining: 0, redeemMethod: 'qr', persoDelivery: 'code', persoSubject: '', persoBody: '', persoAutoDistribute: false, persoUniqueCode: false, savedUnique: false, variantsEnabled: false, variants: [] })));
+        setSlots(Array.from({ length: 12 }, (_, i) => (byIndex.has(i) ? mk(byIndex.get(i)) : { slotIndex: i, giftName: '', stockInitial: 0, stockRemaining: 0, probability: 0, unlimited: false, redeemMethod: 'qr', persoDelivery: 'code', persoSubject: '', persoBody: '', persoAutoDistribute: false, persoUniqueCode: false, savedUnique: false, variantsEnabled: false, variants: [] })));
       } else {
         setSlots(source.slots.map(mk));
       }
@@ -99,13 +104,14 @@ export default function EditCampaign() {
       await api.updateCampaignDetails(id, { name, description, eventName, eventPlace: placePayload(eventPlace), language });
       if (isDraft) {
         // half-finished is fine: what is missing is listed on the campaign page and checked when it is activated
-        await api.saveDraftSlots(id, slots.filter((s) => s.giftName.trim() || Number(s.stockInitial) > 0).map((s) => ({
-          slotIndex: s.slotIndex, giftName: s.giftName, stock: Number(s.stockInitial) || 0, redeemMethod: s.redeemMethod,
+        await api.saveDraftSlots(id, slots.filter((s) => s.giftName.trim() || Number(s.stockInitial) > 0 || s.unlimited).map((s) => ({
+          slotIndex: s.slotIndex, giftName: s.giftName, stock: mode === 'dynamic' && s.unlimited ? 0 : (Number(s.stockInitial) || 0), redeemMethod: s.redeemMethod,
+          ...(mode === 'dynamic' ? { probability: Number(s.probability) || 0, unlimited: !!s.unlimited } : {}),
           variantsEnabled: !!s.variantsEnabled,
           ...(s.variantsEnabled ? { variants: s.variants.map((v) => ({ id: v.id || undefined, name: v.name, stock: Number(v.stock) || 0, redeemMethod: v.redeemMethod,
             ...(v.redeemMethod === 'perso' ? { persoDelivery: v.persoDelivery, persoSubject: v.persoSubject, persoBody: v.persoBody, persoAutoDistribute: !!v.persoAutoDistribute, persoUniqueCode: !!v.persoUniqueCode } : {}) })) } : {}),
           ...(s.redeemMethod === 'perso' ? { persoDelivery: s.persoDelivery, persoSubject: s.persoSubject, persoBody: s.persoBody, persoAutoDistribute: !!s.persoAutoDistribute, persoUniqueCode: !!s.persoUniqueCode && !s.variantsEnabled } : {}),
-        })));
+        })), mode);
         // The codes pasted before the first save were only staged: now that the gifts exist on the server, load them (replacing any previous list).
         const staged = [];
         slots.forEach((sl) => {
@@ -184,7 +190,9 @@ export default function EditCampaign() {
             </div>
           </Card>
 
-          <Card title={t('editCampaign.giftsTitle')} className="mt-card">
+          {campaign.status === 'draft' && <DistributionModePicker value={mode} onChange={setMode} />}
+
+          <Card title={t('editCampaign.giftsTitle')} className="mt-card" action={mode === 'dynamic' ? <ProbabilityTotal values={slots.filter((s) => s.giftName.trim() || s.unlimited || Number(s.stockInitial) > 0).map((s) => s.probability)} /> : undefined}>
             <div className="slots-grid">
               {slots.map((s, i) => (
                 <div key={s.slotIndex} style={{ display: 'contents' }}>
@@ -192,11 +200,11 @@ export default function EditCampaign() {
                     <div className="slot-index">{t('dashboard.caseLabel', { n: s.slotIndex + 1 })}</div>
                     <input placeholder={t('editCampaign.giftNamePlaceholder')} value={s.giftName} onChange={(e) => updateSlot(i, 'giftName', e.target.value)} />
                     {campaign.status === 'draft' ? (
-                      <input type="number" min="0" step="1" value={s.stockInitial} title={t('editCampaign.stockInputTitle')} aria-label={t('editCampaign.stockInputTitle')}
+                      <input type="number" min="0" step="1" value={mode === 'dynamic' && s.unlimited ? '' : s.stockInitial} placeholder={mode === 'dynamic' && s.unlimited ? t('dynamic.unlimitedShort') : undefined} disabled={mode === 'dynamic' && !!s.unlimited} title={t('editCampaign.stockInputTitle')} aria-label={t('editCampaign.stockInputTitle')}
                         onChange={(e) => updateSlot(i, 'stockInitial', e.target.value === '' ? '' : Math.max(0, Math.floor(Number(e.target.value)) || 0))} style={{ width: 84 }} />
                     ) : (
                       <div style={{ fontSize: 12, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
-                        {t('editCampaign.stockLeftLabel', { remaining: s.stockRemaining, initial: s.stockInitial })}
+                        {s.unlimited ? t('dynamic.unlimitedShort') : t('editCampaign.stockLeftLabel', { remaining: s.stockRemaining, initial: s.stockInitial })}
                       </div>
                     )}
                     {s.variantsEnabled ? (
@@ -211,7 +219,13 @@ export default function EditCampaign() {
                     )}
                     <div className="slot-pct" />
                   </div>
-                  {campaign.status === 'draft' && (s.giftName.trim() || Number(s.stockInitial) > 0) && (
+                  {mode === 'dynamic' && (s.giftName.trim() || Number(s.stockInitial) > 0 || s.unlimited) && (
+                    <div style={{ gridColumn: '1 / -1' }}>
+                      <DynamicCaseFields probability={s.probability} unlimited={s.unlimited} readOnly={campaign.status !== 'draft'}
+                        onProbability={(v) => updateSlot(i, 'probability', v)} onUnlimited={(v) => patchSlot(i, { unlimited: v, stockInitial: v ? 0 : s.stockInitial, variantsEnabled: v ? false : s.variantsEnabled })} />
+                    </div>
+                  )}
+                  {campaign.status === 'draft' && !(mode === 'dynamic' && s.unlimited) && (s.giftName.trim() || Number(s.stockInitial) > 0) && (
                     <label className="vr-toggle">
                       <input type="checkbox" checked={!!s.variantsEnabled}
                         onChange={(e) => patchSlot(i, { variantsEnabled: e.target.checked, variants: e.target.checked && !(s.variants || []).length ? [emptyVariant()] : (s.variants || []) })} />
