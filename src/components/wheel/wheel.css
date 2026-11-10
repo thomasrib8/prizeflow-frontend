@@ -63,12 +63,7 @@
 .wh-label-preview { transform-origin: top left; }
 /* on-screen zoom of the small stickers (reset when printing) */
 .wh-prev { zoom: var(--z, 1); }
-/* box sticker 2 x 1 cm: 3 lines of text */
-.wh-label-box { width: 20mm; height: 10mm; padding: 0.8mm 1mm; flex-direction: column; justify-content: center; border-width: 0.2mm; border-radius: 1mm; }
-.wh-lb-brand { font-size: 5pt; font-weight: 800; color: #0055F8; letter-spacing: 0.12em; line-height: 1.2; }
-.wh-lb-name { font-size: 5pt; font-weight: 800; line-height: 1.3; white-space: nowrap; font-family: var(--font-mono, ui-monospace, monospace); }
-.wh-lb-sub { font-size: 4.5pt; line-height: 1.3; color: #5B6788; white-space: nowrap; font-family: var(--font-mono, ui-monospace, monospace); }
-/* TP-Link sticker 4 x 2 cm: QR + 4 lines */
+/* TP-Link and box stickers 4 x 2 cm: QR + 4 lines */
 .wh-label-router { width: 40mm; height: 20mm; border-width: 0.2mm; border-radius: 1.5mm; }
 .wh-label-router .wh-label-qr { width: 18mm; }
 .wh-label-router .wh-label-qr img { width: 14mm; height: 14mm; padding: 0.6mm; border-radius: 1mm; }
@@ -77,7 +72,7 @@
 .wh-lr-cap { font-size: 5pt; font-weight: 700; color: #5B6788; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.8mm; }
 .wh-lr-serial { font-size: 7pt; font-weight: 800; line-height: 1.2; font-family: var(--font-mono, ui-monospace, monospace); }
 .wh-lr-box { font-size: 4.5pt; line-height: 1.3; color: #5B6788; white-space: nowrap; font-family: var(--font-mono, ui-monospace, monospace); }
-/* one A4 sheet holding the 3 stickers at their real size (wheel on top, router + box side by side below) */
+/* one A4 sheet holding the 3 stickers at their real size (wheel on top, router + box side by side below, both 4 x 2 cm) */
 .wh-sheet { display: flex; flex-direction: column; align-items: flex-start; gap: 6mm; }
 .wh-sheet-row { display: flex; align-items: flex-start; gap: 6mm; }
 @media print {

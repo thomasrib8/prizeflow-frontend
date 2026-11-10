@@ -1,6 +1,6 @@
 // The 3 stickers of a pack on ONE A4 sheet, printed from the browser at 100 % (no scaling), on adhesive paper, then cut out:
 //  - wheel:  10 x 5 cm  QR code (opens the wheel's page, admins only) + its identity
-//  - box:     2 x 1 cm  box name + pack serial (text only, too small for a reliable QR code)
+//  - box:     4 x 2 cm  same layout as the router sticker, captioned "box"
 //  - router:  4 x 2 cm  QR code (same link) + pack serial + box name
 // The QR holds only the link — never the security key.
 import { useEffect, useState } from 'react';
@@ -50,7 +50,7 @@ export default function WheelLabel({ wheel, onClose }) {
               </div>
             </div>
             <div className="wh-sheet-row">
-              <div className="wh-prev" style={{ '--z': 1.5 }}>
+              <div className="wh-prev" style={{ '--z': 1.25 }}>
                 <div className="wh-label wh-label-router">
                   <div className="wh-label-qr">{qr && <img src={qr} alt="QR" />}</div>
                   <div className="wh-label-info">
@@ -61,11 +61,15 @@ export default function WheelLabel({ wheel, onClose }) {
                   </div>
                 </div>
               </div>
-              <div className="wh-prev" style={{ '--z': 2 }}>
-                <div className="wh-label wh-label-box">
-                  <div className="wh-lb-brand">SPARK</div>
-                  <div className="wh-lb-name">{boxName}</div>
-                  <div className="wh-lb-sub">{wheel.serialNumber}</div>
+              <div className="wh-prev" style={{ '--z': 1.25 }}>
+                <div className="wh-label wh-label-router">
+                  <div className="wh-label-qr">{qr && <img src={qr} alt="QR" />}</div>
+                  <div className="wh-label-info">
+                    <div className="wh-label-brand">SPARK</div>
+                    <div className="wh-lr-cap">{t('wheelOps.labelBoxCap')}</div>
+                    <div className="wh-lr-serial">{wheel.serialNumber}</div>
+                    <div className="wh-lr-box">{boxName}</div>
+                  </div>
                 </div>
               </div>
             </div>
