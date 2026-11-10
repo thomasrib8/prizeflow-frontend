@@ -1696,7 +1696,10 @@
     "packReviewBtn": "Review the preparation",
     "forceConfirm": "This pack's box has not yet confirmed it erased the previous client's data. Assign anyway? Nothing of the new client will reach the box before that erase.",
     "forceBtn": "Assign anyway",
-    "guideBtn": "PDF guide"
+    "guideBtn": "PDF guide",
+    "setupAppBtn": "Download SPARK SETUP",
+    "setupAppBusy": "Downloading…",
+    "setupAppDone": "“{{file}}” (version {{version}}) is downloading. Open it, drag SPARK SETUP into Applications, then launch it (first launch: right-click, Open)."
   },
   "setupWizard": {
     "title": "Set up for rental",
@@ -1854,8 +1857,8 @@
     "existingIntro": "You are resuming the preparation of this wheel.",
     "wifiIntro": "Spark-Local is the Wi-Fi the box broadcasts: the wheel and the tablet join it when there is no internet. Its password is fixed for the whole pack: it does not change from one client to the next.",
     "alreadySet": "Password already set for this pack: it is kept unless you change it.",
-    "changeWarn": "This pack's box is already activated: changing this password means redoing steps 3 and 4.",
-    "laterWarn": "Changing it later means redoing steps 3 and 4 for this pack.",
+    "changeWarn": "This pack's box is already activated: changing this password means reconfiguring the wheel and reactivating the box.",
+    "laterWarn": "Changing it later means reconfiguring the wheel and reactivating this pack's box.",
     "wheelIntro": "On the Raspberry Pi of wheel {{serial}}. Nothing is typed by hand: one block to paste.",
     "secretWarn": "It contains the pack's secret: do not paste it anywhere else.",
     "wheelOk": "Wheel detected · identity matches",
@@ -1895,7 +1898,23 @@
     "doneText": "Wheel {{serial}} and its box {{box}} are prepared. The pack is available and can be assigned to a client without redoing anything on the hardware.",
     "labelBtn": "Wheel label",
     "close": "Close",
-    "kitWifiTitle": "Kit Wi-Fi (TP-Link)"
+    "kitWifiTitle": "Kit Wi-Fi (TP-Link)",
+    "stepSetup": "SPARK SETUP",
+    "setupIntro": "The rest of the preparation is done with the SPARK SETUP program, on the depot's Mac. No command to type, no block to copy.",
+    "setupOpen": "Open SPARK SETUP, sign in, then choose the pack:",
+    "setupDoes": "The program takes care of:",
+    "setup1": "writing the wheel's SD card",
+    "setup2": "putting the wheel on the TP-Link's Wi-Fi (with the phone)",
+    "setup3": "configuring the wheel with this pack's block",
+    "setup4": "installing the box's SSD",
+    "setup5": "activating the box and having it remember the TP-Link's Wi-Fi",
+    "setup6": "running the checks with and without the cable",
+    "setupLive": "What SPARK sees live:",
+    "setupWait": "This screen updates by itself. You can leave it open while the program works, then click Next.",
+    "setupManual": "SPARK SETUP unavailable? Switch to the manual path (fallback)",
+    "setupBack": "← Back to SPARK SETUP",
+    "setupOpenBtn": "Open SPARK SETUP on this pack",
+    "setupOpenHint": "Works if SPARK SETUP is installed on this Mac."
   },
   "packAssign": {
     "multiTitle": "Wheels of this account",

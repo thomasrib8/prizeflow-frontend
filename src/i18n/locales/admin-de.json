@@ -1696,7 +1696,10 @@
     "packReviewBtn": "Vorbereitung ansehen",
     "forceConfirm": "Die Box dieses Packs hat noch nicht bestätigt, die Daten des vorherigen Kunden gelöscht zu haben. Trotzdem zuweisen? Vom neuen Kunden gelangt nichts auf die Box, bevor sie gelöscht ist.",
     "forceBtn": "Trotzdem zuweisen",
-    "guideBtn": "PDF-Anleitung"
+    "guideBtn": "PDF-Anleitung",
+    "setupAppBtn": "SPARK SETUP herunterladen",
+    "setupAppBusy": "Wird geladen…",
+    "setupAppDone": "„{{file}}“ (Version {{version}}) wird heruntergeladen. Öffnen Sie die Datei, ziehen Sie SPARK SETUP in Programme und starten Sie es (erster Start: Rechtsklick, Öffnen)."
   },
   "setupWizard": {
     "title": "In Betrieb nehmen",
@@ -1854,8 +1857,8 @@
     "existingIntro": "Sie setzen die Vorbereitung dieses Rads fort.",
     "wifiIntro": "Spark-Local ist das WLAN der Box: Rad und Tablet verbinden sich damit, wenn es kein Internet gibt. Das Passwort ist für das ganze Pack fest und ändert sich nicht von Kunde zu Kunde.",
     "alreadySet": "Passwort für dieses Pack bereits festgelegt: Es bleibt erhalten, solange Sie es nicht ändern.",
-    "changeWarn": "Die Box dieses Packs ist bereits aktiviert: Eine Änderung des Passworts erfordert, die Schritte 3 und 4 zu wiederholen.",
-    "laterWarn": "Eine spätere Änderung erfordert, die Schritte 3 und 4 für dieses Pack zu wiederholen.",
+    "changeWarn": "Die Box dieses Packs ist bereits aktiviert: Eine Änderung dieses Passworts erfordert, das Rad neu zu konfigurieren und die Box erneut zu aktivieren.",
+    "laterWarn": "Eine spätere Änderung erfordert, das Rad neu zu konfigurieren und die Box dieses Packs erneut zu aktivieren.",
     "wheelIntro": "Auf dem Raspberry Pi des Rads {{serial}}. Nichts wird von Hand eingetippt: ein einziger Block zum Einfügen.",
     "secretWarn": "Er enthält das Geheimnis des Packs: nirgendwo sonst einfügen.",
     "wheelOk": "Rad erkannt · Identität stimmt",
@@ -1895,7 +1898,23 @@
     "doneText": "Rad {{serial}} und seine Box {{box}} sind vorbereitet. Das Pack ist verfügbar und kann einem Kunden zugewiesen werden, ohne etwas an der Hardware zu wiederholen.",
     "labelBtn": "Etikett des Rads",
     "close": "Schließen",
-    "kitWifiTitle": "Kit-WLAN (TP-Link)"
+    "kitWifiTitle": "Kit-WLAN (TP-Link)",
+    "stepSetup": "SPARK SETUP",
+    "setupIntro": "Der Rest der Vorbereitung läuft mit dem Programm SPARK SETUP auf dem Mac im Depot. Keine Befehle tippen, keine Blöcke kopieren.",
+    "setupOpen": "SPARK SETUP öffnen, anmelden und das Pack wählen:",
+    "setupDoes": "Das Programm übernimmt:",
+    "setup1": "die SD-Karte des Rads beschreiben",
+    "setup2": "das Rad ins WLAN des TP-Link bringen (mit dem Telefon)",
+    "setup3": "das Rad mit dem Block dieses Packs konfigurieren",
+    "setup4": "die SSD der Box installieren",
+    "setup5": "die Box aktivieren und das WLAN des TP-Link speichern lassen",
+    "setup6": "die Prüfungen mit und ohne Kabel durchführen",
+    "setupLive": "Was SPARK live sieht:",
+    "setupWait": "Diese Ansicht aktualisiert sich selbst. Sie können sie offen lassen, während das Programm arbeitet, und dann auf Weiter klicken.",
+    "setupManual": "SPARK SETUP nicht verfügbar? Zum manuellen Ablauf wechseln (Notlösung)",
+    "setupBack": "← Zurück zu SPARK SETUP",
+    "setupOpenBtn": "SPARK SETUP für dieses Pack öffnen",
+    "setupOpenHint": "Funktioniert, wenn SPARK SETUP auf diesem Mac installiert ist."
   },
   "packAssign": {
     "multiTitle": "Räder dieses Kontos",

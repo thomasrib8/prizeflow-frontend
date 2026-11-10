@@ -1696,7 +1696,10 @@
     "packReviewBtn": "Revoir la préparation",
     "forceConfirm": "Le boîtier de ce pack n'a pas encore confirmé avoir effacé les données du client précédent. Attribuer quand même ? Rien du nouveau client n'arrivera sur le boîtier avant cet effacement.",
     "forceBtn": "Attribuer quand même",
-    "guideBtn": "Guide PDF"
+    "guideBtn": "Guide PDF",
+    "setupAppBtn": "Télécharger SPARK SETUP",
+    "setupAppBusy": "Téléchargement…",
+    "setupAppDone": "« {{file}} » (version {{version}}) se télécharge. Ouvrez-le, glissez SPARK SETUP dans Applications, puis lancez-le (premier lancement : clic droit, Ouvrir)."
   },
   "setupWizard": {
     "title": "Mettre en service",
@@ -1854,8 +1857,8 @@
     "existingIntro": "Vous reprenez la préparation de cette roue.",
     "wifiIntro": "Spark-Local est le Wi-Fi diffusé par le boîtier : la roue et la tablette le rejoignent quand il n'y a pas d'internet. Son mot de passe est fixe pour tout le pack : il ne change pas d'un client à l'autre.",
     "alreadySet": "Mot de passe déjà défini pour ce pack : il est conservé tant que vous ne le changez pas.",
-    "changeWarn": "Le boîtier de ce pack est déjà activé : changer ce mot de passe oblige à refaire les étapes 3 et 4.",
-    "laterWarn": "Le changer plus tard oblige à refaire les étapes 3 et 4 pour ce pack.",
+    "changeWarn": "Le boîtier de ce pack est déjà activé : changer ce mot de passe oblige à reconfigurer la roue et à réactiver le boîtier.",
+    "laterWarn": "Le changer plus tard oblige à reconfigurer la roue et à réactiver le boîtier de ce pack.",
     "wheelIntro": "Sur le Raspberry Pi de la roue {{serial}}. Rien n'est tapé à la main : un seul bloc à coller.",
     "secretWarn": "Il contient le secret du pack : ne le collez nulle part ailleurs.",
     "wheelOk": "Roue détectée · identité conforme",
@@ -1895,7 +1898,23 @@
     "doneText": "La roue {{serial}} et son boîtier {{box}} sont préparés. Le pack est disponible et peut être attribué à un client, sans rien refaire sur le matériel.",
     "labelBtn": "Étiquette de la roue",
     "close": "Fermer",
-    "kitWifiTitle": "Wi-Fi du kit (TP-Link)"
+    "kitWifiTitle": "Wi-Fi du kit (TP-Link)",
+    "stepSetup": "SPARK SETUP",
+    "setupIntro": "Le reste de la préparation se fait avec le programme SPARK SETUP, sur le Mac du dépôt. Plus de commande à taper, plus de bloc à copier.",
+    "setupOpen": "Ouvrez SPARK SETUP, connectez-vous, puis choisissez le pack :",
+    "setupDoes": "Le programme s’occupe de :",
+    "setup1": "écrire la carte SD de la roue",
+    "setup2": "mettre la roue sur le Wi-Fi du TP-Link (avec le téléphone)",
+    "setup3": "configurer la roue avec le bloc de ce pack",
+    "setup4": "installer le SSD du boîtier",
+    "setup5": "activer le boîtier et lui faire mémoriser le Wi-Fi du TP-Link",
+    "setup6": "faire les vérifications avec et sans câble",
+    "setupLive": "Ce que SPARK voit en direct :",
+    "setupWait": "Cet écran se met à jour tout seul. Vous pouvez le laisser ouvert pendant que le programme travaille, puis cliquer sur Continuer.",
+    "setupManual": "SPARK SETUP indisponible ? Passer au parcours manuel (secours)",
+    "setupBack": "← Revenir à SPARK SETUP",
+    "setupOpenBtn": "Ouvrir SPARK SETUP sur ce pack",
+    "setupOpenHint": "Fonctionne si SPARK SETUP est installé sur ce Mac."
   },
   "packAssign": {
     "multiTitle": "Roues de ce compte",

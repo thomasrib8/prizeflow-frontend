@@ -300,6 +300,8 @@ export const api = {
   // One-time activation code for an event box (admin, from the client's page)
   getBoxActivation: (userId) => request(`/box-activation/${encodeURIComponent(userId)}`),
   // Pack preparation (Parc hardware wizard): per wheel, not per client.
+  // The SPARK SETUP program (Mac .dmg) for the depot: a temporary signed link from the private storage.
+  getSetupAppLink: () => request('/deploy/app/download-url', { method: 'POST', body: {} }),
   getPackState: (wheelId) => request(`/box-activation/pack/${encodeURIComponent(wheelId)}`),
   getPackWifi: (wheelId) => request(`/box-activation/pack/${encodeURIComponent(wheelId)}/wifi`),
   setPackWifi: (wheelId, password) => request(`/box-activation/pack/${encodeURIComponent(wheelId)}/wifi`, { method: 'PUT', body: { password } }),

@@ -1696,7 +1696,10 @@
     "packReviewBtn": "Revisar la preparación",
     "forceConfirm": "La caja de este pack aún no ha confirmado que borró los datos del cliente anterior. ¿Asignar de todos modos? Nada del nuevo cliente llegará a la caja antes de ese borrado.",
     "forceBtn": "Asignar de todos modos",
-    "guideBtn": "Guía PDF"
+    "guideBtn": "Guía PDF",
+    "setupAppBtn": "Descargar SPARK SETUP",
+    "setupAppBusy": "Descargando…",
+    "setupAppDone": "«{{file}}» (versión {{version}}) se está descargando. Ábralo, arrastre SPARK SETUP a Aplicaciones y ejecútelo (primer inicio: clic derecho, Abrir)."
   },
   "setupWizard": {
     "title": "Puesta en servicio",
@@ -1854,8 +1857,8 @@
     "existingIntro": "Retoma la preparación de esta rueda.",
     "wifiIntro": "Spark-Local es el Wi-Fi que emite la caja: la rueda y la tableta se unen a él cuando no hay internet. Su contraseña es fija para todo el pack: no cambia de un cliente a otro.",
     "alreadySet": "Contraseña ya definida para este pack: se conserva mientras no la cambie.",
-    "changeWarn": "La caja de este pack ya está activada: cambiar esta contraseña obliga a rehacer los pasos 3 y 4.",
-    "laterWarn": "Cambiarla más tarde obliga a rehacer los pasos 3 y 4 de este pack.",
+    "changeWarn": "La caja de este pack ya está activada: cambiar esta contraseña obliga a reconfigurar la rueda y reactivar la caja.",
+    "laterWarn": "Cambiarla más tarde obliga a reconfigurar la rueda y reactivar la caja de este pack.",
     "wheelIntro": "En la Raspberry Pi de la rueda {{serial}}. No se escribe nada a mano: un solo bloque para pegar.",
     "secretWarn": "Contiene el secreto del pack: no lo pegue en ningún otro sitio.",
     "wheelOk": "Rueda detectada · identidad conforme",
@@ -1895,7 +1898,23 @@
     "doneText": "La rueda {{serial}} y su caja {{box}} están preparadas. El pack está disponible y se puede asignar a un cliente sin rehacer nada en el equipo.",
     "labelBtn": "Etiqueta de la rueda",
     "close": "Cerrar",
-    "kitWifiTitle": "Wi-Fi del kit (TP-Link)"
+    "kitWifiTitle": "Wi-Fi del kit (TP-Link)",
+    "stepSetup": "SPARK SETUP",
+    "setupIntro": "El resto de la preparación se hace con el programa SPARK SETUP, en el Mac del almacén. Sin comandos que escribir ni bloques que copiar.",
+    "setupOpen": "Abra SPARK SETUP, inicie sesión y elija el pack:",
+    "setupDoes": "El programa se encarga de:",
+    "setup1": "escribir la tarjeta SD de la rueda",
+    "setup2": "poner la rueda en el Wi-Fi del TP-Link (con el teléfono)",
+    "setup3": "configurar la rueda con el bloque de este pack",
+    "setup4": "instalar el SSD de la caja",
+    "setup5": "activar la caja y hacer que memorice el Wi-Fi del TP-Link",
+    "setup6": "hacer las comprobaciones con y sin cable",
+    "setupLive": "Lo que SPARK ve en directo:",
+    "setupWait": "Esta pantalla se actualiza sola. Puede dejarla abierta mientras el programa trabaja y luego pulsar Continuar.",
+    "setupManual": "¿SPARK SETUP no disponible? Pasar al modo manual (alternativa)",
+    "setupBack": "← Volver a SPARK SETUP",
+    "setupOpenBtn": "Abrir SPARK SETUP con este pack",
+    "setupOpenHint": "Funciona si SPARK SETUP está instalado en este Mac."
   },
   "packAssign": {
     "multiTitle": "Ruedas de esta cuenta",

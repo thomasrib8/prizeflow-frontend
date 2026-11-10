@@ -8,6 +8,7 @@ import ReturnForm from '../components/wheel/ReturnForm';
 import InspectionList from '../components/wheel/InspectionList';
 import WheelLabel from '../components/wheel/WheelLabel';
 import PackWizard from '../components/PackWizard';
+import { IS_DEMO } from '../tutorial/demo';
 import ProfitabilityPanel, { WheelCostForm } from '../components/ProfitabilityPanel';
 import './admin-premium.css';
 
@@ -295,6 +296,14 @@ export default function Park() {
   const [profit, setProfit] = useState({}); // wheelId -> { costCents, coveragePct }
   const [labelOf, setLabelOf] = useState(null);
   const [guideBusy, setGuideBusy] = useState(false);
+  const [setupBusy, setSetupBusy] = useState(false);
+  const [setupNote, setSetupNote] = useState('');
+  // SPARK SETUP (the program that commissions packs on a Mac): a temporary signed link, the browser downloads the .dmg.
+  async function downloadSetupApp() {
+    setSetupBusy(true); setError(''); setSetupNote('');
+    try { const r = await api.getSetupAppLink(); window.location.assign(r.url); setSetupNote(t('park.setupAppDone', { file: r.fileName, version: r.version })); }
+    catch (e) { setError(e.message); } finally { setSetupBusy(false); }
+  }
   async function downloadGuide() { setGuideBusy(true); setError(''); try { await api.downloadCommissioningGuide(); } catch (e) { setError(e.message); } finally { setGuideBusy(false); } }
 
   function load() {
@@ -317,11 +326,13 @@ export default function Park() {
           <p className="page-subtitle">{t('park.pageSubtitle')}</p>
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {!IS_DEMO && <Button variant="secondary" disabled={setupBusy} onClick={downloadSetupApp}>{setupBusy ? t('park.setupAppBusy') : t('park.setupAppBtn')}</Button>}
           <Button variant="secondary" disabled={guideBusy} onClick={downloadGuide}>{t('park.guideBtn')}</Button>
           <Button onClick={() => setWizard({ wheelId: null })}>{t('park.addBtn')}</Button>
         </div>
       </div>
       {error && <div className="error-banner">{error}</div>}
+      {setupNote && <div role="status" style={{ background: '#E8F7EE', color: '#0E7A47', padding: '10px 14px', borderRadius: 10, margin: '0 0 12px' }}>{setupNote}</div>}
       <div className="tabs ap-tabs">
         <button className={`tab${tab === 'park' ? ' active' : ''}`} onClick={() => setTab('park')}>{t('profit.tabPark')}</button>
         <button className={`tab${tab === 'profit' ? ' active' : ''}`} onClick={() => setTab('profit')}>{t('profit.tabProfit')}</button>

@@ -12,9 +12,12 @@ import './setup-wizard.css';
 
 // Screens in order. The box takes the kit's TP-Link Wi-Fi at its activation (the activation page has a "Wi-Fi du kit" field), so the
 // TP-Link is prepared BEFORE the box is activated.
-const STEPS = ['step1', 'step2', 'step3', 'step4', 'step5', 'step6', 'step7'];
-const ID = ['wheel', 'spark', 'tp1', 'block', 'tp2', 'box', 'final'];
-const LAST = STEPS.length - 1;
+// Default path: SPARK does the identity and the Spark-Local password, then hands over to the SPARK SETUP program (Mac of the depot), which
+// writes the wheel card, configures the wheel, installs the box and activates it. The manual path (copy the block, activation code, TP-Link
+// screens) stays available as a fallback: "manual" switches the middle of the list.
+const IDS_ASSISTED = ['wheel', 'spark', 'tp1', 'setup', 'final'];
+const IDS_MANUAL = ['wheel', 'spark', 'tp1', 'block', 'tp2', 'box', 'final'];
+const LABEL = { wheel: 'step1', spark: 'step2', tp1: 'step3', setup: 'stepSetup', block: 'step4', tp2: 'step5', box: 'step6', final: 'step7' };
 
 // A screen of the TP-Link guidance: instructions with tick boxes, nothing is sent anywhere.
 function Guide({ items, ticks, onTick, intro }) {
@@ -58,6 +61,10 @@ export default function PackWizard({ wheelId: initialWheelId = null, onClose, on
   // steps 5-7 — TP-Link (manual), confirmed by the person
   const [ticks, setTicks] = useState({ tp1: [], tp2: [], box: [], final: [] });
   const [boxManual, setBoxManual] = useState(false);
+  const [manual, setManual] = useState(false); // fallback path without SPARK SETUP
+  const ID = manual ? IDS_MANUAL : IDS_ASSISTED;
+  const LAST = ID.length - 1;
+  const STEPS = ID.map((k) => LABEL[k]);
   const [done, setDone] = useState(false);
   const alive = useRef(true);
   useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
@@ -76,18 +83,18 @@ export default function PackWizard({ wheelId: initialWheelId = null, onClose, on
         if (!alive.current) return;
         setWheel(w); setPack(p);
         if (r.password) { setPw(r.password); setPw2(r.password); setPwExisting(true); } else { const s = suggestPassword(); setPw(s); setPw2(s); }
-        setN(!r.password ? 1 : p.boxActivated ? ID.indexOf('final') : 2);
-        if (p.ready) { setN(LAST); setTicks({ tp1: Array(4).fill(true), tp2: Array(5).fill(true), box: Array(3).fill(true), final: [true, true, true] }); } // review of a finished pack
+        setN(!r.password ? 1 : p.boxActivated ? IDS_ASSISTED.length - 1 : (p.depot && p.depot.seenRecently) ? IDS_ASSISTED.indexOf('setup') : 2);
+        if (p.ready) { setN(IDS_ASSISTED.length - 1); setTicks({ tp1: Array(4).fill(true), tp2: Array(5).fill(true), box: Array(3).fill(true), final: [true, true, true] }); } // review of a finished pack
       } catch (e) { setError(e.message); }
     })();
   }, [initialWheelId]);
 
   // Live state while the person works on the wheel / the box.
   useEffect(() => {
-    if (!wheelId || !['block', 'box'].includes(ID[n])) return undefined;
+    if (!wheelId || !['block', 'box', 'setup'].includes(ID[n])) return undefined;
     const id = setInterval(() => loadPack(), 4000);
     return () => clearInterval(id);
-  }, [n, wheelId, loadPack]);
+  }, [n, wheelId, loadPack, ID]);
 
   useEffect(() => {
     const onKey = (e) => { if (e.key === 'Escape') onClose(); };
@@ -113,7 +120,7 @@ export default function PackWizard({ wheelId: initialWheelId = null, onClose, on
     tp2: [t('packWizard.tp2a'), t('packWizard.tp2b'), t('packWizard.tp2c'), t('packWizard.tp2d'), t('packWizard.tp2e')],
     box: [t('packWizard.tp3c'), t('packWizard.tp3d'), t('packWizard.tp3e')],
   };
-  const tplinkConfirmed = ['tp1', 'tp2', 'box'].every((k) => allTicked(k, guides[k].length));
+  const tplinkConfirmed = (manual ? ['tp1', 'tp2', 'box'] : ['tp1']).every((k) => allTicked(k, guides[k].length));
 
   async function next() {
     setError('');
@@ -265,6 +272,7 @@ export default function PackWizard({ wheelId: initialWheelId = null, onClose, on
 
           {!done && ID[n] === 'block' && (
             <>
+              <div style={{ marginBottom: 8 }}><Button variant="ghost" size="sm" type="button" onClick={() => setManual(false)}>{t('packWizard.setupBack')}</Button></div>
               <div className="sw-sub">{t('packWizard.wheelIntro', { serial: serial || '—' })}</div>
               <div className="sw-label">{t('setupWizard.copyStep')}</div>
               <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -318,6 +326,24 @@ export default function PackWizard({ wheelId: initialWheelId = null, onClose, on
                 <Guide items={guides.box} ticks={ticks.box || []} onTick={(i, v) => tick('box', i, v)} />
               </div>
             </>
+          )}
+
+          {!done && ID[n] === 'setup' && (
+            <div className="sw-setup">
+              <div className="sw-sub">{t('packWizard.setupIntro')}</div>
+              <div className="sw-codebox">
+                <div className="sw-sub">{t('packWizard.setupOpen')}</div>
+                <div className="sw-codebig">{serial || '—'}</div>
+                {!IS_DEMO && wheelId && <div style={{ marginTop: 8 }}><Button variant="secondary" size="sm" type="button" onClick={() => { window.location.href = `sparksetup://pack/${wheelId}`; }}>{t('packWizard.setupOpenBtn')}</Button> <span className="sw-sub">{t('packWizard.setupOpenHint')}</span></div>}
+              </div>
+              <div className="sw-label">{t('packWizard.setupDoes')}</div>
+              <ol className="sw-ol" style={{ listStyle: 'decimal', paddingLeft: 22 }}>{[1, 2, 3, 4, 5, 6].map((i) => <li key={i}>{t(`packWizard.setup${i}`)}</li>)}</ol>
+              <div className="sw-label">{t('packWizard.setupLive')}</div>
+              <Check ok={identityOk} label={t('packWizard.checkWheelSeen')} />
+              <Check ok={activated} label={t('packWizard.checkBox', { name: boxName || '—' })} />
+              <div className="sw-sub" style={{ marginTop: 8 }}>{t('packWizard.setupWait')}</div>
+              <div style={{ marginTop: 10 }}><Button variant="ghost" size="sm" type="button" onClick={() => setManual(true)}>{t('packWizard.setupManual')}</Button></div>
+            </div>
           )}
 
           {!done && ID[n] === 'tp1' && <Guide intro={t('packWizard.tp1Intro')} items={guides.tp1} ticks={ticks.tp1 || []} onTick={(i, v) => tick('tp1', i, v)} />}
