@@ -77,12 +77,15 @@
 .wh-lr-cap { font-size: 5pt; font-weight: 700; color: #5B6788; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.8mm; }
 .wh-lr-serial { font-size: 7pt; font-weight: 800; line-height: 1.2; font-family: var(--font-mono, ui-monospace, monospace); }
 .wh-lr-box { font-size: 4.5pt; line-height: 1.3; color: #5B6788; white-space: nowrap; font-family: var(--font-mono, ui-monospace, monospace); }
+/* one A4 sheet holding the 3 stickers at their real size (wheel on top, router + box side by side below) */
+.wh-sheet { display: flex; flex-direction: column; align-items: flex-start; gap: 6mm; }
+.wh-sheet-row { display: flex; align-items: flex-start; gap: 6mm; }
 @media print {
-  .wh-prev { zoom: 1 !important; }
-  @page { size: 100mm 50mm; margin: 0; }
+  @page { size: A4; margin: 0; }
   body * { visibility: hidden !important; }
-  #wheel-label, #wheel-label * { visibility: visible !important; }
-  #wheel-label { position: fixed; left: 0; top: 0; border: none; border-radius: 0; }
+  #wheel-sheet, #wheel-sheet * { visibility: visible !important; }
+  #wheel-sheet { position: fixed; left: 10mm; top: 10mm; }
+  .wh-prev { zoom: 1 !important; }
 }
 
 /* client page, "Attribution du matériel" tab */
