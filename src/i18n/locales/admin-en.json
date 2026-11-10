@@ -1898,6 +1898,14 @@
     "kitWifiTitle": "Kit Wi-Fi (TP-Link)"
   },
   "packAssign": {
+    "multiTitle": "Wheels of this account",
+    "multiIntro": "This account can hold several wheels (depot tests before sending them to clients). Only one wheel can be on at a time: if a second one is switched on, it waits until the first is off.",
+    "multiNone": "No wheel yet.",
+    "multiOn": "On",
+    "multiOff": "Off",
+    "multiRefused": "Waiting: another one is on",
+    "multiBackBtn": "Back to the depot",
+    "addTitle": "Add a wheel to this account",
     "noneHint": "No pack assigned. Choose a pack already prepared in the Hardware park.",
     "pickTitle": "Assign a pack",
     "changeTitle": "Change pack",

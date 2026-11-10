@@ -56,12 +56,13 @@ export default function UserDetail() {
   useEffect(load, [id]);
 
   // End of rental from the client's page: same effect as in the wheel park (wheel back to the depot, box ordered to erase itself).
-  async function handleEndRental() {
+  async function handleEndRental(wheelId) {
     setBusy(true);
     setError('');
     try {
       const all = await api.listWheels();
-      const w = all.find((x) => x.owner && x.owner.id === id);
+      // an admin account holds several wheels: the one clicked; any other account holds one
+      const w = all.find((x) => x.owner && x.owner.id === id && (typeof wheelId !== 'string' || x.id === wheelId));
       if (!w) throw new Error(t('userDetail.noWheelAssigned'));
       setReturnWheel(w); // the return inspection ends the rental (see components/wheel/ReturnForm)
     } catch (err) {
@@ -162,7 +163,7 @@ export default function UserDetail() {
         <>
           {/* Hardware assignment: what this client has right now, the step-by-step commissioning (inline, resumes where things stand),
               the returns history, and the technical details folded away. */}
-          <PackAssignment userId={id} clientLabel={detail.company || detail.name || detail.email} onChanged={load} onEndRental={handleEndRental} />
+          <PackAssignment userId={id} clientLabel={detail.company || detail.name || detail.email} isAdmin={detail.role === 'admin'} onChanged={load} onEndRental={handleEndRental} />
 
           <Card title={t('wheelOps.inspections')} className="mt-card">
             <InspectionList items={inspections} showWheel />

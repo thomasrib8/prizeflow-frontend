@@ -16,7 +16,7 @@ const declaredPayload = (name, place) => (name.trim() ? { name: name.trim(), ...
 const euroToCents = (v) => (v === '' || v === null || v === undefined ? null : Math.round(Number(v) * 100));
 const fmtDay = (s) => (s ? new Date(`${s}T12:00:00`).toLocaleDateString([], { dateStyle: 'medium' }) : '');
 
-export default function PackAssignment({ userId, clientLabel, onChanged, onEndRental }) {
+export default function PackAssignment({ userId, clientLabel, isAdmin = false, onChanged, onEndRental }) {
   const { t } = useTranslation('admin');
   const [confirm, confirmDialog] = useConfirm();
   const [wheels, setWheels] = useState(null);
@@ -45,9 +45,9 @@ export default function PackAssignment({ userId, clientLabel, onChanged, onEndRe
       if (!alive.current) return;
       setWheels(w); setOverview(o);
       const mine = w.find((x) => x.owner && x.owner.id === userId);
-      if (mine) { try { const b = await api.getBoxActivation(userId); if (alive.current) setBox(b.box); } catch { /* shown next time */ } }
+      if (mine && !isAdmin) { try { const b = await api.getBoxActivation(userId); if (alive.current) setBox(b.box); } catch { /* shown next time */ } }
     } catch (e) { if (alive.current) setError(e.message); }
-  }, [userId]);
+  }, [userId, isAdmin]);
 
   useEffect(() => {
     load();
@@ -57,7 +57,10 @@ export default function PackAssignment({ userId, clientLabel, onChanged, onEndRe
     return () => clearInterval(id);
   }, [load]);
 
-  const current = wheels ? wheels.find((w) => w.owner && w.owner.id === userId) || null : null;
+  // An ADMIN account (the depot) can hold several wheels to test them before sending them out; only one can be on at a time.
+  const multi = !!isAdmin;
+  const mine = wheels ? wheels.filter((w) => w.owner && w.owner.id === userId) : [];
+  const current = wheels && !multi ? mine[0] || null : null;
   // keep the editable parameters in step with the saved ones when the pack changes
   useEffect(() => { setNote(current && current.assignment ? current.assignment.note || '' : ''); setBack(current && current.assignment ? current.assignment.expectedReturnAt || '' : ''); setPrice(current && current.assignment && current.assignment.priceOverrideCents !== null && current.assignment.priceOverrideCents !== undefined ? String(current.assignment.priceOverrideCents / 100) : ''); const dp = current && current.assignment && current.assignment.declaredPlace; setPlaceName(dp ? dp.name || '' : ''); setPlace(dp ? { catalogId: dp.catalogId || null, venue: dp.venue || '', address: dp.address || '', postalCode: dp.postalCode || '', city: dp.city || '', country: dp.country || 'France', status: null } : EMPTY_PLACE); }, [current && current.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -71,10 +74,10 @@ export default function PackAssignment({ userId, clientLabel, onChanged, onEndRe
   async function assign() {
     const w = wheels.find((x) => x.id === pick);
     if (!w) return;
-    if (current && !(await confirm(t('packAssign.confirmChange', { from: current.serialNumber }), { danger: true, confirmLabel: t('packAssign.confirmChangeBtn') }))) return;
+    if (current && !multi && !(await confirm(t('packAssign.confirmChange', { from: current.serialNumber }), { danger: true, confirmLabel: t('packAssign.confirmChangeBtn') }))) return;
     setBusy(true); setError(''); setMsg('');
     try {
-      await api.assignWheel(pick, userId, { note: placeName.trim() || note, expectedReturnAt: back, priceOverrideCents: euroToCents(price), plannedRentalId: plannedId || undefined, declaredPlace: declaredPayload(placeName, place) || undefined });
+      await api.assignWheel(pick, userId, multi ? {} : { note: placeName.trim() || note, expectedReturnAt: back, priceOverrideCents: euroToCents(price), plannedRentalId: plannedId || undefined, declaredPlace: declaredPayload(placeName, place) || undefined });
       setPick(''); setChanging(false); setMsg(t('packAssign.assignedMsg'));
       await load(); onChanged && onChanged();
     } catch (e) { setError(e.message); } finally { setBusy(false); }
@@ -94,7 +97,7 @@ export default function PackAssignment({ userId, clientLabel, onChanged, onEndRe
   const wheelConnected = !!(overview && overview.wheel && overview.wheel.connected);
   const hasActive = !!(overview && (overview.campaigns || []).some((c) => c.status === 'active'));
   const dirty = current && current.assignment && (back !== (current.assignment.expectedReturnAt || '') || euroToCents(price) !== (current.assignment.priceOverrideCents ?? null) || placeName !== ((current.assignment.declaredPlace && current.assignment.declaredPlace.name) || ''));
-  const showPicker = wheels && (!current || changing);
+  const showPicker = wheels && (multi || !current || changing);
 
   return (
     <>
@@ -118,13 +121,33 @@ export default function PackAssignment({ userId, clientLabel, onChanged, onEndRe
         </div>
       )}
 
-      {wheels && !current && (
+      {wheels && !current && !multi && (
         <div className="ud-hw-hero">
           <div>
             <div className="ud-hw-kicker">{t('userDetail.hwKicker')}</div>
             <div className="ud-hw-serial" style={{ fontSize: 18 }}>{t('userDetail.noWheelAssigned')}</div>
             <div className="ud-hw-sub">{t('packAssign.noneHint')}</div>
           </div>
+        </div>
+      )}
+
+      {wheels && multi && (
+        <div className="sw-card sw-card-inline" style={{ marginTop: 4 }}>
+          <div className="sw-title" style={{ marginBottom: 4 }}>{t('packAssign.multiTitle')}</div>
+          <div className="sw-sub" style={{ marginBottom: 10 }}>{t('packAssign.multiIntro')}</div>
+          {mine.length === 0 && <p className="sw-sub">{t('packAssign.multiNone')}</p>}
+          {mine.map((w) => (
+            <div key={w.id} className="sw-row" style={{ cursor: 'default', alignItems: 'center', gap: 10 }}>
+              <div style={{ flex: 1 }}>
+                <div className="sw-mono">{w.serialNumber}</div>
+                <div className="sw-sub">{w.modelNumber}{w.box ? ` · ${w.box.name}` : ''}</div>
+              </div>
+              <span className={`ud-hw-pill ${w.connected ? 'on' : ''}`} style={w.connected ? undefined : { background: w.refused ? '#F59E0B' : '#94A3B8', boxShadow: 'none' }}>
+                {w.connected ? t('packAssign.multiOn') : w.refused ? t('packAssign.multiRefused') : t('packAssign.multiOff')}
+              </span>
+              <Button size="sm" variant="secondary" onClick={() => onEndRental && onEndRental(w.id)}>{t('packAssign.multiBackBtn')}</Button>
+            </div>
+          ))}
         </div>
       )}
 
@@ -167,7 +190,7 @@ export default function PackAssignment({ userId, clientLabel, onChanged, onEndRe
 
       {showPicker && (
         <div className="sw-card sw-card-inline" style={{ marginTop: 14 }}>
-          <div className="sw-title" style={{ marginBottom: 4 }}>{current ? t('packAssign.changeTitle') : t('packAssign.pickTitle')}</div>
+          <div className="sw-title" style={{ marginBottom: 4 }}>{multi ? t('packAssign.addTitle') : current ? t('packAssign.changeTitle') : t('packAssign.pickTitle')}</div>
           {current && <div className="sw-warn" style={{ marginBottom: 8 }}>{t('packAssign.changeWarn', { serial: current.serialNumber })}</div>}
           {ready.length === 0 && <p className="sw-sub">{t('packAssign.noneReady')} <Link to="/park" style={{ color: '#002881' }}>{t('packAssign.goPark')}</Link></p>}
           {ready.map((w) => (
@@ -186,6 +209,8 @@ export default function PackAssignment({ userId, clientLabel, onChanged, onEndRe
               </div>
             </div>
           ))}
+          {!multi && (
+            <>
           <div className="sw-label" style={{ marginTop: 14 }}>{t('packAssign.paramsTitle')}</div>
           <div className="sw-two">
             <div>
@@ -209,8 +234,10 @@ export default function PackAssignment({ userId, clientLabel, onChanged, onEndRe
           <div style={{ marginTop: 10 }}>
             <EventNameField value={placeName} onChange={setPlaceName} place={place} onPlace={setPlace} />
           </div>
+            </>
+          )}
           <div className="sw-foot">
-            {current ? <Button variant="ghost" type="button" onClick={() => { setChanging(false); setPick(''); }}>{t('packAssign.cancelBtn')}</Button> : <span />}
+            {current && !multi ? <Button variant="ghost" type="button" onClick={() => { setChanging(false); setPick(''); }}>{t('packAssign.cancelBtn')}</Button> : <span />}
             <Button type="button" disabled={busy || !pick} onClick={assign}>{t('packAssign.assignBtn')}</Button>
           </div>
           <div className="sw-sub">{t('packAssign.afterHint')}</div>

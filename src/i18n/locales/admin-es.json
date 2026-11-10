@@ -1898,6 +1898,14 @@
     "kitWifiTitle": "Wi-Fi del kit (TP-Link)"
   },
   "packAssign": {
+    "multiTitle": "Ruedas de esta cuenta",
+    "multiIntro": "Esta cuenta puede tener varias ruedas (pruebas en el depósito antes de enviarlas a los clientes). Solo una rueda puede estar encendida a la vez: si se enciende una segunda, espera a que la primera se apague.",
+    "multiNone": "Aún no hay ninguna rueda.",
+    "multiOn": "Encendida",
+    "multiOff": "Apagada",
+    "multiRefused": "En espera: otra está encendida",
+    "multiBackBtn": "Devolver al depósito",
+    "addTitle": "Añadir una rueda a esta cuenta",
     "noneHint": "Ningún pack asignado. Elija un pack ya preparado en el Parque de hardware.",
     "pickTitle": "Asignar un pack",
     "changeTitle": "Cambiar de pack",

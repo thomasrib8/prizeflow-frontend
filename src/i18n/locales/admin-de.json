@@ -1898,6 +1898,14 @@
     "kitWifiTitle": "Kit-WLAN (TP-Link)"
   },
   "packAssign": {
+    "multiTitle": "Räder dieses Kontos",
+    "multiIntro": "Dieses Konto kann mehrere Räder halten (Tests im Depot, bevor sie an Kunden gehen). Es kann immer nur ein Rad eingeschaltet sein: wird ein zweites eingeschaltet, wartet es, bis das erste aus ist.",
+    "multiNone": "Noch kein Rad.",
+    "multiOn": "Ein",
+    "multiOff": "Aus",
+    "multiRefused": "Wartet: ein anderes ist ein",
+    "multiBackBtn": "Zurück ins Depot",
+    "addTitle": "Rad zu diesem Konto hinzufügen",
     "noneHint": "Kein Pack zugewiesen. Wählen Sie ein bereits vorbereitetes Pack im Hardware-Park.",
     "pickTitle": "Pack zuweisen",
     "changeTitle": "Pack wechseln",
