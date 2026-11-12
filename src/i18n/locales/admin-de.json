@@ -1383,6 +1383,7 @@
     "switchOnlineHelp": "Ist das Internet zurück, öffnen Sie die Online-Version, um alle Funktionen zu haben (das Telefon braucht Internet)."
   },
   "offlineBox": {
+    "pillLabel": "Offline-Box",
     "notSeen": "Offline-Box: nicht verbunden",
     "inSync": "Offline-Box",
     "silent": "Offline-Box seit {{seconds}} s stumm",

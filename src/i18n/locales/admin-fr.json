@@ -1383,6 +1383,7 @@
     "switchOnlineHelp": "Quand internet est revenu, ouvrez la version en ligne pour retrouver toutes les fonctions (le téléphone doit avoir internet)."
   },
   "offlineBox": {
+    "pillLabel": "Boîtier offline",
     "notSeen": "Boîtier offline : non connecté",
     "inSync": "Boîtier offline",
     "silent": "Boîtier offline muet depuis {{seconds}} s",
