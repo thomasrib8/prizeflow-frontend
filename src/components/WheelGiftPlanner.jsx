@@ -26,6 +26,12 @@ export default function WheelGiftPlanner({ gifts, setGifts, wheelProps, wheelCap
   const giftsRef = useRef(gifts);
   giftsRef.current = gifts;
   const [drag, setDrag] = useState(null); // { id, name, x, y, over }
+  // "Reduce details": every gift shrinks to its one line (case, name, probability, stock); the arrow at the end of a line opens that gift's details.
+  const [compact, setCompact] = useState(false);
+  const [opened, setOpened] = useState(() => new Set());
+  const showDetails = (g) => !compact || opened.has(g.id);
+  const toggleOpen = (id) => setOpened((prev) => { const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n; });
+  const toggleCompact = () => { setCompact((c) => !c); setOpened(new Set()); };
 
   const totalStock = gifts.reduce((sum, g) => sum + (Number(g.stock) || 0), 0);
   const placedCount = gifts.filter((g) => g.caseIndex !== null).length;
@@ -117,7 +123,7 @@ export default function WheelGiftPlanner({ gifts, setGifts, wheelProps, wheelCap
         </Card>
       </div>
 
-      <Card title={t('editCampaign.giftsTitle')} action={<div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>{headerAction}{dynamic && <ProbabilityTotal values={gifts.filter((g) => g.giftName.trim()).map((g) => g.probability)} />}<span className="badge badge-blue">{t('wheelGiftPlanner.totalStockLabel', { n: totalStock })}</span></div>}>
+      <Card title={t('editCampaign.giftsTitle')} action={<div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>{headerAction}<button type="button" className="btn btn-ghost btn-sm" aria-pressed={compact} onClick={toggleCompact}>{compact ? t('wheelGiftPlanner.expandAll') : t('wheelGiftPlanner.collapseAll')}</button>{dynamic && <ProbabilityTotal values={gifts.filter((g) => g.giftName.trim()).map((g) => g.probability)} />}<span className="badge badge-blue">{t('wheelGiftPlanner.totalStockLabel', { n: totalStock })}</span></div>}>
         <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 12px' }}>
           {t('wheelGiftPlanner.instructionsIntro')} <b>{t('wheelGiftPlanner.instructionsDragBold')}</b>{t('wheelGiftPlanner.instructionsRedeemIntro')} <b>QR</b> {t('wheelGiftPlanner.instructionsQrDesc')} <b>Code</b> {t('wheelGiftPlanner.instructionsCodeDesc')} <b>Voucher</b> {t('wheelGiftPlanner.instructionsVoucherDesc')} <b>Perso</b> {t('wheelGiftPlanner.instructionsPersoDesc')}
         </p>
@@ -132,6 +138,7 @@ export default function WheelGiftPlanner({ gifts, setGifts, wheelProps, wheelCap
             const pct = totalStock ? ((Number(g.stock) || 0) / totalStock) * 100 : 0;
             return (
               <div key={g.id} className={`gift-card${placed ? ' placed' : ''}`}>
+                <div className="gift-row-wrap">
                 <div className={`gift-row${dynamic ? ' dyn' : ''}`}>
                   <div
                     className={`gift-handle${draggable ? ' ready' : ''}${placed ? ' placed' : ''}`}
@@ -166,7 +173,15 @@ export default function WheelGiftPlanner({ gifts, setGifts, wheelProps, wheelCap
                   </select>}
                   {!dynamic && <div className="gift-pct">{pct ? `${pct.toFixed(1)}%` : '—'}</div>}
                 </div>
+                {compact && (
+                  <button type="button" className={`gift-toggle${opened.has(g.id) ? ' open' : ''}`} aria-expanded={opened.has(g.id)}
+                    title={opened.has(g.id) ? t('wheelGiftPlanner.hideDetails') : t('wheelGiftPlanner.showDetails')} aria-label={opened.has(g.id) ? t('wheelGiftPlanner.hideDetails') : t('wheelGiftPlanner.showDetails')} onClick={() => toggleOpen(g.id)}>
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+                  </button>
+                )}
+                </div>
 
+                {showDetails(g) && (<>
                 <div className="gift-place-row">
                   {placed ? (
                     <>
@@ -210,6 +225,7 @@ export default function WheelGiftPlanner({ gifts, setGifts, wheelProps, wheelCap
                 {g.variantsEnabled && (
                   <VariantsEditor slot={{ ...g, slotIndex: g.caseIndex ?? g.id, stockInitial: g.stock }} draft campaignId={campaignId} onCodesChanged={onCodesChanged} onChange={(patch) => patchGift(g.id, patch)} />
                 )}
+                </>)}
               </div>
             );
           })}

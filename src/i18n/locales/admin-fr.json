@@ -116,6 +116,10 @@
     "disposableTitle": "Adresse email temporaire / jetable"
   },
   "wheelGiftPlanner": {
+    "collapseAll": "Réduire les détails",
+    "expandAll": "Tout déplier",
+    "showDetails": "Afficher les détails de ce cadeau",
+    "hideDetails": "Masquer les détails de ce cadeau",
     "pinnedHint": "Ce cadeau a des codes uniques enregistrés : il reste sur sa case. Supprimez d'abord ses codes pour le déplacer.",
     "yourWheelTitle": "Votre roue",
     "wheelCompleteLabel": "✓ Roue complète",
@@ -1943,6 +1947,7 @@
     "setupOpenHint": "Fonctionne si SPARK SETUP est installé sur ce Mac."
   },
   "packAssign": {
+    "atDepotLine": "{{client}} : disponible, elle quittera ce compte",
     "multiTitle": "Roues de ce compte",
     "multiIntro": "Ce compte peut avoir plusieurs roues (tests au dépôt avant de les envoyer aux clients). Une seule roue peut être allumée à la fois : si une deuxième est allumée, elle attend que la première soit éteinte.",
     "multiNone": "Aucune roue pour l'instant.",

@@ -116,6 +116,10 @@
     "disposableTitle": "Dirección de email temporal / desechable"
   },
   "wheelGiftPlanner": {
+    "collapseAll": "Reducir detalles",
+    "expandAll": "Desplegar todo",
+    "showDetails": "Mostrar los detalles de este regalo",
+    "hideDetails": "Ocultar los detalles de este regalo",
     "pinnedHint": "Este regalo tiene códigos únicos guardados: se queda en su casilla. Elimine primero sus códigos para moverlo.",
     "yourWheelTitle": "Tu rueda",
     "wheelCompleteLabel": "✓ Rueda completa",
@@ -1943,6 +1947,7 @@
     "setupOpenHint": "Funciona si SPARK SETUP está instalado en este Mac."
   },
   "packAssign": {
+    "atDepotLine": "{{client}}: disponible, saldrá de esa cuenta",
     "multiTitle": "Ruedas de esta cuenta",
     "multiIntro": "Esta cuenta puede tener varias ruedas (pruebas en el depósito antes de enviarlas a los clientes). Solo una rueda puede estar encendida a la vez: si se enciende una segunda, espera a que la primera se apague.",
     "multiNone": "Aún no hay ninguna rueda.",

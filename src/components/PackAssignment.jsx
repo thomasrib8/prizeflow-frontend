@@ -66,10 +66,12 @@ export default function PackAssignment({ userId, clientLabel, isAdmin = false, o
 
   const candidates = wheels ? wheels.filter((w) => !(w.owner && w.owner.id === userId)) : [];
   const pending = (w) => !w.owner && w.boxReset && w.boxReset.state === 'pending'; // its box has not confirmed the erase of the previous client
-  const isReady = (w) => w.packReady && w.status === 'available' && !pending(w);
+  // A wheel held by the ADMIN (depot) account is still free for the clients: given to a client it leaves the depot account for good.
+  const atDepot = (w) => !!(w.owner && w.owner.holdsSeveral);
+  const isReady = (w) => w.packReady && !pending(w) && w.status !== 'maintenance' && (w.status === 'available' || atDepot(w));
   const ready = candidates.filter(isReady);
   const others = candidates.filter((w) => !isReady(w));
-  const reason = (w) => (w.status === 'maintenance' ? t('packAssign.reasonMaintenance') : w.owner ? t('packAssign.reasonRented', { client: clientName(w) }) : w.boxReset && w.boxReset.state === 'pending' ? t('packAssign.reasonWipe') : t('packAssign.reasonNotReady'));
+  const reason = (w) => (w.status === 'maintenance' ? t('packAssign.reasonMaintenance') : atDepot(w) ? t('packAssign.reasonNotReady') : w.owner ? t('packAssign.reasonRented', { client: clientName(w) }) : w.boxReset && w.boxReset.state === 'pending' ? t('packAssign.reasonWipe') : t('packAssign.reasonNotReady'));
 
   async function assign() {
     const w = wheels.find((x) => x.id === pick);
@@ -196,7 +198,7 @@ export default function PackAssignment({ userId, clientLabel, isAdmin = false, o
           {ready.map((w) => (
             <Row key={w.id} selected={pick === w.id} onClick={() => setPick(w.id)}>
               <div className="sw-mono">{w.serialNumber}</div>
-              <div className="sw-sub">{t('packAssign.packLine', { name: w.box ? w.box.name : '—' })}</div>
+              <div className="sw-sub">{t('packAssign.packLine', { name: w.box ? w.box.name : '—' })}{atDepot(w) && !multi ? ` · ${t('packAssign.atDepotLine', { client: clientName(w) })}` : ''}</div>
             </Row>
           ))}
           {others.length > 0 && <div className="sw-label">{t('packAssign.unavailable')}</div>}

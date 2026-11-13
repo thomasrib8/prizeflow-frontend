@@ -116,6 +116,10 @@
     "disposableTitle": "Temporäre / Wegwerf-E-Mail-Adresse"
   },
   "wheelGiftPlanner": {
+    "collapseAll": "Details einklappen",
+    "expandAll": "Alle ausklappen",
+    "showDetails": "Details dieses Geschenks anzeigen",
+    "hideDetails": "Details dieses Geschenks ausblenden",
     "pinnedHint": "Dieses Geschenk hat gespeicherte eindeutige Codes: Es bleibt auf seinem Feld. Löschen Sie zuerst die Codes, um es zu verschieben.",
     "yourWheelTitle": "Ihr Rad",
     "wheelCompleteLabel": "✓ Rad vollständig",
@@ -1943,6 +1947,7 @@
     "setupOpenHint": "Funktioniert, wenn SPARK SETUP auf diesem Mac installiert ist."
   },
   "packAssign": {
+    "atDepotLine": "{{client}}: verfügbar, sie verlässt dieses Konto",
     "multiTitle": "Räder dieses Kontos",
     "multiIntro": "Dieses Konto kann mehrere Räder halten (Tests im Depot, bevor sie an Kunden gehen). Es kann immer nur ein Rad eingeschaltet sein: wird ein zweites eingeschaltet, wartet es, bis das erste aus ist.",
     "multiNone": "Noch kein Rad.",

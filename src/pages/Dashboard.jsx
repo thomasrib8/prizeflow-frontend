@@ -136,14 +136,16 @@ export default function Dashboard() {
   const [msg, setMsg] = useState('');
 
   useEffect(() => {
-    // Draft campaigns never launched (nothing to report yet) and test campaigns are excluded from reporting everywhere else
-    // in the app. The dashboard opens on the active campaign (else the latest one); "All campaigns" stays in the list.
+    // Test campaigns are excluded from reporting everywhere else in the app. Drafts ARE listed: their dashboard can be designed before the
+    // campaign starts (and it moves with the campaign when an admin hands it over). The dashboard opens on the active campaign, else the latest
+    // one that ever ran, else a draft; "All campaigns" stays in the list.
     api.listCampaigns()
       .then((rows) => {
-        const list = rows.filter((c) => c.status !== 'draft' && !c.is_test);
+        const list = rows.filter((c) => !c.is_test);
         setCampaigns(list);
         const active = list.find((c) => c.status === 'active');
-        setCampaignId((active || list[0] || { id: 'all' }).id);
+        const ran = list.find((c) => c.status !== 'draft');
+        setCampaignId((active || ran || list[0] || { id: 'all' }).id);
       })
       .catch(() => { setCampaigns([]); setCampaignId('all'); });
   }, []);
@@ -342,7 +344,7 @@ export default function Dashboard() {
           {editable && !editing && <Button variant="secondary" onClick={() => { setDraft(info.layout.map((w) => ({ ...w }))); setMsg(''); }}>{t('dashboard.editBtn')}</Button>}
           <select value={campaignId} disabled={editing} onChange={(e) => setCampaignId(e.target.value)}
             style={{ padding: '8px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13, fontFamily: 'inherit', color: 'var(--text)' }}>
-            {(campaigns || []).map((c) => <option key={c.id} value={c.id}>{c.name}{c.status === 'active' ? ` · ${t('common.statusActive')}` : ''}</option>)}
+            {(campaigns || []).map((c) => <option key={c.id} value={c.id}>{c.name}{c.status === 'active' ? ` · ${t('common.statusActive')}` : c.status === 'draft' ? ` · ${t('common.statusDraft')}` : ''}</option>)}
             <option value="all">{t('dashboard.allCampaignsOption')}</option>
           </select>
           {campaign && <Badge tone={CAMPAIGN_STATUS_TONE[campaign.status] || 'neutral'}>{statusLabel(campaign.status)}</Badge>}

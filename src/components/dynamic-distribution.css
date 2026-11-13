@@ -101,3 +101,13 @@
   .gift-row.dyn > .dyn-unl { grid-area: unl; }
   .gift-row.dyn > .dyn-redeem { grid-area: redeem; width: 100%; }
 }
+
+/* Gift planner: "reduce details" arrow at the end of each gift line */
+.gift-row-wrap { display: flex; align-items: center; gap: 6px; }
+.gift-row-wrap > .gift-row { flex: 1 1 auto; min-width: 0; }
+.gift-toggle { flex: none; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: #fff; border-radius: 8px; color: #475569; cursor: pointer; transition: background .12s, color .12s; }
+.gift-toggle:hover { background: #F1F5F9; color: #0055F8; }
+.gift-toggle svg { transition: transform .18s cubic-bezier(.16, 1, .3, 1); }
+.gift-toggle.open svg { transform: rotate(180deg); }
+.gift-toggle:focus-visible { outline: 2px solid #0055F8; outline-offset: 1px; }
+@media (prefers-reduced-motion: reduce) { .gift-toggle svg { transition: none; } }
