@@ -6,6 +6,7 @@ import { Button } from '../components/ui';
 import CampaignOverrides from '../components/CampaignOverrides';
 import CampaignRulesConfig from '../components/CampaignRulesConfig';
 import CampaignSettingsForm, { DEFAULT_CAMPAIGN_SETTINGS, settingsFromCampaign } from '../components/CampaignSettingsForm';
+import SaveButton from '../components/SaveButton';
 
 // Post-creation editing of New campaign's "Settings" step: Google review
 // invite (and its link for this campaign), social media invite (and its links for this campaign).
@@ -62,7 +63,7 @@ export default function CampaignSettings() {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           {savedMsg && <span style={{ fontSize: 12, color: '#10B981', fontWeight: 600 }}>{savedMsg}</span>}
-          <Button disabled={saving} onClick={handleSave}>{saving ? t('common.saving') : t('editCampaignSettings.saveChangesBtn')}</Button>
+          <SaveButton disabled={saving} onClick={handleSave} saving={saving} failed={!!error}>{t('editCampaignSettings.saveChangesBtn')}</SaveButton>
           <Button variant="secondary" onClick={() => navigate(`/campaigns/${id}`)}>{t('editCampaignSettings.backBtn')}</Button>
         </div>
       </div>
@@ -72,7 +73,7 @@ export default function CampaignSettings() {
         socialLinks={socialLinks} onSocialLinksChange={(patch) => setSocialLinks((l) => ({ ...l, ...patch }))} />
 
       <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
-        <Button disabled={saving} onClick={handleSave}>{saving ? t('common.saving') : t('editCampaignSettings.saveChangesBtn')}</Button>
+        <SaveButton disabled={saving} onClick={handleSave} saving={saving} failed={!!error}>{t('editCampaignSettings.saveChangesBtn')}</SaveButton>
         <Button variant="secondary" onClick={() => navigate(`/campaigns/${id}`)}>{t('editCampaignSettings.backBtn')}</Button>
       </div>
 

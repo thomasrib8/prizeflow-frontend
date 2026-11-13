@@ -1,0 +1,15 @@
+/* Several e-mail addresses as bubbles */
+.chips-field { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-height: 42px; padding: 5px 8px; background: #fff; border: 1px solid #E2E8F0; border-radius: 8px; cursor: text; transition: border-color .12s, box-shadow .12s; }
+.chips-field:focus-within { border-color: #0055F8; box-shadow: 0 0 0 3px rgba(0, 85, 248, .12); }
+.chips-field.invalid { border-color: #EF4444; }
+.chips-field.disabled { background: #F8FAFC; cursor: default; }
+.chips-field .chip { display: inline-flex; align-items: center; background: #EAF1FF; border: 1px solid #C9DAFF; border-radius: 99px; color: #002881; font-size: 13px; max-width: 100%; }
+.chips-field .chip-text { border: none; background: transparent; padding: 4px 4px 4px 11px; font: inherit; color: inherit; cursor: pointer; border-radius: 99px 0 0 99px; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chips-field .chip-text:hover:not(:disabled) { text-decoration: underline; }
+.chips-field .chip-x { border: none; background: transparent; width: 24px; height: 24px; margin-right: 3px; border-radius: 50%; font-size: 16px; line-height: 1; color: #5B7BC0; cursor: pointer; }
+.chips-field .chip-x:hover:not(:disabled) { background: #D3E1FF; color: #B42318; }
+.chips-field .chip button:focus-visible { outline: 2px solid #0055F8; outline-offset: 1px; }
+/* the field's own input must not look like a second box inside the box */
+.chips-field input[type="text"] { flex: 1 1 160px; min-width: 120px; border: none !important; box-shadow: none !important; outline: none; background: transparent; padding: 6px 4px !important; font-size: 14px; width: auto !important; }
+.chips-msg { font-size: 12px; color: #94A3B8; margin-top: 5px; line-height: 1.4; }
+.chips-msg.bad { color: #B42318; font-weight: 600; }

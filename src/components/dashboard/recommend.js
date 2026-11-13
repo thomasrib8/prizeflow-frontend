@@ -8,6 +8,7 @@ export function allowedViz(dim) {
   if (!dim) return ['bar', 'donut'];
   if (dim.key === 'day') return ['line'];
   if (GEO_TYPES.has(dim.fieldType)) return ['map', 'bar'];
+  if (dim.fieldType === 'rating') return ['column', 'bar']; // stars: how many gave 0, 1, 2... in order
   if (dim.type === 'number') return ['column', 'bar'];
   return ['donut', 'bar'];
 }
@@ -17,6 +18,7 @@ export function recommendViz(dim, res) {
   if (!dim) return null;
   if (dim.key === 'day') return { viz: 'line', reason: 'recoTime' };
   if (GEO_TYPES.has(dim.fieldType)) return { viz: 'map', reason: 'recoGeo' };
+  if (dim.fieldType === 'rating') return { viz: 'column', reason: 'recoNumber' };
   if (dim.type === 'number') return { viz: 'column', reason: 'recoNumber' };
   if (!res) return null;
   const n = (res.buckets || []).filter((b) => b.label !== '…').length;

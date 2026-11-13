@@ -4,6 +4,7 @@ import { api } from '../api/client';
 import { Card, Button, Badge, EmptyState } from '../components/ui';
 import { useWheelSocket } from '../hooks/useWheelSocket';
 import WheelSVG, { posToAngle } from '../components/WheelSVG';
+import SaveButton from '../components/SaveButton';
 
 /// Admin-only "Sequence" tool reviving the old standalone webapp's feature:
 /// build a custom run order by hand (spin the real wheel, click Add for
@@ -242,9 +243,9 @@ function SettingsModule({ wheelStatus, agentConnected, sequences, busyId, saving
         </div>
 
         <div style={{ marginTop: 12 }}>
-          <Button onClick={handleSave} disabled={saving || !name.trim() || steps.length === 0}>
-            {saving ? t('common.saving') : t('sequenceBuilder.saveSequenceBtn')}
-          </Button>
+          <SaveButton onClick={handleSave} disabled={saving || !name.trim() || steps.length === 0} saving={saving}>
+            {t('sequenceBuilder.saveSequenceBtn')}
+          </SaveButton>
         </div>
       </Card>
 

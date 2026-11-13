@@ -5,6 +5,8 @@ import { api } from '../api/client';
 import { Button } from './ui';
 import CollapsibleCard from './CollapsibleCard';
 import './campaign-overrides-test.css';
+import SaveButton from './SaveButton';
+import EmailChipsInput from './EmailChipsInput';
 const Card = CollapsibleCard; // every section folds
 
 const METHODS = [['qr', 'redeemTabQr'], ['code', 'redeemTabCode'], ['voucher', 'redeemTabVoucher']];
@@ -111,7 +113,7 @@ export default function CampaignOverrides({ campaignId = null, archived = false,
           </div>
           <div className="field" style={{ margin: 0, flex: 1, minWidth: 220 }}>
             <label>{t('settings.emailTemplates.replyToLabel')}</label>
-            <input type="email" maxLength={120} disabled={dis} value={form.replyTo} placeholder={d.replyTo ? `${t('campaignOverrides.defaultPrefix')} ${d.replyTo}` : 'contact@votre-entreprise.fr'} onChange={(e) => set({ replyTo: e.target.value })} style={input} />
+            <EmailChipsInput disabled={dis} value={form.replyTo} onChange={(v) => set({ replyTo: v })} placeholder={d.replyTo ? `${t('campaignOverrides.defaultPrefix')} ${d.replyTo}` : 'contact@votre-entreprise.fr'} ariaLabel={t('settings.emailTemplates.replyToLabel')} />
           </div>
         </div>
 
@@ -190,7 +192,7 @@ export default function CampaignOverrides({ campaignId = null, archived = false,
 
       {!staged && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 18 }}>
-          <Button disabled={dis} onClick={save}>{busy ? t('common.saving') : t('campaignOverrides.save')}</Button>
+          <SaveButton disabled={dis} onClick={save} saving={busy} failed={!!error}>{t('campaignOverrides.save')}</SaveButton>
           {msg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{msg}</span>}
         </div>
       )}

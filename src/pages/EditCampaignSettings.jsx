@@ -6,6 +6,7 @@ import { Card, Button } from '../components/ui';
 import SegmentationBuilder from '../components/SegmentationBuilder';
 import CampaignFieldsBuilder from '../components/CampaignFieldsBuilder';
 import { SALES_FIELD_TYPES, GUEST_FIELD_TYPES } from '../components/fieldTypes';
+import SaveButton from '../components/SaveButton';
 
 // Post-creation editing of everything from the "New campaign" wizard's
 // steps 2 & 3 (gifts themselves are edited separately, see EditCampaign.jsx)
@@ -67,7 +68,7 @@ export default function EditCampaignSettings() {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           {savedMsg && <span style={{ fontSize: 12, color: '#10B981', fontWeight: 600 }}>{savedMsg}</span>}
-          <Button disabled={saving} onClick={handleSave}>{saving ? t('common.saving') : t('editCampaignSettings.saveChangesBtn')}</Button>
+          <SaveButton disabled={saving} onClick={handleSave} saving={saving} failed={!!error}>{t('editCampaignSettings.saveChangesBtn')}</SaveButton>
           <Button variant="secondary" onClick={() => navigate(`/campaigns/${id}`)}>{t('editCampaignSettings.backBtn')}</Button>
         </div>
       </div>
@@ -95,7 +96,7 @@ export default function EditCampaignSettings() {
       </Card>
 
       <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
-        <Button disabled={saving} onClick={handleSave}>{saving ? t('common.saving') : t('editCampaignSettings.saveChangesBtn')}</Button>
+        <SaveButton disabled={saving} onClick={handleSave} saving={saving} failed={!!error}>{t('editCampaignSettings.saveChangesBtn')}</SaveButton>
         <Button variant="secondary" onClick={() => navigate(`/campaigns/${id}`)}>{t('editCampaignSettings.backBtn')}</Button>
       </div>
     </div>

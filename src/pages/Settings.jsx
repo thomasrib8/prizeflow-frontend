@@ -13,6 +13,8 @@ import Calibration from './Calibration';
 import ApiPricingModule from '../components/ApiPricingModule';
 import Catalog from './Catalog';
 import './admin-premium.css';
+import SaveButton from '../components/SaveButton';
+import EmailChipsInput from '../components/EmailChipsInput';
 
 // Social platform names are proper nouns (Facebook/Instagram/LinkedIn/X) —
 // never translated. Profile field keys map to settings.information.field*.
@@ -262,7 +264,7 @@ function InformationModule() {
             </div>
           )}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 16 }}>
-            <Button type="submit" disabled={saving || (emailChanged && !emailPassword)}>{saving ? t('common.saving') : t('common.save')}</Button>
+            <SaveButton type="submit" disabled={saving || (emailChanged && !emailPassword)} saving={saving} failed={!!error}>{t('common.save')}</SaveButton>
             {saveMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{saveMsg}</span>}
           </div>
         </form>
@@ -358,7 +360,7 @@ function GoogleReviewModule() {
             onChange={(e) => setGoogleReviewUrl(e.target.value)}
             style={{ flex: 1, padding: '10px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 14 }}
           />
-          <Button type="submit" disabled={saving || !urlDirty}>{saving ? t('common.saving') : t('common.save')}</Button>
+          <SaveButton type="submit" disabled={saving || !urlDirty} saving={saving} failed={!!error} dirty={urlDirty}>{t('common.save')}</SaveButton>
           {saveMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{saveMsg}</span>}
         </form>
         <button
@@ -465,7 +467,7 @@ function SocialMediaModule() {
             </div>
           ))}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <Button type="submit" disabled={saving || !dirty}>{saving ? t('common.saving') : t('common.save')}</Button>
+            <SaveButton type="submit" disabled={saving || !dirty} saving={saving} failed={!!error} dirty={dirty}>{t('common.save')}</SaveButton>
             {saveMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{saveMsg}</span>}
           </div>
         </form>
@@ -704,8 +706,7 @@ function EmailTemplatesModule() {
           </div>
           <div className="field" style={{ margin: 0, flex: 1, minWidth: 220 }}>
             <label>{t('settings.emailTemplates.replyToLabel')}</label>
-            <input type="email" value={replyTo} maxLength={120} placeholder="contact@votre-entreprise.fr" onChange={(e) => setReplyTo(e.target.value)}
-              style={{ width: '100%', padding: '10px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 14 }} />
+            <EmailChipsInput value={replyTo} onChange={setReplyTo} placeholder="contact@votre-entreprise.fr" ariaLabel={t('settings.emailTemplates.replyToLabel')} />
           </div>
         </div>
         <div style={{ background: '#F4F7FD', border: '1px solid #E3E9F7', borderRadius: 12, padding: '10px 14px', fontSize: 12.5, color: '#334155', lineHeight: 1.7, marginBottom: 14 }}>
@@ -714,7 +715,7 @@ function EmailTemplatesModule() {
         </div>
         <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 14px', lineHeight: 1.5 }}>{t('settings.emailTemplates.senderNote')}</p>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <Button onClick={handleSaveSender} disabled={senderSaving}>{senderSaving ? t('common.saving') : t('common.save')}</Button>
+          <SaveButton onClick={handleSaveSender} disabled={senderSaving} saving={senderSaving} failed={!!error}>{t('common.save')}</SaveButton>
           {senderMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{senderMsg}</span>}
         </div>
       </Card>
@@ -782,7 +783,7 @@ function EmailTemplatesModule() {
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <Button onClick={handleSaveBranding} disabled={brandingSaving}>{brandingSaving ? t('common.saving') : t('common.save')}</Button>
+          <SaveButton onClick={handleSaveBranding} disabled={brandingSaving} saving={brandingSaving} failed={!!error}>{t('common.save')}</SaveButton>
           {(headerColor || footerText || logoSize) && (
             <Button variant="ghost" onClick={resetBrandingToDefault} disabled={brandingSaving}>{t('settings.emailTemplates.resetToDefaultBtn')}</Button>
           )}
@@ -830,7 +831,7 @@ function EmailTemplatesModule() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <Button onClick={handleSave} disabled={saving}>{saving ? t('common.saving') : t('common.save')}</Button>
+          <SaveButton onClick={handleSave} disabled={saving} saving={saving} failed={!!error}>{t('common.save')}</SaveButton>
           {isCustomized && (
             <Button variant="ghost" onClick={resetToDefault} disabled={saving}>{t('settings.emailTemplates.resetToDefaultBtn')}</Button>
           )}
@@ -957,7 +958,7 @@ function PrivacyModule() {
             <div style={{ fontSize: 12, color: '#64748B', marginTop: 4 }}>{t('settings.privacy.retentionHelp')}</div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <Button type="submit" disabled={saving || !dirty}>{saving ? t('common.saving') : t('common.save')}</Button>
+            <SaveButton type="submit" disabled={saving || !dirty} saving={saving} failed={!!error} dirty={dirty}>{t('common.save')}</SaveButton>
             {saveMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{saveMsg}</span>}
           </div>
         </form>
@@ -1176,7 +1177,7 @@ function AlertThresholdsModule() {
             );
           })}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14 }}>
-            <Button type="submit" disabled={saving || !dirty}>{saving ? t('common.saving') : t('common.save')}</Button>
+            <SaveButton type="submit" disabled={saving || !dirty} saving={saving} failed={!!error} dirty={dirty}>{t('common.save')}</SaveButton>
             {msg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{msg}</span>}
           </div>
         </form>

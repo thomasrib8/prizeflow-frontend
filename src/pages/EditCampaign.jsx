@@ -12,6 +12,7 @@ import { SLOT_COLORS } from '../components/slotColors';
 import WheelGiftPlanner from '../components/WheelGiftPlanner';
 import { CASE_COUNT } from '../components/giftPlanning';
 import { useWheelPreview } from '../hooks/useWheelPreview';
+import SaveButton from '../components/SaveButton';
 
 // The language guests see throughout the play flow — see NewCampaign.jsx's
 // LANGUAGE_OPTIONS for why this is separate from the admin panel's language.
@@ -287,7 +288,7 @@ export default function EditCampaign() {
           )}
 
           <div style={{ display: 'flex', gap: 10, marginTop: 18, alignItems: 'center', flexWrap: 'wrap' }}>
-            <Button type="submit" disabled={saving}>{saving ? t('common.saving') : t('editCampaignSettings.saveChangesBtn')}</Button>
+            <SaveButton type="submit" disabled={saving} saving={saving} failed={!!error}>{t('editCampaignSettings.saveChangesBtn')}</SaveButton>
             <Button type="button" variant="secondary" onClick={() => navigate(`/campaigns/${id}`)}>{t('common.cancel')}</Button>
             {/* the confirmation sits next to the buttons, where the eyes are after clicking Save (the form is long) */}
             {savedNote && <div className="ap-info" role="status" style={{ margin: 0 }}>{savedNote} <button type="button" className="uc-link" onClick={() => navigate(`/campaigns/${id}`)}>{t('editCampaign.backToCampaign')}</button></div>}

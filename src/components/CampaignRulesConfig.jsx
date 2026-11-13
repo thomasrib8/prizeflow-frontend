@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { Button } from './ui';
 import CollapsibleCard from './CollapsibleCard';
+import SaveButton from './SaveButton';
 
 const input = { width: '100%', padding: '10px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 14, fontFamily: 'inherit' };
 const FIELD_KEYS = { company: 'fieldCompany', legalForm: 'fieldLegalForm', registrationNumber: 'fieldRegistrationNumber', address: 'fieldAddress', city: 'fieldCity', email: 'fieldEmail' };
@@ -101,7 +102,7 @@ export default function CampaignRulesConfig({ campaignId = null, status = 'draft
 
       {!staged && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 18, flexWrap: 'wrap' }}>
-          <Button disabled={busy || archived} onClick={save}>{busy ? t('common.saving') : t('rulesConfig.save')}</Button>
+          <SaveButton disabled={busy || archived} onClick={save} saving={busy} failed={!!error}>{t('rulesConfig.save')}</SaveButton>
           <Button variant="secondary" disabled={busy || archived} onClick={preview}>{t('rulesConfig.preview')}</Button>
           {running && <Button variant="secondary" disabled={busy || archived} onClick={publish}>{t('rulesConfig.publishNew')}</Button>}
           {msg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{msg}</span>}
