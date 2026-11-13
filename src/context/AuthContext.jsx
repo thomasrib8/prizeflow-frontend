@@ -25,8 +25,8 @@ export function AuthProvider({ children }) {
     if (!userId) return;
     api.getAccountSettings().then((s) => {
       setUser((prev) => {
-        if (!prev || prev.enrichedCrm === !!s.enrichedCrm) return prev;
-        const next = { ...prev, enrichedCrm: !!s.enrichedCrm };
+        if (!prev || (prev.enrichedCrm === !!s.enrichedCrm && prev.aiAssistant === !!s.aiAssistant)) return prev;
+        const next = { ...prev, enrichedCrm: !!s.enrichedCrm, aiAssistant: !!s.aiAssistant };
         writeStoredUser(next);
         return next;
       });

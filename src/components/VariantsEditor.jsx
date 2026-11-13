@@ -1,4 +1,7 @@
+import { createContext, useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { api } from '../api/client';
+import { useAiAssistant } from '../hooks/useAiAssistant';
 import { Button } from './ui';
 import UniqueCodesPanel from './UniqueCodesPanel';
 
@@ -10,13 +13,45 @@ import UniqueCodesPanel from './UniqueCodesPanel';
 const PREVIEW_CODE = 'SPARK-A82X';
 const fill = (text, vars) => String(text || '').replace(/\{\{\s*(\w+)\s*\}\}/g, (_, k) => (vars[k] !== undefined ? vars[k] : ''));
 
+// What the e-mail writer knows about the campaign being edited (the page wraps its form with the provider).
+export const MailWriterContext = createContext({ campaignName: '', eventName: '', language: '' });
+
 export function PersoFields({ value, onChange, idPrefix = 'perso', uniqueCodeEditable = false, children = null }) {
   const { t } = useTranslation('admin');
+  const aiOn = useAiAssistant();
+  const mailCtx = useContext(MailWriterContext);
+  const [aiBusy, setAiBusy] = useState(false);
+  const [aiError, setAiError] = useState('');
+  const [aiHint, setAiHint] = useState('');
+  const giftLabel = String(value.name || value.giftName || '').trim();
+  async function generate() {
+    if (!giftLabel || aiBusy) return;
+    if ((value.persoSubject.trim() || value.persoBody.trim()) && !window.confirm(t('editCampaign.aiOverwriteConfirm'))) return;
+    setAiBusy(true); setAiError('');
+    try {
+      const r = await api.writePersoMail({ giftName: giftLabel, delivery: value.persoDelivery, language: mailCtx.language || undefined, campaignName: mailCtx.campaignName, eventName: mailCtx.eventName, hint: aiHint.trim() || undefined });
+      onChange('persoSubject', r.subject);
+      onChange('persoBody', r.body);
+    } catch (e) {
+      setAiError(t('editCampaign.aiError'));
+    } finally { setAiBusy(false); }
+  }
   const set = (field) => (e) => onChange(field, e.target.type === 'checkbox' ? e.target.checked : e.target.value);
   const hasVar = /\{\{\s*unique_code\s*\}\}/.test(`${value.persoSubject} ${value.persoBody}`);
   const preview = fill(value.persoBody, { firstName: 'Camille', giftName: value.name || value.giftName || 'Cadeau', code: 'AB12CD34', unique_code: PREVIEW_CODE });
   return (
     <div style={{ gridColumn: '1 / -1', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 8, padding: 12, margin: '4px 0' }}>
+      {aiOn && (
+        <div style={{ marginBottom: 10 }}>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+            <Button type="button" size="sm" variant="secondary" disabled={aiBusy || !giftLabel} onClick={generate}>{aiBusy ? t('editCampaign.aiWriting') : `✨ ${t('editCampaign.aiWriteBtn')}`}</Button>
+            <input style={{ flex: '1 1 220px', minWidth: 0, fontSize: 12 }} maxLength={300} placeholder={t('editCampaign.aiHintPlaceholder')} value={aiHint} onChange={(e) => setAiHint(e.target.value)} aria-label={t('editCampaign.aiHintPlaceholder')} />
+          </div>
+          {!giftLabel && <p style={{ fontSize: 11, color: '#94A3B8', margin: '4px 0 0' }}>{t('editCampaign.aiNeedGift')}</p>}
+          {giftLabel && <p style={{ fontSize: 11, color: '#94A3B8', margin: '4px 0 0' }}>{t('editCampaign.aiNote')}</p>}
+          {aiError && <div className="error-banner" style={{ marginTop: 6 }} role="alert">{aiError}</div>}
+        </div>
+      )}
       <div style={{ display: 'flex', gap: 10, marginBottom: 8, flexWrap: 'wrap' }}>
         <div className="field" style={{ margin: 0, flex: '0 0 180px' }}>
           <label style={{ fontSize: 11 }}>{t('editCampaign.deliversLabel')}</label>

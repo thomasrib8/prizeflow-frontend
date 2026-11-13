@@ -395,6 +395,13 @@
     "moreBtn": "More"
   },
   "editCampaign": {
+    "aiWriteBtn": "Generate the e-mail with AI",
+    "aiWriting": "Writing…",
+    "aiHintPlaceholder": "Hints (optional): tone, detail to mention…",
+    "aiNeedGift": "Enter the gift name first.",
+    "aiOverwriteConfirm": "The current subject and message will be replaced. Continue?",
+    "aiError": "The AI could not write the e-mail. Try again in a moment.",
+    "aiNote": "A draft to review: the code, QR code and pickup instructions are added automatically under the message.",
     "archivedReadOnlyError": "Archived campaigns are read-only.",
     "giftNameRequiredError": "Case {{n}}: gift name is required",
     "pageTitle": "Edit {{name}}",

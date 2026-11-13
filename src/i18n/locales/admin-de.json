@@ -395,6 +395,13 @@
     "moreBtn": "Mehr"
   },
   "editCampaign": {
+    "aiWriteBtn": "E-Mail mit KI erstellen",
+    "aiWriting": "Wird verfasst…",
+    "aiHintPlaceholder": "Hinweise (optional): Ton, zu erwähnendes Detail…",
+    "aiNeedGift": "Geben Sie zuerst den Namen des Geschenks ein.",
+    "aiOverwriteConfirm": "Betreff und Nachricht werden ersetzt. Fortfahren?",
+    "aiError": "Die KI konnte die E-Mail nicht verfassen. Versuchen Sie es gleich noch einmal.",
+    "aiNote": "Entwurf zur Prüfung: Code, QR-Code und Abholhinweise werden automatisch unter der Nachricht ergänzt.",
     "archivedReadOnlyError": "Archivierte Kampagnen sind schreibgeschützt.",
     "giftNameRequiredError": "Fach {{n}}: Geschenkname ist erforderlich",
     "pageTitle": "{{name}} bearbeiten",

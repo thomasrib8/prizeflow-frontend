@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import EventNameField, { EMPTY_PLACE, placeFromCampaign, placePayload } from '../components/EventNameField';
 import { Card, Button } from '../components/ui';
-import VariantsEditor, { PersoFields, emptyVariant } from '../components/VariantsEditor';
+import VariantsEditor, { PersoFields, MailWriterContext, emptyVariant } from '../components/VariantsEditor';
 import UniqueCodesPanel from '../components/UniqueCodesPanel';
 import DistributionModePicker from '../components/DistributionModePicker';
 import DynamicCaseFields, { ProbabilityTotal, TopCaseWarning } from '../components/DynamicCaseFields';
@@ -91,6 +91,7 @@ export default function EditCampaign() {
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
+    setSavedNote('');
     if (!name.trim()) return setError(t('newCampaign.campaignNameRequiredError'));
     const isDraft = campaign && campaign.status === 'draft';
     for (const s of isDraft ? [] : slots) {
@@ -165,9 +166,8 @@ export default function EditCampaign() {
           <p className="page-subtitle">{t('editCampaign.pageSubtitle')}</p>
         </div>
       </div>
-      {error && <div className="error-banner">{error}</div>}
-      {savedNote && <div className="ap-info" style={{ marginBottom: 12 }}>{savedNote} <button type="button" className="uc-link" onClick={() => navigate(`/campaigns/${id}`)}>{t('editCampaign.backToCampaign')}</button></div>}
       {campaign.status !== 'archived' && (
+        <MailWriterContext.Provider value={{ campaignName: name, eventName, language }}>
         <form onSubmit={handleSubmit}>
           <Card title={t('newCampaign.campaignDetailsTitle')} className="mt-card">
             <div className="field">
@@ -249,11 +249,15 @@ export default function EditCampaign() {
             </div>
           </Card>
 
-          <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
+          <div style={{ display: 'flex', gap: 10, marginTop: 18, alignItems: 'center', flexWrap: 'wrap' }}>
             <Button type="submit" disabled={saving}>{saving ? t('common.saving') : t('editCampaignSettings.saveChangesBtn')}</Button>
             <Button type="button" variant="secondary" onClick={() => navigate(`/campaigns/${id}`)}>{t('common.cancel')}</Button>
+            {/* the confirmation sits next to the buttons, where the eyes are after clicking Save (the form is long) */}
+            {savedNote && <div className="ap-info" role="status" style={{ margin: 0 }}>{savedNote} <button type="button" className="uc-link" onClick={() => navigate(`/campaigns/${id}`)}>{t('editCampaign.backToCampaign')}</button></div>}
           </div>
+          {error && <div className="error-banner" style={{ marginTop: 12 }}>{error}</div>}
         </form>
+        </MailWriterContext.Provider>
       )}
     </div>
   );

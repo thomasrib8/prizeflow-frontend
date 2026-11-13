@@ -395,6 +395,13 @@
     "moreBtn": "Autres"
   },
   "editCampaign": {
+    "aiWriteBtn": "Générer le mail avec l’IA",
+    "aiWriting": "Rédaction en cours…",
+    "aiHintPlaceholder": "Précisions (facultatif) : ton, détail à mentionner…",
+    "aiNeedGift": "Renseignez d’abord le nom du cadeau.",
+    "aiOverwriteConfirm": "L’objet et le message actuels seront remplacés. Continuer ?",
+    "aiError": "L’IA n’a pas pu rédiger le mail. Réessayez dans un instant.",
+    "aiNote": "Proposition à relire : le code, le QR et les consignes de retrait sont ajoutés automatiquement sous le message.",
     "archivedReadOnlyError": "Les campagnes archivées sont en lecture seule.",
     "giftNameRequiredError": "Case {{n}} : le nom du cadeau est requis",
     "pageTitle": "Modifier {{name}}",

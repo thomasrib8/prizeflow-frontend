@@ -461,6 +461,7 @@ export const api = {
   setBoxWifiPassword: (password) => request('/account/box-wifi-password', { method: 'PUT', body: { password } }),
   getOfflineAccessCode: () => request('/account/offline-access-code'),
   getAccountSettings: () => request('/account/settings'),
+  writePersoMail: (payload) => request('/mail-writer/perso', { method: 'POST', body: payload }), // AI proposal: { subject, body }
   getAdminAlertSettings: () => request('/admin/api-usage/settings'),
   updateAdminAlertSettings: (payload) => request('/admin/api-usage/settings', { method: 'PUT', body: payload }),
   getApiSimulatorOptions: () => request('/admin/api-usage/simulator/options'),

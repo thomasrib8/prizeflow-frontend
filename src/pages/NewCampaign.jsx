@@ -7,6 +7,7 @@ import { useAdmin } from '../hooks/useAdmin';
 import { useWheelSocket } from '../hooks/useWheelSocket';
 import { posToAngle } from '../components/WheelSVG';
 import WheelGiftPlanner from '../components/WheelGiftPlanner';
+import { MailWriterContext } from '../components/VariantsEditor';
 import { CASE_COUNT, isGiftReady } from '../components/giftPlanning';
 import SegmentationBuilder from '../components/SegmentationBuilder';
 import CampaignFieldsBuilder from '../components/CampaignFieldsBuilder';
@@ -363,6 +364,7 @@ export default function NewCampaign() {
 
             <DistributionModePicker value={distributionMode} onChange={setDistributionMode} />
 
+            <MailWriterContext.Provider value={{ campaignName: name, eventName, language }}>
             <WheelGiftPlanner
               dynamic={dynamic}
               gifts={gifts}
@@ -394,6 +396,7 @@ export default function NewCampaign() {
                 </>
               )}
             />
+            </MailWriterContext.Provider>
 
             <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
               <Button type="button" onClick={() => goToStep(2)} disabled={placedCount < CASE_COUNT}>{t('newCampaign.nextBtn')}</Button>
