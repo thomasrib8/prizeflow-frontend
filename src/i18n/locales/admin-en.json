@@ -515,10 +515,13 @@
       "guestSearchChoice": "Searchable list",
       "guestDepartment": "Département (France)",
       "guestRegion": "Region (France)",
+      "guestRating": "Rating (stars)",
       "salesNumber": "Number (e.g. budget)"
     },
     "presetDepartmentHint": "Built-in list: the 101 French départements. The visitor types the name, the number or the postal code.",
     "presetRegionHint": "Built-in list: the French regions. The visitor types the name, a département or a postal code.",
+    "ratingStarsLabel": "Number of stars",
+    "ratingHint": "The participant picks 0 to {{max}} stars. If the field is required, at least 1 star is needed.",
     "pasteListBtn": "Paste a list (one value per line)",
     "pasteListPlaceholder": "One value per line, for example copied from a spreadsheet",
     "pasteListImport": "Add to the list"

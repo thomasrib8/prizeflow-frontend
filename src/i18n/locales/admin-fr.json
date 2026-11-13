@@ -515,10 +515,13 @@
       "guestSearchChoice": "Liste avec recherche",
       "guestDepartment": "Département (France)",
       "guestRegion": "Région (France)",
+      "guestRating": "Note (étoiles)",
       "salesNumber": "Nombre (ex. budget)"
     },
     "presetDepartmentHint": "Liste intégrée : les 101 départements. Le visiteur tape le nom, le numéro ou le code postal.",
     "presetRegionHint": "Liste intégrée : les régions de France. Le visiteur tape le nom, un département ou un code postal.",
+    "ratingStarsLabel": "Nombre d'étoiles",
+    "ratingHint": "Le participant choisit de 0 à {{max}} étoiles. Si le champ est obligatoire, il faut au moins 1 étoile.",
     "pasteListBtn": "Coller une liste (une valeur par ligne)",
     "pasteListPlaceholder": "Une valeur par ligne, par exemple copiée depuis un tableur",
     "pasteListImport": "Ajouter à la liste"

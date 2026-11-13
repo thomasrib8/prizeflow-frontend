@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CHOICE_FIELD_TYPES, PRESET_FIELD_TYPES } from './fieldTypes';
+import { CHOICE_FIELD_TYPES, PRESET_FIELD_TYPES, MIN_STARS, MAX_STARS, ratingMax } from './fieldTypes';
 import OptionsEditor from './OptionsEditor';
 
 const selectStyle = {
@@ -60,7 +60,7 @@ export default function CampaignFieldsBuilder({ fields, onChange, fieldTypes, sh
               />
               <select
                 value={f.fieldType}
-                onChange={(e) => updateField(i, { fieldType: e.target.value, options: CHOICE_FIELD_TYPES.has(e.target.value) ? (f.options?.length ? f.options : ['']) : [] })}
+                onChange={(e) => updateField(i, { fieldType: e.target.value, options: e.target.value === 'rating' ? ['5'] : CHOICE_FIELD_TYPES.has(e.target.value) ? (f.options?.length ? f.options : ['']) : [] })}
                 style={selectStyle}
               >
                 {fieldTypes.map((ft) => <option key={ft.value} value={ft.value}>{t(`builders.fieldTypes.${ft.tKey}`)}</option>)}
@@ -91,6 +91,16 @@ export default function CampaignFieldsBuilder({ fields, onChange, fieldTypes, sh
             )}
             {PRESET_FIELD_TYPES.has(f.fieldType) && (
               <p style={{ margin: '0 0 0', fontSize: 12, color: 'var(--text-light, #64748B)' }}>{t(f.fieldType === 'fr_department' ? 'builders.presetDepartmentHint' : 'builders.presetRegionHint')}</p>
+            )}
+
+            {f.fieldType === 'rating' && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginTop: 12 }}>
+                <label style={{ fontSize: 12, fontWeight: 700, color: '#334155' }}>{t('builders.ratingStarsLabel')}</label>
+                <select value={ratingMax(f.options)} onChange={(e) => updateField(i, { options: [e.target.value] })} style={{ ...selectStyle, width: 'auto' }}>
+                  {Array.from({ length: MAX_STARS - MIN_STARS + 1 }, (_, k) => MIN_STARS + k).map((n) => <option key={n} value={n}>{n}</option>)}
+                </select>
+                <span style={{ fontSize: 12, color: 'var(--text-light, #64748B)' }}>{t('builders.ratingHint', { max: ratingMax(f.options) })}</span>
+              </div>
             )}
 
             {showRequired && (

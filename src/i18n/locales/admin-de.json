@@ -515,10 +515,13 @@
       "guestSearchChoice": "Liste mit Suche",
       "guestDepartment": "Département (Frankreich)",
       "guestRegion": "Region (Frankreich)",
+      "guestRating": "Bewertung (Sterne)",
       "salesNumber": "Zahl (z. B. Budget)"
     },
     "presetDepartmentHint": "Integrierte Liste: die 101 französischen Départements. Der Besucher tippt den Namen, die Nummer oder die Postleitzahl.",
     "presetRegionHint": "Integrierte Liste: die Regionen Frankreichs. Der Besucher tippt den Namen, ein Département oder eine Postleitzahl.",
+    "ratingStarsLabel": "Anzahl der Sterne",
+    "ratingHint": "Die Teilnehmenden wählen 0 bis {{max}} Sterne. Bei einem Pflichtfeld ist mindestens 1 Stern nötig.",
     "pasteListBtn": "Liste einfügen (ein Wert pro Zeile)",
     "pasteListPlaceholder": "Ein Wert pro Zeile, z. B. aus einer Tabelle kopiert",
     "pasteListImport": "Zur Liste hinzufügen"

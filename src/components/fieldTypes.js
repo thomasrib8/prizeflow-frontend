@@ -34,8 +34,18 @@ export const GUEST_FIELD_TYPES = [
   { value: 'search_choice', tKey: 'guestSearchChoice' },
   { value: 'fr_department', tKey: 'guestDepartment' },
   { value: 'fr_region', tKey: 'guestRegion' },
+  // Stars: the visitor gives 0 to N stars, N (3 to 10) chosen here and kept as the field's only option
+  { value: 'rating', tKey: 'guestRating' },
 ];
 
 export const CHOICE_FIELD_TYPES = new Set(['dropdown', 'single_choice', 'multi_choice', 'search_choice']);
 // Lists that are built in (no options to type): the answer is one of the 101 départements / 18 régions
 export const PRESET_FIELD_TYPES = new Set(['fr_department', 'fr_region']);
+
+// Number of stars of a "rating" field: its only option, between 3 and 10 (5 when missing). Same rule as the server (src/ratingField.js).
+export const MIN_STARS = 3;
+export const MAX_STARS = 10;
+export const ratingMax = (options) => {
+  const n = parseInt(Array.isArray(options) ? options[0] : options, 10);
+  return Number.isFinite(n) ? Math.min(MAX_STARS, Math.max(MIN_STARS, n)) : 5;
+};

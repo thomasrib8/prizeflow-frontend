@@ -1,0 +1,14 @@
+/* Stars form field ("Note"): a 0 chip then N stars */
+.star-rating { display: flex; align-items: center; flex-wrap: wrap; gap: 2px; }
+.star-rating button { border: none; background: transparent; padding: 3px; cursor: pointer; line-height: 0; border-radius: 8px; font-family: inherit; }
+.star-rating .star svg { fill: transparent; stroke: #B8C2D4; stroke-width: 1.6; stroke-linejoin: round; transition: fill .12s, stroke .12s, transform .12s; }
+.star-rating .star.on svg { fill: #F5B301; stroke: #E09F00; }
+.star-rating .star:hover svg { transform: scale(1.12); }
+.star-rating button:focus-visible { outline: 2px solid #0055F8; outline-offset: 1px; }
+.star-rating .star-zero { line-height: 1; min-width: 30px; height: 30px; margin-right: 8px; border: 1.5px solid #CBD5E1; border-radius: 99px; font-size: 13px; font-weight: 700; color: #64748B; background: #fff; }
+.star-rating .star-zero.on { border-color: #0055F8; color: #002881; background: #EAF1FF; }
+/* 8 to 10 stars: a little smaller so they stay on one line on a phone */
+.star-rating.dense .star { padding: 2px; }
+.star-rating.dense .star svg { width: 25px; height: 25px; }
+.star-rating.dense .star-zero { margin-right: 4px; }
+@media (prefers-reduced-motion: reduce) { .star-rating .star svg { transition: none; } }
