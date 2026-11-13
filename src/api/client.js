@@ -78,6 +78,7 @@ async function request(path, { method = 'GET', body, auth = true } = {}) {
     // Event-box answers worth showing in the rep's own language
     const boxKey = { BOX_NOT_PRIMARY: 'boxApp.readOnly', BOX_BAD_CODE: 'boxApp.badCode', BOX_NO_CODE: 'boxApp.noCode', BOX_NOT_READY: 'boxApp.notReady' }[data && data.code];
     const err = new Error(boxKey ? i18n.t(boxKey, { ns: 'admin' }) : (data && data.error) || `Request failed (${res.status})`);
+    err.status = res.status;
     if (data && data.code) err.code = data.code; // e.g. POSSIBLE_DUPLICATE — lets a screen offer a specific way forward
     if (data && data.analysis) err.analysis = data.analysis; // codes import refused: what is wrong, precisely
     if (data && Array.isArray(data.issues)) err.issues = data.issues; // e.g. ACTIVATION_BLOCKED: what is missing, precisely
@@ -350,6 +351,8 @@ export const api = {
   // Settings of ONE campaign (social links, reward e-mail, privacy); an empty value = the account's (Settings menu)
   getCampaignOverridesDefaults: () => request('/campaigns/overrides-defaults'),
   getCampaignOverrides: (id) => request(`/campaigns/${id}/overrides`),
+  // sends the reward e-mail built from the form (saved or not) to the account holder; id null = campaign not created yet (wizard)
+  sendCampaignTestEmail: (id, body) => request(id ? `/campaigns/${id}/overrides-test-email` : '/campaigns/overrides-test-email', { method: 'POST', body }),
   updateCampaignOverrides: (id, body) => request(`/campaigns/${id}/overrides`, { method: 'PATCH', body }),
   uploadCampaignLogo: async (id, file) => {
     const token = getToken();

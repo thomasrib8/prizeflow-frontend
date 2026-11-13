@@ -4,7 +4,7 @@ import WheelSVG from './WheelSVG';
 import DynamicFieldInput from './DynamicFieldInput';
 import { API_BASE } from '../api/client';
 import { SocialGlyph } from './SocialIcons';
-import { resultCopy } from '../utils/resultScreen';
+import { resultCopy, resultTheme } from '../utils/resultScreen';
 
 // Brand names — never translated, "Facebook" reads the same in every
 // language this app supports.
@@ -278,23 +278,24 @@ export default function GuestFlowScreen({
       const activeSocialLinks = SOCIAL_PLATFORMS.filter((p) => campaignInfo?.socialLinks?.[p.key]);
       const showSocialInvite = !!campaignInfo?.socialMediaRequired && activeSocialLinks.length > 0;
       const copy = resultCopy(campaignInfo?.resultScreen, { firstName: status.firstName, giftName: result.giftName, t });
+      const th = resultTheme(campaignInfo?.resultScreen?.bgColor);
       return (
-        <div style={fullScreenBase} key="done">
+        <div style={{ ...fullScreenBase, background: th.background }} key="done">
           {cornerCloseZone}
           <style>{`
             @keyframes fadeIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
             @keyframes confetti { 0%{transform:translateY(0) rotate(0)} 100%{transform:translateY(-20px) rotate(15deg)} }
           `}</style>
           <div style={{ fontSize: 56, animation: 'confetti 0.6s ease-in-out infinite alternate' }}>{copy.emoji}</div>
-          <div style={{ color: 'white', maxWidth: 480, animation: 'fadeIn 0.4s ease' }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: '#90DCFE', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 12 }}>
+          <div style={{ color: th.text, maxWidth: 480, animation: 'fadeIn 0.4s ease' }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: th.accent, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 12 }}>
               {copy.title}
             </div>
             <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.01em', lineHeight: 1.4, whiteSpace: 'pre-line' }}>
               {copy.message}
             </div>
             {(!!result.isTest || copy.gift) && (
-              <div style={{ marginTop: 20, fontSize: 32, fontWeight: 900, letterSpacing: '-0.02em', color: '#90DCFE' }}>
+              <div style={{ marginTop: 20, fontSize: 32, fontWeight: 900, letterSpacing: '-0.02em', color: th.accent }}>
                 {result.giftName}
               </div>
             )}
@@ -307,7 +308,7 @@ export default function GuestFlowScreen({
               target="_blank"
               rel="noopener noreferrer"
               style={{
-                marginTop: 12, background: 'white', color: '#002881', textDecoration: 'none', borderRadius: 10,
+                marginTop: 12, background: th.btnBg, color: th.btnText, textDecoration: 'none', borderRadius: 10,
                 padding: '12px 24px', fontSize: 15, fontWeight: 700, fontFamily: 'inherit', display: 'inline-block', maxWidth: 420,
               }}
             >{copy.button.label}</a>
@@ -319,16 +320,16 @@ export default function GuestFlowScreen({
           {showReviewInvite && (
             <div style={{
               marginTop: 12, padding: '16px 20px', borderRadius: 14,
-              background: 'rgba(255,255,255,0.08)', maxWidth: 420,
+              background: th.panel, maxWidth: 420,
             }}>
-              <div style={{ color: 'white', fontSize: 15, fontWeight: 600, marginBottom: 12 }}>
+              <div style={{ color: th.text, fontSize: 15, fontWeight: 600, marginBottom: 12 }}>
                 {t('result.reviewInvite')}
               </div>
               <button
                 onClick={() => { onOpenReview(); setReviewClicked(true); }}
                 style={{
-                  background: reviewClicked ? 'rgba(255,255,255,0.15)' : 'white',
-                  color: reviewClicked ? '#94A3B8' : '#002881', border: 'none', borderRadius: 10,
+                  background: reviewClicked ? th.mutedBtn : th.btnBg,
+                  color: reviewClicked ? th.mutedText : th.btnText, border: 'none', borderRadius: 10,
                   padding: '11px 22px', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
                 }}
               >{reviewClicked ? t('result.reviewThanks') : t('result.reviewLeave')}</button>
@@ -341,9 +342,9 @@ export default function GuestFlowScreen({
           {showSocialInvite && (
             <div style={{
               marginTop: 12, padding: '16px 20px', borderRadius: 14,
-              background: 'rgba(255,255,255,0.08)', maxWidth: 420,
+              background: th.panel, maxWidth: 420,
             }}>
-              <div style={{ color: 'white', fontSize: 15, fontWeight: 600, marginBottom: 12 }}>
+              <div style={{ color: th.text, fontSize: 15, fontWeight: 600, marginBottom: 12 }}>
                 {t('result.socialInvite')}
               </div>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
@@ -354,7 +355,7 @@ export default function GuestFlowScreen({
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{
-                      background: 'white', color: '#0F1C3F', textDecoration: 'none', borderRadius: 10,
+                      background: th.btnBg, color: th.btnText, textDecoration: 'none', borderRadius: 10,
                       padding: '11px 18px', fontSize: 14, fontWeight: 700, fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: 7,
                     }}
                   >

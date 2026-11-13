@@ -4,7 +4,7 @@ import { Card, MiniBar } from './ui';
 import WheelSVG from './WheelSVG';
 import { SLOT_COLORS } from './slotColors';
 import { CASE_COUNT, isGiftReady } from './giftPlanning';
-import { ProbabilityTotal, TopCaseWarning } from './DynamicCaseFields';
+import { DistributionBar, ProbabilityTotal, TopCaseWarning } from './DynamicCaseFields';
 import VariantsEditor, { PersoFields, emptyVariant } from './VariantsEditor';
 import UniqueCodesPanel from './UniqueCodesPanel';
 import './dynamic-distribution.css';
@@ -19,7 +19,9 @@ import './dynamic-distribution.css';
 // WheelSVG.jsx), so a drag hit-tests whatever is under the pointer. Every
 // unplaced, ready gift also has a "Place in case" select as a non-drag way
 // to do the same thing.
-export default function WheelGiftPlanner({ gifts, setGifts, wheelProps, wheelCaption, headerAction, dynamic = false }) {
+// Editing an existing draft: `campaignId` lets the unique-codes panels reach the codes already saved, and `isPinned(gift)` marks a gift that cannot be
+// moved to another case (its saved codes belong to its case).
+export default function WheelGiftPlanner({ gifts, setGifts, wheelProps, wheelCaption, headerAction, dynamic = false, campaignId = null, onCodesChanged = () => {}, isPinned = () => false }) {
   const { t } = useTranslation('admin');
   const giftsRef = useRef(gifts);
   giftsRef.current = gifts;
@@ -120,6 +122,7 @@ export default function WheelGiftPlanner({ gifts, setGifts, wheelProps, wheelCap
           {t('wheelGiftPlanner.instructionsIntro')} <b>{t('wheelGiftPlanner.instructionsDragBold')}</b>{t('wheelGiftPlanner.instructionsRedeemIntro')} <b>QR</b> {t('wheelGiftPlanner.instructionsQrDesc')} <b>Code</b> {t('wheelGiftPlanner.instructionsCodeDesc')} <b>Voucher</b> {t('wheelGiftPlanner.instructionsVoucherDesc')} <b>Perso</b> {t('wheelGiftPlanner.instructionsPersoDesc')}
         </p>
         {dynamic && <p className="dyn-help">{t('dynamic.plannerHelp')}</p>}
+        {dynamic && <DistributionBar items={gifts.filter((g) => g.giftName.trim()).map((g) => ({ key: g.id, label: g.giftName.trim(), color: SLOT_COLORS[(g.caseIndex !== null ? g.caseIndex : g.id) % SLOT_COLORS.length], value: g.probability }))} />}
         {dynamic && <TopCaseWarning items={gifts.map((g) => ({ used: !!g.giftName.trim(), probability: g.probability, unlimited: g.unlimited }))} />}
         <div className="gift-list">
           {gifts.map((g) => {
@@ -168,7 +171,9 @@ export default function WheelGiftPlanner({ gifts, setGifts, wheelProps, wheelCap
                   {placed ? (
                     <>
                       <span style={{ fontSize: 12, color: '#047857', fontWeight: 600 }}>{t('wheelGiftPlanner.placedOnCaseLabel', { n: g.caseIndex + 1 })}</span>
-                      <button type="button" className="gift-link-btn" onClick={() => unplace(g.id)}>{t('wheelGiftPlanner.removeFromWheelBtn')}</button>
+                      {isPinned(g)
+                        ? <span style={{ fontSize: 12, color: '#94A3B8' }}>{t('wheelGiftPlanner.pinnedHint')}</span>
+                        : <button type="button" className="gift-link-btn" onClick={() => unplace(g.id)}>{t('wheelGiftPlanner.removeFromWheelBtn')}</button>}
                     </>
                   ) : ready ? (
                     <>
@@ -198,12 +203,12 @@ export default function WheelGiftPlanner({ gifts, setGifts, wheelProps, wheelCap
                 )}
                 {!g.variantsEnabled && g.redeemMethod === 'perso' && (
                   <PersoFields value={g} idPrefix={`gift-${g.id}`} uniqueCodeEditable={!(dynamic && g.unlimited)} onChange={(field, value) => updateGift(g.id, field, value)}>
-                    <UniqueCodesPanel campaignId={null} slotIndex={g.caseIndex ?? g.id} stock={Number(g.stock) || 0} label={g.giftName || t('wheelGiftPlanner.giftNumberBadge', { n: g.id + 1 })} draft
-                      persisted={false} staged={g.pendingCodes || ''} onStage={(txt) => updateGift(g.id, 'pendingCodes', txt)} />
+                    <UniqueCodesPanel campaignId={campaignId} slotIndex={g.caseIndex ?? g.id} stock={Number(g.stock) || 0} label={g.giftName || t('wheelGiftPlanner.giftNumberBadge', { n: g.id + 1 })} draft onChanged={onCodesChanged}
+                      persisted={!!g.savedUnique} staged={g.pendingCodes || ''} onStage={(txt) => updateGift(g.id, 'pendingCodes', txt)} />
                   </PersoFields>
                 )}
                 {g.variantsEnabled && (
-                  <VariantsEditor slot={{ ...g, slotIndex: g.caseIndex ?? g.id, stockInitial: g.stock }} draft onChange={(patch) => patchGift(g.id, patch)} />
+                  <VariantsEditor slot={{ ...g, slotIndex: g.caseIndex ?? g.id, stockInitial: g.stock }} draft campaignId={campaignId} onCodesChanged={onCodesChanged} onChange={(patch) => patchGift(g.id, patch)} />
                 )}
               </div>
             );

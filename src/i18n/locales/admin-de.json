@@ -115,6 +115,7 @@
     "disposableTitle": "Temporäre / Wegwerf-E-Mail-Adresse"
   },
   "wheelGiftPlanner": {
+    "pinnedHint": "Dieses Geschenk hat gespeicherte eindeutige Codes: Es bleibt auf seinem Feld. Löschen Sie zuerst die Codes, um es zu verschieben.",
     "yourWheelTitle": "Ihr Rad",
     "wheelCompleteLabel": "✓ Rad vollständig",
     "casesFilledLabel": "Belegte Fächer",
@@ -395,6 +396,7 @@
     "moreBtn": "Mehr"
   },
   "editCampaign": {
+    "unplacedGiftsError": "{{count}} Geschenk(e) sind nicht auf dem Rad platziert: Ziehen Sie sie auf ein Feld oder leeren Sie Name und Bestand, bevor Sie speichern.",
     "aiWriteBtn": "E-Mail mit KI erstellen",
     "aiWriting": "Wird verfasst…",
     "aiHintPlaceholder": "Hinweise (optional): Ton, zu erwähnendes Detail…",
@@ -1322,6 +1324,12 @@
     "editPageTitle": "Einstellungen — {{name}}",
     "editPageSubtitle": "Einladung zur Google-Bewertung und zu den sozialen Netzwerken für diese Kampagne.",
     "resultScreen": {
+      "bgLabel": "Hintergrundfarbe",
+      "bgCustom": "Eigene Farbe",
+      "bgHex": "Farbcode",
+      "bgReset": "Standardfarbe",
+      "bgHint": "Wählen Sie eine Farbe aus der Palette oder geben Sie einen Code ein. Der Text wechselt automatisch zu hell oder dunkel, damit er lesbar bleibt.",
+      "bgDefault": "SPARK-Blau (Standard)",
       "title": "Abschlussbildschirm",
       "desc": "Passen Sie den Bildschirm an, den Spieler beim Erhalt ihres Geschenks sehen (Handy und Kiosk). Leer lassen, um den Standard zu behalten.",
       "titleLabel": "Titel",
@@ -2809,6 +2817,9 @@
     "modeDynamicDesc": "Jedes Feld hat eine Wahrscheinlichkeit, und gezogen wird bei jedem Dreh. Ist ein Geschenk aufgebraucht, rückt seine Wahrscheinlichkeit zur nächsthöheren Stufe: Spieler sehen nie „nicht auf Lager“.",
     "modeLocked": "Die Methode wird hier gewählt und bei der Aktivierung der Kampagne gesperrt.",
     "probability": "Wahrscheinlichkeit (%)",
+    "distributionTitle": "Verteilung der Wahrscheinlichkeiten",
+    "unassigned": "Nicht zugewiesen",
+    "over": "um {{diff}} % überschritten",
     "unlimited": "Unbegrenzter Bestand",
     "unlimitedShort": "Unbegrenzt",
     "unlimitedHint": "Für Nieten oder digitale Geschenke: nie aufgebraucht.",
@@ -2889,6 +2900,13 @@
     }
   },
   "campaignOverrides": {
+    "testBtn": "Test-E-Mail senden",
+    "testSending": "Wird gesendet …",
+    "testHint": "Sie erhalten den Test an die Adresse Ihres SPARK-Kontos, mit den obigen Einstellungen (auch ungespeichert) und Beispieldaten. Angezeigte Art: {{kind}}.",
+    "testSent": "Test-E-Mail an {{to}} gesendet. Prüfen Sie auch Ihren Spam-Ordner.",
+    "testNotConfigured": "Der E-Mail-Versand ist auf diesem Server nicht eingerichtet.",
+    "testTooMany": "Zu viele Tests hintereinander. Versuchen Sie es in ein paar Minuten erneut.",
+    "testFailed": "Der Test konnte nicht gesendet werden. Bitte erneut versuchen.",
     "intro": "Die zwei Blöcke unten gehören nur zu dieser Kampagne. Ein leeres Feld übernimmt den Standardwert des Kontos (Menü Einstellungen), grau angezeigt.",
     "openDefaults": "Standardwerte ansehen",
     "defaultPrefix": "Standard:",

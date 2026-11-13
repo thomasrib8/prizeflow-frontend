@@ -7,7 +7,11 @@ import { Card, Button } from '../components/ui';
 import VariantsEditor, { PersoFields, MailWriterContext, emptyVariant } from '../components/VariantsEditor';
 import UniqueCodesPanel from '../components/UniqueCodesPanel';
 import DistributionModePicker from '../components/DistributionModePicker';
-import DynamicCaseFields, { ProbabilityTotal, TopCaseWarning } from '../components/DynamicCaseFields';
+import DynamicCaseFields, { DistributionBar, ProbabilityTotal, TopCaseWarning } from '../components/DynamicCaseFields';
+import { SLOT_COLORS } from '../components/slotColors';
+import WheelGiftPlanner from '../components/WheelGiftPlanner';
+import { CASE_COUNT } from '../components/giftPlanning';
+import { useWheelPreview } from '../hooks/useWheelPreview';
 
 // The language guests see throughout the play flow — see NewCampaign.jsx's
 // LANGUAGE_OPTIONS for why this is separate from the admin panel's language.
@@ -33,6 +37,8 @@ export default function EditCampaign() {
   const [eventPlace, setEventPlace] = useState(EMPTY_PLACE);
   const [language, setLanguage] = useState('en');
   const [slots, setSlots] = useState([]);
+  const [gifts, setGifts] = useState([]); // a draft is edited like in the creation wizard: 12 gifts, each dragged onto a case of the wheel
+  const wheel = useWheelPreview();
   const [mode, setMode] = useState('static'); // distribution method: switchable while the campaign is a draft
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
@@ -73,8 +79,9 @@ export default function EditCampaign() {
         })),
       });
       if (source.status === 'draft') {
-        const byIndex = new Map(source.slots.map((s) => [s.slot_index, s]));
-        setSlots(Array.from({ length: 12 }, (_, i) => (byIndex.has(i) ? mk(byIndex.get(i)) : { slotIndex: i, giftName: '', stockInitial: 0, stockRemaining: 0, probability: 0, unlimited: false, redeemMethod: 'qr', persoDelivery: 'code', persoSubject: '', persoBody: '', persoAutoDistribute: false, persoUniqueCode: false, savedUnique: false, variantsEnabled: false, variants: [] })));
+        const placed = [...source.slots].sort((a, b) => a.slot_index - b.slot_index).map((sl, i) => ({ ...mk(sl), id: i, caseIndex: sl.slot_index, stock: sl.stock_initial, probability: sl.probability || '' }));
+        const empty = (id) => ({ id, caseIndex: null, giftName: '', stock: 0, probability: '', unlimited: false, variantsEnabled: false, variants: [], persoUniqueCode: false, savedUnique: false, pendingCodes: '', redeemMethod: 'qr', persoDelivery: 'qr', persoSubject: '', persoBody: '', persoAutoDistribute: false });
+        setGifts([...placed, ...Array.from({ length: Math.max(0, CASE_COUNT - placed.length) }, (_, k) => empty(placed.length + k))]);
       } else {
         setSlots(source.slots.map(mk));
       }
@@ -94,6 +101,12 @@ export default function EditCampaign() {
     setSavedNote('');
     if (!name.trim()) return setError(t('newCampaign.campaignNameRequiredError'));
     const isDraft = campaign && campaign.status === 'draft';
+    // the draft's gifts as case-shaped rows (only the gifts placed on the wheel exist as cases)
+    const draftSlots = gifts.filter((g) => g.caseIndex !== null).map((g) => ({ ...g, slotIndex: g.caseIndex, stockInitial: g.stock }));
+    if (isDraft) {
+      const unplaced = gifts.filter((g) => g.caseIndex === null && (g.giftName.trim() || Number(g.stock) > 0 || g.unlimited));
+      if (unplaced.length) return setError(t('editCampaign.unplacedGiftsError', { count: unplaced.length }));
+    }
     for (const s of isDraft ? [] : slots) {
       if (!s.giftName.trim()) return setError(t('editCampaign.giftNameRequiredError', { n: s.slotIndex + 1 }));
       if (!s.variantsEnabled && s.redeemMethod === 'perso' && (!s.persoSubject.trim() || !s.persoBody.trim())) {
@@ -105,7 +118,7 @@ export default function EditCampaign() {
       await api.updateCampaignDetails(id, { name, description, eventName, eventPlace: placePayload(eventPlace), language });
       if (isDraft) {
         // half-finished is fine: what is missing is listed on the campaign page and checked when it is activated
-        await api.saveDraftSlots(id, slots.filter((s) => s.giftName.trim() || Number(s.stockInitial) > 0 || s.unlimited).map((s) => ({
+        await api.saveDraftSlots(id, draftSlots.filter((s) => s.giftName.trim() || Number(s.stockInitial) > 0 || s.unlimited).map((s) => ({
           slotIndex: s.slotIndex, giftName: s.giftName, stock: mode === 'dynamic' && s.unlimited ? 0 : (Number(s.stockInitial) || 0), redeemMethod: s.redeemMethod,
           ...(mode === 'dynamic' ? { probability: Number(s.probability) || 0, unlimited: !!s.unlimited } : {}),
           variantsEnabled: !!s.variantsEnabled,
@@ -115,7 +128,7 @@ export default function EditCampaign() {
         })), mode);
         // The codes pasted before the first save were only staged: now that the gifts exist on the server, load them (replacing any previous list).
         const staged = [];
-        slots.forEach((sl) => {
+        draftSlots.forEach((sl) => {
           if (sl.variantsEnabled) sl.variants.forEach((v, vi) => { if (v.persoUniqueCode && !v.savedUnique && (v.pendingCodes || '').trim()) staged.push({ slotIndex: sl.slotIndex, variantIndex: vi, text: v.pendingCodes }); });
           else if (sl.persoUniqueCode && !sl.savedUnique && (sl.pendingCodes || '').trim()) staged.push({ slotIndex: sl.slotIndex, variantIndex: null, text: sl.pendingCodes });
         });
@@ -192,62 +205,86 @@ export default function EditCampaign() {
 
           {campaign.status === 'draft' && <DistributionModePicker value={mode} onChange={setMode} />}
 
-          <Card title={t('editCampaign.giftsTitle')} className="mt-card" action={mode === 'dynamic' ? <ProbabilityTotal values={slots.filter((s) => s.giftName.trim() || s.unlimited || Number(s.stockInitial) > 0).map((s) => s.probability)} /> : undefined}>
-            {mode === 'dynamic' && campaign.status === 'draft' && <TopCaseWarning items={slots.map((s) => ({ used: !!s.giftName.trim(), probability: s.probability, unlimited: s.unlimited }))} />}
-            <div className="slots-grid">
-              {slots.map((s, i) => (
-                <div key={s.slotIndex} style={{ display: 'contents' }}>
-                  <div className="slot-row">
-                    <div className="slot-index">{t('dashboard.caseLabel', { n: s.slotIndex + 1 })}</div>
-                    <input placeholder={t('editCampaign.giftNamePlaceholder')} value={s.giftName} onChange={(e) => updateSlot(i, 'giftName', e.target.value)} />
-                    {campaign.status === 'draft' ? (
-                      <input type="number" min="0" step="1" value={mode === 'dynamic' && s.unlimited ? '' : s.stockInitial} placeholder={mode === 'dynamic' && s.unlimited ? t('dynamic.unlimitedShort') : undefined} disabled={mode === 'dynamic' && !!s.unlimited} title={t('editCampaign.stockInputTitle')} aria-label={t('editCampaign.stockInputTitle')}
-                        onChange={(e) => updateSlot(i, 'stockInitial', e.target.value === '' ? '' : Math.max(0, Math.floor(Number(e.target.value)) || 0))} style={{ width: 84 }} />
-                    ) : (
-                      <div style={{ fontSize: 12, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
-                        {s.unlimited ? t('dynamic.unlimitedShort') : t('editCampaign.stockLeftLabel', { remaining: s.stockRemaining, initial: s.stockInitial })}
+          {campaign.status === 'draft' ? (
+            <WheelGiftPlanner
+              dynamic={mode === 'dynamic'}
+              gifts={gifts}
+              setGifts={setGifts}
+              campaignId={id}
+              onCodesChanged={reloadCampaign}
+              isPinned={(g) => (g.variantsEnabled ? (g.variants || []).some((v) => v.savedUnique) : !!g.savedUnique)}
+              wheelProps={{ positionAngle: wheel.previewAngle, interactive: true, onRotate: wheel.onRotate }}
+              wheelCaption={(
+                <>
+                  {wheel.agentConnected && !wheel.manualOverride ? t('newCampaign.wheelCaptionTracking') : t('newCampaign.wheelCaptionLost')}
+                  <div style={{ marginTop: 4 }}>{t('newCampaign.redCleatPointing')} <strong>{t('dashboard.caseLabel', { n: wheel.previewCase })}</strong></div>
+                  {wheel.agentConnected && wheel.manualOverride && (
+                    <button type="button" onClick={wheel.resync} style={{ background: 'none', border: 'none', padding: 0, marginTop: 6, color: '#002881', textDecoration: 'underline', cursor: 'pointer', fontSize: 12, fontFamily: 'inherit' }}>{t('newCampaign.resyncBtn')}</button>
+                  )}
+                </>
+              )}
+            />
+          ) : (
+            <Card title={t('editCampaign.giftsTitle')} className="mt-card" action={mode === 'dynamic' ? <ProbabilityTotal values={slots.filter((s) => s.giftName.trim() || s.unlimited || Number(s.stockInitial) > 0).map((s) => s.probability)} /> : undefined}>
+              {mode === 'dynamic' && campaign.status === 'draft' && <TopCaseWarning items={slots.map((s) => ({ used: !!s.giftName.trim(), probability: s.probability, unlimited: s.unlimited }))} />}
+              {mode === 'dynamic' && (
+                <DistributionBar items={slots.filter((s) => s.giftName.trim() || s.unlimited || Number(s.stockInitial) > 0).map((s) => ({ key: s.slotIndex, label: s.giftName.trim() || t('dashboard.caseLabel', { n: s.slotIndex + 1 }), color: SLOT_COLORS[s.slotIndex % SLOT_COLORS.length], value: s.probability }))} />
+              )}
+              <div className="slots-grid">
+                {slots.map((s, i) => (
+                  <div key={s.slotIndex} style={{ display: 'contents' }}>
+                    <div className="slot-row">
+                      <div className="slot-index">{t('dashboard.caseLabel', { n: s.slotIndex + 1 })}</div>
+                      <input placeholder={t('editCampaign.giftNamePlaceholder')} value={s.giftName} onChange={(e) => updateSlot(i, 'giftName', e.target.value)} />
+                      {campaign.status === 'draft' ? (
+                        <input type="number" min="0" step="1" value={mode === 'dynamic' && s.unlimited ? '' : s.stockInitial} placeholder={mode === 'dynamic' && s.unlimited ? t('dynamic.unlimitedShort') : undefined} disabled={mode === 'dynamic' && !!s.unlimited} title={t('editCampaign.stockInputTitle')} aria-label={t('editCampaign.stockInputTitle')}
+                          onChange={(e) => updateSlot(i, 'stockInitial', e.target.value === '' ? '' : Math.max(0, Math.floor(Number(e.target.value)) || 0))} style={{ width: 84 }} />
+                      ) : (
+                        <div style={{ fontSize: 12, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                          {s.unlimited ? t('dynamic.unlimitedShort') : t('editCampaign.stockLeftLabel', { remaining: s.stockRemaining, initial: s.stockInitial })}
+                        </div>
+                      )}
+                      {s.variantsEnabled ? (
+                        <span className="vr-flag" title={t('variants.modeInVariants')}>{t('variants.modeInVariantsShort')}</span>
+                      ) : (
+                        <select value={s.redeemMethod} title={t('editCampaign.redeemMethodTitle')} onChange={(e) => updateSlot(i, 'redeemMethod', e.target.value)}>
+                          <option value="qr">QR</option>
+                          <option value="code">Code</option>
+                          <option value="voucher">Voucher</option>
+                          <option value="perso">Perso</option>
+                        </select>
+                      )}
+                      <div className="slot-pct" />
+                    </div>
+                    {mode === 'dynamic' && (s.giftName.trim() || Number(s.stockInitial) > 0 || s.unlimited) && (
+                      <div style={{ gridColumn: '1 / -1' }}>
+                        <DynamicCaseFields color={SLOT_COLORS[s.slotIndex % SLOT_COLORS.length]} probability={s.probability} unlimited={s.unlimited} readOnly={campaign.status !== 'draft'}
+                          onProbability={(v) => updateSlot(i, 'probability', v)} onUnlimited={(v) => patchSlot(i, { unlimited: v, stockInitial: v ? 0 : s.stockInitial, variantsEnabled: v ? false : s.variantsEnabled })} />
                       </div>
                     )}
-                    {s.variantsEnabled ? (
-                      <span className="vr-flag" title={t('variants.modeInVariants')}>{t('variants.modeInVariantsShort')}</span>
-                    ) : (
-                      <select value={s.redeemMethod} title={t('editCampaign.redeemMethodTitle')} onChange={(e) => updateSlot(i, 'redeemMethod', e.target.value)}>
-                        <option value="qr">QR</option>
-                        <option value="code">Code</option>
-                        <option value="voucher">Voucher</option>
-                        <option value="perso">Perso</option>
-                      </select>
+                    {campaign.status === 'draft' && !(mode === 'dynamic' && s.unlimited) && (s.giftName.trim() || Number(s.stockInitial) > 0) && (
+                      <label className="vr-toggle">
+                        <input type="checkbox" checked={!!s.variantsEnabled}
+                          onChange={(e) => patchSlot(i, { variantsEnabled: e.target.checked, variants: e.target.checked && !(s.variants || []).length ? [emptyVariant()] : (s.variants || []) })} />
+                        <span>{t('variants.enable')}</span>
+                      </label>
                     )}
-                    <div className="slot-pct" />
+                    {!s.variantsEnabled && s.redeemMethod === 'perso' && (
+                      <PersoFields value={s} idPrefix={`slot-${s.slotIndex}`} uniqueCodeEditable={campaign.status === 'draft'} onChange={(field, value) => updateSlot(i, field, value)}>
+                        <UniqueCodesPanel campaignId={id} slotIndex={s.slotIndex} stock={Number(s.stockInitial) || 0} label={s.giftName || t('dashboard.caseLabel', { n: s.slotIndex + 1 })} draft={campaign.status === 'draft'} onChanged={reloadCampaign}
+                          persisted={!!s.savedUnique} staged={s.pendingCodes || ''} onStage={(txt) => updateSlot(i, 'pendingCodes', txt)} />
+                      </PersoFields>
+                    )}
+                    {s.variantsEnabled && (
+                      <div style={{ gridColumn: '1 / -1' }}>
+                        <VariantsEditor slot={s} draft={campaign.status === 'draft'} onChange={(patch) => patchSlot(i, patch)} campaignId={id} onCodesChanged={reloadCampaign} />
+                      </div>
+                    )}
                   </div>
-                  {mode === 'dynamic' && (s.giftName.trim() || Number(s.stockInitial) > 0 || s.unlimited) && (
-                    <div style={{ gridColumn: '1 / -1' }}>
-                      <DynamicCaseFields probability={s.probability} unlimited={s.unlimited} readOnly={campaign.status !== 'draft'}
-                        onProbability={(v) => updateSlot(i, 'probability', v)} onUnlimited={(v) => patchSlot(i, { unlimited: v, stockInitial: v ? 0 : s.stockInitial, variantsEnabled: v ? false : s.variantsEnabled })} />
-                    </div>
-                  )}
-                  {campaign.status === 'draft' && !(mode === 'dynamic' && s.unlimited) && (s.giftName.trim() || Number(s.stockInitial) > 0) && (
-                    <label className="vr-toggle">
-                      <input type="checkbox" checked={!!s.variantsEnabled}
-                        onChange={(e) => patchSlot(i, { variantsEnabled: e.target.checked, variants: e.target.checked && !(s.variants || []).length ? [emptyVariant()] : (s.variants || []) })} />
-                      <span>{t('variants.enable')}</span>
-                    </label>
-                  )}
-                  {!s.variantsEnabled && s.redeemMethod === 'perso' && (
-                    <PersoFields value={s} idPrefix={`slot-${s.slotIndex}`} uniqueCodeEditable={campaign.status === 'draft'} onChange={(field, value) => updateSlot(i, field, value)}>
-                      <UniqueCodesPanel campaignId={id} slotIndex={s.slotIndex} stock={Number(s.stockInitial) || 0} label={s.giftName || t('dashboard.caseLabel', { n: s.slotIndex + 1 })} draft={campaign.status === 'draft'} onChanged={reloadCampaign}
-                        persisted={!!s.savedUnique} staged={s.pendingCodes || ''} onStage={(txt) => updateSlot(i, 'pendingCodes', txt)} />
-                    </PersoFields>
-                  )}
-                  {s.variantsEnabled && (
-                    <div style={{ gridColumn: '1 / -1' }}>
-                      <VariantsEditor slot={s} draft={campaign.status === 'draft'} onChange={(patch) => patchSlot(i, patch)} campaignId={id} onCodesChanged={reloadCampaign} />
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </Card>
+                ))}
+              </div>
+            </Card>
+          )}
 
           <div style={{ display: 'flex', gap: 10, marginTop: 18, alignItems: 'center', flexWrap: 'wrap' }}>
             <Button type="submit" disabled={saving}>{saving ? t('common.saving') : t('editCampaignSettings.saveChangesBtn')}</Button>

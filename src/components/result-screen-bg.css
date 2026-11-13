@@ -1,0 +1,16 @@
+/* Final screen: background colour choice (presets + full colour picker + hex) */
+.rs-bg { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.rs-bg-sw { width: 34px; height: 34px; padding: 3px; border-radius: 50%; border: 2px solid transparent; background: transparent; cursor: pointer; transition: transform .12s, border-color .12s; }
+.rs-bg-sw > span { display: block; width: 100%; height: 100%; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(3, 4, 26, .14); }
+.rs-bg-sw:hover { transform: scale(1.08); }
+.rs-bg-sw.on { border-color: #0055F8; }
+.rs-bg-sw:focus-visible { outline: 2px solid #0055F8; outline-offset: 2px; }
+.rs-bg-custom { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.field .rs-bg-picker, .rs-bg-picker { margin: 0; line-height: 1; display: inline-flex; align-items: center; gap: 9px; border: 1px solid var(--border); border-radius: 10px; padding: 5px 12px 5px 5px; background: #fff; cursor: pointer; font-size: 13px; font-weight: 600; color: #334155; }
+.rs-bg-picker span { display: block; }
+.rs-bg-picker:hover { border-color: #0055F8; }
+.rs-bg-picker input[type="color"] { width: 30px; height: 30px; padding: 0; border: none; border-radius: 7px; background: none; cursor: pointer; }
+.rs-bg-picker input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+.rs-bg-picker input[type="color"]::-webkit-color-swatch { border: 1px solid rgba(3, 4, 26, .15); border-radius: 7px; }
+.rs-bg-custom .rs-bg-hex { width: 104px; font-family: var(--font-mono, ui-monospace, monospace); text-transform: uppercase; }
+@media (prefers-reduced-motion: reduce) { .rs-bg-sw { transition: none; } }

@@ -1,10 +1,11 @@
 import { useTranslation } from 'react-i18next';
+import './result-screen-bg.css';
 import { Card as PlainCard } from './ui';
 import CollapsibleCard from './CollapsibleCard';
-import { RESULT_EMOJIS, resultCopy } from '../utils/resultScreen';
+import { RESULT_EMOJIS, RESULT_BG_PRESETS, isHexColor, resultCopy, resultTheme } from '../utils/resultScreen';
 
 export const DEFAULT_RESULT_SCREEN = {
-  title: '', message: '', emoji: 'party', showGift: false,
+  title: '', message: '', emoji: 'party', showGift: false, bgColor: '',
   button: { enabled: false, label: '', url: '' },
 };
 
@@ -20,14 +21,15 @@ const hint = { fontSize: 12, color: '#94A3B8', marginTop: 4, lineHeight: 1.5 };
 // Mini phone showing the guest's final screen exactly as the real one builds it.
 function Preview({ value, guestT, giftName }) {
   const copy = resultCopy(value, { firstName: 'Marie', giftName, t: guestT });
+  const th = resultTheme(value.bgColor);
   const btn = value.button && value.button.enabled && value.button.label ? value.button : null; // shown as soon as it has a label, even before the link is typed
   return (
-    <div style={{ width: 230, minHeight: 360, borderRadius: 26, border: '6px solid #0B1437', background: 'linear-gradient(160deg, #0055F8 0%, #266FF9 100%)', color: 'white', textAlign: 'center', padding: '34px 16px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, boxSizing: 'border-box', margin: '0 auto' }}>
+    <div style={{ width: 230, minHeight: 360, borderRadius: 26, border: '6px solid #0B1437', background: th.background, color: th.text, textAlign: 'center', padding: '34px 16px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, boxSizing: 'border-box', margin: '0 auto' }}>
       <div style={{ fontSize: 40, minHeight: 46 }}>{copy.emoji}</div>
-      <div style={{ fontSize: 10, fontWeight: 700, color: '#90DCFE', letterSpacing: '0.12em', textTransform: 'uppercase', overflowWrap: 'anywhere' }}>{copy.title}</div>
+      <div style={{ fontSize: 10, fontWeight: 700, color: th.accent, letterSpacing: '0.12em', textTransform: 'uppercase', overflowWrap: 'anywhere' }}>{copy.title}</div>
       <div style={{ fontSize: 15, fontWeight: 700, lineHeight: 1.35, whiteSpace: 'pre-line', overflowWrap: 'anywhere' }}>{copy.message}</div>
-      {copy.gift && <div style={{ fontSize: 20, fontWeight: 900, color: '#90DCFE', overflowWrap: 'anywhere' }}>{copy.gift}</div>}
-      {btn && <div style={{ marginTop: 6, background: 'white', color: '#002881', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 700, maxWidth: '100%', overflowWrap: 'anywhere' }}>{btn.label}</div>}
+      {copy.gift && <div style={{ fontSize: 20, fontWeight: 900, color: th.accent, overflowWrap: 'anywhere' }}>{copy.gift}</div>}
+      {btn && <div style={{ marginTop: 6, background: th.btnBg, color: th.btnText, borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 700, maxWidth: '100%', overflowWrap: 'anywhere' }}>{btn.label}</div>}
     </div>
   );
 }
@@ -66,6 +68,29 @@ export default function ResultScreenCard({ value, onChange, language = 'fr', com
                 </button>
               ))}
             </div>
+          </div>
+          <div className="field">
+            <label>{t('campaignSettings.resultScreen.bgLabel')}</label>
+            <div className="rs-bg">
+              <button type="button" className={`rs-bg-sw rs-bg-default${!rs.bgColor ? ' on' : ''}`} aria-pressed={!rs.bgColor} title={t('campaignSettings.resultScreen.bgDefault')} onClick={() => set({ bgColor: '' })}>
+                <span style={{ background: 'linear-gradient(160deg, #0055F8 0%, #266FF9 100%)' }} />
+              </button>
+              {RESULT_BG_PRESETS.map((c) => (
+                <button key={c} type="button" className={`rs-bg-sw${(rs.bgColor || '').toUpperCase() === c ? ' on' : ''}`} aria-pressed={(rs.bgColor || '').toUpperCase() === c} aria-label={c} title={c} onClick={() => set({ bgColor: c })}>
+                  <span style={{ background: c }} />
+                </button>
+              ))}
+            </div>
+            <div className="rs-bg-custom">
+              <label className="rs-bg-picker" title={t('campaignSettings.resultScreen.bgCustom')}>
+                <input type="color" value={isHexColor(rs.bgColor) ? rs.bgColor : '#0055F8'} onChange={(e) => set({ bgColor: e.target.value.toUpperCase() })} aria-label={t('campaignSettings.resultScreen.bgCustom')} />
+                <span>{t('campaignSettings.resultScreen.bgCustom')}</span>
+              </label>
+              <input className="rs-bg-hex" type="text" inputMode="text" maxLength={7} spellCheck={false} placeholder="#0055F8" value={rs.bgColor || ''} aria-label={t('campaignSettings.resultScreen.bgHex')}
+                onChange={(e) => { const v = e.target.value.trim(); set({ bgColor: v === '' || /^#?[0-9a-fA-F]{0,6}$/.test(v) ? (v && !v.startsWith('#') ? `#${v}` : v).toUpperCase() : rs.bgColor }); }} />
+              {rs.bgColor && <button type="button" className="gift-link-btn" onClick={() => set({ bgColor: '' })}>{t('campaignSettings.resultScreen.bgReset')}</button>}
+            </div>
+            <div style={hint}>{t('campaignSettings.resultScreen.bgHint')}</div>
           </div>
           <label style={{ display: 'flex', gap: 10, alignItems: 'center', cursor: 'pointer', margin: '6px 0 4px' }}>
             <input type="checkbox" checked={!!rs.showGift} onChange={(e) => set({ showGift: e.target.checked })} style={{ width: 18, height: 18, flexShrink: 0 }} />

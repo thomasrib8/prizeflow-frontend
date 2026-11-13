@@ -115,6 +115,7 @@
     "disposableTitle": "Temporary / disposable email address"
   },
   "wheelGiftPlanner": {
+    "pinnedHint": "This gift has saved unique codes: it stays on its case. Delete its codes first to move it.",
     "yourWheelTitle": "Your wheel",
     "wheelCompleteLabel": "✓ Wheel complete",
     "casesFilledLabel": "Cases filled",
@@ -395,6 +396,7 @@
     "moreBtn": "More"
   },
   "editCampaign": {
+    "unplacedGiftsError": "{{count}} gift(s) are not placed on the wheel: drag them onto a case, or clear their name and stock, before saving.",
     "aiWriteBtn": "Generate the e-mail with AI",
     "aiWriting": "Writing…",
     "aiHintPlaceholder": "Hints (optional): tone, detail to mention…",
@@ -1322,6 +1324,12 @@
     "editPageTitle": "Settings — {{name}}",
     "editPageSubtitle": "Google review invite and social media invite for this campaign.",
     "resultScreen": {
+      "bgLabel": "Background colour",
+      "bgCustom": "Custom colour",
+      "bgHex": "Colour code",
+      "bgReset": "Back to default",
+      "bgHint": "Pick a colour from the palette or type a code. The text switches to light or dark automatically so it stays readable.",
+      "bgDefault": "SPARK blue (default)",
       "title": "End-of-game screen",
       "desc": "Customize the screen players see when they receive their gift (phone and kiosk). Leave empty to keep the default screen.",
       "titleLabel": "Title",
@@ -2809,6 +2817,9 @@
     "modeDynamicDesc": "Each case has a probability and the draw happens at every spin. When a gift runs out, its probability moves up to the next level: players never meet an \"out of stock\".",
     "modeLocked": "The method is chosen here and locked when the campaign is activated.",
     "probability": "Probability (%)",
+    "distributionTitle": "Probability split",
+    "unassigned": "Unassigned",
+    "over": "over by {{diff}} %",
     "unlimited": "Unlimited stock",
     "unlimitedShort": "Unlimited",
     "unlimitedHint": "For losing cases or digital gifts: never runs out.",
@@ -2889,6 +2900,13 @@
     }
   },
   "campaignOverrides": {
+    "testBtn": "Send a test e-mail",
+    "testSending": "Sending…",
+    "testHint": "You receive the test at your SPARK account address, with the settings above (even unsaved) and sample data. Type shown: {{kind}}.",
+    "testSent": "Test e-mail sent to {{to}}. Check your spam folder too.",
+    "testNotConfigured": "E-mail sending is not configured on this server.",
+    "testTooMany": "Too many tests in a row. Try again in a few minutes.",
+    "testFailed": "The test could not be sent. Please try again.",
     "intro": "The two blocks below belong to this campaign only. A field left empty takes the account's default value (Settings menu), shown in grey.",
     "openDefaults": "See the default values",
     "defaultPrefix": "Default:",

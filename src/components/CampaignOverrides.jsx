@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { Button } from './ui';
 import CollapsibleCard from './CollapsibleCard';
+import './campaign-overrides-test.css';
 const Card = CollapsibleCard; // every section folds
 
 const METHODS = [['qr', 'redeemTabQr'], ['code', 'redeemTabCode'], ['voucher', 'redeemTabVoucher']];
@@ -27,6 +28,8 @@ export default function CampaignOverrides({ campaignId = null, archived = false,
   const [logoBusy, setLogoBusy] = useState(false);
   const [error, setError] = useState('');
   const [msg, setMsg] = useState('');
+  const [testBusy, setTestBusy] = useState(false);
+  const [testNote, setTestNote] = useState(null); // { ok, text }
 
   const apply = (res) => {
     setData(res);
@@ -63,6 +66,15 @@ export default function CampaignOverrides({ campaignId = null, archived = false,
     } catch (e) {
       setError(e.code === 'BAD_REPLY_TO' ? t('settings.emailTemplates.replyToInvalid') : e.message);
     } finally { setBusy(false); }
+  }
+  async function sendTest() {
+    setTestBusy(true); setTestNote(null);
+    try {
+      const r = await api.sendCampaignTestEmail(campaignId, { ...payloadOf(form), method });
+      setTestNote({ ok: true, text: t('campaignOverrides.testSent', { to: r.to }) });
+    } catch (e) {
+      setTestNote({ ok: false, text: e.code === 'MAIL_NOT_CONFIGURED' ? t('campaignOverrides.testNotConfigured') : e.status === 429 ? t('campaignOverrides.testTooMany') : t('campaignOverrides.testFailed') });
+    } finally { setTestBusy(false); }
   }
   async function uploadLogo(e) {
     const file = e.target.files[0]; if (!file) return;
@@ -153,6 +165,11 @@ export default function CampaignOverrides({ campaignId = null, archived = false,
           <p style={{ fontSize: 12, color: '#94A3B8', margin: '4px 0 0' }}>{t('campaignOverrides.messageHint', { vars: '{{firstName}} / {{giftName}} / {{code}} / {{unique_code}}' })}</p>
         </div>
         <p style={{ fontSize: 12, color: '#94A3B8', margin: 0 }}>{t('campaignOverrides.persoNote')}</p>
+        <div className="co-test">
+          <Button type="button" variant="secondary" disabled={testBusy} onClick={sendTest}>{testBusy ? t('campaignOverrides.testSending') : t('campaignOverrides.testBtn')}</Button>
+          <span className="co-test-hint">{t('campaignOverrides.testHint', { kind: t(`settings.emailTemplates.${METHODS.find(([m]) => m === method)[1]}`) })}</span>
+          {testNote && <span className={`co-test-note ${testNote.ok ? 'ok' : 'bad'}`} role="status">{testNote.text}</span>}
+        </div>
       </Card>
 
       <Card title={t('campaignOverrides.privacyTitle')} className="mt-card">

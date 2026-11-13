@@ -115,6 +115,7 @@
     "disposableTitle": "Adresse email temporaire / jetable"
   },
   "wheelGiftPlanner": {
+    "pinnedHint": "Ce cadeau a des codes uniques enregistrés : il reste sur sa case. Supprimez d'abord ses codes pour le déplacer.",
     "yourWheelTitle": "Votre roue",
     "wheelCompleteLabel": "✓ Roue complète",
     "casesFilledLabel": "Cases remplies",
@@ -395,6 +396,7 @@
     "moreBtn": "Autres"
   },
   "editCampaign": {
+    "unplacedGiftsError": "{{count}} cadeau(x) ne sont pas placés sur la roue : glissez-les sur une case, ou videz leur nom et leur stock, avant d'enregistrer.",
     "aiWriteBtn": "Générer le mail avec l’IA",
     "aiWriting": "Rédaction en cours…",
     "aiHintPlaceholder": "Précisions (facultatif) : ton, détail à mentionner…",
@@ -1322,6 +1324,12 @@
     "editPageTitle": "Paramètres — {{name}}",
     "editPageSubtitle": "Invitation à l'avis Google et invitation aux réseaux sociaux pour cette campagne.",
     "resultScreen": {
+      "bgLabel": "Couleur de fond",
+      "bgCustom": "Couleur personnalisée",
+      "bgHex": "Code couleur",
+      "bgReset": "Couleur d'origine",
+      "bgHint": "Choisissez une couleur dans la palette ou saisissez un code. Le texte passe automatiquement en clair ou en foncé pour rester lisible.",
+      "bgDefault": "Bleu SPARK (par défaut)",
       "title": "Écran de fin de jeu",
       "desc": "Personnalisez l'écran que le joueur voit quand il reçoit son cadeau (téléphone et borne kiosque). Laissez vide pour garder l'écran par défaut.",
       "titleLabel": "Titre",
@@ -2809,6 +2817,9 @@
     "modeDynamicDesc": "Chaque case a une probabilité et le tirage se fait à chaque lancer. Quand un cadeau est épuisé, sa probabilité passe au palier supérieur : le joueur ne tombe jamais sur « rupture de stock ».",
     "modeLocked": "La méthode se choisit ici et se verrouille à l'activation de la campagne.",
     "probability": "Probabilité (%)",
+    "distributionTitle": "Répartition des probabilités",
+    "unassigned": "Non attribué",
+    "over": "dépasse de {{diff}} %",
     "unlimited": "Stock illimité",
     "unlimitedShort": "Illimité",
     "unlimitedHint": "Pour les cases perdantes ou les cadeaux numériques : jamais épuisée.",
@@ -2889,6 +2900,13 @@
     }
   },
   "campaignOverrides": {
+    "testBtn": "Envoyer un e-mail de test",
+    "testSending": "Envoi en cours…",
+    "testHint": "Vous recevez le test sur l'adresse de votre compte SPARK, avec les réglages ci-dessus (même non enregistrés) et des données d'exemple. Type affiché : {{kind}}.",
+    "testSent": "E-mail de test envoyé à {{to}}. Pensez à regarder vos courriers indésirables.",
+    "testNotConfigured": "L'envoi d'e-mails n'est pas configuré sur ce serveur.",
+    "testTooMany": "Trop de tests d'affilée. Réessayez dans quelques minutes.",
+    "testFailed": "Le test n'a pas pu être envoyé. Réessayez.",
     "intro": "Les deux blocs ci-dessous sont propres à cette campagne. Un champ laissé vide reprend la valeur par défaut du compte (menu Paramètres), affichée en grisé.",
     "openDefaults": "Voir les valeurs par défaut",
     "defaultPrefix": "Par défaut :",

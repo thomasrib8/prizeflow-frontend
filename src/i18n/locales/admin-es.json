@@ -115,6 +115,7 @@
     "disposableTitle": "Dirección de email temporal / desechable"
   },
   "wheelGiftPlanner": {
+    "pinnedHint": "Este regalo tiene códigos únicos guardados: se queda en su casilla. Elimine primero sus códigos para moverlo.",
     "yourWheelTitle": "Tu rueda",
     "wheelCompleteLabel": "✓ Rueda completa",
     "casesFilledLabel": "Casillas llenas",
@@ -395,6 +396,7 @@
     "moreBtn": "Más"
   },
   "editCampaign": {
+    "unplacedGiftsError": "{{count}} regalo(s) no están colocados en la rueda: arrástrelos a una casilla, o vacíe su nombre y stock, antes de guardar.",
     "aiWriteBtn": "Generar el correo con IA",
     "aiWriting": "Redactando…",
     "aiHintPlaceholder": "Indicaciones (opcional): tono, detalle que mencionar…",
@@ -1322,6 +1324,12 @@
     "editPageTitle": "Ajustes — {{name}}",
     "editPageSubtitle": "Invitación a la reseña de Google e invitación a las redes sociales para esta campaña.",
     "resultScreen": {
+      "bgLabel": "Color de fondo",
+      "bgCustom": "Color personalizado",
+      "bgHex": "Código de color",
+      "bgReset": "Color original",
+      "bgHint": "Elija un color de la paleta o escriba un código. El texto cambia solo a claro u oscuro para seguir siendo legible.",
+      "bgDefault": "Azul SPARK (por defecto)",
       "title": "Pantalla final del juego",
       "desc": "Personalice la pantalla que ve el jugador al recibir su regalo (teléfono y quiosco). Déjelo vacío para mantener la pantalla por defecto.",
       "titleLabel": "Título",
@@ -2809,6 +2817,9 @@
     "modeDynamicDesc": "Cada casilla tiene una probabilidad y el sorteo se hace en cada tirada. Cuando un regalo se agota, su probabilidad pasa al nivel superior: el jugador nunca ve «sin existencias».",
     "modeLocked": "El método se elige aquí y se bloquea al activar la campaña.",
     "probability": "Probabilidad (%)",
+    "distributionTitle": "Reparto de probabilidades",
+    "unassigned": "Sin asignar",
+    "over": "se pasa en {{diff}} %",
     "unlimited": "Stock ilimitado",
     "unlimitedShort": "Ilimitado",
     "unlimitedHint": "Para casillas perdedoras o regalos digitales: nunca se agota.",
@@ -2889,6 +2900,13 @@
     }
   },
   "campaignOverrides": {
+    "testBtn": "Enviar un correo de prueba",
+    "testSending": "Enviando…",
+    "testHint": "Recibe la prueba en la dirección de su cuenta SPARK, con los ajustes de arriba (aunque no estén guardados) y datos de ejemplo. Tipo mostrado: {{kind}}.",
+    "testSent": "Correo de prueba enviado a {{to}}. Revise también el spam.",
+    "testNotConfigured": "El envío de correos no está configurado en este servidor.",
+    "testTooMany": "Demasiadas pruebas seguidas. Inténtelo de nuevo en unos minutos.",
+    "testFailed": "No se pudo enviar la prueba. Inténtelo de nuevo.",
     "intro": "Los dos bloques de abajo son propios de esta campaña. Un campo vacío toma el valor por defecto de la cuenta (menú Ajustes), en gris.",
     "openDefaults": "Ver los valores por defecto",
     "defaultPrefix": "Por defecto:",
