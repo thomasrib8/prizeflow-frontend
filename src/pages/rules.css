@@ -21,7 +21,14 @@
   /* Other print sheets (QR, handover, wheel label) hide the whole page with "body * { visibility: hidden }" in the shared CSS bundle: show the rules back. */
   .rl-page, .rl-page * { visibility: visible !important; }
   .rl-page { background: #fff; padding: 0; position: absolute; left: 0; top: 0; width: 100%; }
-  .rl-sheet { box-shadow: none; max-width: none; padding: 0; border-radius: 0; }
+  @page { size: A4; margin: 18mm 16mm; }
+  .rl-sheet { box-shadow: none; max-width: none; padding: 0; border-radius: 0; font-size: 11pt; line-height: 1.55; }
   .rl-print { display: none; }
-  .rl-art { break-inside: avoid-page; }
+  .rl-head { padding-bottom: 14px; }
+  .rl-head h1 { font-size: 20pt; }
+  /* Articles flow across pages (no big blank gaps); a heading never sits alone at the bottom of a page. */
+  .rl-art h2 { font-size: 13pt; margin: 18px 0 6px; break-after: avoid; }
+  .rl-art p, .rl-art li { orphans: 3; widows: 3; }
+  .rl-annex tr, .rl-annex th { break-inside: avoid; }
+  .rl-annex thead { display: table-header-group; }
 }
