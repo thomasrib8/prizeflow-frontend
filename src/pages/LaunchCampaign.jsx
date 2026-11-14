@@ -140,7 +140,7 @@ export default function LaunchCampaign() {
 
   return (
     <div className="ap lc">
-      {(cloudLost || wheelLost) && <CloudLostBanner reason={cloudLost ? 'cloud' : 'wheel'} kioskUrl={q.campaign ? boxKioskUrl(q.campaign.public_token) : null} />}
+      {(cloudLost || wheelLost) && <CloudLostBanner bleed reason={cloudLost ? 'cloud' : 'wheel'} kioskUrl={q.campaign ? boxKioskUrl(q.campaign.public_token) : null} />}
       <div className="page-header launch-header">
         <div>
           <h1 className="page-title">{t('launchCampaign.pageTitle')}</h1>

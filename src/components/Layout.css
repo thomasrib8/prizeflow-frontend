@@ -182,6 +182,10 @@
   max-width: 100%;
 }
 
+/* Offline banner inside a page: spans the full width of the content area, over its side padding. */
+.content .cloud-lost-bleed { margin: -26px -30px 18px; }
+@media (max-width: 768px) { .content .cloud-lost-bleed { margin: -18px -14px 14px; } }
+
 /* Mobile top bar — hidden on desktop, shown only under the breakpoint below. */
 .mobile-topbar {
   display: none;

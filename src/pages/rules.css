@@ -18,7 +18,9 @@
 .rl-total td { font-weight: 800; background: #F8FAFF; }
 @media (max-width: 600px) { .rl-sheet { padding: 22px 18px; border-radius: 12px; } .rl-head h1 { font-size: 21px; } }
 @media print {
-  .rl-page { background: #fff; padding: 0; }
+  /* Other print sheets (QR, handover, wheel label) hide the whole page with "body * { visibility: hidden }" in the shared CSS bundle: show the rules back. */
+  .rl-page, .rl-page * { visibility: visible !important; }
+  .rl-page { background: #fff; padding: 0; position: absolute; left: 0; top: 0; width: 100%; }
   .rl-sheet { box-shadow: none; max-width: none; padding: 0; border-radius: 0; }
   .rl-print { display: none; }
   .rl-art { break-inside: avoid-page; }
