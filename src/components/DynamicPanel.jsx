@@ -78,7 +78,7 @@ export default function DynamicPanel({ campaign, onChanged = () => {} }) {
                     <td><GiftPill slotIndex={c.slotIndex} name={c.giftName} /></td>
                     <td className="num">{pc(c.referenceProbability)}</td>
                     <td className={`num dyn-eff${moved ? (up ? ' up' : ' down') : ''}`}>{pc(c.effectiveProbability)}{moved ? (up ? ' ▲' : ' ▼') : ''}</td>
-                    <td className="num" style={{ fontWeight: 700 }}>{c.unlimited ? t('dynamic.unlimitedShort') : (c.stockRemaining === 0 ? <span className="dyn-short">0</span> : c.stockRemaining)}{!c.unlimited && <span style={{ color: '#94A3B8', fontWeight: 500 }}> / {c.stockInitial}</span>}</td>
+                    <td className="num" style={{ fontWeight: 700 }}>{c.unlimited ? t('dynamic.unlimitedShort') : (c.stockRemaining === 0 ? <span className="dyn-short">0</span> : c.stockRemaining)}{!c.unlimited && <span style={{ color: 'var(--text-light)', fontWeight: 500 }}> / {c.stockInitial}</span>}</td>
                     <td className="num">{c.wins}</td>
                     <td>
                       {c.received > 0 && <div className="dyn-w in">{t('dynamic.received', { n: pts(c.received) })}</div>}

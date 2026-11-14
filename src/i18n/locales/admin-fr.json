@@ -1,4 +1,10 @@
 {
+  "errorBoundary": {
+    "title": "Cette page a rencontré un problème",
+    "text": "Rien n'est perdu : vos données sont intactes. Rechargez la page, ou revenez au tableau de bord.",
+    "reload": "Recharger la page",
+    "home": "Tableau de bord"
+  },
   "common": {
     "loading": "Chargement…",
     "cancel": "Annuler",

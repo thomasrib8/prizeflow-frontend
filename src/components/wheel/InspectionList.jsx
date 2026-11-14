@@ -19,7 +19,7 @@ function Photo({ id, onOpen }) {
 export default function InspectionList({ items, showWheel = false }) {
   const { t } = useTranslation('admin');
   const [big, setBig] = useState('');
-  if (!items || items.length === 0) return <p style={{ fontSize: 13, color: '#94A3B8', margin: 0 }}>{t('wheelOps.noInspections')}</p>;
+  if (!items || items.length === 0) return <p style={{ fontSize: 13, color: 'var(--text-light)', margin: 0 }}>{t('wheelOps.noInspections')}</p>;
   return (
     <div>
       {items.map((i) => (

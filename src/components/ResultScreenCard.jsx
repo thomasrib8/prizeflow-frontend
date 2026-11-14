@@ -16,7 +16,7 @@ export function resultScreenFromCampaign(c) {
   return { ...DEFAULT_RESULT_SCREEN, ...(raw || {}), button: { ...DEFAULT_RESULT_SCREEN.button, ...((raw && raw.button) || {}) } };
 }
 
-const hint = { fontSize: 12, color: '#94A3B8', marginTop: 4, lineHeight: 1.5 };
+const hint = { fontSize: 12, color: 'var(--text-light)', marginTop: 4, lineHeight: 1.5 };
 
 // Mini phone showing the guest's final screen exactly as the real one builds it.
 function Preview({ value, guestT, giftName }) {
@@ -45,7 +45,7 @@ export default function ResultScreenCard({ value, onChange, language = 'fr', com
 
   return (
     <Card title={t('campaignSettings.resultScreen.title')} className="mt-card">
-      {!compact && <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px', lineHeight: 1.6 }}>{t('campaignSettings.resultScreen.desc')}</p>}
+      {!compact && <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 14px', lineHeight: 1.6 }}>{t('campaignSettings.resultScreen.desc')}</p>}
       <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
         <div style={{ flex: '1 1 300px', minWidth: 0 }}>
           <div className="field">
@@ -117,7 +117,7 @@ export default function ResultScreenCard({ value, onChange, language = 'fr', com
         </div>
         {!compact && (
           <div style={{ flex: '0 0 auto', margin: '0 auto' }}>
-            <div style={{ fontSize: 12, color: '#64748B', fontWeight: 600, textAlign: 'center', marginBottom: 8 }}>{t('campaignSettings.resultScreen.preview')}</div>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 600, textAlign: 'center', marginBottom: 8 }}>{t('campaignSettings.resultScreen.preview')}</div>
             <Preview value={rs} guestT={guestT} giftName={t('campaignSettings.resultScreen.sampleGift')} />
           </div>
         )}

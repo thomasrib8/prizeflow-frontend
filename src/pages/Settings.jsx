@@ -72,7 +72,7 @@ function MfaCard() {
   }
 
   if (!status) return null;
-  const note = { fontSize: 13, color: '#64748B', margin: '0 0 14px', lineHeight: 1.6 };
+  const note = { fontSize: 13, color: 'var(--text-muted)', margin: '0 0 14px', lineHeight: 1.6 };
   return (
     <Card title={t('settings.mfa.title')} className="mt-card">
       {error && <div className="error-banner">{error}</div>}
@@ -87,7 +87,7 @@ function MfaCard() {
       {step === 'idle' && status.enabled && (
         <>
           <p style={{ ...note, color: '#047857', fontWeight: 600 }}>✓ {t('settings.mfa.isOn', { count: status.recoveryCodesLeft })}</p>
-          <Button type="button" variant="ghost" onClick={() => setStep('disable')} style={{ color: '#EF4444' }}>{t('settings.mfa.disableBtn')}</Button>
+          <Button type="button" variant="ghost" onClick={() => setStep('disable')} style={{ color: 'var(--red-text)' }}>{t('settings.mfa.disableBtn')}</Button>
         </>
       )}
 
@@ -107,7 +107,7 @@ function MfaCard() {
           <p style={note}>{t('settings.mfa.scanHelp')}</p>
           <div style={{ display: 'flex', gap: 18, alignItems: 'center', flexWrap: 'wrap', marginBottom: 14 }}>
             <img src={setup.qr} alt="QR" width={180} height={180} style={{ border: '1px solid #D8E1F3', borderRadius: 10 }} />
-            <div style={{ fontSize: 12, color: '#64748B' }}>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
               {t('settings.mfa.manualKey')}<br />
               <code style={{ fontSize: 14, color: '#0B1437', wordBreak: 'break-all', letterSpacing: 1 }}>{setup.secret.match(/.{1,4}/g).join(' ')}</code>
             </div>
@@ -255,17 +255,17 @@ function InformationModule() {
               </div>
             ))}
           </div>
-          <p style={{ fontSize: 12, color: '#64748B', margin: '12px 0 0', lineHeight: 1.5 }}>{t('settings.information.rulesHint')}</p>
+          <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '12px 0 0', lineHeight: 1.5 }}>{t('settings.information.rulesHint')}</p>
           {emailChanged && (
             <div className="field" style={{ marginTop: 14, maxWidth: 360 }}>
               <label>{t('settings.information.emailChangePasswordLabel')}</label>
               <input type="password" autoComplete="current-password" value={emailPassword} onChange={(e) => setEmailPassword(e.target.value)} />
-              <div style={{ fontSize: 12, color: '#64748B', marginTop: 4 }}>{t('settings.information.emailChangeHint')}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>{t('settings.information.emailChangeHint')}</div>
             </div>
           )}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 16 }}>
             <SaveButton type="submit" disabled={saving || (emailChanged && !emailPassword)} saving={saving} failed={!!error}>{t('common.save')}</SaveButton>
-            {saveMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{saveMsg}</span>}
+            {saveMsg && <span style={{ fontSize: 13, color: 'var(--green-text)', fontWeight: 600 }}>{saveMsg}</span>}
           </div>
         </form>
       </Card>
@@ -286,20 +286,20 @@ function InformationModule() {
               {pwSaving ? t('common.saving') : t('settings.information.changePasswordBtn')}
             </Button>
           </div>
-          {pwMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{pwMsg}</span>}
+          {pwMsg && <span style={{ fontSize: 13, color: 'var(--green-text)', fontWeight: 600 }}>{pwMsg}</span>}
         </form>
       </Card>
 
       <MfaCard />
 
       <Card title={t('settings.information.deleteAccountTitle')} className="mt-card">
-        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px' }}>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 14px' }}>
           {t('settings.information.deleteAccountDescription')}
         </p>
         {deletionRequested ? (
-          <p style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{t('settings.information.deletionRequestSent')}</p>
+          <p style={{ fontSize: 13, color: 'var(--green-text)', fontWeight: 600 }}>{t('settings.information.deletionRequestSent')}</p>
         ) : (
-          <Button variant="ghost" disabled={deletionBusy} onClick={handleRequestDeletion} style={{ color: '#EF4444' }}>
+          <Button variant="ghost" disabled={deletionBusy} onClick={handleRequestDeletion} style={{ color: 'var(--red-text)' }}>
             {deletionBusy ? t('settings.information.sendingBtn') : t('settings.information.requestAccountDeletionBtn')}
           </Button>
         )}
@@ -346,10 +346,10 @@ function GoogleReviewModule() {
       {error && <div className="error-banner">{error}</div>}
 
       <Card title={t('settings.googleReview.googleReviewLinkTitle')} className="mt-card">
-        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 10px', lineHeight: 1.6 }}>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 10px', lineHeight: 1.6 }}>
           {t('settings.googleReview.googleReviewLinkDesc1')}
         </p>
-        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 16px', lineHeight: 1.7 }}>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 16px', lineHeight: 1.7 }}>
           <strong>{t('settings.googleReview.howToGetItLabel')}</strong> {t('settings.googleReview.howToGetItText1')} <strong>{t('settings.googleReview.askForReviewsLabel')}</strong> {t('settings.googleReview.howToGetItText2')} <code>https://g.page/r/.../review</code>. {t('settings.googleReview.howToGetItText3')}
         </p>
         <form onSubmit={handleSaveUrl} style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
@@ -361,7 +361,7 @@ function GoogleReviewModule() {
             style={{ flex: 1, padding: '10px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 14 }}
           />
           <SaveButton type="submit" disabled={saving || !urlDirty} saving={saving} failed={!!error} dirty={urlDirty}>{t('common.save')}</SaveButton>
-          {saveMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{saveMsg}</span>}
+          {saveMsg && <span style={{ fontSize: 13, color: 'var(--green-text)', fontWeight: 600 }}>{saveMsg}</span>}
         </form>
         <button
           onClick={() => setShowVideo(true)}
@@ -390,7 +390,7 @@ function GoogleReviewModule() {
                 onClick={() => setShowVideo(false)}
                 style={{
                   background: 'none', border: '1px solid #E2E8F0', borderRadius: 8, padding: '5px 12px',
-                  fontSize: 13, color: '#64748B', cursor: 'pointer', fontFamily: 'inherit',
+                  fontSize: 13, color: 'var(--text-muted)', cursor: 'pointer', fontFamily: 'inherit',
                 }}
               >{t('common.close')}</button>
             </div>
@@ -451,7 +451,7 @@ function SocialMediaModule() {
       {error && <div className="error-banner">{error}</div>}
 
       <Card title={t('settings.socialMedia.socialLinksTitle')} className="mt-card">
-        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 16px', lineHeight: 1.6 }}>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 16px', lineHeight: 1.6 }}>
           {t('settings.socialMedia.socialLinksDesc')}
         </p>
         <form onSubmit={handleSave}>
@@ -468,7 +468,7 @@ function SocialMediaModule() {
           ))}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <SaveButton type="submit" disabled={saving || !dirty} saving={saving} failed={!!error} dirty={dirty}>{t('common.save')}</SaveButton>
-            {saveMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{saveMsg}</span>}
+            {saveMsg && <span style={{ fontSize: 13, color: 'var(--green-text)', fontWeight: 600 }}>{saveMsg}</span>}
           </div>
         </form>
       </Card>
@@ -652,7 +652,7 @@ function EmailTemplatesModule() {
       {error && <div className="error-banner">{error}</div>}
 
       <Card title={t('settings.emailTemplates.headerLogoTitle')} className="mt-card">
-        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px', lineHeight: 1.6 }}>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 14px', lineHeight: 1.6 }}>
           {t('settings.emailTemplates.headerLogoDesc')}
         </p>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
@@ -663,7 +663,7 @@ function EmailTemplatesModule() {
             {hasCustomLogo && logoPreviewUrl ? (
               <img src={logoPreviewUrl} alt="Custom logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
             ) : (
-              <span style={{ fontSize: 11, color: '#94A3B8' }}>{t('settings.emailTemplates.defaultLabel')}</span>
+              <span style={{ fontSize: 11, color: 'var(--text-light)' }}>{t('settings.emailTemplates.defaultLabel')}</span>
             )}
           </div>
           <label style={{
@@ -674,7 +674,7 @@ function EmailTemplatesModule() {
             <input type="file" accept="image/png,image/jpeg,image/webp" onChange={handleLogoUpload} disabled={logoBusy} style={{ display: 'none' }} />
           </label>
           {hasCustomLogo && (
-            <Button variant="ghost" disabled={logoBusy} onClick={handleLogoRemove} style={{ color: '#EF4444' }}>
+            <Button variant="ghost" disabled={logoBusy} onClick={handleLogoRemove} style={{ color: 'var(--red-text)' }}>
               {t('settings.emailTemplates.removeBtn')}
             </Button>
           )}
@@ -688,7 +688,7 @@ function EmailTemplatesModule() {
             />
             <span style={{ fontSize: 13, color: '#334155' }}>
               {t('settings.emailTemplates.useInPreSpinFormLabel')}
-              <span style={{ display: 'block', fontSize: 11, color: '#94A3B8' }}>
+              <span style={{ display: 'block', fontSize: 11, color: 'var(--text-light)' }}>
                 {t('settings.emailTemplates.useInPreSpinFormDesc')}
               </span>
             </span>
@@ -697,7 +697,7 @@ function EmailTemplatesModule() {
       </Card>
 
       <Card title={t('settings.emailTemplates.senderTitle')} className="mt-card">
-        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 16px', lineHeight: 1.6 }}>{t('settings.emailTemplates.senderDesc')}</p>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 16px', lineHeight: 1.6 }}>{t('settings.emailTemplates.senderDesc')}</p>
         <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginBottom: 12 }}>
           <div className="field" style={{ margin: 0, flex: 1, minWidth: 220 }}>
             <label>{t('settings.emailTemplates.senderNameLabel')}</label>
@@ -713,15 +713,15 @@ function EmailTemplatesModule() {
           <div><b>{t('settings.emailTemplates.senderPreviewFrom')}</b> {senderName || 'SPARK'} &lt;{senderAddress}&gt;</div>
           <div><b>{t('settings.emailTemplates.senderPreviewReply')}</b> {replyTo || senderAddress}</div>
         </div>
-        <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 14px', lineHeight: 1.5 }}>{t('settings.emailTemplates.senderNote')}</p>
+        <p style={{ fontSize: 12, color: 'var(--text-light)', margin: '0 0 14px', lineHeight: 1.5 }}>{t('settings.emailTemplates.senderNote')}</p>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <SaveButton onClick={handleSaveSender} disabled={senderSaving} saving={senderSaving} failed={!!error}>{t('common.save')}</SaveButton>
-          {senderMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{senderMsg}</span>}
+          {senderMsg && <span style={{ fontSize: 13, color: 'var(--green-text)', fontWeight: 600 }}>{senderMsg}</span>}
         </div>
       </Card>
 
       <Card title={t('settings.emailTemplates.brandingTitle')} className="mt-card">
-        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 16px', lineHeight: 1.6 }}>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 16px', lineHeight: 1.6 }}>
           {t('settings.emailTemplates.brandingDesc')}
         </p>
         <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', marginBottom: 14 }}>
@@ -787,12 +787,12 @@ function EmailTemplatesModule() {
           {(headerColor || footerText || logoSize) && (
             <Button variant="ghost" onClick={resetBrandingToDefault} disabled={brandingSaving}>{t('settings.emailTemplates.resetToDefaultBtn')}</Button>
           )}
-          {brandingSaveMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{brandingSaveMsg}</span>}
+          {brandingSaveMsg && <span style={{ fontSize: 13, color: 'var(--green-text)', fontWeight: 600 }}>{brandingSaveMsg}</span>}
         </div>
       </Card>
 
       <Card title={t('settings.emailTemplates.messageTextTitle')} className="mt-card">
-        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 16px', lineHeight: 1.6 }}>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 16px', lineHeight: 1.6 }}>
           {t('settings.emailTemplates.messageTextDesc')} <code>{'{{firstName}}'}</code>, <code>{'{{giftName}}'}</code>
           {method === 'code' && <> , <code>{'{{code}}'}</code></>}.
         </p>
@@ -835,7 +835,7 @@ function EmailTemplatesModule() {
           {isCustomized && (
             <Button variant="ghost" onClick={resetToDefault} disabled={saving}>{t('settings.emailTemplates.resetToDefaultBtn')}</Button>
           )}
-          {saveMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{saveMsg}</span>}
+          {saveMsg && <span style={{ fontSize: 13, color: 'var(--green-text)', fontWeight: 600 }}>{saveMsg}</span>}
         </div>
       </Card>
     </>
@@ -930,7 +930,7 @@ function PrivacyModule() {
   }
 
   const dirty = saved && (form.retentionMonths !== saved.retentionMonths || form.privacyPolicyUrl !== saved.privacyPolicyUrl || form.marketingConsentEnabled !== saved.marketingConsentEnabled);
-  const note = { fontSize: 13, color: '#64748B', margin: '0 0 14px', lineHeight: 1.6 };
+  const note = { fontSize: 13, color: 'var(--text-muted)', margin: '0 0 14px', lineHeight: 1.6 };
 
   return (
     <>
@@ -943,11 +943,11 @@ function PrivacyModule() {
           <div className="field">
             <label>{t('settings.privacy.policyUrlLabel')}</label>
             <input type="url" placeholder="https://your-company.com/privacy" value={form.privacyPolicyUrl} onChange={(e) => setForm((f) => ({ ...f, privacyPolicyUrl: e.target.value }))} />
-            <div style={{ fontSize: 12, color: '#64748B', marginTop: 4 }}>{t('settings.privacy.policyUrlHelp')}</div>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>{t('settings.privacy.policyUrlHelp')}</div>
           </div>
           <label style={{ display: 'flex', gap: 10, alignItems: 'flex-start', fontSize: 13, cursor: 'pointer', margin: '4px 0 16px' }}>
             <input type="checkbox" checked={form.marketingConsentEnabled} onChange={(e) => setForm((f) => ({ ...f, marketingConsentEnabled: e.target.checked }))} style={{ marginTop: 3 }} />
-            <span><strong>{t('settings.privacy.marketingLabel')}</strong><br /><span style={{ color: '#64748B' }}>{t('settings.privacy.marketingHelp')}</span></span>
+            <span><strong>{t('settings.privacy.marketingLabel')}</strong><br /><span style={{ color: 'var(--text-muted)' }}>{t('settings.privacy.marketingHelp')}</span></span>
           </label>
           <div className="field">
             <label>{t('settings.privacy.retentionLabel')}</label>
@@ -955,11 +955,11 @@ function PrivacyModule() {
               <option value="">{t('settings.privacy.retentionOff')}</option>
               {RETENTION_OPTIONS.map((m) => <option key={m} value={String(m)}>{t('settings.privacy.retentionMonths', { count: m })}</option>)}
             </select>
-            <div style={{ fontSize: 12, color: '#64748B', marginTop: 4 }}>{t('settings.privacy.retentionHelp')}</div>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>{t('settings.privacy.retentionHelp')}</div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <SaveButton type="submit" disabled={saving || !dirty} saving={saving} failed={!!error} dirty={dirty}>{t('common.save')}</SaveButton>
-            {saveMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{saveMsg}</span>}
+            {saveMsg && <span style={{ fontSize: 13, color: 'var(--green-text)', fontWeight: 600 }}>{saveMsg}</span>}
           </div>
         </form>
       </Card>
@@ -972,8 +972,8 @@ function PrivacyModule() {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
           <Button type="button" variant="secondary" disabled={personBusy || !personEmail.trim()} onClick={handleExport}>{t('settings.privacy.exportBtn')}</Button>
-          <Button type="button" variant="ghost" disabled={personBusy || !personEmail.trim()} onClick={handleErase} style={{ color: '#EF4444' }}>{t('settings.privacy.eraseBtn')}</Button>
-          {personMsg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{personMsg}</span>}
+          <Button type="button" variant="ghost" disabled={personBusy || !personEmail.trim()} onClick={handleErase} style={{ color: 'var(--red-text)' }}>{t('settings.privacy.eraseBtn')}</Button>
+          {personMsg && <span style={{ fontSize: 13, color: 'var(--green-text)', fontWeight: 600 }}>{personMsg}</span>}
         </div>
         <p style={{ ...note, margin: '14px 0 0', fontSize: 12 }}>{t('settings.privacy.legalNote')}</p>
       </Card>
@@ -1026,7 +1026,7 @@ function OfflineModeModule() {
     setAlertGap(minutes); setError('');
     try { await api.updateAccountSettings({ cloudLossAlertCooldownMinutes: minutes }); } catch (e) { setAlertGap(before); setError(e.message); }
   }
-  const note = { fontSize: 13, color: '#64748B', margin: '0 0 14px', lineHeight: 1.6 };
+  const note = { fontSize: 13, color: 'var(--text-muted)', margin: '0 0 14px', lineHeight: 1.6 };
   const weak = code && (code.length < 8 || /^\d+$/.test(code));
 
   return (
@@ -1036,9 +1036,9 @@ function OfflineModeModule() {
         <p style={note}>{t('settings.offlineMode.intro')}</p>
         <table style={{ fontSize: 13, marginBottom: 16, borderCollapse: 'collapse' }}>
           <tbody>
-            <tr><td style={{ padding: '4px 16px 4px 0', color: '#64748B' }}>{t('settings.offlineMode.wifiLabel')}</td><td><strong>Spark-Local</strong></td></tr>
-            <tr><td style={{ padding: '4px 16px 4px 0', color: '#64748B' }}>{t('settings.offlineMode.addressLabel')}</td><td><strong>http://sparkoff.box</strong></td></tr>
-            <tr><td style={{ padding: '4px 16px 4px 0', color: '#64748B' }}>{t('settings.offlineMode.addressAltLabel')}</td><td>{getBoxUrl()}/pwa/home</td></tr>
+            <tr><td style={{ padding: '4px 16px 4px 0', color: 'var(--text-muted)' }}>{t('settings.offlineMode.wifiLabel')}</td><td><strong>Spark-Local</strong></td></tr>
+            <tr><td style={{ padding: '4px 16px 4px 0', color: 'var(--text-muted)' }}>{t('settings.offlineMode.addressLabel')}</td><td><strong>http://sparkoff.box</strong></td></tr>
+            <tr><td style={{ padding: '4px 16px 4px 0', color: 'var(--text-muted)' }}>{t('settings.offlineMode.addressAltLabel')}</td><td>{getBoxUrl()}/pwa/home</td></tr>
           </tbody>
         </table>
         <div style={{ margin: '0 0 16px' }}>
@@ -1050,7 +1050,7 @@ function OfflineModeModule() {
         </p>
         {codeSet && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '0 0 16px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 13, color: '#64748B' }}>{t('settings.offlineMode.currentCode')}</span>
+            <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('settings.offlineMode.currentCode')}</span>
             <code style={{ fontSize: 15, fontWeight: 700, letterSpacing: shown ? '0.02em' : '0.15em', background: '#F1F5F9', padding: '6px 12px', borderRadius: 8, userSelect: shown ? 'all' : 'none' }}>
               {shown ? shown : shown === '' ? '—' : '••••••••••'}
             </code>
@@ -1070,12 +1070,12 @@ function OfflineModeModule() {
         </div>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
           <Button type="button" disabled={saving || code.length < 6} onClick={() => save(code)}>{t('settings.offlineMode.saveBtn')}</Button>
-          {codeSet && <Button type="button" variant="ghost" disabled={saving} onClick={() => save('')} style={{ color: '#EF4444' }}>{t('settings.offlineMode.removeBtn')}</Button>}
-          {msg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{msg}</span>}
+          {codeSet && <Button type="button" variant="ghost" disabled={saving} onClick={() => save('')} style={{ color: 'var(--red-text)' }}>{t('settings.offlineMode.removeBtn')}</Button>}
+          {msg && <span style={{ fontSize: 13, color: 'var(--green-text)', fontWeight: 600 }}>{msg}</span>}
         </div>
         <label style={{ display: 'flex', gap: 10, alignItems: 'flex-start', margin: '18px 0 0', cursor: 'pointer' }}>
           <input type="checkbox" checked={alertOn} onChange={(e) => changeAlert(e.target.checked)} style={{ width: 18, height: 18, marginTop: 2, flexShrink: 0 }} />
-          <span style={{ fontSize: 13, lineHeight: 1.55 }}><strong>{t('settings.offlineMode.alertLabel')}</strong><br /><span style={{ color: '#64748B' }}>{t('settings.offlineMode.alertHelp')}</span></span>
+          <span style={{ fontSize: 13, lineHeight: 1.55 }}><strong>{t('settings.offlineMode.alertLabel')}</strong><br /><span style={{ color: 'var(--text-muted)' }}>{t('settings.offlineMode.alertHelp')}</span></span>
         </label>
         {alertOn && (
           <div style={{ display: 'flex', gap: 10, alignItems: 'center', margin: '10px 0 0 28px', flexWrap: 'wrap' }}>
@@ -1171,28 +1171,28 @@ function AlertThresholdsModule() {
                 </label>
                 <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                   <input type="number" min="0" step={r.step} value={d.value ?? ''} onChange={(e) => set(r.key, { value: e.target.value })} style={{ width: 90 }} />
-                  <span style={{ fontSize: 12, color: '#64748B' }}>{r.unit === 'lookups' ? t('settings.alerts.unitLookups') : r.unit === 'x' ? t('settings.alerts.unitTimes') : r.unit}</span>
+                  <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{r.unit === 'lookups' ? t('settings.alerts.unitLookups') : r.unit === 'x' ? t('settings.alerts.unitTimes') : r.unit}</span>
                 </div>
               </div>
             );
           })}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14 }}>
             <SaveButton type="submit" disabled={saving || !dirty} saving={saving} failed={!!error} dirty={dirty}>{t('common.save')}</SaveButton>
-            {msg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{msg}</span>}
+            {msg && <span style={{ fontSize: 13, color: 'var(--green-text)', fontWeight: 600 }}>{msg}</span>}
           </div>
         </form>
       </Card>
 
       <Card title={t('settings.alerts.recentTitle')} className="mt-card">
         {alertsList.length === 0 ? (
-          <p style={{ fontSize: 13, color: '#64748B', margin: 0 }}>{t('settings.alerts.none')}</p>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: 0 }}>{t('settings.alerts.none')}</p>
         ) : (
           <>
             {alertsList.slice(0, 15).map((a) => (
               <div key={a.id} style={{ display: 'flex', gap: 10, padding: '8px 0', borderBottom: '1px solid #F1F5F9', fontSize: 13, opacity: a.readAt ? 0.6 : 1 }}>
                 <Badge tone={a.level === 'critical' ? 'red' : 'orange'}>{a.level}</Badge>
                 <span style={{ flex: 1 }}>{a.message}</span>
-                <span style={{ color: '#94A3B8', fontSize: 12 }}>{String(a.createdAt).slice(0, 10)}</span>
+                <span style={{ color: 'var(--text-light)', fontSize: 12 }}>{String(a.createdAt).slice(0, 10)}</span>
               </div>
             ))}
             {alertsList.some((a) => !a.readAt) && <div style={{ marginTop: 12 }}><Button variant="secondary" onClick={markRead}>{t('settings.alerts.markRead')}</Button></div>}

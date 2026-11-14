@@ -51,7 +51,7 @@ export default function LinkedInAdminCard({ userId }) {
             <input type="checkbox" checked={data.enabled} disabled={busy} onChange={(e) => update({ enabled: e.target.checked })} style={{ width: 18, height: 18 }} />
             <span style={{ fontSize: 14, fontWeight: 600 }}>{t('linkedin.adminSwitch')}</span>
           </label>
-          <p style={{ fontSize: 12, color: '#94A3B8', margin: '6px 0 0 28px' }}>{t('linkedin.adminHelp')}</p>
+          <p style={{ fontSize: 12, color: 'var(--text-light)', margin: '6px 0 0 28px' }}>{t('linkedin.adminHelp')}</p>
 
           {data.enabled && (
             <>
@@ -80,7 +80,7 @@ export default function LinkedInAdminCard({ userId }) {
 
           <h4 style={{ margin: '22px 0 8px', fontSize: 14 }}>{t('linkedin.historyTitle')}</h4>
           {data.history.length === 0 ? (
-            <p style={{ fontSize: 13, color: '#94A3B8', margin: 0 }}>{t('linkedin.historyEmpty')}</p>
+            <p style={{ fontSize: 13, color: 'var(--text-light)', margin: 0 }}>{t('linkedin.historyEmpty')}</p>
           ) : (
             <div style={{ overflowX: 'auto' }}>
               <table className="data-table">
@@ -109,7 +109,7 @@ export default function LinkedInAdminCard({ userId }) {
               </table>
             </div>
           )}
-          <p style={{ fontSize: 11.5, color: '#94A3B8', margin: '10px 0 0' }}>{t('linkedin.apolloNote')}</p>
+          <p style={{ fontSize: 11.5, color: 'var(--text-light)', margin: '10px 0 0' }}>{t('linkedin.apolloNote')}</p>
         </>
       )}
     </Card>

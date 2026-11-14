@@ -1,0 +1,16 @@
+/* Campaign creation: where you are in the 4 steps. Numbered dots joined by a line; on a phone only the current step keeps its label. */
+.wiz-steps { list-style: none; margin: 0 0 20px; padding: 0; display: flex; align-items: flex-start; gap: 0; }
+.wiz-step { position: relative; flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 7px; text-align: center; padding: 0 4px; }
+.wiz-step::before { content: ""; position: absolute; top: 14px; right: 50%; width: 100%; height: 2px; background: #DCE3F0; z-index: 0; }
+.wiz-step:first-child::before { display: none; }
+.wiz-step.done::before, .wiz-step.on::before { background: var(--navy); }
+.wiz-num { position: relative; z-index: 1; width: 30px; height: 30px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; background: #E7ECF6; color: var(--text-muted); border: 2px solid #E7ECF6; transition: background .2s, color .2s, border-color .2s; }
+.wiz-step.on .wiz-num { background: var(--navy); border-color: var(--navy); color: #fff; box-shadow: 0 0 0 4px rgba(0, 85, 248, .16); }
+.wiz-step.done .wiz-num { background: #fff; border-color: var(--navy); color: var(--navy); }
+.wiz-label { font-size: 12px; font-weight: 600; line-height: 1.3; color: var(--text-muted); text-wrap: balance; }
+.wiz-step.on .wiz-label { font-weight: 800; color: var(--text); }
+@media (max-width: 640px) {
+  .wiz-label { display: none; }
+  .wiz-step.on .wiz-label { display: none; } /* the page subtitle already names the current step */
+}
+@media (prefers-reduced-motion: reduce) { .wiz-num { transition: none; } }

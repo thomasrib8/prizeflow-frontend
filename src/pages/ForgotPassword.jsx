@@ -62,7 +62,7 @@ export default function ForgotPassword() {
           {loading ? t('auth.forgotPassword.sendingBtn') : t('auth.forgotPassword.sendResetLinkBtn')}
         </button>
 
-        <p style={{ fontSize: 13, color: '#64748B', marginTop: 16 }}>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 16 }}>
           <Link to="/login">{t('auth.backToSignIn')}</Link>
         </p>
       </form>

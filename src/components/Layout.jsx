@@ -7,6 +7,7 @@ import { useWheelSocket } from '../hooks/useWheelSocket';
 import { api } from '../api/client';
 import { OfflineBoxPill, useOfflineBox } from './OfflineBoxStatus';
 import ConnectionDiagnosticsModal from './ConnectionDiagnosticsModal';
+import ErrorBoundary from './ErrorBoundary';
 import './Layout.css';
 
 // Native-language labels, same as NewCampaign.jsx/EditCampaign.jsx's guest
@@ -159,7 +160,7 @@ export default function Layout({ children }) {
           <button
             className={`agent-pill ${agentConnected ? 'ok' : 'off'}`}
             onClick={() => setShowDiagnostics(true)}
-            style={{ border: 'none', cursor: 'pointer', font: 'inherit' }}
+            style={{ border: 'none', cursor: 'pointer', fontFamily: 'inherit', width: '100%', textAlign: 'left' }}
           >
             <span className="dot" />
             {agentConnected ? t('pwa.wheelReady') : t('pwa.wheelOffline')}
@@ -193,7 +194,7 @@ export default function Layout({ children }) {
           </NavLink>
         </div>
       </aside>
-      <main className="content">{children}</main>
+      <main className="content"><ErrorBoundary resetKey={location.pathname}>{children}</ErrorBoundary></main>
       {showDiagnostics && (
         <ConnectionDiagnosticsModal
           onClose={() => setShowDiagnostics(false)}

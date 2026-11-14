@@ -39,7 +39,7 @@ export function settingsFromCampaign(c) {
 }
 
 const selectStyle = { width: '100%', padding: '10px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 14, fontFamily: 'inherit', background: 'white' };
-const hintStyle = { fontSize: 12, color: '#94A3B8', marginTop: 4, lineHeight: 1.5 };
+const hintStyle = { fontSize: 12, color: 'var(--text-light)', marginTop: 4, lineHeight: 1.5 };
 const warnStyle = { background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: 12, fontSize: 13, color: '#92400E', lineHeight: 1.5 };
 
 // The campaign "Settings" cards: Google review invite (with an optional
@@ -81,7 +81,7 @@ export default function CampaignSettingsForm({ value, onChange, compact = false,
     <>
       <Card title={t('campaignSettings.googleReviewTitle')} className="mt-card">
         {!compact && (
-          <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px', lineHeight: 1.6 }}>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 14px', lineHeight: 1.6 }}>
             {t('campaignSettings.googleReviewDesc')}
           </p>
         )}
@@ -129,7 +129,7 @@ export default function CampaignSettingsForm({ value, onChange, compact = false,
         )}
 
         {reviewOn && !compact && (
-          <p style={{ fontSize: 12, color: '#64748B', margin: 0, lineHeight: 1.5 }}>
+          <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0, lineHeight: 1.5 }}>
             {t('settings.googleReview.neverConditionNote')}
           </p>
         )}
@@ -137,7 +137,7 @@ export default function CampaignSettingsForm({ value, onChange, compact = false,
 
       <Card title={t('campaignSettings.socialTitle')} className="mt-card">
         {!compact && (
-          <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px', lineHeight: 1.6 }}>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 14px', lineHeight: 1.6 }}>
             {t('campaignSettings.socialDesc')}
           </p>
         )}
@@ -158,7 +158,7 @@ export default function CampaignSettingsForm({ value, onChange, compact = false,
         {/* the links of THIS campaign (empty = the account's, shown greyed): only when the invite is on, same card as the switch */}
         {socialLinks && value.socialMediaRequired && (
           <div style={{ marginTop: 4 }}>
-            <p style={{ fontSize: 12, color: '#64748B', margin: '0 0 10px', lineHeight: 1.5 }}>{t('campaignSettings.socialLinksHint')}</p>
+            <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 10px', lineHeight: 1.5 }}>{t('campaignSettings.socialLinksHint')}</p>
             {SOCIAL_PLATFORMS.map((p) => (
               <div className="field" key={p.key}>
                 <label><SocialGlyph name={p.key} size={16} /> {p.label}</label>
@@ -172,7 +172,7 @@ export default function CampaignSettingsForm({ value, onChange, compact = false,
           </div>
         )}
         {!socialLinks && account && configuredSocials.length > 0 && !compact && (
-          <div style={{ fontSize: 13, color: '#64748B' }}>
+          <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>
             {t('campaignSettings.socialLinksUsed')}{' '}
             {configuredSocials.map((p, i) => <span key={p.key}>{i > 0 ? ' · ' : ''}<p.Svg size={15} /> {p.label}</span>)}
           </div>
@@ -193,7 +193,7 @@ export default function CampaignSettingsForm({ value, onChange, compact = false,
       {enrichedCrm && account?.linkedinSearch?.enabled && (
         <Card title={<span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}><LinkedInIcon style={{ width: 18, height: 18 }} />{t('linkedin.cardTitle')}</span>} className="mt-card">
           {!compact && (
-            <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px', lineHeight: 1.6 }}>{t('linkedin.cardDesc')}</p>
+            <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 14px', lineHeight: 1.6 }}>{t('linkedin.cardDesc')}</p>
           )}
           <label style={{ display: 'flex', gap: 10, alignItems: 'center', cursor: 'pointer' }}>
             <input

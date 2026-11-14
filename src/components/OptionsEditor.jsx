@@ -35,7 +35,7 @@ export default function OptionsEditor({ options, onChange }) {
               aria-label={t('builders.removeOptionAriaLabel')}
               style={{
                 width: 28, height: 28, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: 'none', border: 'none', borderRadius: 6, color: '#94A3B8', cursor: 'pointer', fontSize: 16, lineHeight: 1,
+                background: 'none', border: 'none', borderRadius: 6, color: 'var(--text-light)', cursor: 'pointer', fontSize: 16, lineHeight: 1,
               }}
             >×</button>
           </div>

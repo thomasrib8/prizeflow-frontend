@@ -59,7 +59,7 @@ export default function EventNameField({ value, onChange, place, onPlace }) {
               <button key={r.id} type="button" role="option" onClick={() => pick(r)}
                 style={{ display: 'block', width: '100%', textAlign: 'left', padding: '9px 12px', border: 0, borderBottom: '1px solid #F1F5F9', background: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>
                 <div style={{ fontSize: 14, fontWeight: 600 }}>{r.name}{r.own && <span style={{ marginLeft: 8, fontSize: 11, color: '#B45309' }}>{t('eventField.ownProposal')}</span>}</div>
-                <div style={{ fontSize: 12, color: '#64748B' }}>{[r.venue, r.city].filter(Boolean).join(' · ')}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{[r.venue, r.city].filter(Boolean).join(' · ')}</div>
               </button>
             ))}
           </div>

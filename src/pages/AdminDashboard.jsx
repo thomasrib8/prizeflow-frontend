@@ -38,10 +38,10 @@ function rangeFor(preset, from, to) {
 function Delta({ cur, prev, money }) {
   const { t } = useTranslation('admin');
   if (prev === null || prev === undefined) return null;
-  if (!prev) return <span style={{ fontSize: 12, color: '#94A3B8' }}>{t('adminDash.na')}</span>;
+  if (!prev) return <span style={{ fontSize: 12, color: 'var(--text-light)' }}>{t('adminDash.na')}</span>;
   const d = ((cur - prev) / Math.abs(prev)) * 100;
   const up = d >= 0;
-  return <span style={{ fontSize: 12, fontWeight: 600, color: up ? '#047857' : '#B91C1C' }}>{up ? '▲' : '▼'} {up ? '+' : ''}{d.toLocaleString(undefined, { maximumFractionDigits: 0 })} % {money ? '' : ''}<span style={{ fontWeight: 400, color: '#94A3B8' }}> {t('adminDash.vsPrev')}</span></span>;
+  return <span style={{ fontSize: 12, fontWeight: 600, color: up ? '#047857' : '#B91C1C' }}>{up ? '▲' : '▼'} {up ? '+' : ''}{d.toLocaleString(undefined, { maximumFractionDigits: 0 })} % {money ? '' : ''}<span style={{ fontWeight: 400, color: 'var(--text-light)' }}> {t('adminDash.vsPrev')}</span></span>;
 }
 
 function Kpi({ id, label, value, sub, cur, prev, money, reliability }) {
@@ -191,7 +191,7 @@ export default function AdminDashboard() {
           </div>
 
           <Card title={t('adminDash.chartRevenue')} className="mt-card">
-            {chart.length === 0 ? <p style={{ fontSize: 13, color: '#64748B', margin: 0 }}>{t('adminDash.noData')}</p> : (
+            {chart.length === 0 ? <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: 0 }}>{t('adminDash.noData')}</p> : (
               <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
                 <div style={{ flex: '2 1 420px', height: 280, minWidth: 0 }}>
                   <ResponsiveContainer width="100%" height="100%">
@@ -218,11 +218,11 @@ export default function AdminDashboard() {
           </div>
 
           <Card title={t('adminDash.chartApi')} className="mt-card">
-            {chart.length === 0 ? <p style={{ fontSize: 13, color: '#64748B', margin: 0 }}>{t('adminDash.noData')}</p> : (
+            {chart.length === 0 ? <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: 0 }}>{t('adminDash.noData')}</p> : (
               <div style={{ height: 240 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <ComposedChart data={chart}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} /><XAxis dataKey="bucket" tick={{ fontSize: 11 }} /><YAxis tick={{ fontSize: 11 }} /><Tooltip formatter={(v) => Number(v).toLocaleString(undefined, { style: 'currency', currency: 'EUR' })} /><Legend />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} /><XAxis dataKey="bucket" tick={{ fontSize: 11 }} /><YAxis tick={{ fontSize: 11 }} /><Tooltip formatter={(v) => Number(v).toLocaleString(undefined, { style: 'currency', currency: 'EUR' })} /><Legend formatter={(v) => <span style={{ color: 'var(--text-muted)' }}>{v}</span>} />
                     <Bar dataKey="total" name={t('adminDash.kpi.recognized')} fill="#2E6BFF" /><Line dataKey="api" name={t('adminDash.kpi.apiCosts')} stroke="#EF4444" strokeWidth={2} dot={false} />
                   </ComposedChart>
                 </ResponsiveContainer>

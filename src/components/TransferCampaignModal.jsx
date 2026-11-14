@@ -40,7 +40,7 @@ export default function TransferCampaignModal({ campaign, onClose, onDone }) {
               <span style={{ width: 14, height: 14, borderRadius: '50%', border: `2px solid ${picked === u.id ? '#0055F8' : '#BFD4FF'}`, background: picked === u.id ? 'radial-gradient(#0055F8 45%, #fff 50%)' : '#fff', flex: 'none' }} />
               <span style={{ minWidth: 0 }}>
                 <b style={{ display: 'block', fontSize: 13.5 }}>{u.company || u.name}</b>
-                <span style={{ fontSize: 12, color: '#64748B' }}>{u.company ? `${u.name} · ` : ''}{u.email}</span>
+                <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{u.company ? `${u.name} · ` : ''}{u.email}</span>
               </span>
             </button>
           ))}

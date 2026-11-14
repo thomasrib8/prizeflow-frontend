@@ -86,14 +86,14 @@ export default function Login() {
           <div className="field" style={{ textAlign: 'left' }}>
             <label>{t('boxApp.codeLabel')}</label>
             <input type="password" autoComplete="off" value={code} onChange={e => setCode(e.target.value)} required autoFocus maxLength={100} />
-            <div style={{ fontSize: 12, color: '#64748B', marginTop: 6 }}>{t('boxApp.codeHelp')}</div>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6 }}>{t('boxApp.codeHelp')}</div>
           </div>
         ) : mfaToken ? (
           <div className="field" style={{ textAlign: 'left' }}>
             <label>{t('auth.login.mfaCodeLabel')}</label>
             <input type="text" inputMode="text" autoComplete="one-time-code" value={code} onChange={e => setCode(e.target.value)}
               placeholder="123 456" required autoFocus maxLength={20} />
-            <div style={{ fontSize: 12, color: '#64748B', marginTop: 6 }}>{t('auth.login.mfaCodeHelp')}</div>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6 }}>{t('auth.login.mfaCodeHelp')}</div>
           </div>
         ) : (
           <>
@@ -117,10 +117,10 @@ export default function Login() {
         </button>
 
         {!IS_BOX_BUILD && <>
-        <p style={{ fontSize: 13, color: '#64748B', marginTop: 16 }}>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 16 }}>
           <Link to="/forgot-password">{t('auth.login.forgotPasswordLink')}</Link>
         </p>
-        <p style={{ fontSize: 13, color: '#64748B', marginTop: 6 }}>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 6 }}>
           {t('auth.login.noAccountYetText')} <Link to="/register">{t('auth.login.createOneLink')}</Link>
         </p>
         </>}

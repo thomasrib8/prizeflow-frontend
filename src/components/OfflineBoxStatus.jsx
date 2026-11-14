@@ -84,7 +84,7 @@ export function OfflineReviews({ reviews, onChanged }) {
           <div key={r.id} style={{ background: 'white', borderRadius: 10, padding: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
             <div>
               <div style={{ fontWeight: 700 }}>{r.giftName || t('offlineBox.unknownGift')}</div>
-              <div style={{ fontSize: 12, color: '#64748B' }}>{t('offlineBox.reviewQuestion')}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('offlineBox.reviewQuestion')}</div>
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
               <Button size="sm" disabled={busy === r.id} onClick={() => settle(r.id, 'given')}>{t('offlineBox.given')}</Button>

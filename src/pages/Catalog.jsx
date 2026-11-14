@@ -8,7 +8,7 @@ import './admin-premium.css';
 // Admin › Catalogue des salons: the validation queue of what clients typed, correction, merge of duplicates, coordinates.
 const STATUS_TONE = { imported: 'neutral', proposed: 'orange', verified: 'green', rejected: 'red', merged: 'neutral' };
 const TABS = ['proposed', 'all', 'verified', 'imported', 'rejected'];
-const lbl = { fontSize: 12, color: '#64748B' };
+const lbl = { fontSize: 12, color: 'var(--text-muted)' };
 
 function Editor({ id, onClose, onChanged }) {
   const { t } = useTranslation('admin');
@@ -84,7 +84,7 @@ function Editor({ id, onClose, onChanged }) {
             <input value={mergeQ} placeholder={t('catalog.mergePh')} onChange={(ev) => setMergeQ(ev.target.value)} style={{ width: '100%' }} />
             {mergeList.map((m) => (
               <div key={m.id} style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '6px 0', fontSize: 13, borderBottom: '1px solid #F1F5F9' }}>
-                <span style={{ flex: 1 }}><b>{m.name}</b> <span style={{ color: '#64748B' }}>{[m.venue, m.city].filter(Boolean).join(' · ')}</span></span>
+                <span style={{ flex: 1 }}><b>{m.name}</b> <span style={{ color: 'var(--text-muted)' }}>{[m.venue, m.city].filter(Boolean).join(' · ')}</span></span>
                 <Button size="sm" variant="secondary" onClick={async () => { if (await confirm(t('catalog.confirmMerge', { from: e.name, into: m.name }), { confirmLabel: t('catalog.merge') })) run(() => api.mergeCatalogEntry(id, m.id), true); }}>{t('catalog.merge')}</Button>
               </div>
             ))}

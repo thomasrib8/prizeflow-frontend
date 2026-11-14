@@ -51,10 +51,11 @@
   line-height: 1;
   margin-bottom: 8px;
 }
-.stat-value.accent-blue { color: var(--blue); }
-.stat-value.accent-green { color: var(--green); }
-.stat-value.accent-orange { color: var(--orange); }
-.stat-value.accent-red { color: var(--red); }
+/* big numerals only need 3:1: livelier than the small-text shades, still AA for large text */
+.stat-value.accent-blue { color: #0284C7; }
+.stat-value.accent-green { color: #059669; }
+.stat-value.accent-orange { color: #D97706; }
+.stat-value.accent-red { color: #DC2626; }
 .stat-bar { height: 3px; background: var(--border-light); border-radius: 2px; }
 .stat-bar-fill { height: 100%; border-radius: 2px; }
 .fill-blue { background: var(--blue); }
@@ -82,12 +83,12 @@
 .btn-primary:hover:not(:disabled) { background: var(--blue-dark); }
 .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
 .btn-secondary:hover:not(:disabled) { background: var(--bg); }
-.btn-success { background: var(--green); color: white; }
-.btn-success:hover:not(:disabled) { background: #0ea271; }
-.btn-warning { background: var(--orange); color: white; }
-.btn-warning:hover:not(:disabled) { background: #d97706; }
-.btn-danger { background: var(--red); color: white; }
-.btn-danger:hover:not(:disabled) { background: #dc2626; }
+.btn-success { background: #047857; color: white; }
+.btn-success:hover:not(:disabled) { background: #065F46; }
+.btn-warning { background: #B45309; color: white; }
+.btn-warning:hover:not(:disabled) { background: #92400E; }
+.btn-danger { background: #DC2626; color: white; }
+.btn-danger:hover:not(:disabled) { background: #B91C1C; }
 .btn-ghost { background: transparent; color: var(--text-muted); padding: 7px 10px; }
 .btn-ghost:hover:not(:disabled) { color: var(--text); background: var(--bg); }
 .btn-sm { padding: 6px 12px; font-size: 12px; }
@@ -102,10 +103,10 @@
   font-weight: 600;
 }
 .badge-neutral { background: var(--border-light); color: var(--text-muted); }
-.badge-blue { background: var(--blue-pale); color: var(--blue); }
-.badge-green { background: var(--green-pale); color: var(--green); }
-.badge-orange { background: var(--orange-pale); color: var(--orange); }
-.badge-red { background: var(--red-pale); color: var(--red); }
+.badge-blue { background: var(--blue-pale); color: var(--blue-text); }
+.badge-green { background: var(--green-pale); color: var(--green-text); }
+.badge-orange { background: var(--orange-pale); color: var(--orange-text); }
+.badge-red { background: var(--red-pale); color: var(--red-text); }
 .badge-purple { background: var(--purple-pale); color: var(--purple); }
 
 /* Coloured gift pills */
@@ -117,17 +118,17 @@
   font-size: 11px;
   font-weight: 600;
 }
-.gift-pill-0 { background: var(--blue-pale); color: var(--blue); }
-.gift-pill-1 { background: var(--green-pale); color: var(--green); }
-.gift-pill-2 { background: var(--orange-pale); color: var(--orange); }
+.gift-pill-0 { background: var(--blue-pale); color: var(--blue-text); }
+.gift-pill-1 { background: var(--green-pale); color: var(--green-text); }
+.gift-pill-2 { background: var(--orange-pale); color: var(--orange-text); }
 .gift-pill-3 { background: var(--purple-pale); color: var(--purple); }
-.gift-pill-4 { background: #FFF0F0; color: #E11D48; }
+.gift-pill-4 { background: #FFF0F0; color: #BE123C; }
 .gift-pill-5 { background: #F0FFF4; color: #15803D; }
-.gift-pill-6 { background: #FFF8E1; color: #D97706; }
+.gift-pill-6 { background: #FFF8E1; color: #B45309; }
 .gift-pill-7 { background: #EEF2FF; color: #4F46E5; }
-.gift-pill-8 { background: #FCE7F3; color: #BE185D; }
-.gift-pill-9 { background: #F0FDFA; color: #0D9488; }
-.gift-pill-10 { background: #FEF9C3; color: #A16207; }
+.gift-pill-8 { background: #FCE7F3; color: #9D174D; }
+.gift-pill-9 { background: #F0FDFA; color: #0F766E; }
+.gift-pill-10 { background: #FEF9C3; color: #854D0E; }
 .gift-pill-11 { background: #F5F0FF; color: #7C3AED; }
 
 /* Empty state */
@@ -165,7 +166,13 @@
   margin-bottom: 16px;
 }
 @media (max-width: 900px) { .grid-stats { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 480px) { .grid-stats { grid-template-columns: 1fr; } }
+/* phones: KPI cards stay two by two (four full-width cards were four screens tall) */
+@media (max-width: 480px) {
+  .grid-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .grid-stats .card { padding: 14px 14px; }
+  .grid-stats .stat-value { font-size: 22px; }
+  .grid-stats .stat-label { font-size: 10px; letter-spacing: 0.05em; }
+}
 
 /* Same idea, 3-up (Dashboard KPI row) — a plain inline gridTemplateColumns
    override always wins over a class's media query (higher specificity),
@@ -274,7 +281,8 @@ table.data-table tr:hover td { background: #FAFBFC; }
   font-family: inherit;
 }
 .field input:focus, .field select:focus, .field textarea:focus {
-  border-color: var(--blue);
+  border-color: var(--navy);
+  box-shadow: 0 0 0 3px rgba(0, 85, 248, 0.16); /* a real focus ring: the 1px border alone was too faint to follow with a keyboard */
   outline: none;
 }
 
@@ -382,7 +390,7 @@ table.data-table tr:hover td { background: #FAFBFC; }
 .slot-row { display: grid; grid-template-columns: 52px minmax(0, 1fr) 80px 64px 52px; gap: 8px; align-items: center; }
 .slot-index { font-size: 11px; font-weight: 700; color: var(--text-muted); font-family: var(--font-mono); }
 .slot-row input, .slot-row select { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 10px; font-size: 13px; font-family: inherit; }
-.slot-pct { font-size: 11px; font-weight: 700; color: var(--blue); font-family: var(--font-mono); text-align: right; }
+.slot-pct { font-size: 11px; font-weight: 700; color: var(--blue-text); font-family: var(--font-mono); text-align: right; }
 /* Below ~480px, four fixed-width columns (52+80+64+52px + gaps) leave the
    Gift name input almost no room even with minmax(0,1fr) above — stack it
    onto its own row instead of continuing to shrink it. Positional
@@ -426,10 +434,10 @@ table.data-table tr:hover td { background: #FAFBFC; }
 .gift-card.placed { background: #ECFDF5; border-color: #6EE7B7; }
 .gift-row { display: grid; grid-template-columns: 84px minmax(0, 1fr) 76px 76px 48px; gap: 8px; align-items: center; }
 .gift-row input, .gift-row select { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 10px; font-size: 13px; font-family: inherit; }
-.gift-pct { font-size: 11px; font-weight: 700; color: var(--blue); font-family: var(--font-mono); text-align: right; }
+.gift-pct { font-size: 11px; font-weight: 700; color: var(--blue-text); font-family: var(--font-mono); text-align: right; }
 .gift-handle {
   min-height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 8px;
-  font-size: 12px; font-weight: 700; background: #F1F5F9; color: #94A3B8; user-select: none; -webkit-user-select: none;
+  font-size: 12px; font-weight: 700; background: #F1F5F9; color: var(--text-light); user-select: none; -webkit-user-select: none;
 }
 .gift-handle.ready { background: #0F172A; color: white; cursor: grab; touch-action: none; }
 .gift-handle.ready:active { cursor: grabbing; }
@@ -487,3 +495,11 @@ table.data-table tr:hover td { background: #FAFBFC; }
 .camp-menu .camp-menu-sep { height: 1px; background: var(--border); margin: 5px 4px; }
 .camp-menu button.camp-menu-danger { color: #DC2626; }
 .camp-chevron { font-size: 10px; margin-left: 2px; }
+
+/* Hit areas: a link or text button inside a table cell, and the small text buttons, reach at least 24px of height (WCAG 2.5.8) without changing how they look */
+td > a, td > .link-button, .link-button { display: inline-block; padding: 4px 2px; margin: -4px -2px; }
+@media (pointer: coarse) { td > a, td > .link-button, .link-button { padding: 8px 4px; margin: -8px -4px; } .btn-sm { min-height: 36px; } }
+
+/* text links of the dashboard cards ("Voir tout"...): same look, a 24px-high hit area */
+.dash-link { display: inline-block; padding: 5px 2px; margin: -5px -2px; font-size: 12px; font-weight: 600; color: var(--link); text-decoration: none; }
+.dash-link:hover { text-decoration: underline; }

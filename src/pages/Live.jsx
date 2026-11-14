@@ -109,7 +109,7 @@ export default function Live() {
   // feed the map
   useEffect(() => {
     const m = map.current; if (!m || !mapReady || !data) return;
-    const feats = data.wheels.filter((w) => w.position.level < 3).map((w) => ({ type: 'Feature', geometry: { type: 'Point', coordinates: [w.position.lng, w.position.lat] }, properties: { id: w.id, serial: w.serial, status: w.status, level: w.position.level } }));
+    const feats = (Array.isArray(data.wheels) ? data.wheels : []).filter((w) => w && w.position && w.position.level < 3).map((w) => ({ type: 'Feature', geometry: { type: 'Point', coordinates: [w.position.lng, w.position.lat] }, properties: { id: w.id, serial: w.serial, status: w.status, level: w.position.level } }));
     m.getSource('wheels').setData(fc(mode === 'history' ? [] : feats));
     if (!didFit.current && feats.length && mode !== 'history') {
       const b = new maplibregl.LngLatBounds(); feats.forEach((f) => b.extend(f.geometry.coordinates)); m.fitBounds(b, { padding: 60, maxZoom: 8, duration: 0 }); didFit.current = true;
@@ -125,14 +125,15 @@ export default function Live() {
   useEffect(() => {
     const m = map.current; if (!m || !mapReady) return;
     m.setFilter('wheels-selected', ['==', ['get', 'id'], selected || '']);
-    const w = data && data.wheels.find((x) => x.id === selected);
+    const w = data && Array.isArray(data.wheels) && data.wheels.find((x) => x && x.id === selected);
     if (w && w.position.level < 3) m.flyTo({ center: [w.position.lng, w.position.lat], zoom: Math.max(m.getZoom(), 7), duration: 700 });
   }, [selected, mapReady, data]);
 
   async function saveStyle() { setError(''); try { await api.setLiveStyle(styleInput.trim()); window.location.reload(); } catch (e) { setError(e.message); } }
 
   const levelLabel = (p) => (p.level === 1 ? t('live.level1') : p.level === 2 ? t('live.level2') : t('live.level3'));
-  const wheels = data ? data.wheels : [];
+  // tolerant of an incomplete answer (a wheel without position / holes): the page shows what it can instead of failing
+  const wheels = data && Array.isArray(data.wheels) ? data.wheels.filter(Boolean).map((w) => ({ ...w, position: w.position || { level: 3 } })) : [];
 
   return (
     <div className="ap">
@@ -205,15 +206,15 @@ export default function Live() {
 
           {mode === 'history' && hist && (
             <Card title={t('live.zones')} className="mt-card">
-              {hist.zones.length === 0 ? <p style={{ fontSize: 13, color: '#64748B', margin: 0 }}>{t('live.noEvents')}</p> : hist.zones.map((z, i) => <div key={i} style={{ fontSize: 13, display: 'flex', justifyContent: 'space-between', padding: '3px 0' }}><span>{z.city || '—'}</span><b>{z.events} · {z.days} {t('live.days')}</b></div>)}
-              <div style={{ fontSize: 12, color: '#64748B', marginTop: 8 }}>{hist.events.length} {t('live.eventsInPeriod')}{hist.noPosition ? ` · ${hist.noPosition} ${t('live.withoutPosition')}` : ''}</div>
+              {hist.zones.length === 0 ? <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: 0 }}>{t('live.noEvents')}</p> : hist.zones.map((z, i) => <div key={i} style={{ fontSize: 13, display: 'flex', justifyContent: 'space-between', padding: '3px 0' }}><span>{z.city || '—'}</span><b>{z.events} · {z.days} {t('live.days')}</b></div>)}
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8 }}>{hist.events.length} {t('live.eventsInPeriod')}{hist.noPosition ? ` · ${hist.noPosition} ${t('live.withoutPosition')}` : ''}</div>
             </Card>
           )}
 
           <Card title={`${t('live.wheels')}${data ? ` (${data.shown})` : ''}`} className="mt-card" style={!selected ? { marginTop: 0 } : undefined}>
             <button type="button" className="link-button live-drawer-toggle" style={{ display: 'none', marginBottom: 8 }} onClick={() => setListOpen((v) => !v)}>{listOpen ? t('live.hideList') : t('live.showList')}</button>
             <div className={`live-list${listOpen ? ' open' : ''}`} style={{ maxHeight: 540, overflowY: 'auto', padding: '2px 2px 2px 0' }}>
-              {!data ? <p className="page-subtitle">{t('common.loading')}</p> : wheels.length === 0 ? <p style={{ fontSize: 13, color: '#64748B' }}>{t('live.empty')}</p> : wheels.map((w) => (
+              {!data ? <p className="page-subtitle">{t('common.loading')}</p> : wheels.length === 0 ? <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('live.empty')}</p> : wheels.map((w) => (
                 <button key={w.id} type="button" className={`ap-wheel${selected === w.id ? ' on' : ''}`} style={{ '--c': STATUS_COLORS[w.status] }} onClick={() => setSelected(w.id)}>
                   <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                     <span style={{ width: 11, height: 11, borderRadius: '50%', background: w.position.level === 2 ? '#fff' : STATUS_COLORS[w.status], border: `3px solid ${STATUS_COLORS[w.status]}`, boxSizing: 'border-box', flexShrink: 0 }} />

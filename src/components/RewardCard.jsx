@@ -24,11 +24,11 @@ export default function RewardCard({ reward, error, busy, onDistribute, onCancel
         {STATUS_TKEY[reward.status] ? t(`rewardCard.${STATUS_TKEY[reward.status]}`) : reward.status}
       </div>
       <h1 style={{ fontSize: 22, fontWeight: 800, margin: '0 0 6px', color: '#03041A' }}>{reward.giftName}</h1>
-      <p style={{ fontSize: 14, color: '#64748B', margin: '0 0 4px' }}>
+      <p style={{ fontSize: 14, color: 'var(--text-muted)', margin: '0 0 4px' }}>
         {t('rewardCard.forLabel', { firstName: reward.firstName, lastName: reward.lastName })}
       </p>
       {reward.launchedAt && (
-        <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 24px' }}>
+        <p style={{ fontSize: 12, color: 'var(--text-light)', margin: '0 0 24px' }}>
           {t('rewardCard.wheelLaunchedLabel', { date: formatDT(reward.launchedAt) })}
         </p>
       )}
@@ -36,7 +36,7 @@ export default function RewardCard({ reward, error, busy, onDistribute, onCancel
       {error && <div className="error-banner">{error}</div>}
 
       {reward.status === 'redeemed' && reward.distributedBy && (
-        <p style={{ fontSize: 12, color: '#94A3B8', marginBottom: 8 }}>
+        <p style={{ fontSize: 12, color: 'var(--text-light)', marginBottom: 8 }}>
           {t('rewardCard.distributedByLabel', { name: reward.distributedBy })}{reward.distributedAt ? ` · ${formatDT(reward.distributedAt)}` : ''}
         </p>
       )}
@@ -51,7 +51,7 @@ export default function RewardCard({ reward, error, busy, onDistribute, onCancel
             {busy ? t('rewardCard.confirmingBtn') : t('rewardCard.distributeBtn')}
           </button>
           <button type="button" onClick={onCancel} disabled={busy} style={{
-            flex: 1, background: 'white', color: '#EF4444', border: '1px solid #FCA5A5',
+            flex: 1, background: 'white', color: 'var(--red-text)', border: '1px solid #FCA5A5',
             borderRadius: 10, padding: '13px', fontSize: 14, fontWeight: 700,
             cursor: busy ? 'not-allowed' : 'pointer', opacity: busy ? 0.6 : 1, fontFamily: 'inherit',
           }}>
@@ -62,7 +62,7 @@ export default function RewardCard({ reward, error, busy, onDistribute, onCancel
 
       {reward.status === 'redeemed' && (
         <button type="button" onClick={onUndo} disabled={busy} style={{
-          width: '100%', background: 'white', color: '#EF4444', border: '1px solid #FCA5A5',
+          width: '100%', background: 'white', color: 'var(--red-text)', border: '1px solid #FCA5A5',
           borderRadius: 10, padding: '13px', fontSize: 14, fontWeight: 700,
           cursor: busy ? 'not-allowed' : 'pointer', opacity: busy ? 0.6 : 1, fontFamily: 'inherit',
         }}>

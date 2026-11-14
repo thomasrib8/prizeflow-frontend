@@ -71,13 +71,13 @@ export default function EmailStatusBadge({ email, status, isCatchAll, isDisposab
       {!!isDisposable && (
         <span
           title={t('emailStatusBadge.disposableTitle')}
-          style={{ marginLeft: 6, fontSize: 10, fontWeight: 700, color: '#64748B', background: '#F1F5F9', borderRadius: 10, padding: '1px 7px', whiteSpace: 'nowrap' }}
+          style={{ marginLeft: 6, fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', background: '#F1F5F9', borderRadius: 10, padding: '1px 7px', whiteSpace: 'nowrap' }}
         >
           {t('emailStatusBadge.disposableBadge')}
         </span>
       )}
       {variant === 'card' && (
-        <div style={{ fontSize: 11, lineHeight: 1.4, marginTop: 5, color: meta ? meta.color : '#64748B' }}>
+        <div style={{ fontSize: 11, lineHeight: 1.4, marginTop: 5, color: meta ? meta.color : 'var(--text-muted)' }}>
           <strong>{label}.</strong> {text}
         </div>
       )}

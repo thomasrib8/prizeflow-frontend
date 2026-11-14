@@ -70,7 +70,7 @@ export default function FranceMap({ buckets, level = 'department', answered }) {
             );
           })}
         </svg>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4, fontSize: 10.5, color: '#64748B' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4, fontSize: 10.5, color: 'var(--text-muted)' }}>
           <span>0</span>
           <div style={{ flex: 1, height: 8, borderRadius: 4, background: `linear-gradient(90deg, ${shade(0)}, ${shade(0.5)}, ${shade(1)})` }} />
           <span>{pct(max)} %</span>
@@ -78,9 +78,9 @@ export default function FranceMap({ buckets, level = 'department', answered }) {
       </div>
       <div style={{ flex: '1 1 140px', minWidth: 140, fontSize: 12 }}>
         <div style={{ fontWeight: 700, color: '#002881', marginBottom: 6 }}>{t('dashboard.mapTop')}</div>
-        {ranking.length === 0 ? <div style={{ color: '#94A3B8' }}>{t('dashboard.noModuleData')}</div> : ranking.map((r, i) => (
+        {ranking.length === 0 ? <div style={{ color: 'var(--text-light)' }}>{t('dashboard.noModuleData')}</div> : ranking.map((r, i) => (
           <div key={r.name} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 0', borderBottom: '1px solid #F1F5F9' }}>
-            <b style={{ width: 14, color: '#94A3B8' }}>{i + 1}</b><span style={{ flex: 1 }}>{r.name}</span><b>{pct(r.n)} %</b>
+            <b style={{ width: 14, color: 'var(--text-light)' }}>{i + 1}</b><span style={{ flex: 1 }}>{r.name}</span><b>{pct(r.n)} %</b>
           </div>
         ))}
       </div>

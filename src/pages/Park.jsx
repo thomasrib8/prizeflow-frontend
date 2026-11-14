@@ -71,27 +71,27 @@ function WheelHistory({ wheel, navigate }) {
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 14 }}>
         {[[t('wheelOps.statRentals'), rentals.length], [t('wheelOps.statReturns'), inspections.length], [t('wheelOps.statAvg'), avg ? `${avg} / 3` : '—']].map(([k, v]) => (
           <div key={k} style={{ flex: '1 1 120px', background: '#F4F7FD', borderRadius: 12, padding: '10px 12px' }}>
-            <div style={{ fontSize: 10.5, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{k}</div>
+            <div style={{ fontSize: 10.5, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{k}</div>
             <div style={{ fontSize: 20, fontWeight: 800, color: '#0055F8', marginTop: 2 }}>{v}</div>
           </div>
         ))}
       </div>
 
-      {rows.length === 0 && <p style={{ fontSize: 13, color: '#94A3B8', margin: 0 }}>{t('park.noHistory')}</p>}
+      {rows.length === 0 && <p style={{ fontSize: 13, color: 'var(--text-light)', margin: 0 }}>{t('park.noHistory')}</p>}
       {rows.map(({ h, insp }) => (
         <div key={h.id} style={{ border: '1px solid #E3E9F7', borderRadius: 14, padding: '12px 14px', marginBottom: 10 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap', alignItems: 'baseline' }}>
             <button className="link-button" style={{ fontWeight: 800, fontSize: 14 }} onClick={() => navigate(`/users/${h.owner_id}`)}>{h.company || h.name || h.email || h.owner_id}</button>
             {h.released_at ? <Badge tone="neutral">{t(`wheelOps.${REASON_KEY[h.released_reason] || 'reasonEnd'}`)}</Badge> : <Badge tone="green">{t('park.historyCurrent')}</Badge>}
           </div>
-          <div style={{ fontSize: 12.5, color: '#64748B', marginTop: 3 }}>
+          <div style={{ fontSize: 12.5, color: 'var(--text-muted)', marginTop: 3 }}>
             {h.released_at ? t('park.historyRange', { from: formatDT(h.assigned_at), to: formatDT(h.released_at) }) : t('park.historySince', { date: formatDT(h.assigned_at) })}
             {' · '}{t('wheelOps.durationDays', { count: days(h) })}
           </div>
           {h.released_at && (
             <div style={{ marginTop: 10, borderTop: '1px solid #EEF1F8', paddingTop: 10 }}>
               <div style={{ fontSize: 11, fontWeight: 700, color: '#002881', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>{t('wheelOps.returnReport')}</div>
-              {insp ? <InspectionList items={[insp]} /> : <p style={{ fontSize: 13, color: '#94A3B8', margin: 0 }}>{t('wheelOps.noReturnReport')}</p>}
+              {insp ? <InspectionList items={[insp]} /> : <p style={{ fontSize: 13, color: 'var(--text-light)', margin: 0 }}>{t('wheelOps.noReturnReport')}</p>}
             </div>
           )}
         </div>
@@ -104,7 +104,7 @@ function WheelHistory({ wheel, navigate }) {
         </div>
       )}
 
-      <div style={{ fontSize: 12.5, color: '#64748B', borderTop: '1px solid #F1F5F9', paddingTop: 10 }}>{t('wheelOps.addedToPark', { date: formatDT(wheel.createdAt) })}</div>
+      <div style={{ fontSize: 12.5, color: 'var(--text-muted)', borderTop: '1px solid #F1F5F9', paddingTop: 10 }}>{t('wheelOps.addedToPark', { date: formatDT(wheel.createdAt) })}</div>
     </div>
   );
 }
@@ -175,7 +175,7 @@ function WheelDetailModal({ wheelId, wheels, onClose, onChanged, onPrepare }) {
       <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ '--modal-w': '620px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
           <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#03041A' }}>{t('park.detailTitle', { serial: w?.serialNumber || '' })}</h3>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 18, color: '#94A3B8', cursor: 'pointer' }}>✕</button>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 18, color: 'var(--text-light)', cursor: 'pointer' }}>✕</button>
         </div>
         {error && <div className="error-banner">{error}</div>}
         {!w && !error && <p className="page-subtitle">{t('common.loading')}</p>}
@@ -185,7 +185,7 @@ function WheelDetailModal({ wheelId, wheels, onClose, onChanged, onPrepare }) {
               <Badge tone={STATUS_TONE[w.status]}>{t(`park.${STATUS_TKEY[w.status]}`)}</Badge>
               {w.owner
                 ? <button className="link-button" onClick={() => navigate(`/users/${w.owner.id}`)}>{w.owner.company || w.owner.name || w.owner.email}</button>
-                : <span style={{ fontSize: 13, color: '#64748B' }}>{t('park.atDepot')}</span>}
+                : <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('park.atDepot')}</span>}
             </div>
 
             <div className="tabs" style={{ marginBottom: 4 }}>
@@ -197,7 +197,7 @@ function WheelDetailModal({ wheelId, wheels, onClose, onChanged, onPrepare }) {
             {tab === 'details' && (
               <>
             <div style={{ fontSize: 12, fontWeight: 700, color: '#03041A', margin: '14px 0 6px' }}>{t('park.identityTitle')}</div>
-            <div style={{ fontSize: 13, color: '#64748B', lineHeight: 1.8 }}>
+            <div style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.8 }}>
               <div>{t('park.modelLabel')} : <strong style={{ color: '#03041A' }}>{w.modelNumber}</strong></div>
               <div>{t('park.serialLabel')} : <strong style={{ color: '#03041A', ...MONO }}>{w.serialNumber}</strong></div>
               <div>{t('park.keyLabel')} : <strong style={{ color: '#03041A', ...MONO }}>{w.securityKey}</strong></div>
@@ -229,12 +229,12 @@ function WheelDetailModal({ wheelId, wheels, onClose, onChanged, onPrepare }) {
               <Button size="sm" disabled={busy || notes === (w.notes || '')} onClick={() => patch({ notes })}>{t('park.saveNotesBtn')}</Button>
               {!w.owner && w.status === 'available' && <Button size="sm" variant="ghost" disabled={busy} onClick={() => patch({ status: 'maintenance' })}>{t('park.toMaintenanceBtn')}</Button>}
               {!w.owner && w.status === 'maintenance' && <Button size="sm" variant="ghost" disabled={busy} onClick={() => patch({ status: 'available' })}>{t('park.backInServiceBtn')}</Button>}
-              {msg && <span style={{ fontSize: 12, color: 'var(--green)' }}>{msg}</span>}
+              {msg && <span style={{ fontSize: 12, color: 'var(--green-text)' }}>{msg}</span>}
             </div>
 
             <div style={{ fontSize: 12, fontWeight: 700, color: '#03041A', margin: '18px 0 6px' }}>{t('park.assignTitle')}</div>
             {w.status === 'maintenance' ? (
-              <p style={{ fontSize: 13, color: '#94A3B8', margin: 0 }}>{t('park.maintenanceNoAssign')}</p>
+              <p style={{ fontSize: 13, color: 'var(--text-light)', margin: 0 }}>{t('park.maintenanceNoAssign')}</p>
             ) : (
               <>
                 {w.owner && <p style={{ fontSize: 12, color: '#B45309', margin: '0 0 6px' }}>{t('park.wheelWithOther', { client: w.owner.company || w.owner.name || w.owner.email })}</p>}
@@ -251,7 +251,7 @@ function WheelDetailModal({ wheelId, wheels, onClose, onChanged, onPrepare }) {
                   <Button size="sm" disabled={busy || !clientId} onClick={assign}>{w.owner ? t('park.reassignBtn') : t('park.assignBtn')}</Button>
                   {w.owner && <Button size="sm" variant="ghost" disabled={busy} onClick={() => setReturning(true)}>{t('park.releaseBtn')}</Button>}
                 </div>
-                <p style={{ fontSize: 12, color: '#64748B', margin: '8px 0 0' }}>{t('park.afterAssignHint')}</p>
+                <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '8px 0 0' }}>{t('park.afterAssignHint')}</p>
               </>
             )}
 

@@ -9,7 +9,7 @@ import '../pages/admin-premium.css';
 const eur = (c) => (c === null || c === undefined ? '—' : (c / 100).toLocaleString(undefined, { style: 'currency', currency: 'EUR' }));
 const toCents = (v) => (v === '' || v === null || v === undefined ? null : Math.round(Number(v) * 100));
 const today = () => new Date().toISOString().slice(0, 10);
-const lbl = { fontSize: 12, color: '#64748B' };
+const lbl = { fontSize: 12, color: 'var(--text-muted)' };
 
 function Coverage({ pct }) {
   const { t } = useTranslation('admin');

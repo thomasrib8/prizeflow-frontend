@@ -205,7 +205,7 @@ export default function CampaignDetail() {
       {campaign.status === 'archived' && (
         <div style={{
           background: '#F1F5F9', border: '1px solid #E2E8F0', borderRadius: 10, padding: '10px 16px',
-          fontSize: 13, color: '#64748B', marginBottom: 16,
+          fontSize: 13, color: 'var(--text-muted)', marginBottom: 16,
         }}>
           {t('campaignDetail.archivedNotice')}
         </div>
@@ -314,10 +314,10 @@ export default function CampaignDetail() {
                     </td>
                     <td>
                       {s.isNext
-                        ? <span style={{ fontSize: 11, fontWeight: 700, color: '#09B2FD' }}>{t('campaignDetail.nextLabel')}</span>
+                        ? <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--blue-text)' }}>{t('campaignDetail.nextLabel')}</span>
                         : s.consumed
-                          ? <span style={{ fontSize: 11, color: '#10B981' }}>{t('campaignDetail.doneLabel')}</span>
-                          : <span style={{ fontSize: 11, color: '#94A3B8' }}>{t('campaignDetail.pendingLabel')}</span>
+                          ? <span style={{ fontSize: 11, color: 'var(--green-text)' }}>{t('campaignDetail.doneLabel')}</span>
+                          : <span style={{ fontSize: 11, color: 'var(--text-light)' }}>{t('campaignDetail.pendingLabel')}</span>
                       }
                     </td>
                   </tr>
@@ -325,7 +325,7 @@ export default function CampaignDetail() {
               </tbody>
             </table>
           </div>
-          <p style={{ fontSize: 11, color: '#94A3B8', marginTop: 8 }}>
+          <p style={{ fontSize: 11, color: 'var(--text-light)', marginTop: 8 }}>
             {t('campaignDetail.autoRefreshNote')}
           </p>
         </div>

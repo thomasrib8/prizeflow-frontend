@@ -60,7 +60,7 @@ export default function AISuggestionsPanel({ suggestions, analyzedNote, currentN
       )}
 
       {!analyzing && neverAnalyzed && (
-        <div style={{ fontSize: 12, color: '#64748B' }}>{t('aiSuggestionsPanel.neverAnalyzed')}</div>
+        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('aiSuggestionsPanel.neverAnalyzed')}</div>
       )}
 
       {!analyzing && suggestions && (
@@ -88,7 +88,7 @@ export default function AISuggestionsPanel({ suggestions, analyzedNote, currentN
                   <li key={i}>
                     <strong>{itemText(item, t)}</strong>
                     {' — '}
-                    <span style={{ color: '#64748B' }}>{t(item.reason === 'conflict' ? 'aiSuggestionsPanel.reasonConflict' : 'aiSuggestionsPanel.reasonLowConfidence')}</span>
+                    <span style={{ color: 'var(--text-muted)' }}>{t(item.reason === 'conflict' ? 'aiSuggestionsPanel.reasonConflict' : 'aiSuggestionsPanel.reasonLowConfidence')}</span>
                   </li>
                 ))}
               </ul>

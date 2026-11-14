@@ -54,7 +54,7 @@ export default function ConnectionDiagnosticsModal({ onClose, agentConnected, co
             ? t('connectionDiagnostics.connectedForLabel', { duration: since(diagnostics.agent.connectedSince, t) })
             : t('connectionDiagnostics.notConnectedLabel')}
           {diagnostics?.agent?.disconnectHistory?.length > 0 && (
-            <div style={{ marginTop: 6, fontSize: 11, color: '#94A3B8' }}>
+            <div style={{ marginTop: 6, fontSize: 11, color: 'var(--text-light)' }}>
               {t('connectionDiagnostics.lastDisconnectsLabel', { list: diagnostics.agent.disconnectHistory.slice(0, 3).map((d) => new Date(d.disconnectedAt).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })).join(' · ') })}
             </div>
           )}
@@ -74,7 +74,7 @@ export default function ConnectionDiagnosticsModal({ onClose, agentConnected, co
           </Row>
         )}
 
-        <p style={{ fontSize: 11, color: '#94A3B8', marginTop: 12, marginBottom: 0 }}>
+        <p style={{ fontSize: 11, color: 'var(--text-light)', marginTop: 12, marginBottom: 0 }}>
           {t('connectionDiagnostics.autoRefreshNote')}
         </p>
 

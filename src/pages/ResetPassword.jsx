@@ -68,7 +68,7 @@ export default function ResetPassword() {
           {loading ? t('common.saving') : t('auth.resetPassword.saveNewPasswordBtn')}
         </button>
 
-        <p style={{ fontSize: 13, color: '#64748B', marginTop: 16 }}>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 16 }}>
           <Link to="/login">{t('auth.backToSignIn')}</Link>
         </p>
       </form>

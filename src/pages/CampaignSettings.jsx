@@ -62,7 +62,7 @@ export default function CampaignSettings() {
           <p className="page-subtitle">{t('campaignSettings.editPageSubtitle')}</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          {savedMsg && <span style={{ fontSize: 12, color: '#10B981', fontWeight: 600 }}>{savedMsg}</span>}
+          {savedMsg && <span style={{ fontSize: 12, color: 'var(--green-text)', fontWeight: 600 }}>{savedMsg}</span>}
           <SaveButton disabled={saving} onClick={handleSave} saving={saving} failed={!!error}>{t('editCampaignSettings.saveChangesBtn')}</SaveButton>
           <Button variant="secondary" onClick={() => navigate(`/campaigns/${id}`)}>{t('editCampaignSettings.backBtn')}</Button>
         </div>

@@ -141,7 +141,7 @@ function PersistedCodes({ campaignId, slotIndex, variantId = null, stock, label,
                   {editing && editing.id === c.id ? <input value={editing.code} onChange={(e) => setEditing({ ...editing, code: e.target.value })} style={{ width: 160 }} /> : c.code}
                 </td>
                 <td>{c.status === 'assigned' ? <span className="uc-chip ok">{t('uniqueCodes.given')}</span> : <span className="uc-chip">{t('uniqueCodes.free')}</span>}</td>
-                <td style={{ fontSize: 12, color: '#64748B' }}>{c.status === 'assigned' ? `${c.firstName || ''} ${c.lastName || ''}`.trim() : (c.position === null ? t('uniqueCodes.unbound') : '')}</td>
+                <td style={{ fontSize: 12, color: 'var(--text-muted)' }}>{c.status === 'assigned' ? `${c.firstName || ''} ${c.lastName || ''}`.trim() : (c.position === null ? t('uniqueCodes.unbound') : '')}</td>
                 <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
                   {c.status === 'available' && (editing && editing.id === c.id
                     ? <><Button type="button" size="sm" disabled={busy} onClick={saveEdit}>{t('common.save')}</Button> <Button type="button" size="sm" variant="ghost" onClick={() => setEditing(null)}>{t('common.cancel')}</Button></>

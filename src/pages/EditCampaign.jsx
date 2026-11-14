@@ -198,7 +198,7 @@ export default function EditCampaign() {
               <select value={language} onChange={(e) => setLanguage(e.target.value)} style={{ width: '100%', padding: '10px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 14, fontFamily: 'inherit' }}>
                 {LANGUAGE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
               </select>
-              <div style={{ fontSize: 12, color: '#94A3B8', marginTop: 4 }}>
+              <div style={{ fontSize: 12, color: 'var(--text-light)', marginTop: 4 }}>
                 {t('newCampaign.guestLanguageHint')}
               </div>
             </div>

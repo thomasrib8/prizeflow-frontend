@@ -104,7 +104,7 @@ export default function CampaignOverrides({ campaignId = null, archived = false,
       {error && <div className="error-banner" style={{ marginTop: 12 }}>{error}</div>}
 
       <Card title={t('campaignOverrides.emailTitle')} className="mt-card">
-        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px', lineHeight: 1.6 }}>{t('campaignOverrides.emailDesc')}</p>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 14px', lineHeight: 1.6 }}>{t('campaignOverrides.emailDesc')}</p>
 
         <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginBottom: 12 }}>
           <div className="field" style={{ margin: 0, flex: 1, minWidth: 220 }}>
@@ -137,13 +137,13 @@ export default function CampaignOverrides({ campaignId = null, archived = false,
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap', margin: '14px 0' }}>
           <div style={{ width: 56, height: 56, borderRadius: 10, border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', background: '#F8FAFC' }}>
-            {form.hasLogo && logoUrl ? <img src={logoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : <span style={{ fontSize: 11, color: '#94A3B8', textAlign: 'center' }}>{d.hasLogo ? t('campaignOverrides.accountLogo') : t('settings.emailTemplates.defaultLabel')}</span>}
+            {form.hasLogo && logoUrl ? <img src={logoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : <span style={{ fontSize: 11, color: 'var(--text-light)', textAlign: 'center' }}>{d.hasLogo ? t('campaignOverrides.accountLogo') : t('settings.emailTemplates.defaultLabel')}</span>}
           </div>
           <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '9px 16px', border: '1px solid #CBD5E1', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: logoBusy || archived ? 'not-allowed' : 'pointer', color: '#0F1C3F' }}>
             {logoBusy ? t('settings.emailTemplates.uploadingBtn') : form.hasLogo ? t('settings.emailTemplates.replaceLogoBtn') : t('settings.emailTemplates.uploadLogoBtn')}
             <input type="file" accept="image/png,image/jpeg,image/webp" disabled={logoBusy || archived} onChange={uploadLogo} style={{ display: 'none' }} />
           </label>
-          {form.hasLogo && <Button variant="ghost" disabled={logoBusy} onClick={removeLogo} style={{ color: '#EF4444' }}>{t('settings.emailTemplates.removeBtn')}</Button>}
+          {form.hasLogo && <Button variant="ghost" disabled={logoBusy} onClick={removeLogo} style={{ color: 'var(--red-text)' }}>{t('settings.emailTemplates.removeBtn')}</Button>}
           <div className="field" style={{ margin: 0 }}>
             <label>{t('settings.emailTemplates.useInPreSpinFormLabel')}</label>
             <select disabled={dis} value={form.guestFormLogoEnabled} onChange={(e) => set({ guestFormLogoEnabled: e.target.value })} style={{ ...input, width: 'auto' }}>
@@ -164,9 +164,9 @@ export default function CampaignOverrides({ campaignId = null, archived = false,
         <div className="field">
           <label>{t('campaignOverrides.message')}</label>
           <textarea rows={4} maxLength={5000} disabled={dis} value={form.templates[method].bodyText} placeholder={defaultTpl.bodyText || data.builtIn.defaultBodyText || ''} onChange={(e) => setTemplate('bodyText', e.target.value)} style={{ ...input, resize: 'vertical' }} />
-          <p style={{ fontSize: 12, color: '#94A3B8', margin: '4px 0 0' }}>{t('campaignOverrides.messageHint', { vars: '{{firstName}} / {{giftName}} / {{code}} / {{unique_code}}' })}</p>
+          <p style={{ fontSize: 12, color: 'var(--text-light)', margin: '4px 0 0' }}>{t('campaignOverrides.messageHint', { vars: '{{firstName}} / {{giftName}} / {{code}} / {{unique_code}}' })}</p>
         </div>
-        <p style={{ fontSize: 12, color: '#94A3B8', margin: 0 }}>{t('campaignOverrides.persoNote')}</p>
+        <p style={{ fontSize: 12, color: 'var(--text-light)', margin: 0 }}>{t('campaignOverrides.persoNote')}</p>
         <div className="co-test">
           <Button type="button" variant="secondary" disabled={testBusy} onClick={sendTest}>{testBusy ? t('campaignOverrides.testSending') : t('campaignOverrides.testBtn')}</Button>
           <span className="co-test-hint">{t('campaignOverrides.testHint', { kind: t(`settings.emailTemplates.${METHODS.find(([m]) => m === method)[1]}`) })}</span>
@@ -175,7 +175,7 @@ export default function CampaignOverrides({ campaignId = null, archived = false,
       </Card>
 
       <Card title={t('campaignOverrides.privacyTitle')} className="mt-card">
-        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px', lineHeight: 1.6 }}>{t('campaignOverrides.privacyDesc')}</p>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 14px', lineHeight: 1.6 }}>{t('campaignOverrides.privacyDesc')}</p>
         <div className="field">
           <label>{t('campaignOverrides.policyUrl')}</label>
           <input type="url" disabled={dis} value={form.privacyPolicyUrl} placeholder={d.privacyPolicyUrl ? `${t('campaignOverrides.defaultPrefix')} ${d.privacyPolicyUrl}` : 'https://votre-site.fr/confidentialite'} onChange={(e) => set({ privacyPolicyUrl: e.target.value })} style={input} />
@@ -193,7 +193,7 @@ export default function CampaignOverrides({ campaignId = null, archived = false,
       {!staged && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 18 }}>
           <SaveButton disabled={dis} onClick={save} saving={busy} failed={!!error}>{t('campaignOverrides.save')}</SaveButton>
-          {msg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{msg}</span>}
+          {msg && <span style={{ fontSize: 13, color: 'var(--green-text)', fontWeight: 600 }}>{msg}</span>}
         </div>
       )}
     </>

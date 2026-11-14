@@ -3,8 +3,8 @@
 .cc-bar:hover { background: #F6F9FF; }
 .cc-bar:focus-visible { outline: 2px solid #0055F8; outline-offset: -2px; }
 .cc-title { flex: 1; font-size: 14px; font-weight: 800; color: #03041A; letter-spacing: -0.01em; }
-.cc-hint { font-size: 12px; color: #94A3B8; font-weight: 600; }
-.cc-chev { color: #94A3B8; transition: transform .15s; font-size: 14px; }
+.cc-hint { font-size: 12px; color: var(--text-light); font-weight: 600; }
+.cc-chev { color: var(--text-light); transition: transform .15s; font-size: 14px; }
 .cc.open .cc-chev { transform: rotate(180deg); }
 .cc.open .cc-bar { border-bottom: 1px solid #EDF1FA; }
 .cc-body { padding: 16px 22px 20px; }

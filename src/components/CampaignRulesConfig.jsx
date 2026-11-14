@@ -33,7 +33,7 @@ export default function CampaignRulesConfig({ campaignId = null, status = 'draft
   const check = (key, label, hint) => (
     <label style={{ display: 'flex', gap: 10, alignItems: 'flex-start', margin: '8px 0', cursor: 'pointer' }}>
       <input type="checkbox" disabled={archived} checked={!!cfg[key]} onChange={(e) => set({ [key]: e.target.checked })} style={{ marginTop: 3 }} />
-      <span style={{ fontSize: 13, color: '#334155' }}>{label}{hint && <span style={{ display: 'block', fontSize: 11.5, color: '#94A3B8' }}>{hint}</span>}</span>
+      <span style={{ fontSize: 13, color: '#334155' }}>{label}{hint && <span style={{ display: 'block', fontSize: 11.5, color: 'var(--text-light)' }}>{hint}</span>}</span>
     </label>
   );
 
@@ -57,7 +57,7 @@ export default function CampaignRulesConfig({ campaignId = null, status = 'draft
 
   return (
     <CollapsibleCard title={t('rulesConfig.title')} className="mt-card">
-      <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 12px', lineHeight: 1.6 }}>{t('rulesConfig.intro')}</p>
+      <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 12px', lineHeight: 1.6 }}>{t('rulesConfig.intro')}</p>
       {error && <div className="error-banner">{error}</div>}
       {data.missingOrganizer.length > 0 && (
         <div className="ap-warn" style={{ marginBottom: 12 }}>{t('rulesConfig.organizerMissing', { fields: missingLabels })} <Link to="/settings">{t('rulesConfig.openInformation')}</Link></div>
@@ -85,7 +85,7 @@ export default function CampaignRulesConfig({ campaignId = null, status = 'draft
           <div className="field" key={k} style={{ margin: 0, flex: 1, minWidth: 170 }}>
             <label>{t(`rulesConfig.${k}`)}</label>
             <input type="date" disabled={archived} value={cfg[k]} onChange={(e) => set({ [k]: e.target.value })} style={input} />
-            <small style={{ color: '#94A3B8', fontSize: 11.5 }}>{ph}</small>
+            <small style={{ color: 'var(--text-light)', fontSize: 11.5 }}>{ph}</small>
           </div>
         ))}
         <div className="field" style={{ margin: 0, width: 130 }}>
@@ -105,10 +105,10 @@ export default function CampaignRulesConfig({ campaignId = null, status = 'draft
           <SaveButton disabled={busy || archived} onClick={save} saving={busy} failed={!!error}>{t('rulesConfig.save')}</SaveButton>
           <Button variant="secondary" disabled={busy || archived} onClick={preview}>{t('rulesConfig.preview')}</Button>
           {running && <Button variant="secondary" disabled={busy || archived} onClick={publish}>{t('rulesConfig.publishNew')}</Button>}
-          {msg && <span style={{ fontSize: 13, color: '#10B981', fontWeight: 600 }}>{msg}</span>}
+          {msg && <span style={{ fontSize: 13, color: 'var(--green-text)', fontWeight: 600 }}>{msg}</span>}
         </div>
       )}
-      <p style={{ fontSize: 12, color: '#94A3B8', margin: '10px 0 0' }}>{running ? t('rulesConfig.newVersionHint') : t('rulesConfig.autoAtStart')}</p>
+      <p style={{ fontSize: 12, color: 'var(--text-light)', margin: '10px 0 0' }}>{running ? t('rulesConfig.newVersionHint') : t('rulesConfig.autoAtStart')}</p>
     </CollapsibleCard>
   );
 }

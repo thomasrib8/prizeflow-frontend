@@ -155,7 +155,7 @@ export default function PwaAnalytics() {
       else if (w.type === 'progress') blocks.push(
         <section key={w.id} className="pw-card pw-card-pad">
           <h2 className="pw-card-title" style={{ marginBottom: 10 }}>{t('dashboard.campaignProgressLabel')}</h2>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}><b style={{ fontSize: 26 }}>{kpi ? `${kpi.progressPct}%` : '–'}</b><span style={{ fontSize: 12, color: '#64748B' }}>{kpi ? t('dashboard.campaignProgressSub', { distributed: kpi.distributed, planned: kpi.planned }) : ''}</span></div>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}><b style={{ fontSize: 26 }}>{kpi ? `${kpi.progressPct}%` : '–'}</b><span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{kpi ? t('dashboard.campaignProgressSub', { distributed: kpi.distributed, planned: kpi.planned }) : ''}</span></div>
           <div className="pw-bar" style={{ marginTop: 10 }}><div style={{ width: `${kpi?.progressPct || 0}%`, background: '#0055F8' }} /></div>
         </section>,
       );
@@ -237,7 +237,7 @@ export default function PwaAnalytics() {
               {[3, 2, 1].map((n) => (
                 <div key={n} className="pw-donut-row">
                   <i style={{ background: STAR_COLORS[n] }} />
-                  <span className="pw-stars" style={{ color: '#F59E0B', display: 'inline-flex', marginLeft: 0 }}>
+                  <span className="pw-stars" style={{ color: 'var(--orange-text)', display: 'inline-flex', marginLeft: 0 }}>
                     {Array.from({ length: n }, (_, i) => <IconStar key={i} filled />)}
                   </span>
                   <span>{rating[n]}<small>{Math.round((rating[n] / ratedTotal) * 100)}%</small></span>

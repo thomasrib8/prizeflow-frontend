@@ -36,7 +36,7 @@ function Section({ section }) {
               <span className="cb">{selected.includes(o.value) ? '✓' : ''}</span><span className="t" title={o.label}>{o.label}</span><b>{o.count}</b>
             </button>
           ))}
-          {matching.length === 0 && <div style={{ fontSize: 12, color: '#94A3B8', padding: '6px 4px' }}>{t('history.noOptionMatch')}</div>}
+          {matching.length === 0 && <div style={{ fontSize: 12, color: 'var(--text-light)', padding: '6px 4px' }}>{t('history.noOptionMatch')}</div>}
           {!q && matching.length > SHOWN && (
             <button type="button" className="fp-more" onClick={() => setAll((v) => !v)}>{all ? t('history.showLess') : t('history.showMore', { count: matching.length - SHOWN })}</button>
           )}

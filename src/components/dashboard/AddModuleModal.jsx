@@ -65,7 +65,7 @@ export default function AddModuleModal({ campaignId, dimensions, isAdmin, onAdd,
             <div className="dash-pick" style={{ maxHeight: 240, overflowY: 'auto' }}>
               {chartable.map((d) => <button key={d.key} type="button" className={source === d.key ? 'on' : ''} onClick={() => setSource(d.key)}>
                 {BUILTIN[d.key] ? t(`dashboard.${BUILTIN[d.key]}`) : d.label}
-                <span style={{ color: '#94A3B8', fontSize: 11 }}> · {BUILTIN[d.key] ? t('dashboard.srcBuiltin') : d.kind === 'segment' ? t('dashboard.srcSegment') : d.kind === 'sales' ? t('dashboard.srcSales') : t('dashboard.srcGuest')}</span>
+                <span style={{ color: 'var(--text-light)', fontSize: 11 }}> · {BUILTIN[d.key] ? t('dashboard.srcBuiltin') : d.kind === 'segment' ? t('dashboard.srcSegment') : d.kind === 'sales' ? t('dashboard.srcSales') : t('dashboard.srcGuest')}</span>
               </button>)}
             </div>
             <div style={{ fontSize: 12, fontWeight: 700, color: '#475569', margin: '14px 0 6px' }}>{t('dashboard.pickViz')}</div>

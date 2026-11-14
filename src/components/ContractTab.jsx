@@ -12,7 +12,7 @@ const TYPES = ['long', 'short', 'reseller', 'sub'];
 const eur = (cents) => (cents === null || cents === undefined ? '—' : (cents / 100).toLocaleString(undefined, { style: 'currency', currency: 'EUR' }));
 const toCents = (v) => (v === '' || v === null || v === undefined ? null : Math.round(Number(v) * 100));
 const today = () => new Date().toISOString().slice(0, 10);
-const label = { fontSize: 12, color: '#64748B' };
+const label = { fontSize: 12, color: 'var(--text-muted)' };
 
 export default function ContractTab({ userId }) {
   const { t } = useTranslation('admin');
@@ -64,7 +64,7 @@ export default function ContractTab({ userId }) {
             {cur.type === 'short' && <b>{eur(cur.event_price_cents)} {t('contract.perEvent')}</b>}
             {cur.type === 'reseller' && <b>{eur(cur.rent_cents)} {t('contract.perWheelMonth')} · {t('contract.activation')} {eur(cur.activation_cents)}</b>}
             {cur.type === 'sub' && <b>{t('contract.under')} {data.parent ? <Link to={`/users/${data.parent.id}`}>{data.parent.name}</Link> : '—'}</b>}
-            <span style={{ color: '#94A3B8', fontSize: 12 }}> · {t('contract.since')} {cur.valid_from}</span>
+            <span style={{ color: 'var(--text-light)', fontSize: 12 }}> · {t('contract.since')} {cur.valid_from}</span>
           </div>
         ) : <p style={{ fontSize: 13, color: '#B45309' }}>{t('contract.none')}</p>}
 
@@ -129,7 +129,7 @@ export default function ContractTab({ userId }) {
             </div>
           )}
           <div className="sw-label" style={{ marginTop: 14 }}>{t('contract.subClientsTitle')}</div>
-          {data.subClients.length === 0 ? <p style={{ fontSize: 13, color: '#64748B', margin: 0 }}>{t('contract.noSubClients')}</p>
+          {data.subClients.length === 0 ? <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: 0 }}>{t('contract.noSubClients')}</p>
             : data.subClients.map((c) => <div key={c.id} style={{ fontSize: 13, padding: '4px 0' }}><Link to={`/users/${c.id}`}>{c.name}</Link></div>)}
         </Card>
       )}
@@ -139,7 +139,7 @@ export default function ContractTab({ userId }) {
           <div>{t('contract.recognized')} <b>{eur(data.totals.recognizedCents)}</b></div>
           <div>{t('contract.forecast')} <b>{eur(data.totals.forecastCents)}</b></div>
         </div>
-        {data.entries.length === 0 ? <p style={{ fontSize: 13, color: '#64748B', margin: 0 }}>{t('contract.noEntries')}</p> : (
+        {data.entries.length === 0 ? <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: 0 }}>{t('contract.noEntries')}</p> : (
           <table className="data-table">
             <thead><tr><th>{t('contract.date')}</th><th>{t('contract.source')}</th><th>{t('contract.client')}</th><th>{t('contract.amount')}</th><th></th></tr></thead>
             <tbody>{data.entries.map((e) => (

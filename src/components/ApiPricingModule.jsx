@@ -57,10 +57,10 @@ function TariffRow({ row, onSaved, setError }) {
     <div className="ap-line" style={{ display: 'block' }}>
       <div style={{ display: 'flex', gap: 10, alignItems: 'baseline', flexWrap: 'wrap' }}>
         <b>{row.plan_label}</b>
-        {row.service !== '*' && <span style={{ color: '#64748B' }}>{row.service}</span>}
-        {row.unit && <span style={{ color: '#64748B' }}>({row.unit}{row.per_units > 1 ? ` / ${row.per_units.toLocaleString()}` : ''})</span>}
+        {row.service !== '*' && <span style={{ color: 'var(--text-muted)' }}>{row.service}</span>}
+        {row.unit && <span style={{ color: 'var(--text-muted)' }}>({row.unit}{row.per_units > 1 ? ` / ${row.per_units.toLocaleString()}` : ''})</span>}
         <Badge tone={prepared ? 'neutral' : 'green'}>{prepared ? t('settings.pricing.prepared') : t('settings.pricing.inForce')}</Badge>
-        <span style={{ color: '#94A3B8', fontSize: 12 }}>{t('settings.pricing.since')} {row.valid_from}</span>
+        <span style={{ color: 'var(--text-light)', fontSize: 12 }}>{t('settings.pricing.since')} {row.valid_from}</span>
         <span style={{ flex: 1 }} />
         {!open && row.kind !== 'free' && <Button variant="secondary" size="sm" onClick={start}>{t('settings.pricing.edit')}</Button>}
       </div>
@@ -74,7 +74,7 @@ function TariffRow({ row, onSaved, setError }) {
         <div className="ap-bar" style={{ marginTop: 10, marginBottom: 0 }}>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             {fields.map(([k]) => (
-              <label key={k} style={{ fontSize: 12, color: '#64748B' }}>{t(`settings.pricing.${k === 'unitPrice' ? 'unitPrice' : k}`)} {k !== 'quota' && `(${row.currency})`}
+              <label key={k} style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t(`settings.pricing.${k === 'unitPrice' ? 'unitPrice' : k}`)} {k !== 'quota' && `(${row.currency})`}
                 <input type="number" min="0" step="any" value={f[k] ?? ''} onChange={(e) => setF((p) => ({ ...p, [k]: e.target.value }))} style={{ display: 'block', width: 130 }} />
               </label>
             ))}

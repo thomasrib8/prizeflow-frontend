@@ -71,7 +71,7 @@
 }
 .nav-section-title {
   padding: 0 12px 6px;
-  color: rgba(255,255,255,0.45);
+  color: rgba(255,255,255,0.86); /* AA on the blue sidebar: the hierarchy comes from size, caps and tracking, not from a faint colour */
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -102,9 +102,9 @@
 /* Solid fills (not the pale tints Badge.jsx uses on white cards) — those
    read as a muddy wash on the navy sidebar background, exactly like the
    nav-badge notification bubble already handles the same problem. */
-.agent-pill.ok { background: #10B981; color: white; }
-.agent-pill.off { background: #EF4444; color: white; }
-.agent-pill.warn { background: #F59E0B; color: white; }
+.agent-pill.ok { background: #047857; color: white; }
+.agent-pill.off { background: #B91C1C; color: white; }
+.agent-pill.warn { background: #B45309; color: white; }
 .agent-pill .dot {
   width: 6px; height: 6px;
   border-radius: 50%;
@@ -162,14 +162,18 @@
 .logout-link {
   background: none;
   border: none;
-  padding: 0;
-  font-size: 10px;
-  color: rgba(255,255,255,0.5);
+  padding: 6px 0; /* a 24px-high hit area (it used to be 12px) */
+  font-size: 11px;
+  color: rgba(255,255,255,0.86);
   cursor: pointer;
   text-align: left;
   font-family: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(255,255,255,0.35);
 }
-.logout-link:hover { color: #EF4444; }
+.logout-link:hover { color: #fff; text-decoration-color: #fff; }
+.logout-link:focus-visible { outline: 2px solid #fff; outline-offset: 2px; border-radius: 4px; }
 
 .content {
   flex: 1;

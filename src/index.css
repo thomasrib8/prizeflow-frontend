@@ -26,6 +26,11 @@
   --blue-dark: #0792CF;
   --blue-pale: #EBF9FF;
   --link: #002881;
+  /* text-safe shades of the status colours (the base ones stay for fills, bars and icons): AA on their pale backgrounds */
+  --green-text: #047857;
+  --orange-text: #B45309;
+  --blue-text: #0369A1;
+  --red-text: #B91C1C;
   --green: #10B981;
   --green-pale: #ECFDF5;
   --orange: #F59E0B;
@@ -38,8 +43,8 @@
   --bg: #F1F5F9;
   --surface: #FFFFFF;
   --text: #03041A;
-  --text-muted: #64748B;
-  --text-light: #94A3B8;
+  --text-muted: #52627A;
+  --text-light: #5E6E85;
   --border: #E2E8F0;
   --border-light: #F1F5F9;
 
@@ -66,8 +71,8 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 button { font-family: inherit; }
-button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible {
-  outline: 2px solid var(--blue);
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible, [role="button"]:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid var(--navy);
   outline-offset: 2px;
 }
 input, select, textarea { font-family: inherit; font-size: 14px; }

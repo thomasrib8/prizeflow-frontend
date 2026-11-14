@@ -46,7 +46,7 @@ export default function SearchSelect({ value, onChange, search, placeholder }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px', border: '1px solid var(--border, #E2E8F0)', borderRadius: 10, background: '#fff' }}>
           <span style={{ flex: 1, fontSize: 14 }}>{value}</span>
           <button type="button" aria-label={t('field.searchClear', { defaultValue: 'Effacer' })} onClick={() => { onChange(''); setOpen(true); }}
-            style={{ border: 'none', background: 'none', color: '#94A3B8', fontSize: 16, cursor: 'pointer', lineHeight: 1 }}>×</button>
+            style={{ border: 'none', background: 'none', color: 'var(--text-light)', fontSize: 16, cursor: 'pointer', lineHeight: 1 }}>×</button>
         </div>
       ) : (
         <input
@@ -57,7 +57,7 @@ export default function SearchSelect({ value, onChange, search, placeholder }) {
       )}
       {open && (
         <ul ref={listRef} role="listbox" style={LIST}>
-          {results.length === 0 && <li style={{ padding: '10px 12px', fontSize: 13, color: '#94A3B8' }}>{t('field.searchNoResults', { defaultValue: 'Aucun résultat' })}</li>}
+          {results.length === 0 && <li style={{ padding: '10px 12px', fontSize: 13, color: 'var(--text-light)' }}>{t('field.searchNoResults', { defaultValue: 'Aucun résultat' })}</li>}
           {results.map((r, i) => (
             <li key={r.value} role="option" aria-selected={i === active}
               onMouseDown={(e) => { e.preventDefault(); pick(r); }} onMouseEnter={() => setActive(i)}

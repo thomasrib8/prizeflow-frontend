@@ -10,7 +10,7 @@ const STATUS_TONE = { event: 'green', rented: 'blue', available: 'neutral', main
 const eur = (c) => (c === null || c === undefined ? '—' : (c / 100).toLocaleString(undefined, { style: 'currency', currency: 'EUR' }));
 const fmt = (d) => (d ? new Date(`${d}T12:00:00`).toLocaleDateString([], { dateStyle: 'medium' }) : '—');
 const TABS = ['wheels', 'clients', 'history', 'requests'];
-const lbl = { fontSize: 12, color: '#64748B' };
+const lbl = { fontSize: 12, color: 'var(--text-muted)' };
 
 function RequestForm({ park, clients, initialWheel, onClose, onSent }) {
   const { t } = useTranslation('admin');
@@ -86,7 +86,7 @@ export default function MyPark() {
               <thead><tr><th>{t('myPark.wheel')}</th><th>{t('myPark.statusCol')}</th><th>{t('myPark.client')}</th><th>{t('myPark.event')}</th><th>{t('myPark.since')}</th><th></th></tr></thead>
               <tbody>{park.wheels.map((w) => (
                 <tr key={w.wheelId}>
-                  <td style={{ fontWeight: 600 }}>{w.serial}<div style={{ fontSize: 11, color: '#94A3B8', fontWeight: 400 }}>{t('myPark.heldSince')} {fmt(w.heldSince)}</div></td>
+                  <td style={{ fontWeight: 600 }}>{w.serial}<div style={{ fontSize: 11, color: 'var(--text-light)', fontWeight: 400 }}>{t('myPark.heldSince')} {fmt(w.heldSince)}</div></td>
                   <td><Badge tone={STATUS_TONE[w.status]}>{t(`myPark.status.${w.status}`)}</Badge></td>
                   <td>{w.client ? (w.client.name || t('myPark.sparkClient')) : '—'}</td>
                   <td>{w.event ? `${w.event.name}${w.event.city ? ` · ${w.event.city}` : ''}` : '—'}</td>
@@ -123,7 +123,7 @@ export default function MyPark() {
           {requests.length === 0 ? <p className="ap-hint" style={{ margin: 0 }}>{t('myPark.noRequests')}</p> : requests.map((r) => (
             <div key={r.id} className="ap-line">
               <Badge tone={r.status === 'pending' ? 'orange' : r.status === 'done' ? 'green' : 'neutral'}>{t(`myPark.reqStatus.${r.status}`)}</Badge>
-              <span>{[r.wheel, r.client, r.wantedOn && fmt(r.wantedOn)].filter(Boolean).join(' · ') || '—'}</span>{r.note && <span style={{ color: '#64748B' }}>{r.note}</span>}<span style={{ flex: 1 }} />
+              <span>{[r.wheel, r.client, r.wantedOn && fmt(r.wantedOn)].filter(Boolean).join(' · ') || '—'}</span>{r.note && <span style={{ color: 'var(--text-muted)' }}>{r.note}</span>}<span style={{ flex: 1 }} />
               {r.status === 'pending' && <Button size="sm" variant="ghost" onClick={async () => { try { const x = await api.cancelResellerRequest(r.id); setRequests(x.requests); load(); } catch (e) { setError(e.message); } }}>{t('myPark.cancel')}</Button>}
             </div>
           ))}

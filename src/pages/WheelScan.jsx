@@ -89,7 +89,7 @@ export default function WheelScan() {
             <div className="wh-card"><InspectionList items={w.inspections} /></div>
             <div className="wh-lb">{t('wheelOps.history')}</div>
             <div className="wh-card">
-              {w.history.length === 0 ? <p style={{ fontSize: 13, color: '#94A3B8', margin: 0 }}>{t('park.noHistory')}</p> : w.history.map((h) => (
+              {w.history.length === 0 ? <p style={{ fontSize: 13, color: 'var(--text-light)', margin: 0 }}>{t('park.noHistory')}</p> : w.history.map((h) => (
                 <div key={h.id} className="wh-tl"><i /><span><b style={{ color: '#03041A' }}>{h.company || h.name || h.email}</b><br />{h.released_at ? t('park.historyRange', { from: fmt(h.assigned_at), to: fmt(h.released_at) }) : t('park.historySince', { date: fmt(h.assigned_at) })}</span></div>
               ))}
             </div>

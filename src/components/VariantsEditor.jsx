@@ -47,8 +47,8 @@ export function PersoFields({ value, onChange, idPrefix = 'perso', uniqueCodeEdi
             <Button type="button" size="sm" variant="secondary" disabled={aiBusy || !giftLabel} onClick={generate}>{aiBusy ? t('editCampaign.aiWriting') : `✨ ${t('editCampaign.aiWriteBtn')}`}</Button>
             <input style={{ flex: '1 1 220px', minWidth: 0, fontSize: 12 }} maxLength={300} placeholder={t('editCampaign.aiHintPlaceholder')} value={aiHint} onChange={(e) => setAiHint(e.target.value)} aria-label={t('editCampaign.aiHintPlaceholder')} />
           </div>
-          {!giftLabel && <p style={{ fontSize: 11, color: '#94A3B8', margin: '4px 0 0' }}>{t('editCampaign.aiNeedGift')}</p>}
-          {giftLabel && <p style={{ fontSize: 11, color: '#94A3B8', margin: '4px 0 0' }}>{t('editCampaign.aiNote')}</p>}
+          {!giftLabel && <p style={{ fontSize: 11, color: 'var(--text-light)', margin: '4px 0 0' }}>{t('editCampaign.aiNeedGift')}</p>}
+          {giftLabel && <p style={{ fontSize: 11, color: 'var(--text-light)', margin: '4px 0 0' }}>{t('editCampaign.aiNote')}</p>}
           {aiError && <div className="error-banner" style={{ marginTop: 6 }} role="alert">{aiError}</div>}
         </div>
       )}
@@ -69,7 +69,7 @@ export function PersoFields({ value, onChange, idPrefix = 'perso', uniqueCodeEdi
       <div className="field" style={{ margin: 0 }}>
         <label style={{ fontSize: 11 }}>{t('editCampaign.messageLabel', { vars: `{{firstName}} / {{giftName}}${value.persoDelivery === 'code' ? ' / {{code}}' : ''}` })}</label>
         <textarea id={`${idPrefix}-body`} rows={2} placeholder={t('editCampaign.messagePlaceholder')} value={value.persoBody} onChange={set('persoBody')} />
-        {value.persoDelivery === 'code' && <p style={{ fontSize: 11, color: '#94A3B8', margin: '4px 0 0' }}>{t('editCampaign.codeAutoAddedNote', { code: '{{code}}' })}</p>}
+        {value.persoDelivery === 'code' && <p style={{ fontSize: 11, color: 'var(--text-light)', margin: '4px 0 0' }}>{t('editCampaign.codeAutoAddedNote', { code: '{{code}}' })}</p>}
       </div>
       {(uniqueCodeEditable || value.persoUniqueCode) && (
         <div className="uc-opt">
@@ -79,7 +79,7 @@ export function PersoFields({ value, onChange, idPrefix = 'perso', uniqueCodeEdi
           </label>
           {value.persoUniqueCode && (
             <>
-              <p style={{ fontSize: 11.5, color: '#64748B', margin: '4px 0 6px' }}>{t('uniqueCodes.optionHelp')}</p>
+              <p style={{ fontSize: 11.5, color: 'var(--text-muted)', margin: '4px 0 6px' }}>{t('uniqueCodes.optionHelp')}</p>
               {!hasVar && <div className="ap-warn" style={{ margin: '0 0 6px', padding: '6px 10px', fontSize: 12 }}>{t('uniqueCodes.variableMissing')}</div>}
               <button type="button" className="uc-ins" onClick={() => onChange('persoBody', `${value.persoBody}${value.persoBody && !/\s$/.test(value.persoBody) ? ' ' : ''}{{unique_code}}`)}>{t('uniqueCodes.insertVariable')}</button>
               {children}
@@ -94,7 +94,7 @@ export function PersoFields({ value, onChange, idPrefix = 'perso', uniqueCodeEdi
         <input type="checkbox" checked={!!value.persoAutoDistribute} onChange={set('persoAutoDistribute')} />
         <span style={{ fontSize: 12, color: '#334155' }}>
           {t('editCampaign.autoDistributeLabel')}
-          <span style={{ display: 'block', fontSize: 11, color: '#94A3B8' }}>{t('editCampaign.autoDistributeDesc')}</span>
+          <span style={{ display: 'block', fontSize: 11, color: 'var(--text-light)' }}>{t('editCampaign.autoDistributeDesc')}</span>
         </span>
       </label>
     </div>

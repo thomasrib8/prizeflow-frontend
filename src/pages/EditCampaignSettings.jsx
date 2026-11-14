@@ -67,7 +67,7 @@ export default function EditCampaignSettings() {
           <p className="page-subtitle">{t('editCampaignSettings.pageSubtitle')}</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          {savedMsg && <span style={{ fontSize: 12, color: '#10B981', fontWeight: 600 }}>{savedMsg}</span>}
+          {savedMsg && <span style={{ fontSize: 12, color: 'var(--green-text)', fontWeight: 600 }}>{savedMsg}</span>}
           <SaveButton disabled={saving} onClick={handleSave} saving={saving} failed={!!error}>{t('editCampaignSettings.saveChangesBtn')}</SaveButton>
           <Button variant="secondary" onClick={() => navigate(`/campaigns/${id}`)}>{t('editCampaignSettings.backBtn')}</Button>
         </div>
@@ -75,21 +75,21 @@ export default function EditCampaignSettings() {
       {error && <div className="error-banner">{error}</div>}
 
       <Card title={t('campaignForm.segmentationTitle')} className="mt-card">
-        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px' }}>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 14px' }}>
           {t('editCampaignSettings.segmentationDesc')}
         </p>
         <SegmentationBuilder categories={segmentCategories} onChange={setSegmentCategories} />
       </Card>
 
       <Card title={t('campaignForm.salesFieldsTitle')} className="mt-card">
-        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px' }}>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 14px' }}>
           {t('editCampaignSettings.salesFieldsDesc')}
         </p>
         <CampaignFieldsBuilder fields={salesFields} onChange={setSalesFields} fieldTypes={SALES_FIELD_TYPES} />
       </Card>
 
       <Card title={t('campaignForm.guestFormTitle')} className="mt-card">
-        <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px' }}>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 14px' }}>
           {t('editCampaignSettings.guestFormDesc')}
         </p>
         <CampaignFieldsBuilder fields={guestFields} onChange={setGuestFields} fieldTypes={GUEST_FIELD_TYPES} showRequired />

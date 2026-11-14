@@ -56,7 +56,7 @@ export default function UniqueCodesSummary({ campaignId }) {
                   <td style={{ fontFamily: 'var(--font-mono, monospace)', fontWeight: 700 }}>{h.code}</td>
                   <td>{`${h.firstName || ''} ${h.lastName || ''}`.trim() || '—'}<div className="ap-sub">{h.email}</div></td>
                   <td>{h.giftName}</td>
-                  <td style={{ fontSize: 12, color: '#64748B' }}>{h.assignedAt}</td>
+                  <td style={{ fontSize: 12, color: 'var(--text-muted)' }}>{h.assignedAt}</td>
                   <td><Badge tone={h.emailStatus === 'sent' ? 'green' : h.emailStatus === 'error' ? 'red' : 'orange'}>{t(`uniqueCodes.email_${h.emailStatus}`)}</Badge></td>
                   <td style={{ textAlign: 'right' }}>{h.emailStatus !== 'sent' && <Button size="sm" variant="secondary" disabled={busy === h.rewardId} onClick={() => resend(h.rewardId)}>{t('uniqueCodes.resend')}</Button>}</td>
                 </tr>

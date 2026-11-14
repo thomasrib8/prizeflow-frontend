@@ -75,7 +75,7 @@ export default function WheelLabel({ wheel, onClose }) {
             </div>
           </div>
         </div>
-        <p style={{ fontSize: 12, color: '#64748B', margin: '14px 0 0' }}>{t('wheelOps.labelHint')}</p>
+        <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '14px 0 0' }}>{t('wheelOps.labelHint')}</p>
         <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 16 }}>
           <Button variant="ghost" onClick={onClose}>{t('park.closeBtn')}</Button>
           <Button onClick={() => window.print()}>{t('wheelOps.labelPrint')}</Button>

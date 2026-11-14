@@ -19,7 +19,7 @@ import { deptLabel, norm, searchDepartments, searchRegions } from '../data/frGeo
 // Radio buttons and checkboxes sit inside a `.field`, whose global input style (full width, padded box) would stretch them across the row
 // and push the text to the far right: they keep their natural size, and the answer labels stay regular weight.
 const CHOICE_INPUT = { width: 'auto', padding: 0, margin: 0, flexShrink: 0, boxShadow: 'none' };
-const CHOICE_LABEL = { display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 400, margin: 0, cursor: 'pointer', color: 'var(--text-primary, #0F172A)' };
+const CHOICE_LABEL = { display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, fontWeight: 400, margin: 0, padding: '6px 0', minHeight: 34, cursor: 'pointer', color: 'var(--text-primary, #0F172A)' }; // a whole row to tap, not just the 16px circle
 
 const toResult = (o) => ({ value: o, label: o });
 const deptResult = (d) => ({ value: deptLabel(d), label: deptLabel(d), hint: d.region });

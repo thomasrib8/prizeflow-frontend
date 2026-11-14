@@ -118,13 +118,13 @@ export default function WheelGiftPlanner({ gifts, setGifts, wheelProps, wheelCap
               </div>
               <MiniBar pct={(placedCount / CASE_COUNT) * 100} color={placedCount === CASE_COUNT ? '#10B981' : '#09B2FD'} />
             </div>
-            <div style={{ fontSize: 12, color: '#64748B', lineHeight: 1.5, textAlign: 'center' }}>{wheelCaption}</div>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5, textAlign: 'center' }}>{wheelCaption}</div>
           </div>
         </Card>
       </div>
 
       <Card title={t('editCampaign.giftsTitle')} action={<div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>{headerAction}<button type="button" className="btn btn-ghost btn-sm" aria-pressed={compact} onClick={toggleCompact}>{compact ? t('wheelGiftPlanner.expandAll') : t('wheelGiftPlanner.collapseAll')}</button>{dynamic && <ProbabilityTotal values={gifts.filter((g) => g.giftName.trim()).map((g) => g.probability)} />}<span className="badge badge-blue">{t('wheelGiftPlanner.totalStockLabel', { n: totalStock })}</span></div>}>
-        <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 12px' }}>
+        <p style={{ fontSize: 12, color: 'var(--text-light)', margin: '0 0 12px' }}>
           {t('wheelGiftPlanner.instructionsIntro')} <b>{t('wheelGiftPlanner.instructionsDragBold')}</b>{t('wheelGiftPlanner.instructionsRedeemIntro')} <b>QR</b> {t('wheelGiftPlanner.instructionsQrDesc')} <b>Code</b> {t('wheelGiftPlanner.instructionsCodeDesc')} <b>Voucher</b> {t('wheelGiftPlanner.instructionsVoucherDesc')} <b>Perso</b> {t('wheelGiftPlanner.instructionsPersoDesc')}
         </p>
         {dynamic && <p className="dyn-help">{t('dynamic.plannerHelp')}</p>}
@@ -187,12 +187,12 @@ export default function WheelGiftPlanner({ gifts, setGifts, wheelProps, wheelCap
                     <>
                       <span style={{ fontSize: 12, color: '#047857', fontWeight: 600 }}>{t('wheelGiftPlanner.placedOnCaseLabel', { n: g.caseIndex + 1 })}</span>
                       {isPinned(g)
-                        ? <span style={{ fontSize: 12, color: '#94A3B8' }}>{t('wheelGiftPlanner.pinnedHint')}</span>
+                        ? <span style={{ fontSize: 12, color: 'var(--text-light)' }}>{t('wheelGiftPlanner.pinnedHint')}</span>
                         : <button type="button" className="gift-link-btn" onClick={() => unplace(g.id)}>{t('wheelGiftPlanner.removeFromWheelBtn')}</button>}
                     </>
                   ) : ready ? (
                     <>
-                      <span style={{ fontSize: 12, color: '#64748B' }}>{t('wheelGiftPlanner.dragOrLabel')}</span>
+                      <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('wheelGiftPlanner.dragOrLabel')}</span>
                       <select
                         aria-label={t('wheelGiftPlanner.placeInCaseAriaLabel', { n: g.id + 1 })}
                         value=""
@@ -204,7 +204,7 @@ export default function WheelGiftPlanner({ gifts, setGifts, wheelProps, wheelCap
                       </select>
                     </>
                   ) : (
-                    <span style={{ fontSize: 12, color: '#94A3B8' }}>{t('wheelGiftPlanner.addNameStockFullHint')}</span>
+                    <span style={{ fontSize: 12, color: 'var(--text-light)' }}>{t('wheelGiftPlanner.addNameStockFullHint')}</span>
                   )}
                 </div>
 

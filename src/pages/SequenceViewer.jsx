@@ -124,7 +124,7 @@ export default function SequenceViewer() {
                       {step.consumed ? (
                         <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-light)' }}>✓ Used</span>
                       ) : step.isCurrent ? (
-                        <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--blue)' }}>▶ Next</span>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--blue-text)' }}>▶ Next</span>
                       ) : (
                         <span style={{ fontSize: 11, color: 'var(--text-light)' }}>Pending</span>
                       )}

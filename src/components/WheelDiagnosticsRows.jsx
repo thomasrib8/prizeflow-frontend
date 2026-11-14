@@ -15,7 +15,7 @@ function Row({ tone, title, children }) {
       <div style={{ paddingTop: 4 }}><Dot color={tone} /></div>
       <div style={{ flex: 1 }}>
         <div style={{ fontSize: 13, fontWeight: 700, color: '#03041A', marginBottom: 3 }}>{title}</div>
-        <div style={{ fontSize: 12, color: '#64748B', lineHeight: 1.6 }}>{children}</div>
+        <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.6 }}>{children}</div>
       </div>
     </div>
   );
@@ -80,7 +80,7 @@ export default function WheelDiagnosticsRows({ diagnostics }) {
       {identity && (identity.modelNumber || identity.serialNumber || identity.securityKey) && (
         <div style={{ padding: '12px 0', borderTop: '1px solid #F1F5F9', marginTop: 4 }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: '#03041A', marginBottom: 6 }}>{t('wheelDiagnostics.wheelIdentityTitle')}</div>
-          <div style={{ fontSize: 12, color: '#64748B', lineHeight: 1.8 }}>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.8 }}>
             {identity.modelNumber && <div>{t('wheelDiagnostics.modelNumberLabel')}: <strong style={{ color: '#03041A' }}>{identity.modelNumber}</strong></div>}
             {identity.serialNumber && <div>{t('wheelDiagnostics.serialNumberLabel')}: <strong style={{ color: '#03041A' }}>{identity.serialNumber}</strong></div>}
             {identity.securityKey && <div>{t('wheelDiagnostics.securityKeyLabel')}: <strong style={{ color: '#03041A' }}>{identity.securityKey}</strong></div>}

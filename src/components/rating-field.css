@@ -5,7 +5,7 @@
 .star-rating .star.on svg { fill: #F5B301; stroke: #E09F00; }
 .star-rating .star:hover svg { transform: scale(1.12); }
 .star-rating button:focus-visible { outline: 2px solid #0055F8; outline-offset: 1px; }
-.star-rating .star-zero { line-height: 1; min-width: 30px; height: 30px; margin-right: 8px; border: 1.5px solid #CBD5E1; border-radius: 99px; font-size: 13px; font-weight: 700; color: #64748B; background: #fff; }
+.star-rating .star-zero { line-height: 1; min-width: 30px; height: 30px; margin-right: 8px; border: 1.5px solid #CBD5E1; border-radius: 99px; font-size: 13px; font-weight: 700; color: var(--text-muted); background: #fff; }
 .star-rating .star-zero.on { border-color: #0055F8; color: #002881; background: #EAF1FF; }
 /* 8 to 10 stars: a little smaller so they stay on one line on a phone */
 .star-rating.dense .star { padding: 2px; }

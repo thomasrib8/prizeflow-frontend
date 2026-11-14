@@ -16,6 +16,7 @@ import EventNameField, { EMPTY_PLACE, placePayload } from '../components/EventNa
 import DistributionModePicker from '../components/DistributionModePicker';
 import { probabilityProblem } from '../components/DynamicCaseFields';
 import CampaignOverrides from '../components/CampaignOverrides';
+import '../components/wizard-steps.css';
 import CampaignRulesConfig, { DEFAULT_RULES_CONFIG } from '../components/CampaignRulesConfig';
 import { applyDraftExtras, hasExtras } from '../utils/draftExtras';
 import CampaignSettingsForm, { DEFAULT_CAMPAIGN_SETTINGS, settingsFromCampaign } from '../components/CampaignSettingsForm';
@@ -306,17 +307,18 @@ export default function NewCampaign() {
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: 8, marginBottom: 18 }}>
+      <ol className="wiz-steps" aria-label={t('newCampaign.pageTitle')}>
         {STEPS.map((s) => (
-          <div key={s.n} style={{
-            flex: 1, textAlign: 'center', padding: '8px 4px', borderRadius: 8, fontSize: 12, fontWeight: 700,
-            background: s.n === step ? 'var(--blue, #09B2FD)' : s.n < step ? 'var(--blue-pale, #EBF9FF)' : '#F1F5F9',
-            color: s.n === step ? '#03041A' : s.n < step ? 'var(--blue, #09B2FD)' : '#94A3B8',
-          }}>
-            {s.n}. {s.label}
-          </div>
+          <li key={s.n} className={`wiz-step${s.n === step ? ' on' : s.n < step ? ' done' : ''}`} aria-current={s.n === step ? 'step' : undefined}>
+            <span className="wiz-num" aria-hidden="true">
+              {s.n < step
+                ? <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+                : s.n}
+            </span>
+            <span className="wiz-label">{s.label}</span>
+          </li>
         ))}
-      </div>
+      </ol>
 
       {error && <div className="error-banner">{error}</div>}
 
@@ -338,7 +340,7 @@ export default function NewCampaign() {
                 <select value={language} onChange={e => setLanguage(e.target.value)} style={{ width: '100%', padding: '10px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 14, fontFamily: 'inherit' }}>
                   {LANGUAGE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select>
-                <div style={{ fontSize: 12, color: '#94A3B8', marginTop: 4 }}>
+                <div style={{ fontSize: 12, color: 'var(--text-light)', marginTop: 4 }}>
                   {t('newCampaign.guestLanguageHint')}
                 </div>
               </div>
@@ -389,7 +391,7 @@ export default function NewCampaign() {
               )}
               headerAction={(
                 <>
-                  {templateMsg && <span style={{ fontSize: 12, color: '#10B981', fontWeight: 600 }}>{templateMsg}</span>}
+                  {templateMsg && <span style={{ fontSize: 12, color: 'var(--green-text)', fontWeight: 600 }}>{templateMsg}</span>}
                   <button type="button" onClick={handleSaveTemplate} disabled={savingTemplate} className="btn btn-ghost btn-sm" style={{ cursor: savingTemplate ? 'not-allowed' : 'pointer' }}>
                     {savingTemplate ? t('common.saving') : t('newCampaign.saveAsTemplateBtn')}
                   </button>
@@ -403,7 +405,7 @@ export default function NewCampaign() {
               <Button type="button" variant="secondary" onClick={() => navigate('/campaigns')}>{t('common.cancel')}</Button>
               <Button type="button" variant="ghost" disabled={saving} onClick={handleSaveDraft}>{t('newCampaign.saveDraftBtn')}</Button>
               {placedCount < CASE_COUNT && (
-                <span style={{ alignSelf: 'center', fontSize: 12, color: '#64748B' }}>
+                <span style={{ alignSelf: 'center', fontSize: 12, color: 'var(--text-muted)' }}>
                   {t('newCampaign.placeAllGiftsHint', { count: CASE_COUNT, placed: placedCount })}
                 </span>
               )}
@@ -414,14 +416,14 @@ export default function NewCampaign() {
         {step === 2 && (
           <>
             <Card title={t('campaignForm.segmentationTitle')} className="mt-card">
-              <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px' }}>
+              <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 14px' }}>
                 {t('campaignForm.segmentationDesc')}
               </p>
               <SegmentationBuilder categories={segmentCategories} onChange={setSegmentCategories} />
             </Card>
 
             <Card title={t('campaignForm.salesFieldsTitle')} className="mt-card">
-              <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px' }}>
+              <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 14px' }}>
                 {t('campaignForm.salesFieldsDesc')}
               </p>
               <CampaignFieldsBuilder fields={salesFields} onChange={setSalesFields} fieldTypes={SALES_FIELD_TYPES} />
@@ -438,13 +440,13 @@ export default function NewCampaign() {
         {step === 3 && (
           <>
             <Card title={t('campaignForm.guestFormTitle')} className="mt-card">
-              <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 14px' }}>
+              <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 14px' }}>
                 {t('campaignForm.guestFormDesc')}
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }}>
                 {[t('campaignForm.firstNameLabel'), t('campaignForm.lastNameLabel'), t('campaignForm.emailAddressLabel')].map((label) => (
                   <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 12px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13, color: '#334155' }}>
-                    {label} <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 700, color: '#94A3B8' }}>{t('campaignForm.alwaysRequiredBadge')}</span>
+                    {label} <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 700, color: 'var(--text-light)' }}>{t('campaignForm.alwaysRequiredBadge')}</span>
                   </div>
                 ))}
               </div>

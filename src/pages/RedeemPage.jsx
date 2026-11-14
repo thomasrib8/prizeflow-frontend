@@ -87,13 +87,13 @@ export default function RedeemPage() {
         background: 'white', borderRadius: 20, padding: '40px 36px', width: 440, maxWidth: '94vw',
         boxShadow: '0 30px 80px rgba(0,0,0,0.15)',
       }}>
-        {state === 'loading' && <p style={{ color: '#64748B', textAlign: 'center' }}>{t('common.loading')}</p>}
+        {state === 'loading' && <p style={{ color: 'var(--text-muted)', textAlign: 'center' }}>{t('common.loading')}</p>}
 
         {state === 'invalid' && (
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 40, marginBottom: 14 }}>⚠️</div>
             <h1 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 8px', color: '#03041A' }}>{t('redeemPage.invalidCodeTitle')}</h1>
-            <p style={{ fontSize: 14, color: '#64748B' }}>{error || t('redeemPage.invalidCodeDefault')}</p>
+            <p style={{ fontSize: 14, color: 'var(--text-muted)' }}>{error || t('redeemPage.invalidCodeDefault')}</p>
           </div>
         )}
 

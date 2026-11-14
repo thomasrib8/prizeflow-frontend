@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { Badge, Button, EmptyState, GiftPill, MiniBar } from '../components/ui';
@@ -228,7 +229,7 @@ export default function Dashboard() {
             <h3 className="card-title">{t('dashboard.distributionOverviewTitle')}</h3>
             <div style={{ display: 'flex', gap: 4 }}>
               {CHART_FILTERS.map((f) => (
-                <button key={f} onClick={() => setChartFilter(f)} style={{ padding: '4px 10px', borderRadius: 6, border: 'none', fontSize: 11, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', background: chartFilter === f ? 'var(--blue, #09B2FD)' : 'var(--border-light, #F1F5F9)', color: chartFilter === f ? '#03041A' : 'var(--text-muted)' }}>{f}</button>
+                <button key={f} type="button" aria-pressed={chartFilter === f} onClick={() => setChartFilter(f)} style={{ padding: '7px 12px', minWidth: 40, borderRadius: 8, border: 'none', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', background: chartFilter === f ? 'var(--blue, #09B2FD)' : 'var(--border-light, #F1F5F9)', color: chartFilter === f ? '#03041A' : 'var(--text-muted)' }}>{f}</button>
               ))}
             </div>
           </div>
@@ -241,7 +242,7 @@ export default function Dashboard() {
                 <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#94A3B8' }} tickLine={false} axisLine={false} tickFormatter={(v) => v.slice(5)} />
                 <YAxis tick={{ fontSize: 10, fill: '#94A3B8' }} tickLine={false} axisLine={false} />
                 <Tooltip content={<CustomTooltip />} />
-                <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
+                <Legend wrapperStyle={{ fontSize: 12, paddingTop: 8 }} formatter={(v) => <span style={{ color: 'var(--text-muted)' }}>{v}</span>} />
                 <Line type="monotone" dataKey="planned" name={t('dashboard.chartPlannedLegend')} stroke="#CBD5E1" strokeWidth={1.5} strokeDasharray="4 3" dot={false} />
                 <Line type="monotone" dataKey="distributed" name={t('dashboard.chartDistributedLegend')} stroke="#0055F8" strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
                 <Line type="monotone" dataKey="remaining" name={t('dashboard.chartRemainingLegend')} stroke="#CBD5E1" strokeWidth={1.5} strokeDasharray="4 3" dot={false} />
@@ -273,14 +274,14 @@ export default function Dashboard() {
               </tbody>
             </table>
           )}
-          {campaign && <div style={{ marginTop: 14, textAlign: 'center' }}><a href="/history" style={{ fontSize: 12, color: 'var(--link)', fontWeight: 600, textDecoration: 'none' }}>{t('dashboard.viewFullReportLink')}</a></div>}
+          {campaign && <div style={{ marginTop: 14, textAlign: 'center' }}><Link to="/history" className="dash-link">{t('dashboard.viewFullReportLink')}</Link></div>}
         </div>
       );
       case 'topRewards': return (
         <div className="card">
           <div className="card-head">
             <h3 className="card-title">{t('dashboard.topRewardsTitle')}</h3>
-            <a href="/campaigns" style={{ fontSize: 12, color: 'var(--link)', fontWeight: 600, textDecoration: 'none' }}>{t('dashboard.viewAllRewardsLink')}</a>
+            <Link to="/campaigns" className="dash-link">{t('dashboard.viewAllRewardsLink')}</Link>
           </div>
           {topRewards.length === 0 ? <EmptyState title={t('dashboard.noRewardsYet')} /> : (
             <table className="data-table">
@@ -304,7 +305,7 @@ export default function Dashboard() {
         <div className="card">
           <div className="card-head">
             <h3 className="card-title">{t('dashboard.recentActivityTitle')}</h3>
-            <a href="/history" style={{ fontSize: 12, color: 'var(--link)', fontWeight: 600, textDecoration: 'none' }}>{t('dashboard.viewAllLink')}</a>
+            <Link to="/history" className="dash-link">{t('dashboard.viewAllLink')}</Link>
           </div>
           {recentActivity.length === 0 ? <EmptyState title={t('dashboard.noActivityYet')} /> : (
             <div className="activity-list">
@@ -342,7 +343,7 @@ export default function Dashboard() {
           <Button variant="secondary" onClick={() => setShowDownloadApp(true)}>{t('dashboard.downloadAppBtn')}</Button>
           {editable && !editing && <Button variant="secondary" disabled={pdfBusy} onClick={async () => { setPdfBusy(true); try { await api.downloadDashboardPdf(campaignId); } catch (e) { setMsg(e.message); } finally { setPdfBusy(false); } }}>{pdfBusy ? t('dashboard.exportingPdf') : t('dashboard.exportPdf')}</Button>}
           {editable && !editing && <Button variant="secondary" onClick={() => { setDraft(info.layout.map((w) => ({ ...w }))); setMsg(''); }}>{t('dashboard.editBtn')}</Button>}
-          <select value={campaignId} disabled={editing} onChange={(e) => setCampaignId(e.target.value)}
+          <select aria-label={t('dashboard.pageTitle')} value={campaignId} disabled={editing} onChange={(e) => setCampaignId(e.target.value)}
             style={{ padding: '8px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13, fontFamily: 'inherit', color: 'var(--text)' }}>
             {(campaigns || []).map((c) => <option key={c.id} value={c.id}>{c.name}{c.status === 'active' ? ` · ${t('common.statusActive')}` : c.status === 'draft' ? ` · ${t('common.statusDraft')}` : ''}</option>)}
             <option value="all">{t('dashboard.allCampaignsOption')}</option>
@@ -383,7 +384,7 @@ export default function Dashboard() {
             <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 6 }}>{t('dashboard.aiGoalLabel')}</label>
             <textarea value={aiGoal} onChange={(e) => setAiGoal(e.target.value)} rows={3} maxLength={300} placeholder={t('dashboard.aiGoalPlaceholder')}
               style={{ width: '100%', boxSizing: 'border-box', padding: '9px 11px', border: '1.5px solid #E3E9F7', borderRadius: 10, fontSize: 13, fontFamily: 'inherit' }} />
-            <p style={{ fontSize: 11.5, color: '#64748B', margin: '8px 0 0' }}>{t('dashboard.aiPrivacy')}</p>
+            <p style={{ fontSize: 11.5, color: 'var(--text-muted)', margin: '8px 0 0' }}>{t('dashboard.aiPrivacy')}</p>
             {aiError && <div className="error-banner" style={{ marginTop: 10 }}>{aiError}</div>}
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 16 }}>
               <Button variant="ghost" disabled={aiBusy} onClick={() => setAiOpen(false)}>{t('dashboard.cancelBtn')}</Button>
@@ -392,7 +393,7 @@ export default function Dashboard() {
           </div>
         </div>
       )}
-      {msg && !editing && <p style={{ fontSize: 12, color: 'var(--green)', margin: '0 0 10px' }}>{msg}</p>}
+      {msg && !editing && <p style={{ fontSize: 12, color: 'var(--green-text)', margin: '0 0 10px' }}>{msg}</p>}
       {msg && editing && <p className="error-banner" style={{ margin: '0 0 10px' }}>{msg}</p>}
 
       {layout.length === 0 && <EmptyState title={t('dashboard.noModules')} action={editing ? <Button onClick={() => setAdding(true)}>{t('dashboard.addModuleBtn')}</Button> : null} />}

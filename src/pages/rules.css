@@ -2,10 +2,10 @@
 .rl-page { min-height: 100vh; background: #F1F5FB; padding: 24px 14px 48px; font-family: var(--font-ui, system-ui, sans-serif); color: #0F172A; }
 .rl-sheet { max-width: 780px; margin: 0 auto; background: #fff; border-radius: 16px; padding: 36px 40px; box-shadow: 0 10px 40px -20px rgba(0, 40, 129, .35); line-height: 1.65; font-size: 15px; }
 .rl-head { text-align: center; border-bottom: 1px solid #E3E9F7; padding-bottom: 22px; margin-bottom: 8px; }
-.rl-kicker { margin: 0; font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #64748B; }
+.rl-kicker { margin: 0; font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--text-muted); }
 .rl-head h1 { margin: 6px 0 4px; font-size: 26px; letter-spacing: -.02em; }
 .rl-sub { margin: 0; color: #475569; font-size: 14px; }
-.rl-version { margin: 10px 0 0; font-size: 12px; color: #94A3B8; }
+.rl-version { margin: 10px 0 0; font-size: 12px; color: var(--text-light); }
 .rl-print { margin-top: 14px; background: #fff; border: 1.5px solid #CBD5E1; border-radius: 10px; padding: 8px 16px; font-size: 13px; font-weight: 700; cursor: pointer; color: #0F1C3F; font-family: inherit; }
 .rl-art h2 { font-size: 16px; margin: 26px 0 8px; color: #002881; }
 .rl-art p { margin: 0 0 10px; }

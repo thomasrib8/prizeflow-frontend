@@ -12,7 +12,7 @@ const SPINS_PER_PHASE = 10;
 function SpinDots({ total, recorded, label }) {
   return (
     <div style={{ textAlign: 'center' }}>
-      {label && <div style={{ fontSize: 11, fontWeight: 600, color: '#64748B', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: 10 }}>{label}</div>}
+      {label && <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: 10 }}>{label}</div>}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
         {Array.from({ length: total }, (_, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -237,7 +237,7 @@ export default function Calibration({ onExit }) {
           {(step > 0 || step === -1) && step < 5 && (
             <button onClick={handleExitRequest} style={{
               background: 'none', border: '1px solid #E2E8F0', borderRadius: 8,
-              padding: '7px 14px', fontSize: 13, color: '#64748B', cursor: 'pointer', fontFamily: 'inherit',
+              padding: '7px 14px', fontSize: 13, color: 'var(--text-muted)', cursor: 'pointer', fontFamily: 'inherit',
             }}>{t('calibration.exitBtn')}</button>
           )}
         </div>
@@ -250,10 +250,10 @@ export default function Calibration({ onExit }) {
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 36, marginBottom: 14 }}>⟳</div>
             <h2 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 10px', color: '#03041A' }}>{t('calibration.transitioningTitle')}</h2>
-            <p style={{ fontSize: 14, color: '#64748B', lineHeight: 1.6, margin: '0 0 6px' }}>
+            <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.6, margin: '0 0 6px' }}>
               {t('calibration.transitioningDesc')}
             </p>
-            <p style={{ fontSize: 12, color: '#94A3B8' }}>{t('calibration.wheelStateLabel', { state: wheelState || '—' })}</p>
+            <p style={{ fontSize: 12, color: 'var(--text-light)' }}>{t('calibration.wheelStateLabel', { state: wheelState || '—' })}</p>
           </div>
         </Modal>
       )}
@@ -268,7 +268,7 @@ export default function Calibration({ onExit }) {
                   <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                 </div>
                 <h2 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 10px', color: '#03041A' }}>{t('calibration.interruptedTitle')}</h2>
-                <p style={{ fontSize: 14, color: '#64748B', lineHeight: 1.6, margin: '0 0 28px' }}>
+                <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.6, margin: '0 0 28px' }}>
                   {interruptedMessage}
                 </p>
                 <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
@@ -284,7 +284,7 @@ export default function Calibration({ onExit }) {
                   <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#09B2FD" strokeWidth="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1" fill="#09B2FD"/></svg>
                 </div>
                 <h2 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 10px', color: '#03041A' }}>{t('calibration.wheelCalibrationTitle')}</h2>
-                <p style={{ fontSize: 14, color: '#64748B', lineHeight: 1.6, margin: '0 0 28px' }}>
+                <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.6, margin: '0 0 28px' }}>
                   {t('calibration.entryDescPrefix')} <strong>{t('calibration.entryDescBold')}</strong> {t('calibration.entryDescSuffix')}
                 </p>
                 <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
@@ -304,7 +304,7 @@ export default function Calibration({ onExit }) {
         <Modal wide>
           <div className="cal-step-grid">
             <div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: '#09B2FD', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>{stepTitles[1]} {t('calibration.definingSection1')}</div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--blue-text)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>{stepTitles[1]} {t('calibration.definingSection1')}</div>
               <h2 style={{ fontSize: 20, fontWeight: 700, margin: '0 0 16px', color: '#03041A' }}>{t('calibration.positionCleatTitle')}</h2>
               <p style={{ fontSize: 14, color: '#334155', lineHeight: 1.7, margin: '0 0 28px' }}>
                 {t('calibration.positionCleatDescPrefix')} <strong>{t('calibration.section1Bold')}</strong> {t('calibration.positionCleatDescMiddle')} <strong>{t('calibration.section1And12Bold')}</strong>.
@@ -330,7 +330,7 @@ export default function Calibration({ onExit }) {
         <Modal wide>
           <div className="cal-step-grid">
             <div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: '#09B2FD', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>{stepTitles[2]} {t('calibration.definingSection1')}</div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--blue-text)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>{stepTitles[2]} {t('calibration.definingSection1')}</div>
               <h2 style={{ fontSize: 20, fontWeight: 700, margin: '0 0 16px', color: '#03041A' }}>{t('calibration.repositionCleatTitle')}</h2>
               <p style={{ fontSize: 14, color: '#334155', lineHeight: 1.7, margin: '0 0 28px' }}>
                 {t('calibration.positionCleatDescPrefix')} <strong>{t('calibration.section1Bold')}</strong> {t('calibration.positionCleatDescMiddle')} <strong>{t('calibration.section1And2Bold')}</strong>.
@@ -355,7 +355,7 @@ export default function Calibration({ onExit }) {
       {step === 3 && (
         <Modal wide>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#09B2FD', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>{stepTitles[3]}</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--blue-text)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>{stepTitles[3]}</div>
             <h2 style={{ fontSize: 28, fontWeight: 900, margin: '0 0 4px', color: '#03041A', letterSpacing: '-0.01em' }}>1</h2>
             <h3 style={{ fontSize: 16, fontWeight: 800, margin: '0 0 24px', color: '#03041A', letterSpacing: '0.04em', textTransform: 'uppercase' }}>{t('calibration.spinClockwiseTitle')}</h3>
 
@@ -364,22 +364,22 @@ export default function Calibration({ onExit }) {
             </div>
 
             {isRecording && (
-              <div style={{ fontSize: 13, fontWeight: 700, color: '#F59E0B', background: '#FFFBEB', padding: '8px 18px', borderRadius: 20, display: 'inline-block', marginBottom: 14 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--orange-text)', background: '#FFFBEB', padding: '8px 18px', borderRadius: 20, display: 'inline-block', marginBottom: 14 }}>
                 {t('calibration.recordingInProgress')}
               </div>
             )}
             {spinMsg && !isRecording && (
-              <div style={{ fontSize: 13, fontWeight: 700, color: '#10B981', background: '#ECFDF5', padding: '8px 18px', borderRadius: 20, display: 'inline-block', marginBottom: 14 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--green-text)', background: '#ECFDF5', padding: '8px 18px', borderRadius: 20, display: 'inline-block', marginBottom: 14 }}>
                 {spinMsg}
               </div>
             )}
             {!isRecording && !spinMsg && wheelState !== 'CalRun' && (
-              <div style={{ fontSize: 12, color: '#EF4444', background: '#FEF2F2', padding: '6px 14px', borderRadius: 20, display: 'inline-block', marginBottom: 14 }}>
+              <div style={{ fontSize: 12, color: 'var(--red-text)', background: '#FEF2F2', padding: '6px 14px', borderRadius: 20, display: 'inline-block', marginBottom: 14 }}>
                 {t('calibration.waitingForCalMode', { state: wheelState || '—' })}
               </div>
             )}
             {!isRecording && !spinMsg && wheelState === 'CalRun' && (
-              <div style={{ fontSize: 12, color: '#94A3B8', marginBottom: 14 }}>
+              <div style={{ fontSize: 12, color: 'var(--text-light)', marginBottom: 14 }}>
                 {t('calibration.spinHardClockwise')}
               </div>
             )}
@@ -408,7 +408,7 @@ export default function Calibration({ onExit }) {
       {step === 4 && (
         <Modal wide>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#09B2FD', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>{stepTitles[4]}</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--blue-text)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>{stepTitles[4]}</div>
             <h2 style={{ fontSize: 28, fontWeight: 900, margin: '0 0 4px', color: '#03041A', letterSpacing: '-0.01em' }}>2</h2>
             <h3 style={{ fontSize: 16, fontWeight: 800, margin: '0 0 24px', color: '#03041A', letterSpacing: '0.04em', textTransform: 'uppercase' }}>{t('calibration.spinCounterClockwiseTitle')}</h3>
 
@@ -417,17 +417,17 @@ export default function Calibration({ onExit }) {
             </div>
 
             {isRecording && (
-              <div style={{ fontSize: 13, fontWeight: 700, color: '#F59E0B', background: '#FFFBEB', padding: '8px 18px', borderRadius: 20, display: 'inline-block', marginBottom: 14 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--orange-text)', background: '#FFFBEB', padding: '8px 18px', borderRadius: 20, display: 'inline-block', marginBottom: 14 }}>
                 {t('calibration.recordingInProgress')}
               </div>
             )}
             {spinMsg && !isRecording && (
-              <div style={{ fontSize: 13, fontWeight: 700, color: '#10B981', background: '#ECFDF5', padding: '8px 18px', borderRadius: 20, display: 'inline-block', marginBottom: 14 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--green-text)', background: '#ECFDF5', padding: '8px 18px', borderRadius: 20, display: 'inline-block', marginBottom: 14 }}>
                 {spinMsg}
               </div>
             )}
             {!isRecording && !spinMsg && wheelState === 'CalRun' && (
-              <div style={{ fontSize: 12, color: '#94A3B8', marginBottom: 14 }}>
+              <div style={{ fontSize: 12, color: 'var(--text-light)', marginBottom: 14 }}>
                 {t('calibration.spinHardCounterClockwise')}
               </div>
             )}
@@ -458,7 +458,7 @@ export default function Calibration({ onExit }) {
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 48, marginBottom: 14 }}>✅</div>
             <h2 style={{ fontSize: 20, fontWeight: 700, margin: '0 0 10px', color: '#03041A' }}>{t('calibration.calibrationCompleteTitle')}</h2>
-            <p style={{ fontSize: 14, color: '#64748B', lineHeight: 1.6, margin: '0 0 20px' }}>
+            <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.6, margin: '0 0 20px' }}>
               {t('calibration.calibrationCompleteDesc')}
             </p>
             <div style={{
@@ -482,7 +482,7 @@ export default function Calibration({ onExit }) {
               </div>
               <div>
                 <h3 style={{ fontSize: 16, fontWeight: 700, margin: '0 0 8px', color: '#03041A' }}>{t('calibration.cancelCalibrationTitle')}</h3>
-                <p style={{ fontSize: 14, color: '#64748B', margin: 0, lineHeight: 1.6 }}>
+                <p style={{ fontSize: 14, color: 'var(--text-muted)', margin: 0, lineHeight: 1.6 }}>
                   {t('calibration.cancelCalibrationDesc')}
                 </p>
               </div>
@@ -498,7 +498,7 @@ export default function Calibration({ onExit }) {
       {/* Background content (visible when no modal) */}
       {step === 0 && (
         <div className="card" style={{ padding: 40, textAlign: 'center', marginTop: 120 }}>
-          <p style={{ color: '#64748B', fontSize: 14 }}>{t('calibration.confirmAboveHint')}</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>{t('calibration.confirmAboveHint')}</p>
         </div>
       )}
     </div>

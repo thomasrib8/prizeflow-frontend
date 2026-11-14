@@ -11,5 +11,5 @@
 .chips-field .chip button:focus-visible { outline: 2px solid #0055F8; outline-offset: 1px; }
 /* the field's own input must not look like a second box inside the box */
 .chips-field input[type="text"] { flex: 1 1 160px; min-width: 120px; border: none !important; box-shadow: none !important; outline: none; background: transparent; padding: 6px 4px !important; font-size: 14px; width: auto !important; }
-.chips-msg { font-size: 12px; color: #94A3B8; margin-top: 5px; line-height: 1.4; }
+.chips-msg { font-size: 12px; color: var(--text-light); margin-top: 5px; line-height: 1.4; }
 .chips-msg.bad { color: #B42318; font-weight: 600; }

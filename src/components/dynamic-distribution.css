@@ -6,9 +6,9 @@
 .dyn-mode b { font-size: 14px; color: #03041A; display: flex; align-items: center; gap: 8px; }
 .dyn-mode b::before { content: ""; width: 14px; height: 14px; border-radius: 50%; border: 2px solid #BFD4FF; background: #fff; flex: none; }
 .dyn-mode.on b::before { border-color: #0055F8; background: radial-gradient(#0055F8 45%, #fff 50%); }
-.dyn-mode span { font-size: 12.5px; color: #64748B; line-height: 1.5; }
+.dyn-mode span { font-size: 12.5px; color: var(--text-muted); line-height: 1.5; }
 .dyn-mode:disabled { opacity: .7; cursor: default; }
-.dyn-lock { font-size: 12px; color: #94A3B8; margin: 8px 0 0; }
+.dyn-lock { font-size: 12px; color: var(--text-light); margin: 8px 0 0; }
 
 /* Per-case probability: a large figure, a slider and an "unlimited" switch */
 .dyn-case { display: flex; gap: 14px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin: 2px 0 4px; padding: 12px 14px; border: 1px solid #DCE7FF; background: linear-gradient(180deg, #F7FAFF, #F1F6FF); border-radius: 12px; }
@@ -22,7 +22,7 @@
 .dyn-big:focus-within { border-color: #0055F8; box-shadow: 0 0 0 3px rgba(0, 85, 248, .15); }
 .dyn-case .dyn-big input { width: 74px; border: none; outline: none; box-shadow: none; background: transparent; padding: 0; text-align: right; font-size: 22px; font-weight: 800; line-height: 1.2; color: #03041A; font-variant-numeric: tabular-nums; -moz-appearance: textfield; }
 .dyn-case .dyn-big input::-webkit-outer-spin-button, .dyn-case .dyn-big input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.dyn-big span { font-size: 15px; font-weight: 700; color: #64748B; }
+.dyn-big span { font-size: 15px; font-weight: 700; color: var(--text-muted); }
 .dyn-case.ro .dyn-big { background: transparent; border-color: transparent; box-shadow: none; }
 .dyn-range { -webkit-appearance: none; appearance: none; flex: 1 1 auto; min-width: 120px; height: 8px; border-radius: 99px; border: none; padding: 0; background: linear-gradient(90deg, var(--c, #0055F8) var(--p, 0%), #DCE5F5 var(--p, 0%)); cursor: pointer; }
 .dyn-range::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #fff; border: 2px solid var(--c, #0055F8); box-shadow: 0 2px 5px rgba(3, 4, 26, .22); transition: transform .12s; }
@@ -64,7 +64,7 @@
 .dyn-eff { font-weight: 800; }
 .dyn-eff.up { color: #047857; }
 .dyn-eff.down { color: #B45309; }
-.dyn-w { font-size: 11.5px; color: #64748B; }
+.dyn-w { font-size: 11.5px; color: var(--text-muted); }
 .dyn-w.in { color: #047857; font-weight: 700; }
 .dyn-w.out { color: #B45309; font-weight: 700; }
 .dyn-alert { border-radius: 12px; padding: 12px 15px; font-size: 13px; line-height: 1.5; margin-bottom: 12px; }
@@ -74,10 +74,10 @@
 .dyn-hist { max-height: 260px; overflow-y: auto; border: 1px solid #F1F4FB; border-radius: 10px; }
 .dyn-hist-row { display: flex; gap: 10px; align-items: baseline; padding: 7px 12px; font-size: 12.5px; border-bottom: 1px solid #F1F4FB; }
 .dyn-hist-row:last-child { border-bottom: none; }
-.dyn-hist-row time { color: #94A3B8; font-variant-numeric: tabular-nums; flex: none; }
+.dyn-hist-row time { color: var(--text-light); font-variant-numeric: tabular-nums; flex: none; }
 .dyn-forecast { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; font-size: 13px; }
 .dyn-forecast input { width: 110px; }
-.dyn-note { font-size: 12px; color: #64748B; margin: 8px 0 0; line-height: 1.5; }
+.dyn-note { font-size: 12px; color: var(--text-muted); margin: 8px 0 0; line-height: 1.5; }
 .dyn-short { color: #B45309; font-weight: 700; }
 .dyn-fine { color: #047857; font-weight: 700; }
 @media (max-width: 700px) { .dyn-modes { grid-template-columns: 1fr; } }
@@ -87,11 +87,11 @@
 .dyn-pct { display: flex; align-items: center; border: 1.5px solid #C9DAFF; background: #F4F8FF; border-radius: var(--radius-sm); padding-right: 9px; }
 .dyn-pct:focus-within { border-color: var(--blue, #0055F8); box-shadow: 0 0 0 3px rgba(0, 85, 248, .12); }
 .gift-row .dyn-pct input { border: none; box-shadow: none; width: 100%; min-width: 0; text-align: right; background: transparent; outline: none; padding-right: 4px; font-weight: 700; }
-.dyn-pct span { font-size: 12px; font-weight: 700; color: #64748B; }
+.dyn-pct span { font-size: 12px; font-weight: 700; color: var(--text-muted); }
 .dyn-unl { display: flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 7px 8px; font-size: 12.5px; font-weight: 600; color: #475569; background: #fff; cursor: pointer; white-space: nowrap; user-select: none; }
 .dyn-unl.on { background: #EAF1FF; border-color: #0055F8; color: #002881; }
 .dyn-unl input { margin: 0; accent-color: #0055F8; }
-.dyn-help { font-size: 12px; color: #64748B; margin: 0 0 12px; line-height: 1.5; background: #F4F8FF; border: 1px solid #DCE7FF; border-radius: 10px; padding: 8px 12px; }
+.dyn-help { font-size: 12px; color: var(--text-muted); margin: 0 0 12px; line-height: 1.5; background: #F4F8FF; border: 1px solid #DCE7FF; border-radius: 10px; padding: 8px 12px; }
 @media (max-width: 760px) {
   .gift-row.dyn { grid-template-columns: 1fr 1fr; grid-template-areas: "handle handle" "name name" "pct stock" "unl redeem"; row-gap: 6px; }
   .gift-row.dyn > .gift-handle { grid-area: handle; justify-self: start; }

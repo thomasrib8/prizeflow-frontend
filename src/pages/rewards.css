@@ -9,7 +9,7 @@
 .rw-list .crm-head, .rw-list .crm-row { grid-template-columns: minmax(0, 1.6fr) minmax(0, 2fr) 120px 130px; }
 .rw-list .crm-row { grid-template-areas: "who gift st date"; }
 .rw-st { grid-area: st; }
-.rw-date { grid-area: date; font-size: 12px; color: #64748B; text-align: right; }
+.rw-date { grid-area: date; font-size: 12px; color: var(--text-muted); text-align: right; }
 @container (max-width: 700px) {
   .rw-list .crm-row { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "who st" "gift date"; }
 }

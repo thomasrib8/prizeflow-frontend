@@ -158,11 +158,11 @@ export default function Magic() {
 
           {armedSlot !== null && (
             justLanded ? (
-              <div style={{ fontSize: 13, fontWeight: 700, color: '#10B981', background: '#ECFDF5', padding: '8px 18px', borderRadius: 20 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--green-text)', background: '#ECFDF5', padding: '8px 18px', borderRadius: 20 }}>
                 {t('magic.caseForced', { n: armedSlot + 1 })}
               </div>
             ) : (
-              <div style={{ fontSize: 13, fontWeight: 700, color: '#F59E0B', background: '#FFFBEB', padding: '8px 18px', borderRadius: 20 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--orange-text)', background: '#FFFBEB', padding: '8px 18px', borderRadius: 20 }}>
                 {t('magic.caseArmed', { n: armedSlot + 1 })}
               </div>
             )

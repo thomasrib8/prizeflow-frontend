@@ -329,7 +329,7 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
     <div className="modal-overlay">
       <form ref={formRef} className="modal-card" style={{ '--modal-w': '560px' }} onSubmit={(e) => e.preventDefault()}>
         <h3 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 800 }}>{t('newProspectModal.title')}</h3>
-        <p style={{ margin: '0 0 16px', fontSize: 13, color: '#64748B' }}>
+        <p style={{ margin: '0 0 16px', fontSize: 13, color: 'var(--text-muted)' }}>
           {t('newProspectModal.subtitlePrefix')} <strong>{campaign.name}</strong> {t('newProspectModal.subtitleSuffix')}
         </p>
 
@@ -348,12 +348,12 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
               {scan.state === 'reading' ? t('newProspectModal.scanReading') : scan.state === 'done' ? t('newProspectModal.scanAnother') : t('newProspectModal.scanBadgeOrCard')}
             </Button>
             {scan.state === 'idle' && (
-              <div style={{ fontSize: 12, color: '#64748B', marginTop: 8 }}>{t('newProspectModal.scanIdleHint')}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8 }}>{t('newProspectModal.scanIdleHint')}</div>
             )}
             {scan.state === 'done' && (
               <div style={{ fontSize: 12, color: '#047857', marginTop: 8, fontWeight: 600 }}>
                 ✓ {scan.source === 'qr' ? t('newProspectModal.scanDoneQr') : t('newProspectModal.scanDonePhoto')}{' '}
-                <span style={{ color: '#64748B', fontWeight: 500 }}>{t('newProspectModal.scanDoneCheckHint')}</span>
+                <span style={{ color: 'var(--text-muted)', fontWeight: 500 }}>{t('newProspectModal.scanDoneCheckHint')}</span>
               </div>
             )}
             {scan.state === 'error' && <div style={{ fontSize: 12, color: '#B91C1C', marginTop: 8 }}>{scan.message}</div>}
@@ -518,8 +518,8 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
                   >
                     {t('prospectCard.stopRecording')}
                   </button>
-                  <span style={{ fontSize: 12, color: '#EF4444', fontWeight: 600 }}>
-                    {t('prospectCard.recordingLabel')} <span style={{ color: '#94A3B8', fontWeight: 500 }}>{t('prospectCard.recordingSilenceHint')}</span>
+                  <span style={{ fontSize: 12, color: 'var(--red-text)', fontWeight: 600 }}>
+                    {t('prospectCard.recordingLabel')} <span style={{ color: 'var(--text-light)', fontWeight: 500 }}>{t('prospectCard.recordingSilenceHint')}</span>
                   </span>
                 </>
               ) : (
@@ -567,7 +567,7 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
 
         <label style={{ display: 'flex', gap: 10, alignItems: 'flex-start', fontSize: 13, color: '#334155', cursor: 'pointer', margin: '16px 0 4px', lineHeight: 1.45 }}>
           <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} style={{ marginTop: 2, flexShrink: 0, width: 18, height: 18 }} />
-          <span>{t('newProspectModal.consentText')} <span style={{ color: '#94A3B8' }}>{t('newProspectModal.consentRecordedNote')}</span></span>
+          <span>{t('newProspectModal.consentText')} <span style={{ color: 'var(--text-light)' }}>{t('newProspectModal.consentRecordedNote')}</span></span>
         </label>
 
         {duplicate && (
@@ -585,7 +585,7 @@ export default function NewProspectModal({ campaign, initialFile = null, scanEna
           <Button type="button" variant={canQueue ? 'secondary' : 'primary'} disabled={saving || !consent} onClick={() => submit(false)}>{t('newProspectModal.saveOnlyBtn')}</Button>
           <Button type="button" variant="secondary" onClick={onClose} disabled={saving}>{t('common.cancel')}</Button>
         </div>
-        {!consent && <div style={{ fontSize: 11, color: '#94A3B8', marginTop: 8 }}>{t('newProspectModal.tickToSaveHint')}</div>}
+        {!consent && <div style={{ fontSize: 11, color: 'var(--text-light)', marginTop: 8 }}>{t('newProspectModal.tickToSaveHint')}</div>}
       </form>
       {liDialog && (
         <LinkedInSearchDialog

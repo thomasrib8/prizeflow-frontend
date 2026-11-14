@@ -1,4 +1,10 @@
 {
+  "errorBoundary": {
+    "title": "This page ran into a problem",
+    "text": "Nothing is lost: your data is intact. Reload the page, or go back to the dashboard.",
+    "reload": "Reload the page",
+    "home": "Dashboard"
+  },
   "common": {
     "loading": "Loading…",
     "cancel": "Cancel",

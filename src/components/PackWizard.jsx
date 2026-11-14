@@ -253,7 +253,7 @@ export default function PackWizard({ wheelId: initialWheelId = null, onClose, on
             <div className="sw-wifi">
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div className="sw-sub" style={{ marginBottom: 6 }}>{t('packWizard.wifiIntro')}</div>
-                {pwExisting && !pwTouched && <div className="sw-sub" style={{ color: 'var(--green)' }}>{t('packWizard.alreadySet')}</div>}
+                {pwExisting && !pwTouched && <div className="sw-sub" style={{ color: 'var(--green-text)' }}>{t('packWizard.alreadySet')}</div>}
                 <div className="sw-label">{t('setupWizard.pwLabel')}</div>
                 <div style={{ display: 'flex', gap: 6 }}>
                   <input className="sw-input" style={{ flex: 1 }} type={pwShow ? 'text' : 'password'} autoComplete="off" spellCheck={false} value={pw}

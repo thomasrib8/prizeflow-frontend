@@ -1,4 +1,10 @@
 {
+  "errorBoundary": {
+    "title": "Esta página ha tenido un problema",
+    "text": "No se ha perdido nada: sus datos están intactos. Recargue la página o vuelva al panel.",
+    "reload": "Recargar la página",
+    "home": "Panel"
+  },
   "common": {
     "loading": "Cargando…",
     "cancel": "Cancelar",

@@ -16,9 +16,9 @@ function Column({ heading, subtitle, qr, url, alt, children }) {
   return (
     <div style={{ textAlign: 'center' }}>
       <div style={{ fontSize: 13, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#0055F8', marginBottom: 4 }}>{heading}</div>
-      <p style={{ margin: '0 auto 14px', fontSize: 13, color: '#64748B', maxWidth: 330 }}>{subtitle}</p>
+      <p style={{ margin: '0 auto 14px', fontSize: 13, color: 'var(--text-muted)', maxWidth: 330 }}>{subtitle}</p>
       {qr ? <img src={qr} alt={alt} style={{ width: 190, height: 190 }} /> : <div style={{ width: 190, height: 190, margin: '0 auto' }} />}
-      <p style={{ fontSize: 12, color: '#94A3B8', margin: '8px 0 0', wordBreak: 'break-all' }}>{url}</p>
+      <p style={{ fontSize: 12, color: 'var(--text-light)', margin: '8px 0 0', wordBreak: 'break-all' }}>{url}</p>
       {children}
     </div>
   );
@@ -51,7 +51,7 @@ export default function DownloadAppModal({ onClose }) {
           </Column>
         </div>
 
-        <p style={{ margin: '22px 0 12px', fontSize: 12, color: '#64748B', textAlign: 'center' }}>{t('downloadAppModal.sameGestures')}</p>
+        <p style={{ margin: '22px 0 12px', fontSize: 12, color: 'var(--text-muted)', textAlign: 'center' }}>{t('downloadAppModal.sameGestures')}</p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24, textAlign: 'left' }}>
           <div>
             <div style={heading}>{t('downloadAppModal.iphoneTitle')}</div>

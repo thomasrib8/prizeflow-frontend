@@ -39,7 +39,7 @@ export default function ProfitabilityCard({ campaignId, readOnly = false, bare =
     try { setData(await api.createBudgetField(campaignId)); } catch { setFailed(true); }
   }
 
-  const Frame = ({ children, head }) => (bare ? <>{head && <h2 className="pw-card-title" style={{ marginBottom: 12 }}>{t('dashboard.profitTitle')}</h2>}{children}</> : <div className="card">{head && <div className="card-head"><h3 className="card-title">{t('dashboard.profitTitle')}</h3>{saved && <span style={{ fontSize: 11, color: 'var(--green)' }}>{t('dashboard.profitSaved')}</span>}</div>}{children}</div>);
+  const Frame = ({ children, head }) => (bare ? <>{head && <h2 className="pw-card-title" style={{ marginBottom: 12 }}>{t('dashboard.profitTitle')}</h2>}{children}</> : <div className="card">{head && <div className="card-head"><h3 className="card-title">{t('dashboard.profitTitle')}</h3>{saved && <span style={{ fontSize: 11, color: 'var(--green-text)' }}>{t('dashboard.profitSaved')}</span>}</div>}{children}</div>);
   if (failed) return <Frame><div className="dash-empty">{t('dashboard.moduleError')}</div></Frame>;
   if (!data) return <Frame><div className="dash-empty">{t('common.loading')}</div></Frame>;
 
@@ -69,8 +69,8 @@ export default function ProfitabilityCard({ campaignId, readOnly = false, bare =
                   ? <input value={c.label} placeholder={t('dashboard.profitCostLabel')} maxLength={60} onChange={(e) => setCost(i, { label: e.target.value })} style={{ ...INPUT, textAlign: 'left', flex: 1, fontWeight: 500 }} />
                   : <span style={{ flex: 1 }}>{t('dashboard.profitCost')}</span>}
                 <input type="number" min="0" inputMode="decimal" value={c.amount || ''} placeholder="0" onChange={(e) => setCost(i, { amount: e.target.value === '' ? 0 : Number(e.target.value) })} style={{ ...INPUT, width: 96 }} />
-                <span style={{ color: '#64748B' }}>€</span>
-                {detailed && costs.length > 1 && <button type="button" aria-label={t('dashboard.removeModule')} onClick={() => change({ costs: costs.filter((_, k) => k !== i) })} style={{ border: 'none', background: 'none', color: '#94A3B8', cursor: 'pointer', fontSize: 15 }}>×</button>}
+                <span style={{ color: 'var(--text-muted)' }}>€</span>
+                {detailed && costs.length > 1 && <button type="button" aria-label={t('dashboard.removeModule')} onClick={() => change({ costs: costs.filter((_, k) => k !== i) })} style={{ border: 'none', background: 'none', color: 'var(--text-light)', cursor: 'pointer', fontSize: 15 }}>×</button>}
               </div>
             ))}
             <button type="button" onClick={() => change({ costs: [...costs, { label: '', amount: 0 }] })} style={{ justifySelf: 'start', border: 'none', background: 'none', color: '#002881', fontWeight: 700, fontSize: 12, cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}>{detailed ? t('dashboard.profitAddLine') : t('dashboard.profitDetail')}</button>
@@ -106,7 +106,7 @@ export default function ProfitabilityCard({ campaignId, readOnly = false, bare =
 
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap', marginTop: 8 }}>
             <span style={{ fontSize: 26, fontWeight: 800, color: roi === null ? '#94A3B8' : roi >= 0 ? '#1AA864' : '#E24B4A' }}>{roi === null ? '—' : `${roi > 0 ? '+ ' : ''}${roi} %`}</span>
-            <span style={{ fontSize: 11.5, color: '#64748B' }}>
+            <span style={{ fontSize: 11.5, color: 'var(--text-muted)' }}>
               {roi === null ? t('dashboard.profitNeedCost') : t('dashboard.profitRoi')}
               {r.costPerLead !== null && ` · ${t('dashboard.profitPerLead', { amount: money(r.costPerLead) })}`}
               {r.costPerQualified !== null && ` · ${t('dashboard.profitPerQualified', { amount: money(r.costPerQualified) })}`}

@@ -1,4 +1,10 @@
 {
+  "errorBoundary": {
+    "title": "Diese Seite hat ein Problem",
+    "text": "Nichts ist verloren: Ihre Daten sind unversehrt. Laden Sie die Seite neu oder kehren Sie zum Dashboard zurück.",
+    "reload": "Seite neu laden",
+    "home": "Dashboard"
+  },
   "common": {
     "loading": "Wird geladen…",
     "cancel": "Abbrechen",

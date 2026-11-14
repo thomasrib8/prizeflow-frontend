@@ -38,7 +38,7 @@ export default function SegmentationBuilder({ categories, onChange }) {
                 title={t('builders.removeCategoryTitle')}
                 style={{
                   width: 32, height: 32, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  background: 'white', border: '1px solid var(--border, #E2E8F0)', borderRadius: 8, color: '#EF4444', cursor: 'pointer',
+                  background: 'white', border: '1px solid var(--border, #E2E8F0)', borderRadius: 8, color: 'var(--red-text)', cursor: 'pointer',
                 }}
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" width="15" height="15">

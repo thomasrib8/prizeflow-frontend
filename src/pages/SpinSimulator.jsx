@@ -196,7 +196,7 @@ export default function SpinSimulator() {
           <div className="sp-chart"><ResponsiveContainer width="100%" height="100%">
             <BarChart data={dayData} margin={{ top: 22, right: 8, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#E3EAF8" vertical={false} /><XAxis dataKey="name" tick={{ fontSize: 12 }} /><YAxis tick={{ fontSize: 12 }} width={56} tickFormatter={int} />
-              <Tooltip formatter={(v) => int(v)} /><Legend />
+              <Tooltip formatter={(v) => int(v)} /><Legend formatter={(v) => <span style={{ color: 'var(--text-muted)' }}>{v}</span>} />
               {SCENARIOS.map((k) => <Bar key={k} dataKey={k} name={name(k)} fill={COLORS[k]} radius={[6, 6, 0, 0]}><LabelList dataKey={k} position="top" formatter={int} className="sp-label" /></Bar>)}
             </BarChart>
           </ResponsiveContainer></div>

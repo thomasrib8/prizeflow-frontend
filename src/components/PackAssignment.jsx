@@ -179,7 +179,7 @@ export default function PackAssignment({ userId, clientLabel, isAdmin = false, o
           <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginTop: 10, flexWrap: 'wrap' }}>
             <Button size="sm" disabled={busy || !dirty} onClick={saveParams}>{t('packAssign.saveBtn')}</Button>
             <Button size="sm" variant="secondary" onClick={showSheet}>{sheet ? t('packAssign.hideSheetBtn') : t('packAssign.sheetBtn')}</Button>
-            {msg && <span className="sw-sub" style={{ color: 'var(--green)' }}>{msg}</span>}
+            {msg && <span className="sw-sub" style={{ color: 'var(--green-text)' }}>{msg}</span>}
           </div>
           {sheet && (
             <>

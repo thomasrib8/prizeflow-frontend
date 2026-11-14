@@ -207,10 +207,10 @@ export default function LaunchCampaign() {
               <p className="page-subtitle">{t('common.loading')}</p>
             )}
             {guestUrl && (
-              <p style={{ fontSize: 12, color: '#94A3B8', marginTop: 12, wordBreak: 'break-all' }}>{guestUrl}</p>
+              <p style={{ fontSize: 12, color: 'var(--text-light)', marginTop: 12, wordBreak: 'break-all' }}>{guestUrl}</p>
             )}
             {q.campaign && (
-              <p style={{ fontSize: 12, color: '#94A3B8', marginTop: 4 }}>{t('launchCampaign.campaignLabel', { name: q.campaign.name })}</p>
+              <p style={{ fontSize: 12, color: 'var(--text-light)', marginTop: 4 }}>{t('launchCampaign.campaignLabel', { name: q.campaign.name })}</p>
             )}
             {qrDataUrl && (
               <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 16 }}>
@@ -281,7 +281,7 @@ export default function LaunchCampaign() {
 
       {q.campaign !== null && (
         <Card title={t('pwa.last20PlayersTitle')} className="mt-card">
-          <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 12px' }}>
+          <p style={{ fontSize: 12, color: 'var(--text-light)', margin: '0 0 12px' }}>
             {t('launchCampaign.clickNameHint')}
           </p>
           {q.recentPlayers && q.recentPlayers.length > 0 && (

@@ -57,7 +57,7 @@ function ServiceBadge({ name, status }) {
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
       <span style={{ fontSize: 13, fontWeight: 600 }}>{name}</span>
       <Badge tone={tone}>{label}</Badge>
-      {status?.description && <span style={{ fontSize: 12, color: '#94A3B8' }}>{status.description}</span>}
+      {status?.description && <span style={{ fontSize: 12, color: 'var(--text-light)' }}>{status.description}</span>}
     </div>
   );
 }
@@ -98,7 +98,7 @@ export default function AppHealth() {
           </div>
 
           <Card title={t('appHealth.serviceStatusTitle')} className="mt-card">
-            <p style={{ fontSize: 12, color: '#94A3B8', marginBottom: 12 }}>
+            <p style={{ fontSize: 12, color: 'var(--text-light)', marginBottom: 12 }}>
               {t('appHealth.serviceStatusDesc')}
             </p>
             <div style={{ display: 'flex', gap: 28, flexWrap: 'wrap', rowGap: 12 }}>
@@ -109,7 +109,7 @@ export default function AppHealth() {
 
           <ResendQuotaCard initial={health.emailStatus} />
 
-          <Card title={t('appHealth.emailFindingQuotaTitle')} className="mt-card" action={<span style={{ fontSize: 11, color: '#94A3B8' }}>Hunter.io</span>}>
+          <Card title={t('appHealth.emailFindingQuotaTitle')} className="mt-card" action={<span style={{ fontSize: 11, color: 'var(--text-light)' }}>Hunter.io</span>}>
             <ProviderQuotaTable
               status={health.apiQuotaStatus?.hunter}
               hasData={(s) => !!(s.searches || s.credits || s.planName)}
@@ -125,7 +125,7 @@ export default function AppHealth() {
             />
           </Card>
 
-          <Card title={t('appHealth.verificationQuotaTitle')} className="mt-card" action={<span style={{ fontSize: 11, color: '#94A3B8' }}>Bouncer</span>}>
+          <Card title={t('appHealth.verificationQuotaTitle')} className="mt-card" action={<span style={{ fontSize: 11, color: 'var(--text-light)' }}>Bouncer</span>}>
             <ProviderQuotaTable
               status={health.apiQuotaStatus?.bouncer}
               hasData={(s) => s.credits != null}
@@ -136,7 +136,7 @@ export default function AppHealth() {
           </Card>
 
           <Card title={t('appHealth.recentErrorsTitle')} className="mt-card">
-            <p style={{ fontSize: 12, color: '#94A3B8', marginBottom: 12 }}>
+            <p style={{ fontSize: 12, color: 'var(--text-light)', marginBottom: 12 }}>
               {health.sentryEnabled
                 ? t('appHealth.sentryEnabledDesc')
                 : t('appHealth.sentryDisabledDesc')}

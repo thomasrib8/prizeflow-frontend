@@ -128,8 +128,8 @@ export default function Users() {
                           <option value="admin">{t('users.roleAdmin')}</option>
                         </select>
                       </td>
-                      <td>{types[u.id] ? t(`contract.types.${types[u.id].type}`) : <span style={{ color: '#94A3B8' }}>—</span>}</td>
-                      <td>{types[u.id] && types[u.id].parentResellerName ? types[u.id].parentResellerName : <span style={{ color: '#94A3B8' }}>—</span>}</td>
+                      <td>{types[u.id] ? t(`contract.types.${types[u.id].type}`) : <span style={{ color: 'var(--text-light)' }}>—</span>}</td>
+                      <td>{types[u.id] && types[u.id].parentResellerName ? types[u.id].parentResellerName : <span style={{ color: 'var(--text-light)' }}>—</span>}</td>
                       <td><Badge tone={STATUS_TONE[u.status]}>{t(`users.${STATUS_TKEY[u.status]}`)}</Badge></td>
                       <td>
                         {!isSelf && (

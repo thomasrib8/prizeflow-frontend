@@ -65,10 +65,10 @@ function SequenceRunModal({ sequence, wheelStatus, agentConnected, status, busyI
       <div className="modal-card" style={{ '--modal-w': '480px', textAlign: 'center' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
           <div style={{ textAlign: 'left' }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#09B2FD', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{t('sequenceBuilder.sequenceLabel')}</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--blue-text)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{t('sequenceBuilder.sequenceLabel')}</div>
             <h2 style={{ fontSize: 18, fontWeight: 700, margin: '2px 0 0', color: '#03041A' }}>{sequence.name}</h2>
           </div>
-          <button type="button" onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 22, color: '#94A3B8', cursor: 'pointer', lineHeight: 1, padding: 0 }}>×</button>
+          <button type="button" onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 22, color: 'var(--text-light)', cursor: 'pointer', lineHeight: 1, padding: 0 }}>×</button>
         </div>
 
         {!agentConnected && (
@@ -80,11 +80,11 @@ function SequenceRunModal({ sequence, wheelStatus, agentConnected, status, busyI
         </div>
 
         {isRunningThis ? (
-          <div style={{ fontSize: 13, fontWeight: 700, color: '#F59E0B', background: '#FFFBEB', padding: '8px 18px', borderRadius: 20, display: 'inline-block', marginBottom: 18 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--orange-text)', background: '#FFFBEB', padding: '8px 18px', borderRadius: 20, display: 'inline-block', marginBottom: 18 }}>
             {t('sequenceBuilder.forcingCaseLabel', { n: targetIndex + 1, position: position + 1, total: steps.length })}
           </div>
         ) : (
-          <div style={{ fontSize: 13, fontWeight: 700, color: '#10B981', background: '#ECFDF5', padding: '8px 18px', borderRadius: 20, display: 'inline-block', marginBottom: 18 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--green-text)', background: '#ECFDF5', padding: '8px 18px', borderRadius: 20, display: 'inline-block', marginBottom: 18 }}>
             {t('sequenceBuilder.sequenceCompleteLabel')}
           </div>
         )}
@@ -92,7 +92,7 @@ function SequenceRunModal({ sequence, wheelStatus, agentConnected, status, busyI
         <StepBubbles steps={steps} position={position} active={isRunningThis} />
 
         <div style={{ marginTop: 26 }}>
-          <Button variant="ghost" disabled={!isRunningThis || busyId === 'stop'} onClick={onStop} style={{ color: '#EF4444' }}>
+          <Button variant="ghost" disabled={!isRunningThis || busyId === 'stop'} onClick={onStop} style={{ color: 'var(--red-text)' }}>
             {busyId === 'stop' ? t('sequenceBuilder.stoppingLabel') : t('sequenceBuilder.stopSequenceBtn')}
           </Button>
         </div>
@@ -120,13 +120,13 @@ function LibraryModule({ sequences, status, agentConnected, busyId, onActivate, 
                 : <Badge tone="neutral">{t('sequenceBuilder.readyLabel')}</Badge>}
             </div>
             {seq.description && (
-              <p style={{ fontSize: 12, color: '#64748B', margin: '0 0 12px', lineHeight: 1.5 }}>{seq.description}</p>
+              <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 12px', lineHeight: 1.5 }}>{seq.description}</p>
             )}
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 20 }}>
               {seq.steps.map((s, i) => (
                 <span key={i} style={{
                   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                  width: 26, height: 26, borderRadius: '50%', background: '#EFF6FF', color: '#09B2FD',
+                  width: 26, height: 26, borderRadius: '50%', background: '#EFF6FF', color: 'var(--blue-text)',
                   fontSize: 12, fontWeight: 700,
                 }}>
                   {s + 1}
@@ -137,7 +137,7 @@ function LibraryModule({ sequences, status, agentConnected, busyId, onActivate, 
               {isActive ? (
                 <>
                   <Button size="sm" variant="ghost" onClick={() => onView(seq)}>{t('sequenceBuilder.viewBtn')}</Button>
-                  <Button size="sm" variant="ghost" disabled={busyId === 'stop'} onClick={onStop} style={{ color: '#EF4444' }}>
+                  <Button size="sm" variant="ghost" disabled={busyId === 'stop'} onClick={onStop} style={{ color: 'var(--red-text)' }}>
                     {busyId === 'stop' ? t('sequenceBuilder.stoppingLabel') : t('sequenceBuilder.stopBtn')}
                   </Button>
                 </>
@@ -190,7 +190,7 @@ function SettingsModule({ wheelStatus, agentConnected, sequences, busyId, saving
         <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'center' }}>
           <WheelSVG positionAngle={posAngle} size={200} />
           <div style={{ flex: 1, minWidth: 220 }}>
-            <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 10px' }}>
+            <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 10px' }}>
               {t('sequenceBuilder.spinInstructions')}
             </p>
             <Button variant="success" onClick={handleAddStep} disabled={!agentConnected}>
@@ -200,7 +200,7 @@ function SettingsModule({ wheelStatus, agentConnected, sequences, busyId, saving
         </div>
 
         <div style={{ marginTop: 18 }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: '#64748B', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             {t('sequenceBuilder.stepsCountLabel', { count: steps.length })}
           </div>
           {steps.length === 0 ? (
@@ -209,14 +209,14 @@ function SettingsModule({ wheelStatus, agentConnected, sequences, busyId, saving
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {steps.map((s, i) => (
                 <span key={i} style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 6, background: '#EFF6FF', color: '#09B2FD',
+                  display: 'inline-flex', alignItems: 'center', gap: 6, background: '#EFF6FF', color: 'var(--blue-text)',
                   fontWeight: 700, fontSize: 13, padding: '5px 6px 5px 12px', borderRadius: 20,
                 }}>
                   {s + 1}
                   <button
                     type="button"
                     onClick={() => handleRemoveStep(i)}
-                    style={{ background: 'none', border: 'none', color: '#09B2FD', cursor: 'pointer', fontSize: 14, lineHeight: 1, padding: '2px 4px' }}
+                    style={{ background: 'none', border: 'none', color: 'var(--blue-text)', cursor: 'pointer', fontSize: 14, lineHeight: 1, padding: '2px 4px' }}
                   >
                     ✕
                   </button>
@@ -273,7 +273,7 @@ function SettingsModule({ wheelStatus, agentConnected, sequences, busyId, saving
                       variant="ghost"
                       disabled={busyId === seq.id || isSeqActive(seq.id)}
                       onClick={() => onDelete(seq.id)}
-                      style={{ color: '#EF4444' }}
+                      style={{ color: 'var(--red-text)' }}
                     >
                       {busyId === seq.id ? t('sequenceBuilder.deletingLabel') : t('sequenceBuilder.deleteBtn')}
                     </Button>

@@ -127,7 +127,7 @@ export default function UserDetail() {
     <div>
       <div className="page-header">
         <div>
-          <Link to="/users" style={{ fontSize: 13, color: '#64748B' }}>{t('userDetail.backToUsers')}</Link>
+          <Link to="/users" style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('userDetail.backToUsers')}</Link>
           <h1 className="page-title" style={{ marginTop: 6 }}>{detail.name || detail.email}</h1>
           <p className="page-subtitle">{detail.company || t('userDetail.noCompanyOnFile')} · {detail.email}</p>
         </div>
@@ -177,14 +177,14 @@ export default function UserDetail() {
                 <div>{t('userDetail.modelNumberDisplay')}<strong>{detail.wheel_model_number}</strong></div>
                 <div>{t('userDetail.serialNumberDisplay')}<strong>{detail.wheel_serial_number}</strong></div>
                 <div>{t('userDetail.securityKeyDisplay')}<strong>{detail.wheel_security_key}</strong></div>
-                <div style={{ fontSize: 12, color: '#94A3B8', marginTop: 6 }}>{t('userDetail.generatedLabel')}{formatDT(detail.wheel_identity_generated_at)}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-light)', marginTop: 6 }}>{t('userDetail.generatedLabel')}{formatDT(detail.wheel_identity_generated_at)}</div>
                 <div style={{ fontSize: 12, marginTop: 4, color: detail.wheel_first_connected_at ? '#10B981' : '#F59E0B' }}>
                   {detail.wheel_first_connected_at
                     ? `${t('userDetail.confirmedInServicePrefix')}${formatDT(detail.wheel_first_connected_at)}`
                     : t('userDetail.notConfirmedYet')}
                 </div>
               </div>
-            ) : <p style={{ fontSize: 13, color: '#64748B', margin: 0 }}>{t('userDetail.noWheelAssigned')}</p>}
+            ) : <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: 0 }}>{t('userDetail.noWheelAssigned')}</p>}
           </Card>
           </details>
         </>
@@ -196,10 +196,10 @@ export default function UserDetail() {
         <>
           <Card title={t('userDetail.clientProfileTitle')} className="mt-card">
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, fontSize: 13 }}>
-              <div><span style={{ color: '#94A3B8' }}>{t('userDetail.addressLabel')}</span><div>{detail.address || '—'}</div></div>
-              <div><span style={{ color: '#94A3B8' }}>{t('userDetail.phoneLabel')}</span><div>{detail.phone || '—'}</div></div>
-              <div><span style={{ color: '#94A3B8' }}>{t('userDetail.industryLabel')}</span><div>{detail.industry_sector || '—'}</div></div>
-              <div><span style={{ color: '#94A3B8' }}>{t('userDetail.createdLabel')}</span><div>{formatDT(detail.created_at)}</div></div>
+              <div><span style={{ color: 'var(--text-light)' }}>{t('userDetail.addressLabel')}</span><div>{detail.address || '—'}</div></div>
+              <div><span style={{ color: 'var(--text-light)' }}>{t('userDetail.phoneLabel')}</span><div>{detail.phone || '—'}</div></div>
+              <div><span style={{ color: 'var(--text-light)' }}>{t('userDetail.industryLabel')}</span><div>{detail.industry_sector || '—'}</div></div>
+              <div><span style={{ color: 'var(--text-light)' }}>{t('userDetail.createdLabel')}</span><div>{formatDT(detail.created_at)}</div></div>
             </div>
           </Card>
 
@@ -209,12 +209,12 @@ export default function UserDetail() {
       {module === 'overview' && (
         <Card title={t('userDetail.overviewTitle')} className="mt-card">
           <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 14 }}>
-            <span style={{ fontSize: 13, color: '#64748B' }}>{t('userDetail.wheelStatusLabel')}</span>
+            <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('userDetail.wheelStatusLabel')}</span>
             {overview ? (
               <Badge tone={overview.wheel.connected ? 'green' : 'red'}>
                 {overview.wheel.connected ? t('userDetail.onlineLabel') : t('userDetail.offlineLabel')}
               </Badge>
-            ) : <span style={{ fontSize: 13, color: '#94A3B8' }}>…</span>}
+            ) : <span style={{ fontSize: 13, color: 'var(--text-light)' }}>…</span>}
           </div>
 
           {overview?.wheel.diagnostics && (
@@ -318,7 +318,7 @@ export default function UserDetail() {
               <option value="magician">{t('users.roleMagician')}</option>
               <option value="admin">{t('users.roleAdmin')}</option>
             </select>
-            <Button variant="ghost" disabled={busy} onClick={handleDelete} style={{ color: '#EF4444' }}>
+            <Button variant="ghost" disabled={busy} onClick={handleDelete} style={{ color: 'var(--red-text)' }}>
               {t('userDetail.deleteAccountBtn')}
             </Button>
           </div>
@@ -343,7 +343,7 @@ export default function UserDetail() {
               {notes.map((n) => (
                 <div key={n.id} style={{ padding: '10px 12px', border: '1px solid #F1F5F9', borderRadius: 8, fontSize: 13 }}>
                   <div>{n.body}</div>
-                  <div style={{ fontSize: 11, color: '#94A3B8', marginTop: 4 }}>
+                  <div style={{ fontSize: 11, color: 'var(--text-light)', marginTop: 4 }}>
                     {n.author_name || t('userDetail.adminFallback')} · {formatDT(n.created_at)}
                   </div>
                 </div>
