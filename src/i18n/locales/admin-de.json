@@ -949,6 +949,7 @@
       "sheetScan": "Scannen Sie zuerst Code 1 zum Verbinden, dann Code 2, um die Seite der Box zu öffnen.",
       "sheetNetwork": "Netzwerk",
       "sheetPassword": "Passwort",
+      "sheetAccessCode": "Zugangscode des Geräts",
       "sheetOpen": "Für die Offline-App öffnen Sie",
       "qrRemembered": "Gespeichert",
       "sheetStep1": "Dem WLAN Spark-Local beitreten",

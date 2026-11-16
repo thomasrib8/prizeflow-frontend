@@ -949,6 +949,7 @@
       "sheetScan": "Escanee primero el código 1 para conectarse y después el 2 para abrir la página de la caja.",
       "sheetNetwork": "Red",
       "sheetPassword": "Contraseña",
+      "sheetAccessCode": "Código de acceso del equipo",
       "sheetOpen": "Para la app sin conexión, abra",
       "qrRemembered": "Memorizada",
       "sheetStep1": "Unirse al Wi-Fi Spark-Local",

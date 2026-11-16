@@ -949,6 +949,7 @@
       "sheetScan": "Scan code 1 first to connect, then code 2 to open the box's page.",
       "sheetNetwork": "Network",
       "sheetPassword": "Password",
+      "sheetAccessCode": "Box access code",
       "sheetOpen": "For the offline app, open",
       "qrRemembered": "Remembered",
       "sheetStep1": "Join the Spark-Local Wi-Fi",

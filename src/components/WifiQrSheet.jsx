@@ -23,12 +23,18 @@ export default function WifiQrSheet({ onClose }) {
   const [loaded, setLoaded] = useState(false); // the remembered password has been read (nothing is saved before that)
   const [saved, setSaved] = useState(''); // what the server holds
   const [locked, setLocked] = useState(false); // the box is activated: the real password is on the box, only the administrator changes it
+  const [accessCode, setAccessCode] = useState(''); // the shared code the sales reps type in the offline app (printed under the Wi-Fi password)
   const ready = pw.length >= 8;
 
   // The password is remembered (encrypted, on the account): prefilled here, saved a moment after you stop typing.
   useEffect(() => {
     let alive = true;
     api.getBoxWifiPassword().then((r) => { if (alive) { setPw(r.password || ''); setSaved(r.password || ''); setLocked(!!r.locked); } }).catch(() => {}).then(() => { if (alive) setLoaded(true); });
+    return () => { alive = false; };
+  }, []);
+  useEffect(() => {
+    let alive = true;
+    api.getOfflineAccessCode().then((r) => { if (alive) setAccessCode((r && r.code) || ''); }).catch(() => {});
     return () => { alive = false; };
   }, []);
   useEffect(() => {
@@ -102,6 +108,7 @@ export default function WifiQrSheet({ onClose }) {
             <tbody>
               <tr><th>{t('settings.offlineMode.sheetNetwork')}</th><td>{SSID}</td></tr>
               <tr><th>{t('settings.offlineMode.sheetPassword')}</th><td className="wq-mono">{ready ? pw : '—'}</td></tr>
+              {accessCode && <tr><th>{t('settings.offlineMode.sheetAccessCode')}</th><td className="wq-mono">{accessCode}</td></tr>}
             </tbody>
           </table>
           <p className="wq-open">{t('settings.offlineMode.sheetOpen')} <strong>sparkoff.box</strong></p>

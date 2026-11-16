@@ -949,6 +949,7 @@
       "sheetScan": "Scannez d'abord le code 1 pour vous connecter, puis le code 2 pour ouvrir la page du boîtier.",
       "sheetNetwork": "Réseau",
       "sheetPassword": "Mot de passe",
+      "sheetAccessCode": "Code d’accès au boîtier",
       "sheetOpen": "Pour l'application hors ligne, ouvrez",
       "qrRemembered": "Mémorisé",
       "sheetStep1": "Rejoindre le Wi-Fi Spark-Local",
