@@ -144,6 +144,7 @@ export function useLaunchQueue({ watch = false } = {}) {
   return {
     campaign, reloadCampaign: () => loadActiveCampaign(true), error, setError, queue, recentPlayers, filteredRecentPlayers,
     queueActionBusy, handleCancelPlayer, handleSkipPlayer, handleNoteSaved, scanEnabled,
+    reloadPlayers: () => { if (campaign) loadRecentPlayers(campaign.id); },
     playerSearch, setPlayerSearch, playerFilterGifts, setPlayerFilterGifts,
     playerFilterSegments, setPlayerFilterSegments, playerGiftOptions, playerSegmentOptions, playerActiveFilterCount,
   };

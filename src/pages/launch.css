@@ -24,8 +24,22 @@
 .lc-search { display: flex; gap: 10px; align-items: center; margin-bottom: 14px; }
 .lc-search input { flex: 1; padding: 9px 14px; border: 1.5px solid #E3E9F7; border-radius: 99px; font: inherit; font-size: 13px; background: #fff; }
 .lc-search input:focus { outline: none; border-color: #0055F8; box-shadow: 0 0 0 3px rgba(0, 85, 248, .12); }
-.lc-list .crm-head, .lc-list .crm-row { grid-template-columns: minmax(0, 2fr) minmax(0, 1.6fr) minmax(0, 1fr) 70px; }
+.lc-list .crm-head, .lc-list .crm-row { grid-template-columns: minmax(0, 2fr) minmax(0, 1.6fr) minmax(0, 1fr) 196px; }
 .lc-list .crm-row { grid-template-areas: "who gift seg stars"; }
 @container (max-width: 700px) {
-  .lc-list .crm-row { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "who stars" "gift seg"; }
+  .lc-list .crm-row { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "who who" "gift seg" "stars stars"; }
+  .lc-act { justify-content: flex-start; }
 }
+/* Retrait column of the last players: Distribuer / Annuler side by side, or the final status */
+.lc-act { grid-area: stars; display: flex; gap: 6px; justify-content: flex-end; align-items: center; flex-wrap: nowrap; }
+.lc-btn { font: inherit; font-size: 12px; font-weight: 700; padding: 6px 11px; border-radius: 8px; border: 1px solid transparent; cursor: pointer; white-space: nowrap; line-height: 1.2; }
+.lc-btn:disabled { opacity: .6; cursor: not-allowed; }
+.lc-do { background: #09B2FD; color: #03041A; }
+.lc-no { background: #fff; color: var(--red-text); border-color: #FCA5A5; }
+.lc-no.sure { background: #FEE2E2; border-color: #EF4444; }
+.lc-undo { background: #fff; color: var(--text-muted); border-color: #CBD5E1; padding: 5px 8px; }
+.lc-chip-st { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 99px; white-space: nowrap; }
+.lc-st-redeemed { background: #DCFCE7; color: #166534; }
+.lc-st-cancelled { background: #FEE2E2; color: #991B1B; }
+.lc-st-expired { background: #F1F5F9; color: #475569; }
+.lc-act-err { width: 18px; height: 18px; border-radius: 50%; background: #EF4444; color: #fff; font-size: 12px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; cursor: help; }

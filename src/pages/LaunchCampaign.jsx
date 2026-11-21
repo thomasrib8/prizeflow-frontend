@@ -15,6 +15,7 @@ import { useWheelLost } from '../hooks/useWheelLost';
 import { OfflineReviews, useOfflineBox } from '../components/OfflineBoxStatus';
 import ProspectCard from '../components/ProspectCard';
 import NewProspectModal from '../components/NewProspectModal';
+import RewardRowActions from '../components/RewardRowActions';
 import FilterGroup from '../components/FilterGroup';
 import './crm.css';
 import './launch.css';
@@ -303,7 +304,7 @@ export default function LaunchCampaign() {
           )}
           {q.recentPlayers && q.filteredRecentPlayers.length > 0 && (
             <div className="crm-list lc-list">
-              <div className="crm-head"><span>{t('launchCampaign.tableNameHeader')}</span><span>{t('common.gift')}</span><span>{t('common.segment')}</span><span>{t('launchCampaign.tableLeadHeader')}</span></div>
+              <div className="crm-head"><span>{t('launchCampaign.tableNameHeader')}</span><span>{t('common.gift')}</span><span>{t('common.segment')}</span><span>{t('launchCampaign.tableRedeemHeader')}</span></div>
               {q.filteredRecentPlayers.map((p) => (
                 <div key={p.rewardId} className="crm-row click" style={{ '--c': p.lead_rating === 3 ? '#059669' : p.lead_rating === 2 ? '#F59E0B' : '#0055F8' }} role="button" tabIndex={0}
                   onClick={() => setNoteGuest({ email: p.email, firstName: p.first_name, lastName: p.last_name })}
@@ -321,7 +322,10 @@ export default function LaunchCampaign() {
                     )}
                   </div>
                   <div className="crm-seg">{p.segment ? <span className="crm-chip">{p.segment}</span> : <span className="crm-gift-none">—</span>}</div>
-                  <div className="crm-stars">{p.lead_rating ? <>{'★'.repeat(p.lead_rating)}<i>{'★'.repeat(3 - p.lead_rating)}</i></> : <span className="none">—</span>}</div>
+                  {/* the buttons live in the row that opens the guest card: their clicks must not open it */}
+                  <div className="lc-act" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
+                    <RewardRowActions player={p} onChanged={q.reloadPlayers} />
+                  </div>
                 </div>
               ))}
             </div>
