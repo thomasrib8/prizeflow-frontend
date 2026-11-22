@@ -2890,18 +2890,34 @@
       "restock": "{{gift}} : +{{delta}} (stock {{stock}})",
       "depleted": "{{gift}} : épuisé",
       "suspended": "Tirages suspendus (rupture)",
-      "resumed": "Tirages repris"
+      "resumed": "Tirages repris",
+      "probability": "Probabilité de {{gift}} : {{before}} % → {{after}} %"
     },
     "err": {
       "RESTOCK_INVALID": "La quantité doit être un nombre entier d'au moins 1.",
       "UNIQUE_CODES_MISSING": "Chargez d'abord davantage de codes uniques pour ce cadeau.",
       "UNLIMITED": "Ce cadeau a un stock illimité.",
-      "CAMPAIGN_NOT_RUNNING": "Le stock peut être ajouté à une campagne active ou en pause."
+      "CAMPAIGN_NOT_RUNNING": "Le stock peut être ajouté à une campagne active ou en pause.",
+      "PROBABILITY_SUM": "Le total doit faire exactement 100 % (actuellement {{total}} %).",
+      "PROBABILITY_RANGE": "Chaque probabilité doit être entre 0 et 100, avec au plus deux décimales."
     },
     "stockTitle": "Stock",
     "addShort": "Ajouter",
     "plannerHelp": "Chaque case a une probabilité de sortir (le total doit faire 100 %) et un stock. Cochez « Illimité » pour une case qui ne s'épuise jamais, comme une case perdante ou un cadeau numérique.",
-    "topCaseWarning": "La case la plus probable est limitée : quand elle sera épuisée, sa part ({{p}} %) ira vers le palier inférieur le plus proche. Pensez à un stock suffisant ou à une case illimitée."
+    "topCaseWarning": "La case la plus probable est limitée : quand elle sera épuisée, sa part ({{p}} %) ira vers le palier inférieur le plus proche. Pensez à un stock suffisant ou à une case illimitée.",
+    "editProb": "Modifier les probabilités",
+    "editProbTitle": "Modifier les probabilités de référence",
+    "editProbIntro": "Le changement s'applique dès le prochain tirage. Les tirages déjà faits et les stocks ne changent pas.",
+    "editProbCurrent": "Actuelle",
+    "editProbNew": "Nouvelle",
+    "editProbTotal": "Total : {{n}} %",
+    "editProbTotalHint": "Le total doit faire exactement 100 %.",
+    "editProbPublishRules": "Publier aussi une nouvelle version du règlement avec ces probabilités (avenant)",
+    "editProbSave": "Enregistrer",
+    "editProbNoChange": "Aucune probabilité n'a changé.",
+    "editProbRulesPublished": "Probabilités enregistrées. Règlement mis à jour (version {{version}}).",
+    "editProbRulesFailed": "Probabilités enregistrées, mais le règlement n'a pas pu être republié : {{error}}",
+    "editProbSaved": "Probabilités enregistrées."
   },
   "transfer": {
     "menu": "Transférer la campagne",

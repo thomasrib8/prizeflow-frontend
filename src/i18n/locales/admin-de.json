@@ -2890,18 +2890,34 @@
       "restock": "{{gift}}: +{{delta}} (Bestand {{stock}})",
       "depleted": "{{gift}}: aufgebraucht",
       "suspended": "Ziehungen ausgesetzt (aufgebraucht)",
-      "resumed": "Ziehungen fortgesetzt"
+      "resumed": "Ziehungen fortgesetzt",
+      "probability": "Wahrscheinlichkeit von {{gift}}: {{before}} % → {{after}} %"
     },
     "err": {
       "RESTOCK_INVALID": "Die Menge muss eine ganze Zahl von mindestens 1 sein.",
       "UNIQUE_CODES_MISSING": "Laden Sie zuerst mehr eindeutige Codes für dieses Geschenk.",
       "UNLIMITED": "Dieses Geschenk hat einen unbegrenzten Bestand.",
-      "CAMPAIGN_NOT_RUNNING": "Bestand kann zu einer aktiven oder pausierten Kampagne hinzugefügt werden."
+      "CAMPAIGN_NOT_RUNNING": "Bestand kann zu einer aktiven oder pausierten Kampagne hinzugefügt werden.",
+      "PROBABILITY_SUM": "Die Summe muss genau 100 % betragen (derzeit {{total}} %).",
+      "PROBABILITY_RANGE": "Jede Wahrscheinlichkeit muss zwischen 0 und 100 liegen, mit höchstens zwei Nachkommastellen."
     },
     "stockTitle": "Bestand",
     "addShort": "Hinzufügen",
     "plannerHelp": "Jedes Feld hat eine Ziehungswahrscheinlichkeit (die Summe muss 100 % ergeben) und einen Bestand. Haken Sie „Unbegrenzt“ an für ein Feld, das nie ausgeht, etwa eine Niete oder ein digitales Geschenk.",
-    "topCaseWarning": "Das wahrscheinlichste Feld ist begrenzt: ist es aufgebraucht, geht sein Anteil ({{p}} %) an die nächstniedrigere Stufe. Planen Sie genug Bestand oder ein unbegrenztes Feld ein."
+    "topCaseWarning": "Das wahrscheinlichste Feld ist begrenzt: ist es aufgebraucht, geht sein Anteil ({{p}} %) an die nächstniedrigere Stufe. Planen Sie genug Bestand oder ein unbegrenztes Feld ein.",
+    "editProb": "Wahrscheinlichkeiten ändern",
+    "editProbTitle": "Referenzwahrscheinlichkeiten ändern",
+    "editProbIntro": "Die Änderung gilt ab der nächsten Ziehung. Bereits erfolgte Ziehungen und Bestände ändern sich nicht.",
+    "editProbCurrent": "Aktuell",
+    "editProbNew": "Neu",
+    "editProbTotal": "Summe: {{n}} %",
+    "editProbTotalHint": "Die Summe muss genau 100 % betragen.",
+    "editProbPublishRules": "Auch eine neue Version der Teilnahmebedingungen mit diesen Wahrscheinlichkeiten veröffentlichen (Nachtrag)",
+    "editProbSave": "Speichern",
+    "editProbNoChange": "Keine Wahrscheinlichkeit wurde geändert.",
+    "editProbRulesPublished": "Wahrscheinlichkeiten gespeichert. Teilnahmebedingungen aktualisiert (Version {{version}}).",
+    "editProbRulesFailed": "Wahrscheinlichkeiten gespeichert, aber die Teilnahmebedingungen konnten nicht neu veröffentlicht werden: {{error}}",
+    "editProbSaved": "Wahrscheinlichkeiten gespeichert."
   },
   "transfer": {
     "menu": "Kampagne übertragen",

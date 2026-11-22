@@ -2890,18 +2890,34 @@
       "restock": "{{gift}}: +{{delta}} (stock {{stock}})",
       "depleted": "{{gift}}: agotado",
       "suspended": "Sorteos suspendidos (agotado)",
-      "resumed": "Sorteos reanudados"
+      "resumed": "Sorteos reanudados",
+      "probability": "Probabilidad de {{gift}}: {{before}} % → {{after}} %"
     },
     "err": {
       "RESTOCK_INVALID": "La cantidad debe ser un número entero de al menos 1.",
       "UNIQUE_CODES_MISSING": "Cargue antes más códigos únicos para este regalo.",
       "UNLIMITED": "Este regalo tiene un stock ilimitado.",
-      "CAMPAIGN_NOT_RUNNING": "Se puede añadir stock a una campaña activa o en pausa."
+      "CAMPAIGN_NOT_RUNNING": "Se puede añadir stock a una campaña activa o en pausa.",
+      "PROBABILITY_SUM": "El total debe ser exactamente 100 % (actualmente {{total}} %).",
+      "PROBABILITY_RANGE": "Cada probabilidad debe estar entre 0 y 100, con dos decimales como máximo."
     },
     "stockTitle": "Stock",
     "addShort": "Añadir",
     "plannerHelp": "Cada casilla tiene una probabilidad de salir (el total debe ser 100 %) y un stock. Marque «Ilimitado» para una casilla que nunca se agota, como una casilla perdedora o un regalo digital.",
-    "topCaseWarning": "La casilla más probable es limitada: cuando se agote, su parte ({{p}} %) irá al nivel inferior más cercano. Prevea stock suficiente o una casilla ilimitada."
+    "topCaseWarning": "La casilla más probable es limitada: cuando se agote, su parte ({{p}} %) irá al nivel inferior más cercano. Prevea stock suficiente o una casilla ilimitada.",
+    "editProb": "Modificar las probabilidades",
+    "editProbTitle": "Modificar las probabilidades de referencia",
+    "editProbIntro": "El cambio se aplica desde el próximo sorteo. Los sorteos ya realizados y los stocks no cambian.",
+    "editProbCurrent": "Actual",
+    "editProbNew": "Nueva",
+    "editProbTotal": "Total: {{n}} %",
+    "editProbTotalHint": "El total debe ser exactamente 100 %.",
+    "editProbPublishRules": "Publicar también una nueva versión de las bases con estas probabilidades (anexo)",
+    "editProbSave": "Guardar",
+    "editProbNoChange": "No ha cambiado ninguna probabilidad.",
+    "editProbRulesPublished": "Probabilidades guardadas. Bases actualizadas (versión {{version}}).",
+    "editProbRulesFailed": "Probabilidades guardadas, pero no se pudieron volver a publicar las bases: {{error}}",
+    "editProbSaved": "Probabilidades guardadas."
   },
   "transfer": {
     "menu": "Transferir la campaña",

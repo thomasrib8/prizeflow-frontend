@@ -323,6 +323,8 @@ export const api = {
   // Dynamic distribution: live state (reference vs effective probability, stocks, movements) and "add stock" (positive only)
   getDynamicState: (id) => request(`/campaigns/${id}/dynamic`),
   restockCampaign: (id, body) => request(`/campaigns/${id}/restock`, { method: 'POST', body }),
+  // Running dynamic campaign: change the reference probabilities by hand (only the cases sent and really different; total exactly 100 %).
+  setCampaignProbabilities: (id, probabilities) => request(`/campaigns/${id}/probabilities`, { method: 'PUT', body: { probabilities } }),
   downloadCampaignQrPdf: (id) => downloadFile(`/campaigns/${id}/qr.pdf`),
   // Manual fallback for when scanning the QR fails — an already-logged-in
   // operator looks up a reward by ID and gets back the same signed code

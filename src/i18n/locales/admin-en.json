@@ -2890,18 +2890,34 @@
       "restock": "{{gift}}: +{{delta}} (stock {{stock}})",
       "depleted": "{{gift}}: exhausted",
       "suspended": "Draws suspended (out of stock)",
-      "resumed": "Draws resumed"
+      "resumed": "Draws resumed",
+      "probability": "{{gift}} probability: {{before}} % → {{after}} %"
     },
     "err": {
       "RESTOCK_INVALID": "The quantity must be a whole number of at least 1.",
       "UNIQUE_CODES_MISSING": "Load more unique codes for this gift first.",
       "UNLIMITED": "This gift has an unlimited stock.",
-      "CAMPAIGN_NOT_RUNNING": "Stock can be added to an active or paused campaign."
+      "CAMPAIGN_NOT_RUNNING": "Stock can be added to an active or paused campaign.",
+      "PROBABILITY_SUM": "The total must be exactly 100 % (currently {{total}} %).",
+      "PROBABILITY_RANGE": "Each probability must be between 0 and 100, with at most two decimals."
     },
     "stockTitle": "Stock",
     "addShort": "Add",
     "plannerHelp": "Each case has a probability of being drawn (the total must be 100 %) and a stock. Tick \"Unlimited\" for a case that never runs out, such as a losing case or a digital gift.",
-    "topCaseWarning": "The most probable case is limited: when it runs out, its share ({{p}} %) will go to the nearest lower level. Plan enough stock, or an unlimited case."
+    "topCaseWarning": "The most probable case is limited: when it runs out, its share ({{p}} %) will go to the nearest lower level. Plan enough stock, or an unlimited case.",
+    "editProb": "Change the probabilities",
+    "editProbTitle": "Change the reference probabilities",
+    "editProbIntro": "The change applies from the next draw. Draws already made and stocks do not change.",
+    "editProbCurrent": "Current",
+    "editProbNew": "New",
+    "editProbTotal": "Total: {{n}} %",
+    "editProbTotalHint": "The total must be exactly 100 %.",
+    "editProbPublishRules": "Also publish a new version of the game rules with these probabilities (amendment)",
+    "editProbSave": "Save",
+    "editProbNoChange": "No probability changed.",
+    "editProbRulesPublished": "Probabilities saved. Game rules updated (version {{version}}).",
+    "editProbRulesFailed": "Probabilities saved, but the game rules could not be republished: {{error}}",
+    "editProbSaved": "Probabilities saved."
   },
   "transfer": {
     "menu": "Transfer campaign",

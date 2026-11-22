@@ -16,6 +16,8 @@ export default function DynamicPanel({ campaign, onChanged = () => {} }) {
   const [restock, setRestock] = useState(null); // { slotIndex, giftName, variants, variantId, add }
   const [busy, setBusy] = useState(false);
   const [participants, setParticipants] = useState('');
+  const [editProb, setEditProb] = useState(null); // { values: { [slotIndex]: '12.5' }, publishRules: true } while the dialog is open
+  const [notice, setNotice] = useState(''); // short confirmation after a change of probabilities
   const running = campaign.status === 'active' || campaign.status === 'paused';
 
   const load = useCallback(() => api.getDynamicState(campaign.id).then(setData).catch((e) => setError(e.message)), [campaign.id]);
@@ -48,6 +50,45 @@ export default function DynamicPanel({ campaign, onChanged = () => {} }) {
     } finally { setBusy(false); }
   }
 
+  // Change of the reference probabilities (running campaign): the dialog starts from the current values; the total must be exactly 100 %.
+  const cents = (v) => Math.round(Number(String(v).replace(',', '.')) * 100);
+  const editTotal = editProb ? cases.reduce((a, c) => a + (Number.isFinite(cents(editProb.values[c.slotIndex])) ? cents(editProb.values[c.slotIndex]) : NaN), 0) : 0;
+  const editValid = editProb && Number.isFinite(editTotal) && editTotal === 10000
+    && cases.every((c) => { const v = Number(String(editProb.values[c.slotIndex]).replace(',', '.')); return String(editProb.values[c.slotIndex]).trim() !== '' && v >= 0 && v <= 100; });
+  const editChanged = editProb ? cases.filter((c) => cents(editProb.values[c.slotIndex]) !== Math.round(c.referenceProbability * 100)) : [];
+
+  function openEditProb() {
+    setNotice(''); setError('');
+    setEditProb({ values: Object.fromEntries(cases.map((c) => [c.slotIndex, String(Math.round(c.referenceProbability * 100) / 100)])), publishRules: true });
+  }
+
+  async function submitProb(e) {
+    e.preventDefault();
+    if (!editValid) return;
+    if (editChanged.length === 0) { setEditProb(null); setNotice(t('dynamic.editProbNoChange')); return; }
+    setBusy(true); setError('');
+    try {
+      await api.setCampaignProbabilities(campaign.id, editChanged.map((c) => ({ slotIndex: c.slotIndex, probability: cents(editProb.values[c.slotIndex]) / 100 })));
+      let msg = t('dynamic.editProbSaved');
+      if (editProb.publishRules) {
+        try { const r = await api.generateRules(campaign.id); msg = t('dynamic.editProbRulesPublished', { version: r.version }); }
+        catch (err) { msg = t('dynamic.editProbRulesFailed', { error: err.message }); }
+      }
+      setEditProb(null);
+      setNotice(msg);
+      await load();
+      onChanged();
+    } catch (err) {
+      setError(t(`dynamic.err.${err.code}`, { defaultValue: err.message, total: err.total }));
+    } finally { setBusy(false); }
+  }
+
+  // History: stock movements and probability changes, newest first
+  const history = [
+    ...data.movements.map((m) => ({ key: `m${m.id}`, at: String(m.createdAt), text: `${kindText(m)}${m.actor ? ` · ${m.actor}` : ''}${m.source === 'box' ? ` · ${t('dynamic.fromBox')}` : ''}` })),
+    ...(data.probabilityChanges || []).map((p) => ({ key: `p${p.id}`, at: String(p.createdAt), text: `${t('dynamic.kinds.probability', { gift: p.giftName || t('dashboard.caseLabel', { n: p.slotIndex + 1 }), before: pts(p.before), after: pts(p.after) })}${p.actor ? ` · ${p.actor}` : ''}` })),
+  ].sort((x, y) => y.at.localeCompare(x.at));
+
   return (
     <div className="dyn-panel">
       {data.suspended && running && (
@@ -57,9 +98,13 @@ export default function DynamicPanel({ campaign, onChanged = () => {} }) {
         <div className="dyn-alert warn"><b>{t('dynamic.depletedTitle')}</b>{t('dynamic.depletedBody', { names: names(data.depleted) })}</div>
       )}
       {error && <div className="error-banner">{error}</div>}
+      {notice && <div className="dyn-alert ok" role="status">{notice}</div>}
 
       <Card title={t('dynamic.title')}>
-        <p className="ap-hint" style={{ marginTop: 0 }}>{t('dynamic.effectiveNote')}</p>
+        <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+          <p className="ap-hint" style={{ marginTop: 0, flex: '1 1 320px' }}>{t('dynamic.effectiveNote')}</p>
+          {running && <Button size="sm" variant="secondary" onClick={openEditProb}>{t('dynamic.editProb')}</Button>}
+        </div>
         <div style={{ overflowX: 'auto' }}>
           <table className="data-table dyn-table">
             <thead><tr>
@@ -130,14 +175,56 @@ export default function DynamicPanel({ campaign, onChanged = () => {} }) {
       </Card>
 
       <Card title={t('dynamic.historyTitle')} className="mt-card">
-        {data.movements.length === 0 ? <p className="ap-hint" style={{ margin: 0 }}>{t('dynamic.noHistory')}</p> : (
+        {history.length === 0 ? <p className="ap-hint" style={{ margin: 0 }}>{t('dynamic.noHistory')}</p> : (
           <div className="dyn-hist">
-            {data.movements.map((m) => (
-              <div key={m.id} className="dyn-hist-row"><time>{String(m.createdAt).slice(0, 16)}</time><span>{kindText(m)}{m.actor ? ` · ${m.actor}` : ''}{m.source === 'box' ? ` · ${t('dynamic.fromBox')}` : ''}</span></div>
+            {history.map((h) => (
+              <div key={h.key} className="dyn-hist-row"><time>{h.at.slice(0, 16)}</time><span>{h.text}</span></div>
             ))}
           </div>
         )}
       </Card>
+
+      {editProb && (
+        <div className="modal-overlay">
+          <form className="modal-card" style={{ '--modal-w': '560px' }} onSubmit={submitProb}>
+            <h3 style={{ margin: '0 0 6px', fontSize: 17, fontWeight: 700 }}>{t('dynamic.editProbTitle')}</h3>
+            <p className="dyn-note" style={{ marginTop: 0 }}>{t('dynamic.editProbIntro')}</p>
+            <div style={{ maxHeight: '52vh', overflowY: 'auto', margin: '8px 0' }}>
+              <table className="data-table dyn-table">
+                <thead><tr><th>{t('campaignDetail.tableCase')}</th><th>{t('common.gift')}</th><th className="num">{t('dynamic.editProbCurrent')}</th><th className="num">{t('dynamic.editProbNew')}</th></tr></thead>
+                <tbody>
+                  {cases.map((c) => {
+                    const changed = cents(editProb.values[c.slotIndex]) !== Math.round(c.referenceProbability * 100);
+                    return (
+                      <tr key={c.slotIndex}>
+                        <td style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)' }}>{c.slotIndex + 1}</td>
+                        <td><GiftPill slotIndex={c.slotIndex} name={c.giftName} /></td>
+                        <td className="num">{pc(c.referenceProbability)}</td>
+                        <td className="num">
+                          <input type="number" min="0" max="100" step="0.01" inputMode="decimal" aria-label={t('dynamic.editProbNew') + ' ' + (c.slotIndex + 1)}
+                            value={editProb.values[c.slotIndex]} onChange={(e) => setEditProb({ ...editProb, values: { ...editProb.values, [c.slotIndex]: e.target.value } })}
+                            style={{ width: 88, textAlign: 'right', fontWeight: changed ? 700 : 400, borderColor: changed ? '#0055F8' : undefined }} /> %
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <p style={{ margin: '4px 0 10px', fontWeight: 700, color: editValid ? '#166534' : 'var(--red-text)' }}>
+              {t('dynamic.editProbTotal', { n: Number.isFinite(editTotal) ? pts(editTotal / 100) : '—' })}{!editValid && <span style={{ fontWeight: 500 }}> · {t('dynamic.editProbTotalHint')}</span>}
+            </p>
+            <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 13, margin: '0 0 14px' }}>
+              <input type="checkbox" checked={editProb.publishRules} onChange={(e) => setEditProb({ ...editProb, publishRules: e.target.checked })} style={{ marginTop: 2 }} />
+              <span>{t('dynamic.editProbPublishRules')}</span>
+            </label>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <Button type="button" variant="secondary" disabled={busy} onClick={() => setEditProb(null)}>{t('common.cancel')}</Button>
+              <Button type="submit" disabled={busy || !editValid}>{busy ? t('common.saving') : t('dynamic.editProbSave')}</Button>
+            </div>
+          </form>
+        </div>
+      )}
 
       {restock && (
         <div className="modal-overlay">
